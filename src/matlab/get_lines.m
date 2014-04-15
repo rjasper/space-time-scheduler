@@ -1,4 +1,4 @@
-function lines = extract_lines(Om)
+function lines = get_lines(Om)
 
 N = length(Om);
 
@@ -12,5 +12,3 @@ for i = 1:N
     
     lines{i} = [P1; P2];
 end
-
-lines = [lines{:}]; % concatenate cells to single matrix

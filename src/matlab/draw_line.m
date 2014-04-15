@@ -1,4 +1,4 @@
-function draw_lines(segs, varargin)
+function draw_line(segs, varargin)
 %DRAW_LINES   plots a set of line segments
 %
 % arguments:

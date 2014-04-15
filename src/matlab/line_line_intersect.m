@@ -8,6 +8,7 @@ Q2 = line2(3:4);
 R1 = Q1 - P1;
 R2 = Q2 - P2;
 
+% TODO: catch bad matrix condition (must likely due to parallel lines)
 t = [-R1 R2] \ (P1 - P2);
 
 t1 = t(1);

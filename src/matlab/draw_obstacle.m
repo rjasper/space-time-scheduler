@@ -1,4 +1,4 @@
-function draw_obstacles(Om)
+function draw_obstacle(Om)
 
 was_hold = ishold;
 
