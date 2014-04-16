@@ -1,12 +1,12 @@
-function [pid, vid] = get_ids(Om)
+function [pid, vid] = get_ids(Os)
 
-N = size(Om, 2);
+N = size(Os, 2);
 M = zeros(1, N);
 pid = cell(1, N);
 vid = cell(1, N);
 
 for i = 1:N
-    M(i) = size(Om{i}, 2);
+    M(i) = size(Os{i}, 2);
     
     pid{i} = repmat(i, 1, M(i));
     vid{i} = 1:M(i);

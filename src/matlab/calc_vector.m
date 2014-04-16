@@ -1,7 +1,7 @@
-function vec = calc_vector(Om)
+function vec = calc_vector(P)
 
-if iscell(Om)
-    vec = cellfun(@helper, Om, 'UniformOutput', false);
+if iscell(P)
+    vec = cellfun(@helper, P, 'UniformOutput', false);
 else
     vec = helper(P);
 end

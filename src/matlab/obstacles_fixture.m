@@ -1,6 +1,6 @@
-function Om = obstacles_fixture
+function Os = obstacles_fixture
 
-Om = {
+Os = {
     regular_polygon(6, [4  4], 1)
     regular_polygon(3, [5 11], 3)
     regular_polygon(4, [9  6], 2)

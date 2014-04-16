@@ -1,11 +1,11 @@
-function vec = line2vec(line)
+function vec = line2vec(l)
 
-if iscell(line)
-    vec = cellfun(@(l) helper(l), line, 'UniformOutput', false);
+if iscell(l)
+    vec = cellfun(@helper, l, 'UniformOutput', false);
 else
-    vec = helper(line);
+    vec = helper(l);
 end
 
-function vec = helper(line)
+function vec = helper(l)
 
-vec = line(3:4, :) - line(1:2, :);
+vec = l(3:4, :) - l(1:2, :);

@@ -1,4 +1,4 @@
-function rho = calc_line_angle(line)
+function rho = calc_line_angle(l)
 
-vec = line2vec(line);
+vec = line2vec(l);
 rho = calc_vector_angle(vec);

@@ -16,8 +16,4 @@ delta1 = mod(rho - rho2, 2*pi);
 % angle between rho2 and rho1
 delta2 = alpha{pid}(vid1);
 
-if 0 < delta1 && delta1 < delta2
-    b = false;
-else
-    b = true;
-end
+b = not( 0 < delta1 && delta1 < delta2 );

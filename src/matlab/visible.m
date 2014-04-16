@@ -1,17 +1,15 @@
-function b = visible(P1, P2, lines)
+function b = visible(P1, P2, l)
 
-N = size(lines, 2);
+n = size(l, 2);
 
-for i = 1:N
-    [~, t1, t2] = line_line_intersect([P1; P2], lines(:, i));
+t1 = NaN(1, n);
+t2 = NaN(1, n);
+
+parfor i = 1:n
+    [~, t1_i, t2_i] = line_line_intersect([P1; P2], l(:, i));
     
-    if isnan(t1) % parallel
-        continue;
-    elseif min(t1, t2) > 0 && max(t1, t2) < 1
-        b = false;
-        return;
-    end
+    t1(i) = t1_i;
+    t2(i) = t2_i;
 end
 
-b = true;
-        
+b = ~any( min(t1, t2) > 0 & max(t1, t2) < 1 );
