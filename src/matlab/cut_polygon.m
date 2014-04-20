@@ -40,7 +40,6 @@ V_ = [P_ C_];
 s  = [s repmat('b', 1, n_C)];
 n_V = size(V, 2);
 
-% TODO: C_vid unused
 % reorder vertices
 reorder_idx = calculate_vertex_order;
 V  = V(:, reorder_idx);
@@ -128,6 +127,11 @@ P_R = vid2poly(vid_R);
     end
 
     function idx = calculate_vertex_order
+        if n_C == 0
+            idx = 1:n; % no change
+            return;
+        end
+        
         idx = NaN(1, n_V);
 
         last = 0;
