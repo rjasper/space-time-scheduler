@@ -12,4 +12,4 @@ parfor i = 1:n
     t2(i) = t2_i;
 end
 
-b = ~any( min(t1, t2) > 0 & max(t1, t2) < 1 );
+b = ~any( min(t1, t2) >= 0 & max(t1, t2) <= 1 );
