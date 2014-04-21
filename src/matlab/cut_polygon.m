@@ -6,6 +6,17 @@ vid_L = {};
 vid_R = {};
 vid_B = [];
 
+% P_L = {NaN(2,0)};
+% P_R = {NaN(2,0)};
+% vid_L = {NaN(1,0)};
+% vid_R = {NaN(1,0)};
+% vid_B = NaN(1,0);
+% V = P;
+
+if isempty(P)
+    return;
+end
+
 n = size(P, 2);
 e = get_edges(P);
 
@@ -19,13 +30,11 @@ s = arrayfun(@vertex_side, P_(2, :));
 % TODO: check result variables
 if all(s == 'l')
     P_L = {P};
-    V = P;
     vid_L = {1:n};
     
     return;
 elseif all(s == 'r')
     P_R = {P};
-    V = P;
     vid_R = {1:n};
     
     return;
@@ -185,8 +194,13 @@ P_R = vid2poly(vid_R);
 
     function C_dir = determine_direction
         [pred_vid, succ_vid] = neighbors(C_vid);
+        
 
         C_dir = s([pred_vid; succ_vid]);
+        
+        if size(C_vid, 2) == 1
+            C_dir = C_dir'; % stupid inconsistent matlab behaviour
+        end
 
         filt = C_dir == 'b';
         pred_filt_idx = find(filt(1, :));

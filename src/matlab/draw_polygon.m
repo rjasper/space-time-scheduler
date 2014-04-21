@@ -12,10 +12,15 @@ if ~was_hold
     hold off;
 end
 
-function helper(P)
+    function helper(P)
+        if isempty(P)
+            return;
+        end
 
-X = P(1, :);
-Y = P(2, :);
+        X = P(1, :);
+        Y = P(2, :);
 
-fill(X, Y, 'red');
-hold on;
+        fill(X, Y, 'red');
+        hold on;
+    end
+end
