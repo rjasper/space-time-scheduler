@@ -6,13 +6,6 @@ vid_L = {};
 vid_R = {};
 vid_B = [];
 
-% P_L = {NaN(2,0)};
-% P_R = {NaN(2,0)};
-% vid_L = {NaN(1,0)};
-% vid_R = {NaN(1,0)};
-% vid_B = NaN(1,0);
-% V = P;
-
 if isempty(P)
     return;
 end
@@ -194,7 +187,6 @@ P_R = vid2poly(vid_R);
 
     function C_dir = determine_direction
         [pred_vid, succ_vid] = neighbors(C_vid);
-        
 
         C_dir = s([pred_vid; succ_vid]);
         

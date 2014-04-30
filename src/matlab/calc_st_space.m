@@ -56,7 +56,7 @@ Om_st = [Om_st{:}];
                 path_i1 = path(:, i); % segment start
                 path_i2 = path(:, i+1); % segment end
                 path_i = [path_i1; path_i2]; % path segment
-                vec_i = path_i2 - path_i1;
+                vec_i = line2vec(path_i);
                 
                 cut_smin = repmat(path_i1, 2, 1) + [zeros(2, 1); -v_j];
                 cut_smax = repmat(path_i2, 2, 1) + [zeros(2, 1); -v_j];
