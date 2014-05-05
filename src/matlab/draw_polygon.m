@@ -1,4 +1,4 @@
-function draw_polygon(P)
+function draw_polygon(P, varargin)
 
 was_hold = ishold;
 
@@ -20,7 +20,7 @@ end
         X = P(1, :);
         Y = P(2, :);
 
-        fill(X, Y, 'red');
+        fill(X, Y, varargin{:});
         hold on;
     end
 end
