@@ -1,79 +1,81 @@
-function [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cut_polygon(P, cut)
+function [C, vid_L, vid_R, vid_S] = cut_polygon(V, vid_P, cut)
 
-n = size(P, 2);
+n_V = size(V, 2);
+n_P = size(vid_P, 2);
 
-P_L = {};
-P_R = {};
-V = P;
-map = repmat(1:n, 2, 1);
+% P_L = {};
+% P_R = {};
+% V = P;
+C = NaN(2, 0);
 vid_L = {};
 vid_R = {};
-vid_B = [];
+vid_S = [];
+% map = repmat(1:n, 2, 1);
 
-if isempty(P)
+if isempty(vid_P)
     return;
 end
 
+P = V(:, vid_P);
+P_T = transform(P);
 e = get_edges(P);
-
-P_ = transform(P);
 
 % determine precision used by vertex_side
 eps = determine_eps;
 % determine side of P's vertices
-s = arrayfun(@vertex_side, P_(2, :));
-    
+s = arrayfun(@vertex_side, P_T(2, :));
+
 % TODO: check result variables
 if all(s == 'l')
-    P_L = {P};
-    vid_L = {1:n};
+%     P_L = {P};
+    vid_L = {vid_P};
     
     return;
 elseif all(s == 'r')
-    P_R = {P};
-    vid_R = {1:n};
+%     P_R = {P};
+    vid_R = {vid_P};
     
     return;
 end
 
-[C, C_eid, n_C] = calculate_crossings;
-C_ = transform(C); % TODO: recalculates R-matrix
+[C, eid_C, n_C] = calculate_crossings;
+C_T = transform(C); % TODO: recalculates R-matrix
 
 % merge polygon vertices and crossing points
-V  = [P C];
-V_ = [P_ C_];
+PC  = [P C];
+PC_T = [P_T C_T];
 s  = [s repmat('b', 1, n_C)];
-n_V = size(V, 2);
+n_PC = size(PC, 2);
 
 % reorder vertices
 reorder_idx = calculate_vertex_order;
-V  = V(:, reorder_idx);
-V_ = V_(:, reorder_idx);
+PC   = PC(:, reorder_idx);
+PC_T = PC_T(:, reorder_idx);
 s  = s(:, reorder_idx);
-map = [reorder_idx; inverse_order(reorder_idx)];
+% map = [reorder_idx; inverse_order(reorder_idx)];
 
 % determine polygon vertices on the cut
 b_filt = s == 'b';
-b_vid = find(b_filt);
-n_C = size(b_vid, 2);
+vid_b = find(b_filt);
+n_b = size(vid_b, 2);
 
 % sort cuts by 'hit order'
-[~, hit_idx] = sort(V_(1, b_filt), 2);
-C_vid = b_vid(hit_idx);
-C  = V(:, C_vid);
-C_ = V_(:, C_vid);
+[~, hit_idx] = sort(PC_T(1, b_filt), 2);
+vid_b = vid_b(hit_idx);
+% C  = V(:, C_vid);
+b_T = PC_T(:, vid_b);
 
-C_dir = determine_direction;
-B = cellfun(@determine_bridge_passing, ...
-    mat2cell(C_dir, 2, ones(1, n_C)), ...
-    num2cell(C_vid), ...
+dir_C = determine_direction;
+Bridge = cellfun(@determine_bridge_passing, ...
+    mat2cell(dir_C, 2, ones(1, n_b)), ...
+    num2cell(vid_b), ...
     'UniformOutput', false);
-B = [B{:}];
+Bridge = [Bridge{:}];
 
 % number of polygons after split
-N = 1 + length( strfind(B(1, :) & B(2, :), [true false]) ) ...
-    + sum( ismember(C_dir', 'll', 'rows')' & B(1, :) ) ...
-    + sum( ismember(C_dir', 'rr', 'rows')' & B(2, :) );
+N = 1 + length( strfind(Bridge(1, :) & Bridge(2, :), [true false]) ) ...
+    + sum( ismember(dir_C', 'll', 'rows')' & Bridge(1, :) ) ...
+    + sum( ismember(dir_C', 'rr', 'rows')' & Bridge(2, :) );
 
 % build independent polygon pieces
 vid_cut = build_polygons;
@@ -81,16 +83,17 @@ vid_cut = build_polygons;
 % determine the polygons side (left or right)
 s_P = cellfun(@polygon_side, vid_cut);
 
-% devide pieces by their side
-vid_L = vid_cut(s_P == 'l');
-vid_R = vid_cut(s_P == 'r');
+% devide pieces by their side and
+% restore original indexing
+vid_L = cellfun(@PC2VC_vid, vid_cut(s_P == 'l'), 'UniformOutput', false);
+vid_R = cellfun(@PC2VC_vid, vid_cut(s_P == 'r'), 'UniformOutput', false);
 
 % determine the set of vertices used by both sides
-vid_B = determine_shared_vertices;
+vid_S = PC2VC_vid( determine_shared_vertices );
 
-% build actual polygons consisting of points
-P_L = vid2poly(vid_L);
-P_R = vid2poly(vid_R);
+% % build actual polygons consisting of points
+% P_L = vid2poly(vid_L);
+% P_R = vid2poly(vid_R);
 
     function eps = determine_eps
         l = sqrt( sum(diff([P P(:, 1)], 1, 2).^2) );
@@ -100,7 +103,7 @@ P_R = vid2poly(vid_R);
     % calculate P in a coordinate system where
     % L1 is located in the origin and L2 lies on the positive x-axis
     function pts_ = transform(pts)
-        n_P = size(pts, 2);
+        n_pts = size(pts, 2);
         L1 = cut(1:2);
         L2 = cut(3:4);
 
@@ -110,49 +113,49 @@ P_R = vid2poly(vid_R);
         % rotation matrix
         R = [dL(1) dL(2); -dL(2) dL(1)] / l_length;
         % transform P and l
-        pts_ = R * (pts - repmat(L1, 1, n_P));
+        pts_ = R * (pts - repmat(L1, 1, n_pts));
     end
 
     function [pred_vid, succ_vid] = neighbors(vid)
-        pred_vid = mod( vid-1 - 1, n_V ) + 1;
-        succ_vid = mod( vid+1 - 1, n_V ) + 1;
+        pred_vid = mod( vid-1 - 1, n_PC ) + 1;
+        succ_vid = mod( vid+1 - 1, n_PC ) + 1;
     end
 
-    function [C, C_eid, n_C] = calculate_crossings
+    function [C, eid_C, n_C] = calculate_crossings
         % find edge crossings with cut
         s_ = [s s(1)];
-        C_eid = sort( [strfind(s_, 'lr') strfind(s_, 'rl')] ); % cutted edges (id)
-        n_C = length(C_eid); % number of edge cuts
+        eid_C = sort( [strfind(s_, 'lr') strfind(s_, 'rl')] ); % cutted edges (id)
+        n_C = length(eid_C); % number of edge cuts
 
         % calculate crossing points
         C = NaN(2, n_C);
         for i = 1:n_C
-            eid = C_eid(i);
+            eid = eid_C(i);
             C(:, i) = line_line_intersect(cut, e(:, eid));
         end
     end
 
     function idx = calculate_vertex_order
         if n_C == 0
-            idx = 1:n; % no change
+            idx = 1:n_P; % no change
             return;
         end
         
-        idx = NaN(1, n_V);
+        idx = NaN(1, n_PC);
 
         last = 0;
         for i = 1:n_C
-            C_eid_i = C_eid(i);
-            C_vid_i = C_eid_i + i;
-            I = last+1:C_eid_i;
+            eid_C_i = eid_C(i);
+            vid_C_i = eid_C_i + i;
+            I = last+1:eid_C_i;
 
             idx(I + i-1) = I;
-            idx(C_vid_i) = n + i;
+            idx(vid_C_i) = n_P + i;
 
-            last = C_eid_i;
+            last = eid_C_i;
         end
 
-        I = C_eid(end)+1:n;
+        I = eid_C(end)+1:n_P;
         idx(I + n_C) = I;
     end
 
@@ -178,40 +181,40 @@ P_R = vid2poly(vid_R);
         end
     end
 
-    function P = vid2poly(vid)
-        P = cellfun(@(v) V(:, v), vid, 'UniformOutput', false);
+%     function P = vid2poly(vid)
+%         P = cellfun(@(v) V(:, v), vid, 'UniformOutput', false);
+%     end
+
+    function vid_S = determine_shared_vertices
+        Bridge_ = [false(2, 1) Bridge];
+        
+        tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
+        vid_S = vid_b( tmp(1, :) & tmp(2, :) );
     end
 
-    function vid_B = determine_shared_vertices
-        B_ = [false(2, 1) B];
-        
-        tmp = B_(:, 1:end-1) | B_(:, 2:end);
-        vid_B = C_vid( tmp(1, :) & tmp(2, :) );
-    end
+    function dir_b = determine_direction
+        [pred_vid, succ_vid] = neighbors(vid_b);
 
-    function C_dir = determine_direction
-        [pred_vid, succ_vid] = neighbors(C_vid);
-
-        C_dir = s([pred_vid; succ_vid]);
+        dir_b = s([pred_vid; succ_vid]);
         
-        if size(C_vid, 2) == 1
-            C_dir = C_dir'; % stupid inconsistent matlab behaviour
+        if size(vid_b, 2) == 1
+            dir_b = dir_b'; % stupid inconsistent matlab behaviour
         end
 
-        filt = C_dir == 'b';
+        filt = dir_b == 'b';
         pred_filt_idx = find(filt(1, :));
         succ_filt_idx = find(filt(2, :));
 
         pred_filt_vid = pred_vid(filt(1, :));
         succ_filt_vid = succ_vid(filt(2, :));
 
-        pred_lower = V_(1, pred_filt_vid) < C_(1, filt(1, :));
-        succ_lower = V_(1, succ_filt_vid) < C_(1, filt(2, :));
+        pred_lower = PC_T(1, pred_filt_vid) < b_T(1, filt(1, :));
+        succ_lower = PC_T(1, succ_filt_vid) < b_T(1, filt(2, :));
 
-        C_dir(1, pred_filt_idx( pred_lower)) = 'u'; % up
-        C_dir(1, pred_filt_idx(~pred_lower)) = 'd'; % down
-        C_dir(2, succ_filt_idx( succ_lower)) = 'd'; % down
-        C_dir(2, succ_filt_idx(~succ_lower)) = 'u'; % up
+        dir_b(1, pred_filt_idx( pred_lower)) = 'u'; % up
+        dir_b(1, pred_filt_idx(~pred_lower)) = 'd'; % down
+        dir_b(2, succ_filt_idx( succ_lower)) = 'd'; % down
+        dir_b(2, succ_filt_idx(~succ_lower)) = 'u'; % up
     end
 
     function B = determine_bridge_passing(dir, vid)
@@ -229,12 +232,12 @@ P_R = vid2poly(vid_R);
         else % 'rr' or 'll'
             [pred_vid, succ_vid] = neighbors(vid);
 
-            C_cur_  = V_(:, vid);
-            C_pred_ = V_(:, pred_vid);
-            C_succ_ = V_(:, succ_vid);
+            cur_C_T  = PC_T(:, vid);
+            pred_C_T = PC_T(:, pred_vid);
+            succ_C_T = PC_T(:, succ_vid);
 
-            delta1 = C_cur_ - C_pred_;
-            delta2 = C_succ_ - C_cur_;
+            delta1 = cur_C_T - pred_C_T;
+            delta2 = succ_C_T - cur_C_T;
 
             m1 = -delta1(1)/delta1(2); % -cot(alpha1)
             m2 = -delta2(1)/delta2(2); % -cot(alpha2)
@@ -248,9 +251,9 @@ P_R = vid2poly(vid_R);
     end
 
     function vid_cut = build_polygons
-        used_vertex = false(1, n_V);
+        used_vertex = false(1, n_PC);
         vid_cut = cell(1, N);
-        vid_cut_i = NaN(1, n + N-1);
+        vid_cut_i = NaN(1, n_P + N-1);
         i = 1;
         % for each polygon piece
         while ~all(used_vertex | b_filt)
@@ -284,7 +287,7 @@ P_R = vid2poly(vid_R);
                 % determine path along the bridges
 
                 [~, cur] = neighbors(last); % crossing point
-                cid = find(C_vid == cur, 1, 'first');
+                cid = find(vid_b == cur, 1, 'first');
 
                 % go either up or downward the bridges
                 switch side
@@ -296,7 +299,7 @@ P_R = vid2poly(vid_R);
                         I_cid = cid:-1:downward_cid;
                 end
 
-                I = C_vid(I_cid);
+                I = vid_b(I_cid);
 
                 % check if the bridges go beyond the last point
                 last_idx = find( I == prev(vid_first), 1, 'first' );
@@ -324,20 +327,20 @@ P_R = vid2poly(vid_R);
             if first <= last
                 I = first:last;
             else
-                I = [first:n_V 1:last];
+                I = [first:n_PC 1:last];
             end
         end
 
         function upward_cid = upward(cid)
-            upward_cid = find( ~B(1, cid:end), 1, 'first' ) + cid-1;
+            upward_cid = find( ~Bridge(1, cid:end), 1, 'first' ) + cid-1;
         end
 
         function downward_cid = downward(cid)
-            downward_cid = find( [true ~B(2, 1:cid-1)], 1, 'last' );
+            downward_cid = find( [true ~Bridge(2, 1:cid-1)], 1, 'last' );
         end
 
         function next_vid = next(vid)
-            if vid == n_V
+            if vid == n_PC
                 next_vid = 1;
             else
                 next_vid = vid+1;
@@ -346,11 +349,24 @@ P_R = vid2poly(vid_R);
 
         function prev_vid = prev(vid)
             if vid == 1
-                prev_vid = n_V;
+                prev_vid = n_PC;
             else
                 prev_vid = vid-1;
             end
         end
+    end
+
+    function vid_ = PC2VC_vid(vid)
+        % restore order from before reordering
+        vid_ = reorder_idx(vid);
+        
+        % restore original vid_P
+        P_filt = vid_ <= n_P;
+        vid_(P_filt) = vid_P( vid_(P_filt) );
+        
+        % adjust new crossing vertices' indices
+        C_filt = not(P_filt);
+        vid_(C_filt) = vid_(C_filt) + n_V - n_P;
     end
 end
 
