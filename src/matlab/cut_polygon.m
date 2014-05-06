@@ -1,7 +1,11 @@
-function [P_L, P_R, V, vid_L, vid_R, vid_B] = cut_polygon(P, cut)
+function [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cut_polygon(P, cut)
+
+n = size(P, 2);
 
 P_L = {};
 P_R = {};
+V = P;
+map = repmat(1:n, 2, 1);
 vid_L = {};
 vid_R = {};
 vid_B = [];
@@ -10,7 +14,6 @@ if isempty(P)
     return;
 end
 
-n = size(P, 2);
 e = get_edges(P);
 
 P_ = transform(P);
@@ -47,6 +50,7 @@ reorder_idx = calculate_vertex_order;
 V  = V(:, reorder_idx);
 V_ = V_(:, reorder_idx);
 s  = s(:, reorder_idx);
+map = [reorder_idx; inverse_order(reorder_idx)];
 
 % determine polygon vertices on the cut
 b_filt = s == 'b';

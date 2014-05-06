@@ -66,22 +66,22 @@ Om_st = [Om_st{:}];
                 % TODO: cut smin/smax only once per i
                 
                 if vec_vec_angle(vec_i, v_j) > pi % polygon comes from the left
-                    [~, polygon_cut] = cut_polygon(polygon_j, cut_smin);
-                    [polygon_cut, ~] = cut_multipolygon(polygon_cut, cut_smax);
-                    [polygon_cut, ~] = cut_multipolygon(polygon_cut, cut_tmin);
-                    [~, polygon_cut] = cut_multipolygon(polygon_cut, cut_tmax);
+                    [P_cut, ~] = cut_polygon(polygon_j, cut_tmin);
+                    [~, P_cut] = cut_multipolygon(P_cut, cut_tmax);
+                    [~, P_cut] = cut_multipolygon(P_cut, cut_smin);
+                    [P_cut, ~] = cut_multipolygon(P_cut, cut_smax);
                 else % vec_vec_angle(vec_i, v_j) < pi % polygon comes from the right
-                    [polygon_cut, ~] = cut_polygon(polygon_j, cut_smin);
-                    [~, polygon_cut] = cut_multipolygon(polygon_cut, cut_smax);
-                    [~, polygon_cut] = cut_multipolygon(polygon_cut, cut_tmin);
-                    [polygon_cut, ~] = cut_multipolygon(polygon_cut, cut_tmax);
+                    [~, P_cut] = cut_polygon(polygon_j, cut_tmin);
+                    [P_cut, ~] = cut_multipolygon(P_cut, cut_tmax);
+                    [P_cut, ~] = cut_multipolygon(P_cut, cut_smin);
+                    [~, P_cut] = cut_multipolygon(P_cut, cut_smax);
                 end
                 
                 e_s = vec_i / l(i);
                 
                 Om_st_ji = cellfun(@(p) ...
                     calc_polygon_st(p, path_i1, [s_i(i); t1], e_s, v_j), ...
-                    polygon_cut, ...
+                    P_cut, ...
                     'UniformOutput', false);
                 
                 % TODO: glue polygons
@@ -96,19 +96,21 @@ Om_st = [Om_st{:}];
     function P_st = calc_polygon_st(P, xy0, st0, e_s, v)
         n_P = size(P, 2);
         
+        % TODO: deal with mirrored polygons
+        
         P_st = [e_s -v] \ (P - repmat(xy0, 1, n_P)) + repmat(st0, 1, n_P);
     end
 end
 
-function [P_L, P_R] = cut_multipolygon(P, cut)
+function [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cut_multipolygon(P, cut)
 if isempty(P)
-    P_L = {};
-    P_R = {};
+    [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cellempty;
     return;
 end
 
-[P_L, P_R] = cellfun(@(p) cut_polygon(p, cut), P, 'UniformOutput', false);
+[P_L, P_R, V, map, vid_L, vid_R, vid_B] = ...
+    cellfun(@(p) cut_polygon(p, cut), P, 'UniformOutput', false);
 
-P_L = [P_L{:}];
-P_R = [P_R{:}];
+[P_L, P_R, V, map, vid_L, vid_R, vid_B] = ...
+    cellflatten(P_L, P_R, V, map, vid_L, vid_R, vid_B);
 end
