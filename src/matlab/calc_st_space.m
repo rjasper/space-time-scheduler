@@ -47,7 +47,10 @@ Om_st = [Om_st{:}];
             
             polygon_j = polygon + repmat(xy1, 1, n_poly);
             
-            Om_st_j = cell(1, N_segs);
+            V_st = cell(1, N_segs);
+            vid = cell(1, N_segs);
+            vid_S_smin = cell(1, N_segs);
+            vid_S_smax = cell(1, N_segs);
             
             % for each path segment
             for i = 1:N_segs
@@ -58,59 +61,76 @@ Om_st = [Om_st{:}];
                 path_i = [path_i1; path_i2]; % path segment
                 vec_i = line2vec(path_i);
                 
+                % TODO: define epsilon > 0
+                if vec_vec_angle(vec_i, v_j) < pi % polygon goes to the left
+                    direction = 'left';
+                elseif vec_vec_angle(vec_i, v_j) > pi % polygon goes to the right
+                    direction = 'right';
+                else % polygon goes along the path
+                    direction = 'parallel';
+                end
+                
                 cut_smin = repmat(path_i1, 2, 1) + [zeros(2, 1); -v_j];
                 cut_smax = repmat(path_i2, 2, 1) + [zeros(2, 1); -v_j];
                 cut_tmin = path_i;
                 cut_tmax = path_i + repmat(dt * -v_j, 2, 1);
                 
-                % TODO: cut smin/smax only once per i
+                V = polygon_j;
+                vid_i = 1:n_poly;
                 
-                if vec_vec_angle(vec_i, v_j) > pi % polygon comes from the left
-                    [P_cut, ~] = cut_polygon(polygon_j, cut_tmin);
-                    [~, P_cut] = cut_multipolygon(P_cut, cut_tmax);
-                    [~, P_cut] = cut_multipolygon(P_cut, cut_smin);
-                    [P_cut, ~] = cut_multipolygon(P_cut, cut_smax);
-                else % vec_vec_angle(vec_i, v_j) < pi % polygon comes from the right
-                    [~, P_cut] = cut_polygon(polygon_j, cut_tmin);
-                    [P_cut, ~] = cut_multipolygon(P_cut, cut_tmax);
-                    [P_cut, ~] = cut_multipolygon(P_cut, cut_smin);
-                    [~, P_cut] = cut_multipolygon(P_cut, cut_smax);
+                switch direction
+                    case 'left'
+                        [C, ~, vid_i] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
+                        [C, vid_i, ~] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
+                        [C, vid_i, ~, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
+                        [C, ~, vid_i, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                    case 'right'
+                        [C, vid_i, ~] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
+                        [C, ~, vid_i] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
+                        [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
+                        [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                    case 'parallel'
+                        % TODO: implement
+                        
+                        error('nyi');
                 end
+                
+                % determine relevant vids
+                vid_all = unique([vid_i{:}]);
+                % calculate old to new index mapping
+                idx_map = inverse_order(vid_all);
+                % translate indices
+                V = V(:, vid_all);
+                vid_i = cellfun(@(v) idx_map(v), vid_i, 'UniformOutput', false);
+                vid_S_smin_i = idx_map(vid_S_smin_i);
+                vid_S_smax_i = idx_map(vid_S_smax_i);
                 
                 e_s = vec_i / l(i);
                 
-                Om_st_ji = cellfun(@(p) ...
-                    calc_polygon_st(p, path_i1, [s_i(i); t1], e_s, v_j), ...
-                    P_cut, ...
-                    'UniformOutput', false);
+                V_st_i = calc_polygon_st(V, path_i1, [s_i(i); t1], e_s, v_j);
                 
-                % TODO: glue polygons
+                switch direction
+                    case 'left' % polygon was mirrored
+                        vid_i = cellfun(@fliplr, vid_i, 'UniformOutput', false);
+                end
                 
-                Om_st_j{i} = Om_st_ji;
+                V_st{i} = V_st_i;
+                vid{i} = vid_i;
+                vid_S_smin{i} = vid_S_smin_i;
+                vid_S_smax{i} = vid_S_smax_i;
             end
+                
+            % TODO: glue polygons
+            
+            Om_st_j = cellfun(@vid2polygon, V_st, vid, 'UniformOutput', false);
             
             Om_st_j = [Om_st_j{:}];
         end
     end
 
-    function P_st = calc_polygon_st(P, xy0, st0, e_s, v)
-        n_P = size(P, 2);
+    function V_st = calc_polygon_st(V, xy0, st0, e_s, v)
+        n_V = size(V, 2);
         
-        % TODO: deal with mirrored polygons
-        
-        P_st = [e_s -v] \ (P - repmat(xy0, 1, n_P)) + repmat(st0, 1, n_P);
+        V_st = [e_s -v] \ (V - repmat(xy0, 1, n_V)) + repmat(st0, 1, n_V);
     end
-end
-
-function [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cut_multipolygon(P, cut)
-if isempty(P)
-    [P_L, P_R, V, map, vid_L, vid_R, vid_B] = cellempty;
-    return;
-end
-
-[P_L, P_R, V, map, vid_L, vid_R, vid_B] = ...
-    cellfun(@(p) cut_polygon(p, cut), P, 'UniformOutput', false);
-
-[P_L, P_R, V, map, vid_L, vid_R, vid_B] = ...
-    cellflatten(P_L, P_R, V, map, vid_L, vid_R, vid_B);
 end

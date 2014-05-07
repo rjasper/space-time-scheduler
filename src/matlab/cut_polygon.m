@@ -1,4 +1,4 @@
-function [C, vid_L, vid_R, vid_S] = cut_polygon(V, vid_P, cut)
+function [C, vid_L, vid_R, vid_S, S_xT] = cut_polygon(V, vid_P, cut)
 
 n_V = size(V, 2);
 n_P = size(vid_P, 2);
@@ -9,7 +9,8 @@ n_P = size(vid_P, 2);
 C = NaN(2, 0);
 vid_L = {};
 vid_R = {};
-vid_S = [];
+vid_S = zeros(1, 0);
+S_xT = NaN(1, 0);
 % map = repmat(1:n, 2, 1);
 
 if isempty(vid_P)
@@ -88,8 +89,10 @@ s_P = cellfun(@polygon_side, vid_cut);
 vid_L = cellfun(@PC2VC_vid, vid_cut(s_P == 'l'), 'UniformOutput', false);
 vid_R = cellfun(@PC2VC_vid, vid_cut(s_P == 'r'), 'UniformOutput', false);
 
+vid_S_ = determine_shared_vertices;
+S_xT = PC_T(1, vid_S_);
 % determine the set of vertices used by both sides
-vid_S = PC2VC_vid( determine_shared_vertices );
+vid_S = PC2VC_vid(vid_S_);
 
 % % build actual polygons consisting of points
 % P_L = vid2poly(vid_L);
