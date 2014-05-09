@@ -19,7 +19,7 @@ Om_st = [Om_st{:}];
     function v = calc_velocity(path)
         dpath = diff(path, 1, 2);
         
-        % v := [x; y] / t
+        % v := [dx; dy] / dt
         v = dpath(1:2, :) ./ repmat(dpath(3, :), 2, 1);
     end
 
