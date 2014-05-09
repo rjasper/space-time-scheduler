@@ -1,5 +1,16 @@
 function [V, vid, R2V_map] = merge_polygons(V_L, vid_L, vid_S_L, V_R, vid_R, vid_S_R)
 
+n_L = size(V_L, 2);
+n_R = size(V_R, 2);
+
+if isempty(vid_S_L) % == isempty(vid_S_R)
+    V = [V_L V_R];
+    R2V_map = n_L + 1:n_R;
+    vid = [vid_L cellfun(@(v) n_L + v, vid_R, 'UniformOutput', false)];
+    
+    return;
+end
+
 N_L = length(vid_L);
 N_R = length(vid_R);
 N_P_max = N_L + N_R;
@@ -115,7 +126,7 @@ vid = [vid(1:i-1) vid_L(unused_L)];
             [isS, S_idx] = ismember(vid, vid_S);
             % find bridges
             B_filt = isS & isS([2:end 1]);
-            B_filt_ = circshift(B_filt, [0 -1]);
+            B_filt_ = circshift(B_filt, [0 1]);
 
             % determine bridge IDs
             switch side
@@ -126,7 +137,7 @@ vid = [vid(1:i-1) vid_L(unused_L)];
             end
             
             mapTo = zeros(1, n_P);
-            mapTo(B_idx) = B;
+            mapTo(B_filt) = B;
             
             mapFrom(1, B) = i; % polygon ID (pid)
             mapFrom(2, B) = find(B_filt_); % polygon vertex ID (pvid)

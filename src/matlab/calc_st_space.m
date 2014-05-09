@@ -8,6 +8,9 @@ v = cellfun(@calc_velocity, {Om{:}.path}, 'UniformOutput', false);
 l = calc_path_length(path);
 s_i = cumsum([0 l]);
 
+% debug
+j = 0;
+
 Om_st = cellfun(@calc_Om_st, ...
     {Om{:}.polygon}, ...
     {Om{:}.path}, ...
@@ -39,6 +42,8 @@ Om_st = [Om_st{:}];
         Om_st = [Om_st{:}];
         
         function Om_st_j = calc_Om_st_v(p1, p2, v_j)
+            j = j + 1;
+            
             xy1 = p1(1:2);
             xy2 = p2(1:2);
             t1 = p1(3);
@@ -122,9 +127,30 @@ Om_st = [Om_st{:}];
                 
             % TODO: glue polygons
             
-            Om_st_j = cellfun(@vid2polygon, V_st, vid, 'UniformOutput', false);
+            if N_segs == 1
+                V_st = V_st{1};
+            else
+                V_R_st = V_st{N_segs};
+                vid_R = vid{N_segs};
+                vid_S_R = vid_S_smin{N_segs};
+                
+                for i = N_segs-1:-1:1
+                    V_L_st = V_st{i};
+                    vid_L = vid{i};
+                    vid_S_L = vid_S_smax{i};
+                    
+                    [V_R_st, vid_R] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, vid_S_R);
+                    vid_S_R = vid_S_smin{i};
+                end
+                
+                V_st = V_R_st;
+                vid = vid_R;
+            end
             
-            Om_st_j = [Om_st_j{:}];
+%             Om_st_j = cellfun(@vid2polygon, V_st, vid, 'UniformOutput', false);
+            Om_st_j = vid2polygon(V_st, vid);
+            
+%             Om_st_j = [Om_st_j{:}];
         end
     end
 
