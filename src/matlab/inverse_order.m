@@ -1,16 +1,15 @@
-function inverse = inverse_order(order)
+function inverse = inverse_order(order, m)
     
 n = size(order, 2);
 
-zero_filt = order == 0;
-has_zeros = any(zero_filt);
-
-if has_zeros
-    order(zero_filt) = max(order)+1;
+if ~exist('m', 'var')
+    m = max(order);
 end
 
+inverse = zeros(1, m+1);
+
+zero_filt = order == 0;
+order(zero_filt) = m+1;
 inverse(order) = 1:n;
 
-if has_zeros
-    inverse = inverse(1:end-1);
-end
+inverse = inverse(1:m);

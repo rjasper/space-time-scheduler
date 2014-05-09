@@ -27,16 +27,25 @@ V2_R = [
 vid2_R = {1:6};
 vid2_S_R = [1 6 4 3];
 
-merge_polygons(V1_L, vid1_L, vid1_S_L, V1_R, vid1_R, vid1_S_R);
-merge_polygons(V2_L, vid2_L, vid2_S_L, V2_R, vid2_R, vid2_S_R);
+[V1, vid1] = merge_polygons(V1_L, vid1_L, vid1_S_L, V1_R, vid1_R, vid1_S_R);
+[V2, vid2] = merge_polygons(V2_L, vid2_L, vid2_S_L, V2_R, vid2_R, vid2_S_R);
 
 P1_L = vid2polygon(V1_L, vid1_L);
 P1_R = vid2polygon(V1_R, vid1_R);
 P2_L = vid2polygon(V2_L, vid2_L);
 P2_R = vid2polygon(V2_R, vid2_R);
 
+P1 = vid2polygon(V1, vid1);
+P2 = vid2polygon(V2, vid2);
+
 figure(1);
 draw_polygon([P1_L P1_R], 'r');
 
 figure(2);
 draw_polygon([P2_L P2_R], 'r');
+
+figure(3);
+draw_polygon(P1, 'r');
+
+figure(4);
+draw_polygon(P2, 'r');
