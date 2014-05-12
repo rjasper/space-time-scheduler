@@ -47,49 +47,13 @@ while any(unused_B)
 
     j = 1;
     while no_loop
+        [j, bid, pid_R] = step(j, bid, vid_R, mapFrom_R, mapTo_R, 'right');
+        
         unused_B(bid) = false;
-
-        pid_R = mapFrom_R(1, bid);
-        pvid_start_R = mapFrom_R(2, bid);
-        vid_R_pid = vid_R{pid_R};
-        n_R_pid = length(vid_R_pid);
-        isB_R = mapTo_R{pid_R} ~= 0;
-
-        unused_R(pid_R) = false;
-
-        % go to next bridge start (might be cur)
-        pvid_Bstart_R = bnext(isB_R, pvid_start_R);
-        pvid_end_R = idxmod(pvid_Bstart_R-1, n_R_pid);
-
-        I_R = interval(pvid_start_R, pvid_end_R, n_R_pid);
-        n_I_R = length(I_R);
-        vid_i(j-1 + (1:n_I_R)) = R2V_map( vid_R_pid(I_R) );
-        j = j + n_I_R;
-
-        % cross bridge to L
-
-        bid = mapTo_R{pid_R}(pvid_Bstart_R);
-        unused_B(bid) = false;
-
-        pid_L = mapFrom_L(1, bid);
-        pvid_start_L = mapFrom_L(2, bid);
-        vid_L_pid = vid_L{pid_L};
-        n_L_pid = length(vid_L_pid);
-        isB_L = mapTo_L{pid_L} ~= 0;
-
-        unused_L(pid_L) = false;
-
-        % go to next bridge start
-        pvid_Bstart_L = bnext(isB_L, pvid_start_L);
-        pvid_end_L = idxmod(pvid_Bstart_L-1, n_L_pid);
-
-        I_L = interval(pvid_start_L, pvid_end_L, n_L_pid);
-        n_I_L = length(I_L);
-        vid_i(j-1 + (1:n_I_L)) = vid_L_pid( I_L );
-        j = j + n_I_L;
-
-        % cross bridge back to R
-        bid = mapTo_L{pid_L}(pvid_Bstart_L);
+        [j, bid, pid_L] = step(j, bid, vid_L, mapFrom_L, mapTo_L, 'left');
+        if pid_L ~= 0
+            unused_L(pid_L) = false;
+        end
 
         % check if polygon is complete
         no_loop = bid ~= bid_first;
@@ -147,6 +111,51 @@ vid = [vid(1:i-1) vid_L_ vid_R_];
             mapFrom(2, B) = B_idx_; % polygon vertex ID (pvid)
         end
     end
+
+    function [j_, bid_, pid] = step(j, bid, vid, mapFrom, mapTo, side)
+        unused_B(bid) = false;
+        
+        pid = mapFrom(1, bid);
+        pvid_start = mapFrom(2, bid);
+        
+        % no polygon on this side of the bridge
+        % save the point and go to the side
+        if pid == 0
+            switch side
+                case 'left'
+                    vid_i(j) = vid_S_L(bid+1);
+                case 'right'
+                    vid_i(j) = vid_S_L(bid);
+            end
+            
+            j_ = j + 1;
+            bid_ = bid;
+            return;
+        else
+            isB = mapTo{pid} ~= 0;
+            pvid_end = bnext(isB, pvid_start);
+
+            vid_pid = vid{pid};
+            n_pid = length(vid_pid);
+
+            I = interval(pvid_start, pvid_end, n_pid);
+            n_I = length(I);
+
+            switch side
+                case 'left'
+                    I_ = vid_pid( I );
+                    unused_L(pid) = false;
+                case 'right'
+                    I_ = R2V_map( vid_pid(I) );
+                    unused_R(pid) = false;
+            end
+
+            vid_i(j-1 + (1:n_I)) = I_;
+            
+            j_ = j + n_I;
+            bid_ = mapTo{pid}(pvid_end);
+        end
+    end
 end
 
 % gets the next true index after the given one
@@ -158,12 +167,12 @@ function next = bnext(b, idx)
     next = idxmod( next_shift + idx-1, length(b) );
 end
 
-% gives the interval between i_start and i_end
+% gives the interval between i_start and i_end (without i_end)
 % is cyclic
 function I = interval(i_start, i_end, n)
     if i_start <= i_end
-        I = i_start:i_end;
+        I = i_start:i_end-1;
     else
-        I = [i_start:n 1:i_end];
+        I = [i_start:n 1:i_end-1];
     end
 end

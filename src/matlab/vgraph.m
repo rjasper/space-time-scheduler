@@ -17,7 +17,7 @@ n_V = size(V, 2);
 A = zeros(n_V, n_V);
 
 % TODO: parallelize
-% make this hideous method human readible :P
+% make this hideous method human readable :P
 
 for i = 1:n_V
     for j = 1:n_V
