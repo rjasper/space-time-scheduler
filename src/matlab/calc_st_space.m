@@ -83,17 +83,28 @@ Om_st = [Om_st{:}];
                 V = polygon_j;
                 vid_i = 1:n_poly;
                 
+                vid_S_smin_i = zeros(1, 0);
+                vid_S_smax_i = zeros(1, 0);
+                
                 switch direction
                     case 'left'
                         [C, ~, vid_i] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
                         [C, vid_i, ~] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
-                        [C, vid_i, ~, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
-                        [C, ~, vid_i, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                        if i > 1
+                            [C, vid_i, ~, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
+                        end
+                        if i < N_segs
+                            [C, ~, vid_i, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                        end
                     case 'right'
                         [C, vid_i, ~] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
                         [C, ~, vid_i] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
-                        [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
-                        [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                        if i > 1
+                            [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
+                        end
+                        if i < N_segs
+                            [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
+                        end
                     case 'parallel'
                         % TODO: implement
                         
