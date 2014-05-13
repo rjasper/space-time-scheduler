@@ -3,11 +3,8 @@ function XYT = calc_xyt_path(V_xy, path_xy, V_st, path_st)
 XY = V_xy(:, path_xy);
 ST = V_st(:, path_st);
 
-n_XY = length(path_xy);
-n_ST = length(path_st);
-
 l_XY = path_length(V_xy, path_xy);
-s_XY = cumsum([0 l_XY(1:end)]);
+s_XY = [0 cumsum(l_XY(1:end))];
 
 t_XY = arrayfun(@calc_t, s_XY);
 [x_ST, y_ST] = arrayfun(@calc_xy, ST(1, :));
