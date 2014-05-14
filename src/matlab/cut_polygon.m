@@ -8,7 +8,7 @@ vid_L = {};
 vid_R = {};
 vid_S = zeros(1, 0);
 S_xT = NaN(1, 0);
-isB = false(1, 0);
+B = false(2, 0);
 
 if isempty(vid_P)
     return;
@@ -81,8 +81,10 @@ s_P = cellfun(@polygon_side, vid_cut);
 vid_L = cellfun(@PC2VC_vid, vid_cut(s_P == 'l'), 'UniformOutput', false);
 vid_R = cellfun(@PC2VC_vid, vid_cut(s_P == 'r'), 'UniformOutput', false);
 
-vid_S_ = determine_shared_vertices;
+S_b_filt = determine_shared_b_vertices;
+vid_S_ = vid_b(S_b_filt);
 S_xT = PC_T(1, vid_S_);
+B = B(:, S_b_filt);
 % determine the set of vertices used by both sides
 vid_S = PC2VC_vid(vid_S_);
 
@@ -172,12 +174,19 @@ vid_S = PC2VC_vid(vid_S_);
         end
     end
 
-    function vid_S = determine_shared_vertices
+    function S_b_filt = determine_shared_b_vertices
         Bridge_ = [false(2, 1) B];
         
         tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
-        vid_S = vid_b( tmp(1, :) & tmp(2, :) );
+        S_b_filt = tmp(1, :) & tmp(2, :);
     end
+
+%     function vid_S = determine_shared_vertices
+%         Bridge_ = [false(2, 1) B];
+%         
+%         tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
+%         vid_S = vid_b( tmp(1, :) & tmp(2, :) );
+%     end
 
     function dir_b = determine_direction
         [pred_vid, succ_vid] = neighbors(vid_b);

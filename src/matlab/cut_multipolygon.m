@@ -1,10 +1,13 @@
-function [C, vid_L, vid_R, vid_S, S_xT] = cut_multipolygon(V, vid_P, cut)
+function [C, vid_L, vid_R, vid_S, S_xT, B] = cut_multipolygon(V, vid_P, cut)
+
 if isempty(vid_P)
     C = NaN(2, 0);
     vid_L = {};
     vid_R = {};
     vid_S = zeros(1, 0);
     S_xT = NaN(1, 0);
+    B = false(2, 0);
+    
     return;
 end
 
@@ -12,7 +15,7 @@ end
 n_V = size(V, 2);
 
 % cut each polygon
-[C, vid_L, vid_R, vid_S, S_xT] = ...
+[C, vid_L, vid_R, vid_S, S_xT, B] = ...
     cellfun(@(vid) cut_polygon(V, vid, cut), vid_P, 'UniformOutput', false);
 
 % number of crossed edges (new vertices)
@@ -24,12 +27,13 @@ vid_L = cellfun(@calc_index, vid_L, ncum_C, 'UniformOutput', false);
 vid_R = cellfun(@calc_index, vid_R, ncum_C, 'UniformOutput', false);
 vid_S = cellfun(@calc_index, vid_S, ncum_C, 'UniformOutput', false);
 
-[C, vid_L, vid_R, vid_S, S_xT] = ...
-    cellflatten(C, vid_L, vid_R, vid_S, S_xT);
+[C, vid_L, vid_R, vid_S, S_xT, B] = ...
+    cellflatten(C, vid_L, vid_R, vid_S, S_xT, B);
 
 % sort shared points (points on the cut) by hit order
 [S_xT, S_idx] = sort(S_xT);
 vid_S = vid_S(S_idx);
+B = B(:, S_idx);
 
     function vid_ = calc_index(vid, offset)
         if iscell(vid)

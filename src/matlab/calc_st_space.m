@@ -107,7 +107,7 @@ Om_st = [Om_st{:}];
                         end
                         
                         [V_st_i, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
-                            vid_remap(V_st_i, vid_i, vid_S_smin_i, vid_S_smax_i);
+                            vid_remap(V_st_i, vid_i, 0, vid_S_smin_i, vid_S_smax_i);
                     otherwise
                         cut_smin = repmat(path_i1, 2, 1) + [zeros(2, 1); -v_j];
                         cut_smax = repmat(path_i2, 2, 1) + [zeros(2, 1); -v_j];
@@ -136,7 +136,7 @@ Om_st = [Om_st{:}];
                         end
                         
                         [V, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
-                            vid_remap(V, vid_i, vid_S_smin_i, vid_S_smax_i);
+                            vid_remap(V, vid_i, 0, vid_S_smin_i, vid_S_smax_i);
 
                         V_st_i = calc_polygon_st(V, path_i1, [s(i); t1], e_s, v_j);
 
