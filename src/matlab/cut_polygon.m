@@ -1,17 +1,14 @@
-function [C, vid_L, vid_R, vid_S, S_xT] = cut_polygon(V, vid_P, cut)
+function [C, vid_L, vid_R, vid_S, S_xT, B] = cut_polygon(V, vid_P, cut)
 
 n_V = size(V, 2);
 n_P = size(vid_P, 2);
 
-% P_L = {};
-% P_R = {};
-% V = P;
 C = NaN(2, 0);
 vid_L = {};
 vid_R = {};
 vid_S = zeros(1, 0);
 S_xT = NaN(1, 0);
-% map = repmat(1:n, 2, 1);
+isB = false(1, 0);
 
 if isempty(vid_P)
     return;
@@ -26,14 +23,11 @@ eps = determine_eps;
 % determine side of P's vertices
 s = arrayfun(@vertex_side, P_T(2, :));
 
-% TODO: check result variables
 if all(s == 'l')
-%     P_L = {P};
     vid_L = {vid_P};
     
     return;
 elseif all(s == 'r')
-%     P_R = {P};
     vid_R = {vid_P};
     
     return;
@@ -53,7 +47,6 @@ reorder_idx = calculate_vertex_order;
 PC   = PC(:, reorder_idx);
 PC_T = PC_T(:, reorder_idx);
 s  = s(:, reorder_idx);
-% map = [reorder_idx; inverse_order(reorder_idx)];
 
 % determine polygon vertices on the cut
 b_filt = s == 'b';
@@ -63,20 +56,19 @@ n_b = size(vid_b, 2);
 % sort cuts by 'hit order'
 [~, hit_idx] = sort(PC_T(1, b_filt), 2);
 vid_b = vid_b(hit_idx);
-% C  = V(:, C_vid);
 b_T = PC_T(:, vid_b);
 
 dir_C = determine_direction;
-Bridge = cellfun(@determine_bridge_passing, ...
+B = cellfun(@determine_bridge_passing, ...
     mat2cell(dir_C, 2, ones(1, n_b)), ...
     num2cell(vid_b), ...
     'UniformOutput', false);
-Bridge = [Bridge{:}];
+B = [B{:}];
 
 % number of polygons after split
-N = 1 + length( strfind(Bridge(1, :) & Bridge(2, :), [true false]) ) ...
-    + sum( ismember(dir_C', 'll', 'rows')' & Bridge(1, :) ) ...
-    + sum( ismember(dir_C', 'rr', 'rows')' & Bridge(2, :) );
+N = 1 + length( strfind(B(1, :) & B(2, :), [true false]) ) ...
+    + sum( ismember(dir_C', 'll', 'rows')' & B(1, :) ) ...
+    + sum( ismember(dir_C', 'rr', 'rows')' & B(2, :) );
 
 % build independent polygon pieces
 vid_cut = build_polygons;
@@ -93,10 +85,6 @@ vid_S_ = determine_shared_vertices;
 S_xT = PC_T(1, vid_S_);
 % determine the set of vertices used by both sides
 vid_S = PC2VC_vid(vid_S_);
-
-% % build actual polygons consisting of points
-% P_L = vid2poly(vid_L);
-% P_R = vid2poly(vid_R);
 
     function eps = determine_eps
         l = sqrt( sum(diff([P P(:, 1)], 1, 2).^2) );
@@ -184,12 +172,8 @@ vid_S = PC2VC_vid(vid_S_);
         end
     end
 
-%     function P = vid2poly(vid)
-%         P = cellfun(@(v) V(:, v), vid, 'UniformOutput', false);
-%     end
-
     function vid_S = determine_shared_vertices
-        Bridge_ = [false(2, 1) Bridge];
+        Bridge_ = [false(2, 1) B];
         
         tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
         vid_S = vid_b( tmp(1, :) & tmp(2, :) );
@@ -335,11 +319,11 @@ vid_S = PC2VC_vid(vid_S_);
         end
 
         function upward_cid = upward(cid)
-            upward_cid = find( ~Bridge(1, cid:end), 1, 'first' ) + cid-1;
+            upward_cid = find( ~B(1, cid:end), 1, 'first' ) + cid-1;
         end
 
         function downward_cid = downward(cid)
-            downward_cid = find( [true ~Bridge(2, 1:cid-1)], 1, 'last' );
+            downward_cid = find( [true ~B(2, 1:cid-1)], 1, 'last' );
         end
 
         function next_vid = next(vid)

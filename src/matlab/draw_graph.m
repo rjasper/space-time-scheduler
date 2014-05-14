@@ -8,9 +8,9 @@ N = length(i);
 was_hold = ishold;
 
 for k = 1:N
-    if i(k) > j(k)
-        continue
-    end
+%     if i(k) > j(k)
+%         continue
+%     end
     
     line(V(1, ij(:, k)')', V(2, ij(:, k)')');
     hold on;
