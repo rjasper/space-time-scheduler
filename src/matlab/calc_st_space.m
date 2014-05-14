@@ -101,8 +101,6 @@ Om_st = [Om_st{:}];
                             [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V_st_i, vid_i, cut_smax); V_st_i = [V_st_i C];
                         end
                         
-                        % TODO: duplicate code
-                        
                         [V_st_i, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
                             vid_remap(V_st_i, vid_i, vid_S_smin_i, vid_S_smax_i);
                     otherwise
@@ -148,8 +146,6 @@ Om_st = [Om_st{:}];
                 vid_S_smin{i} = vid_S_smin_i;
                 vid_S_smax{i} = vid_S_smax_i;
             end
-                
-            % TODO: glue polygons
             
             if N_segs == 1
                 V_st = V_st{1};
