@@ -179,10 +179,10 @@ Om_st = [Om_st{:}];
 %             Om_st_j = [Om_st_j{:}];
         end
     end
+end
 
-    function V_st = calc_polygon_st(V, xy0, st0, e_s, v)
-        n_V = size(V, 2);
-        
-        V_st = [e_s -v] \ (V - repmat(xy0, 1, n_V)) + repmat(st0, 1, n_V);
-    end
+function V_st = calc_polygon_st(V, xy0, st0, e_s, v)
+    n_V = size(V, 2);
+
+    V_st = [e_s -v] \ (V - repmat(xy0, 1, n_V)) + repmat(st0, 1, n_V);
 end
