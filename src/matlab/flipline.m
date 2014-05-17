@@ -1,5 +1,5 @@
-function line_ = flipline(line)
+function varargout = flipline(varargin)
 
-line_ = line([3:4 1:2], :);
+varargout = cellfun(@(line) line([3:4 1:2], :), varargin, 'UniformOutput', false);
 
 end
