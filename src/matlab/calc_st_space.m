@@ -89,7 +89,8 @@ Om_st = [Om_st{:}];
                     case 'parallel'
                         [~, ~, ~, vid_S, S_xT, B] = cut_polygon(V, vid_i, path_i);
                         n_S = length(vid_S);
-                        B_idx = find(B(1, :) & B(2, :));
+                        isB = B(1, :) & B(2, :);
+                        B_idx = find(isB);
 
                         s1 = s(i) + S_xT;
                         s2 = s1 + dt * e_s' * v_j;
@@ -103,7 +104,10 @@ Om_st = [Om_st{:}];
                         cut_smin = [s(i  ) t2 s(i  ) t1]'; % flipped
                         cut_smax = [s(i+1) t1 s(i+1) t2]';
                         
-                        % TODO: set vid_S_tmin_i and vid_S_tmax_i
+                        % TODO: test vid_S_tmin_i and vid_S_tmax_i
+                        
+                        vid_S_tmin_i = 1:n_S;
+                        vid_S_tmax_i = n_S + (n_S:-1:1); % flipped
                         
                         if i > 1
                             [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V_st_i, vid_i, cut_smin); V_st_i = [V_st_i C];
@@ -111,6 +115,25 @@ Om_st = [Om_st{:}];
                         if i < N_segs
                             [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V_st_i, vid_i, cut_smax); V_st_i = [V_st_i C];
                         end
+                         
+%                         [vid_S_tmin_i, idx_tmin] = intersect(vid_S_tmin_i, [vid_i{:}], 'stable');
+%                         [vid_S_tmax_i, idx_tmax] = intersect(vid_S_tmax_i, [vid_i{:}], 'stable');
+%                         
+%                         % TODO: add new crossings to tmin and tmax cut
+%                         
+%                         if idx_tmin(1) > 1 && B_(idx_tmin(1) - 1)
+%                             vid_S_tmin_i = [vid_S_smin_i(end) vid_S_tmin_i];
+%                         end
+%                         if ~isempty(vid_S_tmax_i) && idx_tmax(end) < n_S && B_(idx_tmax(end))
+%                             vid_S_tmax_i = [vid_S_tmax_i vid_S_smin_i(1)];
+%                         end
+% 
+%                         if ~isempty(vid_S_tmin_i) && idx_tmin(end) < n_S && B_(idx_tmin(end))
+%                             vid_S_tmin_i = [vid_S_tmin_i vid_S_smax_i(1)];
+%                         end
+%                         if ~isempty(vid_S_tmax_i) && idx_tmax(1) > 1 && B_(idx_tmax(1) - 1)
+%                             vid_S_tmax_i = [vid_S_smax_i(end) vid_S_tmax_i];
+%                         end
                         
                         [V_st_i, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
                             vid_remap(V_st_i, vid_i, 0, vid_S_smin_i, vid_S_smax_i);
@@ -132,26 +155,8 @@ Om_st = [Om_st{:}];
                         
                         switch direction
                             case 'left'
-%                                 [C, ~, vid_i] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
-%                                 [C, vid_i, ~] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
-%                                 if i > 1
-%                                     [C, vid_i, ~, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
-%                                 end
-%                                 if i < N_segs
-%                                     [C, ~, vid_i, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
-%                                 end
-                                
                                 cuts = [cut_tmax flipline(cut_smax) flipline(cut_tmin) cut_smin];
                             case 'right'
-%                                 [C, vid_i, ~] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
-%                                 [C, ~, vid_i] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
-%                                 if i > 1
-%                                     [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V, vid_i, cut_smin); V = [V C];
-%                                 end
-%                                 if i < N_segs
-%                                     [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
-%                                 end
-                                
                                 cuts = [cut_tmin cut_smax flipline(cut_tmax) flipline(cut_smin)];
                         end
                         
@@ -194,22 +199,6 @@ Om_st = [Om_st{:}];
                 V_st = V_st{1};
                 vid = vid{1};
             else
-                
-%                 V_R_st = V_st{N_segs};
-%                 vid_R = vid{N_segs};
-%                 vid_S_R = vid_S_smin{N_segs}; % TODO: deal with flipping
-%                 
-%                 % TODO: switch direction (from first to last segment)
-%                 for i = N_segs-1:-1:1
-%                     V_L_st = V_st{i};
-%                     vid_L = vid{i};
-%                     vid_S_L = vid_S_smax{i}; % TODO: deal with flipping
-%                     
-%                     [V_R_st, vid_R] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, vid_S_R);
-%                     vid_S_R = vid_S_smin{i}; % TODO: deal with flipping
-%                 end
-                %
-                
                 V_L_st = V_st{1};
                 vid_L = vid{1};
                 vid_S_L = vid_S_smax{1};

@@ -1,4 +1,4 @@
-function [C, vid_L, vid_R, vid_S, S_xT, B] = cut_multipolygon(V, vid_P, cut)
+function [C, vid_L, vid_R, vid_S, S_xT, B, eid_C] = cut_multipolygon(V, vid_P, cut)
 
 if isempty(vid_P)
     C = NaN(2, 0);
@@ -7,25 +7,37 @@ if isempty(vid_P)
     vid_S = zeros(1, 0);
     S_xT = NaN(1, 0);
     B = false(2, 0);
+    eid_C = zeros(2, 0);
     
     return;
 end
+
+% number of polygons
+N_P = length(vid_P);
 
 % number of vertices
 n_V = size(V, 2);
 
 % cut each polygon
-[C, vid_L, vid_R, vid_S, S_xT, B] = ...
+[C, vid_L, vid_R, vid_S, S_xT, B, eid_C] = ...
     cellfun(@(vid) cut_polygon(V, vid, cut), vid_P, 'UniformOutput', false);
 
 % number of crossed edges (new vertices)
 n_C = cellfun(@(c) size(c, 2), C);
-ncum_C = num2cell( [0 cumsum( n_C(1:end-1) )] );
+ncum_C = [0 cumsum( n_C(1:end-1) )];
+ncum_C_ = num2cell( ncum_C );
 
 % calculate new indices
-vid_L = cellfun(@calc_index, vid_L, ncum_C, 'UniformOutput', false);
-vid_R = cellfun(@calc_index, vid_R, ncum_C, 'UniformOutput', false);
-vid_S = cellfun(@calc_index, vid_S, ncum_C, 'UniformOutput', false);
+vid_L = cellfun(@calc_index, vid_L, ncum_C_, 'UniformOutput', false);
+vid_R = cellfun(@calc_index, vid_R, ncum_C_, 'UniformOutput', false);
+vid_S = cellfun(@calc_index, vid_S, ncum_C_, 'UniformOutput', false);
+
+eid_C = cellfun( ...
+    @(pid, eid) [repmat(pid, length(eid), 1); ncum_C(pid) + eid], ...
+    num2cell( 1:N_P ), ...
+    eid_C, ...
+    'UniformOutput', false);
+eid_C = [eid_C{:}];
 
 [C, vid_L, vid_R, vid_S, S_xT, B] = ...
     cellflatten(C, vid_L, vid_R, vid_S, S_xT, B);

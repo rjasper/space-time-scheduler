@@ -1,4 +1,4 @@
-function [C, vid_L, vid_R, vid_S, S_xT, B] = cut_polygon(V, vid_P, cut)
+function [C, vid_L, vid_R, vid_S, S_xT, B, eid_C] = cut_polygon(V, vid_P, cut)
 
 n_V = size(V, 2);
 n_P = size(vid_P, 2);
@@ -9,6 +9,7 @@ vid_R = {};
 vid_S = zeros(1, 0);
 S_xT = NaN(1, 0);
 B = false(2, 0);
+eid_C = zeros(1, 0);
 
 if isempty(vid_P)
     return;

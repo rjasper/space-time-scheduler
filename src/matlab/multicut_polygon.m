@@ -48,6 +48,9 @@ S_filt{1}(yn_T < 0) = false;
 %% determine cut vertices which are part of multiple cuts
 % some shared vertices might be part of multiple cuts
 
+% FIXME: rare case (double bridges which are cut multiple times)
+%        - leads to repeated shared vertex IDs
+
 % check the common point of the first and the last cut
 
 idx_S1_first = find(S_filt{1}, 1, 'first');
