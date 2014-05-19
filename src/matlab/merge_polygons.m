@@ -6,7 +6,7 @@ n_S = length(vid_S_L); % == length(vid_S_R)
 
 if n_S == 0 % == isempty(vid_S_R)
     V = [V_L V_R];
-    R2V_map = n_L + 1:n_R;
+    R2V_map = n_L + (1:n_R);
     vid = [vid_L cellfun(@(v) n_L + v, vid_R, 'UniformOutput', false)];
     
     return;

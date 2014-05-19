@@ -141,7 +141,7 @@ Om_st = [Om_st{:}];
 %                                     [C, ~, vid_i, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
 %                                 end
                                 
-                                cuts = [cut_tmax; flipline(cut_smax); flipline(cut_tmin); cut_smin];
+                                cuts = [cut_tmax flipline(cut_smax) flipline(cut_tmin) cut_smin];
                             case 'right'
 %                                 [C, vid_i, ~] = cut_polygon(V, vid_i, cut_tmin); V = [V C];
 %                                 [C, ~, vid_i] = cut_multipolygon(V, vid_i, cut_tmax); V = [V C];
@@ -152,7 +152,7 @@ Om_st = [Om_st{:}];
 %                                     [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V, vid_i, cut_smax); V = [V C];
 %                                 end
                                 
-                                cuts = [cut_tmin; cut_smax; flipline(cut_tmax); flipline(cut_smin)];
+                                cuts = [cut_tmin cut_smax flipline(cut_tmax) flipline(cut_smin)];
                         end
                         
                         [C, vid_i, vid_S] = multicut_polygon(V, vid_i, cuts);
@@ -166,15 +166,15 @@ Om_st = [Om_st{:}];
                         
                         switch direction
                             case 'left'
-                                [vid_S_tmax_i, vid_S_smax_i, vid_S_tmin_i, vid_S_smin] = flipline( vid_S{:} );
+                                [vid_S_tmax_i, vid_S_smax_i, vid_S_tmin_i, vid_S_smin_i] = fliplr_all( vid_S{:} );
                             case 'right'
-                                [vid_S_tmin_i, vid_S_smax_i, vid_S_tmax_i, vid_S_smin] = vid_S{:};
+                                [vid_S_tmin_i, vid_S_smax_i, vid_S_tmax_i, vid_S_smin_i] = vid_S{:};
                         end
                         
-%                         [V, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
-%                             vid_remap(V, vid_i, 0, vid_S_smin_i, vid_S_smax_i);
+                        [V, vid_i, ~, vid_S_smin_i, vid_S_smax_i, vid_S_tmin_i, vid_S_tmax_i] = ...
+                            vid_remap([V C], vid_i, 0, vid_S_smin_i, vid_S_smax_i, vid_S_tmin_i, vid_S_tmax_i);
 
-                        V_st_i = calc_polygon_st([V C], path_i1, [s(i); t1], e_s, v_j);
+                        V_st_i = calc_polygon_st(V, path_i1, [s(i); t1], e_s, v_j);
 
                         switch direction
                             case 'left' % polygon was mirrored
@@ -194,22 +194,37 @@ Om_st = [Om_st{:}];
                 V_st = V_st{1};
                 vid = vid{1};
             else
-                V_R_st = V_st{N_segs};
-                vid_R = vid{N_segs};
-                vid_S_R = vid_S_smin{N_segs}; % TODO: deal with flipping
                 
-                % TODO: switch direction (from first to last segment)
-                for i = N_segs-1:-1:1
-                    V_L_st = V_st{i};
-                    vid_L = vid{i};
-                    vid_S_L = vid_S_smax{i}; % TODO: deal with flipping
+%                 V_R_st = V_st{N_segs};
+%                 vid_R = vid{N_segs};
+%                 vid_S_R = vid_S_smin{N_segs}; % TODO: deal with flipping
+%                 
+%                 % TODO: switch direction (from first to last segment)
+%                 for i = N_segs-1:-1:1
+%                     V_L_st = V_st{i};
+%                     vid_L = vid{i};
+%                     vid_S_L = vid_S_smax{i}; % TODO: deal with flipping
+%                     
+%                     [V_R_st, vid_R] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, vid_S_R);
+%                     vid_S_R = vid_S_smin{i}; % TODO: deal with flipping
+%                 end
+                %
+                
+                V_L_st = V_st{1};
+                vid_L = vid{1};
+                vid_S_L = vid_S_smax{1};
+                
+                for i = 2:N_segs
+                    V_R_st = V_st{i};
+                    vid_R = vid{i};
+                    vid_S_R = vid_S_smin{i};
                     
-                    [V_R_st, vid_R] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, vid_S_R);
-                    vid_S_R = vid_S_smin{i}; % TODO: deal with flipping
+                    [V_L_st, vid_L, R2V_map] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, fliplr(vid_S_R));
+                    vid_S_L = R2V_map( vid_S_smax{i} );
                 end
                 
-                V_st = V_R_st;
-                vid = vid_R;
+                V_st = V_L_st;
+                vid = vid_L;
             end
             
 %             Om_st_j = cellfun(@vid2polygon, V_st, vid, 'UniformOutput', false);
