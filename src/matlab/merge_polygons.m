@@ -4,6 +4,10 @@ n_L = size(V_L, 2);
 n_R = size(V_R, 2);
 n_S = length(vid_S_L); % == length(vid_S_R)
 
+if n_S ~= length(vid_S_R)
+    error('vid_S_L and vid_S_R do not have the same number of elements');
+end
+
 if n_S == 0 % == isempty(vid_S_R)
     V = [V_L V_R];
     R2V_map = n_L + (1:n_R);

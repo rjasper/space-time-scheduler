@@ -33,16 +33,44 @@ Om_st = [Om_st{:}];
         p1 = path_Om(:, 1:end-1);
         p2 = path_Om(:, 2:end);
         
-        Om_st = cellfun(@calc_Om_st_v, ...
+        [V_st, vid, vid_S_tmin, vid_S_tmax] = cellfun(@calc_Om_st_v, ...
             mat2cell( p1, 3, ones(1, n_v) ), ...
             mat2cell( p2, 3, ones(1, n_v) ), ...
             mat2cell( v , 2, ones(1, n_v) ), ...
             'UniformOutput', false);
         
-        Om_st = [Om_st{:}];
+        [V_st, vid] = merge_vertical(V_st, vid, vid_S_tmin, vid_S_tmax);
         
-        function Om_st_j = calc_Om_st_v(p1, p2, v_j)
-            j = j + 1;
+        % just for scoping :P
+        function [V_, vid_] = merge_vertical(V, vid, vid_S_tmin, vid_S_tmax)
+            if n_v == 1
+                V_ = V{1};
+                vid_ = vid{1};
+            else
+                V_L_st = V{1};
+                vid_L = vid{1};
+                vid_S_L = vid_S_tmax{1};
+
+                for j = 2:n_v
+                    V_R_st = V{j};
+                    vid_R = vid{j};
+                    vid_S_R = vid_S_tmin{j};
+
+                    [V_L_st, vid_L, R2V_map] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, fliplr(vid_S_R));
+                    vid_S_L = R2V_map( vid_S_tmax{j} );
+                end
+
+                V_ = V_L_st;
+                vid_ = vid_L;
+            end
+        end
+        
+        Om_st = vid2polygon(V_st,  vid);
+
+%         Om_st = [Om_st{:}];
+        
+        function [V_st, vid, vid_S_tmin, vid_S_tmax] = calc_Om_st_v(p1, p2, v_j)
+            j = j + 1; % debug
             
             xy1 = p1(1:2);
             xy2 = p2(1:2);
@@ -89,8 +117,8 @@ Om_st = [Om_st{:}];
                     case 'parallel'
                         [~, ~, ~, vid_S, S_xT, B] = cut_polygon(V, vid_i, path_i);
                         n_S = length(vid_S);
-                        isB = B(1, :) & B(2, :);
-                        B_idx = find(isB);
+                        isB12 = B(1, :) & B(2, :);
+                        B_idx = find(isB12);
 
                         s1 = s(i) + S_xT;
                         s2 = s1 + dt * e_s' * v_j;
@@ -101,6 +129,8 @@ Om_st = [Om_st{:}];
                             @(b) [b b+1 n_S+b+1 n_S+b], num2cell(B_idx), ...
                             'UniformOutput', false);
                         
+                        cut_tmin = [s(i  ) t1 s(i+1) t1]';
+                        cut_tmax = [s(i+1) t2 s(i  ) t2]'; % flipped
                         cut_smin = [s(i  ) t2 s(i  ) t1]'; % flipped
                         cut_smax = [s(i+1) t1 s(i+1) t2]';
                         
@@ -109,34 +139,55 @@ Om_st = [Om_st{:}];
                         vid_S_tmin_i = 1:n_S;
                         vid_S_tmax_i = n_S + (n_S:-1:1); % flipped
                         
-                        if i > 1
-                            [C, ~, vid_i, vid_S_smin_i] = cut_multipolygon(V_st_i, vid_i, cut_smin); V_st_i = [V_st_i C];
-                        end
-                        if i < N_segs
-                            [C, vid_i, ~, vid_S_smax_i] = cut_multipolygon(V_st_i, vid_i, cut_smax); V_st_i = [V_st_i C];
-                        end
-                         
-%                         [vid_S_tmin_i, idx_tmin] = intersect(vid_S_tmin_i, [vid_i{:}], 'stable');
-%                         [vid_S_tmax_i, idx_tmax] = intersect(vid_S_tmax_i, [vid_i{:}], 'stable');
-%                         
-%                         % TODO: add new crossings to tmin and tmax cut
-%                         
-%                         if idx_tmin(1) > 1 && B_(idx_tmin(1) - 1)
-%                             vid_S_tmin_i = [vid_S_smin_i(end) vid_S_tmin_i];
-%                         end
-%                         if ~isempty(vid_S_tmax_i) && idx_tmax(end) < n_S && B_(idx_tmax(end))
-%                             vid_S_tmax_i = [vid_S_tmax_i vid_S_smin_i(1)];
-%                         end
-% 
-%                         if ~isempty(vid_S_tmin_i) && idx_tmin(end) < n_S && B_(idx_tmin(end))
-%                             vid_S_tmin_i = [vid_S_tmin_i vid_S_smax_i(1)];
-%                         end
-%                         if ~isempty(vid_S_tmax_i) && idx_tmax(1) > 1 && B_(idx_tmax(1) - 1)
-%                             vid_S_tmax_i = [vid_S_smax_i(end) vid_S_tmax_i];
-%                         end
+                        vid_S = {vid_S_tmin_i, vid_S_tmax_i};
                         
-                        [V_st_i, vid_i, ~, vid_S_smin_i, vid_S_smax_i] = ...
-                            vid_remap(V_st_i, vid_i, 0, vid_S_smin_i, vid_S_smax_i);
+                        if i > 1
+                            [C, vid_i_, ~, vid_S3, ~, B, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smin);
+                            isB3 = B(1, :) & B(2, :);
+                            
+                            vid_S(1:2) = split_shared_vertices( ...
+                                cut_smin, ...
+                                [cut_tmin cut_tmax], ...
+                                'll', ...
+                                V_st_i, ...
+                                vid_i, ...
+                                vid_S(1:2), ...
+                                eid_C, ...
+                                {isB12, isB12});
+                            
+                            V_st_i = [V_st_i C];
+                            vid_i = vid_i_;
+                            vid_S{3} = vid_S3;
+                        else
+                            vid_S{3} = zeros(1, 0);
+                            isB3 = false(1, 0);
+                        end
+                        
+                        if i < N_segs
+                            [C, vid_i_, ~, vid_S4, ~, B, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smax);
+                            isB12 = B(1, :) & B(2, :);
+                            
+                            vid_S(1:3) = split_shared_vertices( ...
+                                cut_smax, ...
+                                [cut_tmin cut_tmax cut_smin], ...
+                                'lll', ...
+                                V_st_i, ...
+                                vid_i, ...
+                                vid_S(1:3), ...
+                                eid_C, ...
+                                {isB12, isB12, isB3});
+                            
+                            V_st_i = [V_st_i C];
+                            vid_i = vid_i_;
+                            vid_S{4} = vid_S4;
+                        else
+                            vid_S{4} = zeros(1, 0);
+                        end
+                        
+                        [vid_S_tmin_i, vid_S_tmax_i, vid_S_smin_i, vid_S_smax_i] = vid_S{:};
+                        
+                        [V_st_i, vid_i, ~, vid_S_tmin_i, vid_S_tmax_i, vid_S_smin_i, vid_S_smax_i] = ...
+                            vid_remap(V_st_i, vid_i, 0, vid_S_tmin_i, vid_S_tmax_i, vid_S_smin_i, vid_S_smax_i);
                     otherwise
                         if i == 1
                             cut_smin = NaN(4, 0);
@@ -198,26 +249,36 @@ Om_st = [Om_st{:}];
             if N_segs == 1
                 V_st = V_st{1};
                 vid = vid{1};
+                vid_S_tmin = vid_S_tmin{1};
+                vid_S_tmax = vid_S_tmax{1};
             else
                 V_L_st = V_st{1};
                 vid_L = vid{1};
                 vid_S_L = vid_S_smax{1};
+                vid_S_tmin_L = vid_S_tmin{1};
+                vid_S_tmax_L = vid_S_tmax{1};
                 
                 for i = 2:N_segs
                     V_R_st = V_st{i};
                     vid_R = vid{i};
                     vid_S_R = vid_S_smin{i};
+                    vid_S_tmin_R = vid_S_tmin{i};
+                    vid_S_tmax_R = vid_S_tmax{i};
                     
                     [V_L_st, vid_L, R2V_map] = merge_polygons(V_L_st, vid_L, vid_S_L, V_R_st, vid_R, fliplr(vid_S_R));
                     vid_S_L = R2V_map( vid_S_smax{i} );
+                    vid_S_tmin_L = [vid_S_tmin_L, R2V_map( vid_S_tmin_R )];
+                    vid_S_tmax_L = [R2V_map( vid_S_tmax_R ), vid_S_tmax_L];
                 end
                 
                 V_st = V_L_st;
                 vid = vid_L;
+                vid_S_tmin = vid_S_tmin_L(diff([0, vid_S_tmin_L]) ~= 0);
+                vid_S_tmax = vid_S_tmax_L(diff([0, vid_S_tmax_L]) ~= 0);
             end
             
 %             Om_st_j = cellfun(@vid2polygon, V_st, vid, 'UniformOutput', false);
-            Om_st_j = vid2polygon(V_st, vid);
+%             Om_st_j = vid2polygon(V_st, vid);
             
 %             Om_st_j = [Om_st_j{:}];
         end
