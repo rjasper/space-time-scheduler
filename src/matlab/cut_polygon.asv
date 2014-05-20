@@ -118,8 +118,8 @@ vid_S = PC2VC_vid(vid_S_);
     function [C, eid_C, n_C] = calculate_crossings
         % find edge crossings with cut
         s_ = [s; s([2:end 1])]';
-        eid_C = find( ismember(s_, ['lr'; 'rl'], 'rows')' );
-%         eid_C = sort( [strfind(s_, 'lr') strfind(s_, 'rl')] ); % cutted edges (id)
+        eid_C = find(
+        eid_C = sort( [strfind(s_, 'lr') strfind(s_, 'rl')] ); % cutted edges (id)
         n_C = length(eid_C); % number of edge cuts
 
         % calculate crossing points

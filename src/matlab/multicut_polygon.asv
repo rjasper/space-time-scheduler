@@ -7,36 +7,34 @@ C = cell(1, n_cuts);
 vid_S = cell(1, n_cuts);
 S_xT = cell(1, n_cuts);
 B = cell(1, n_cuts);
-isB = cell(1, n_cuts);
 
 %% cut polygon
 % cut the polygon multiple times
 
 V_ = V; % TODO: preallocate
-vid_ = {vid};
+vid = {vid};
 
 for i = 1:n_cuts
-    [C_i, vid_i, ~, vid_S_i, S_xT_i, B_i, eid_C] = cut_multipolygon(V_, vid_, cuts(:, i));
+    [C_i, vid_, ~, vid_S_i, S_xT_i, B_i, eid_C] = cut_multipolygon(V_, vid, cuts(:, i));
     
-    vid_S(1:i-1) = split_shared_vertices( ...
+    side = repmat('l', 1, i-1);
+    
+    [vid_S_L, vid_S_R] = split_shared_vertices( ...
         cuts(:, i), ...
         cuts(:, 1:i-1), ...
         repmat('l', 1, i-1), ...
-        V_, ...
-        vid_, ...
-        vid_S(1:i-1), ...
+        V, ...
+        vid, ...
+        vid_S_i, ...
         eid_C, ...
-        isB(1:i-1));
-    
-    isB_i = B_i(1, :) & B_i(2, :);
+        isB);
     
     V_ = [V_ C_i];
     C{i} = C_i;
-    vid_ = vid_i;
+    vid = vid_;
     vid_S{i} = vid_S_i;
     S_xT{i} = S_xT_i;
     B{i} = B_i;
-    isB{i} = isB_i;
 end
 
 % %% determine cut vertices which are still part of the polygon

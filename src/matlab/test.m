@@ -58,7 +58,7 @@ figure(3);
 clf reset;
 draw_polygon(Om_st, 'g');
 hold on;
-draw_path(path_st, V_st);
+% draw_path(path_st, V_st);
 hold off;
 
 % figure(4);
