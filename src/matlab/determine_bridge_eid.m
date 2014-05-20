@@ -1,9 +1,9 @@
 function eid_B = determine_bridge_eid(vid, vid_S, isB, side)
 
 switch (side)
-    case 'left'
+    case {'left' 'l'}
         vid_S_ = vid_S([1:end-1; 2:end]');
-    case 'right'
+    case {'right' 'r'}
         vid_S_ = vid_S([2:end; 1:end-1]');
 end
 
