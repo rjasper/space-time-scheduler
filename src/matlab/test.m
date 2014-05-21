@@ -33,11 +33,11 @@ F_st = [L t_F]';
 
 Om_st = calc_st_space(Om, V(:, path));
 
-% [A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
-% [d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
-% path_st = pred2path(pred_st, 2); % to F_st
-% 
-% XYT = calc_xyt_path(V, path, V_st, path_st);
+[A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
+[d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
+path_st = pred2path(pred_st, 2); % to F_st
+
+XYT = calc_xyt_path(V, path, V_st, path_st);
 
 % figure(1);
 % clf reset;
@@ -68,10 +68,10 @@ hold off;
 % hold off;
 
 
-% figure(5);
-% clf reset;
-% % draw3D_obstacles(Os, Om, t_F);
-% draw3D_obstacles({}, Om, t_F);
-% hold on;
-% plot3(XYT(1, :), XYT(2, :), XYT(3, :));
-% hold off;
+figure(5);
+clf reset;
+% draw3D_obstacles(Os, Om, t_F);
+draw3D_obstacles({}, Om, t_F);
+hold on;
+plot3(XYT(1, :), XYT(2, :), XYT(3, :));
+hold off;

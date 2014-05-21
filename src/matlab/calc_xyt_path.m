@@ -4,15 +4,15 @@ XY = V_xy(:, path_xy);
 ST = V_st(:, path_st);
 
 l_XY = path_length(V_xy, path_xy);
-s_XY = [0 cumsum(l_XY(1:end))];
+s_XY = [0 cumsum(l_XY)];
 
 t_XY = arrayfun(@calc_t, s_XY);
 [x_ST, y_ST] = arrayfun(@calc_xy, ST(1, :));
 
 XYT_ = [[XY; t_XY] [x_ST; y_ST; ST(2, :)]];
-[s, s_idx_] = sort([s_XY ST(1, :)]);
-s_idx = s_idx_( [diff(s) ~= 0, true] );
-XYT = XYT_(:, s_idx); % TODO: use epsilon
+[t_, t_idx_] = sort([t_XY ST(2, :)]);
+t_idx = t_idx_( [true, diff(t_) ~= 0] );
+XYT = XYT_(:, t_idx); % TODO: use epsilon
 
     function t = calc_t(s)
         % TODO: use epsilon

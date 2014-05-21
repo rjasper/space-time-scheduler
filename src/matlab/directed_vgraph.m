@@ -65,6 +65,8 @@ for i = 1:n_V
                 continue
             end
             
+            % TODO: weight does not make sense
+            
             % distance between the two vertices
             A_st(i, j) = sqrt( sum( (V_st(:, i) - V_st(:, j)).^2 ) );
         end
