@@ -90,7 +90,7 @@ f6 = figure(6);
 clf reset;
 draw3D_obstacles(Os, Om, t_F);
 hold on;
-plot3(XYT(1, :), XYT(2, :), XYT(3, :));
+plot3(XYT(1, :), XYT(2, :), XYT(3, :), 'b');
 hold off;
 
 %% save
@@ -100,3 +100,4 @@ hold off;
 % saveas(f3, 'vgraph.png');
 % saveas(f4, 'path.png');
 % saveas(f5, 'st_space.png');
+saveas(f5, 'st_edges.png');
