@@ -67,9 +67,10 @@ B = cellfun(@determine_bridge_passing, ...
 B = [B{:}];
 
 % number of polygons after split
-N = 1 + length( strfind(B(1, :) & B(2, :), [true false]) ) ...
-    + sum( ismember(dir_C', 'll', 'rows')' & B(1, :) ) ...
-    + sum( ismember(dir_C', 'rr', 'rows')' & B(2, :) );
+% N = 1 + length( strfind(B(1, :) & B(2, :), [true false]) ) ...
+%     + sum( ismember(dir_C', 'll', 'rows')' & B(1, :) ) ...
+%     + sum( ismember(dir_C', 'rr', 'rows')' & B(2, :) );
+N = 1 + sum( B(1, :) & B(2, :) );
 
 % build independent polygon pieces
 vid_cut = build_polygons;
@@ -119,7 +120,6 @@ vid_S = PC2VC_vid(vid_S_);
         % find edge crossings with cut
         s_ = [s; s([2:end 1])]';
         eid_C = find( ismember(s_, ['lr'; 'rl'], 'rows')' );
-%         eid_C = sort( [strfind(s_, 'lr') strfind(s_, 'rl')] ); % cutted edges (id)
         n_C = length(eid_C); % number of edge cuts
 
         % calculate crossing points
@@ -177,18 +177,14 @@ vid_S = PC2VC_vid(vid_S_);
     end
 
     function S_b_filt = determine_shared_b_vertices
-        Bridge_ = [false(2, 1) B];
-        
-        tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
-        S_b_filt = tmp(1, :) & tmp(2, :);
-    end
-
-%     function vid_S = determine_shared_vertices
-%         Bridge_ = [false(2, 1) B];
+%         B_ = [false(2, 1) B];
 %         
-%         tmp = Bridge_(:, 1:end-1) | Bridge_(:, 2:end);
-%         vid_S = vid_b( tmp(1, :) & tmp(2, :) );
-%     end
+%         tmp = B_(:, 1:end-1) | B_(:, 2:end);
+%         S_b_filt = tmp(1, :) & tmp(2, :);
+        
+        B_ = [false B(1, :) & B(2, :)];
+        S_b_filt = B_(1:end-1) | B_(2:end);
+    end
 
     function dir_b = determine_direction
         [pred_vid, succ_vid] = neighbors(vid_b);
@@ -255,7 +251,7 @@ vid_S = PC2VC_vid(vid_S_);
         i = 1;
         % for each polygon piece
         while ~all(used_vertex | b_filt)
-            % each non-crossing vertex is used once
+            % each non-border vertex is used once
             vid_first = find(~used_vertex & ~b_filt, 1, 'first');
 
             if vid_first == 1 && s(end) == s(1)
@@ -270,8 +266,9 @@ vid_S = PC2VC_vid(vid_S_);
             % for each contiguous range of non-crossing vertices of the current
             % polygon piece
             while no_loop
-                % get last vertex of contiguous non-crossing vertices
-                last = find_last_contiguous(s, cur, 'x');
+%                 % get last vertex of contiguous non-border vertices
+%                 last = find_last_contiguous(s, cur, 'x');
+                % TODO: go until next bridge
 
                 I = interval(cur, last);
 
@@ -330,11 +327,17 @@ vid_S = PC2VC_vid(vid_S_);
         end
 
         function upward_cid = upward(cid)
-            upward_cid = find( ~B(1, cid:end), 1, 'first' ) + cid-1;
+%             upward_cid = find( ~B(1, cid:end), 1, 'first' ) + cid-1;
+            
+            B_ = B(1, :) & B(2, :);
+            upward_cid = find( ~B_(cid:end), 1, 'first' ) + cid-1;
         end
 
         function downward_cid = downward(cid)
-            downward_cid = find( [true ~B(2, 1:cid-1)], 1, 'last' );
+%             downward_cid = find( [true ~B(2, 1:cid-1)], 1, 'last' );
+            
+            B_ = B(1, :) & B(2, :);
+            downward_cid = find( [true ~B_(1:cid-1)], 1, 'last' );
         end
 
         function next_vid = next(vid)
@@ -375,4 +378,16 @@ function idx = find_last_contiguous(arr, id0, delimiter)
 
     idx_shifted = find( [shifted delimiter] ~= kind, 1, 'first' ) - 1;
     idx = mod( idx_shifted + id0-1 - 1, n_arr ) + 1;
+end
+
+function idx = until(b, id0)
+    n_b = length(b);
+    b_ = circshift(b, [0 -(id0-1)]);
+    idx_ = find(b_, 1, 'first');
+    
+    if isempty(idx_)
+        idx_ = n_b;
+    end
+    
+    idx = idxmod(idx_ + id0-1 - 1, n_b);
 end

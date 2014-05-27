@@ -123,7 +123,7 @@ vid = [vid(1:i-1) vid_L_ vid_R_];
         pvid_start = mapFrom(2, bid);
         
         % no polygon on this side of the bridge
-        % save the point and go to the side
+        % save the point and go to the previous side
         if pid == 0
             switch side
                 case 'left'
