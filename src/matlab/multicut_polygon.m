@@ -6,8 +6,8 @@ n_V = size(V, 2);
 C = cell(1, n_cuts);
 vid_S = cell(1, n_cuts);
 S_xT = cell(1, n_cuts);
+% B = cell(1, n_cuts);
 B = cell(1, n_cuts);
-isB = cell(1, n_cuts);
 
 %% cut polygon
 % cut the polygon multiple times
@@ -27,9 +27,9 @@ for i = 1:n_cuts
         vid_, ...
         vid_S(1:i-1), ...
         eid_C, ...
-        isB(1:i-1));
+        B(1:i-1));
     
-    isB_i = B_i(1, :) & B_i(2, :);
+%     isB_i = B_i(1, :) & B_i(2, :);
     
     V_ = [V_ C_i];
     C{i} = C_i;
@@ -37,7 +37,7 @@ for i = 1:n_cuts
     vid_S{i} = vid_S_i;
     S_xT{i} = S_xT_i;
     B{i} = B_i;
-    isB{i} = isB_i;
+%     B{i} = isB_i;
 end
 
 % remove initial crossing points which were cut off and remap indices

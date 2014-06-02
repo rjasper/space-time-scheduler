@@ -8,7 +8,7 @@ vid_L = {};
 vid_R = {};
 vid_S = zeros(1, 0);
 S_xT = NaN(1, 0);
-B = false(2, 0);
+B = false(1, 0);
 eid_C = zeros(1, 0);
 
 if isempty(vid_P)
@@ -24,11 +24,11 @@ eps = determine_eps;
 % determine side of P's vertices
 s = arrayfun(@vertex_side, P_T(2, :));
 
-if all(s == 'l')
+if ~any(s == 'r')
     vid_L = {vid_P};
     
     return;
-elseif all(s == 'r')
+elseif ~any(s == 'l')
     vid_R = {vid_P};
     
     return;
@@ -59,19 +59,25 @@ n_b = size(vid_b, 2);
 vid_b = vid_b(hit_idx);
 b_T = PC_T(:, vid_b);
 
+% determine the direction of the edges of the border vertices
 dir_C = determine_direction;
-B = cellfun(@determine_bridge_passing, ...
+
+% determine bridges between border vertices
+B_b_ = cellfun(@determine_bridge_passing, ...
     mat2cell(dir_C, 2, ones(1, n_b)), ...
     num2cell(vid_b), ...
     'UniformOutput', false);
-B = [B{:}];
+B_b = [B_b_{:}];
 
 % number of polygons after split
-N = 1 + sum( B(1, :) & B(2, :) );
+N = 1 + sum( B_b );
 
-filt_S_b = determine_shared_b_vertices;
+filt_S_b = determine_shared_vertices;
 vid_S_ = vid_b(filt_S_b);
-B = B(:, filt_S_b);
+n_S = length(vid_S_);
+% bridges between shared vertices
+% note that there is one unset dummy bridge at the end for convenience
+B = B_b(filt_S_b);
 
 % build independent polygon pieces
 vid_cut = build_polygons;
@@ -107,11 +113,6 @@ vid_S = PC2VC_vid(vid_S_);
         R = [dL(1) dL(2); -dL(2) dL(1)] / l_length;
         % transform P and l
         pts_ = R * (pts - repmat(L1, 1, n_pts));
-    end
-
-    function [pred_vid, succ_vid] = neighbors(vid)
-        pred_vid = mod( vid-1 - 1, n_PC ) + 1;
-        succ_vid = mod( vid+1 - 1, n_PC ) + 1;
     end
 
     function [C, eid_C, n_C] = calculate_crossings
@@ -174,14 +175,23 @@ vid_S = PC2VC_vid(vid_S_);
         end
     end
 
-    function S_b_filt = determine_shared_b_vertices
-%         B_ = [false(2, 1) B];
-%         
-%         tmp = B_(:, 1:end-1) | B_(:, 2:end);
-%         S_b_filt = tmp(1, :) & tmp(2, :);
-        
-        B_ = [false, B(1, :) & B(2, :)];
-        S_b_filt = B_(1:end-1) | B_(2:end);
+    function vid_next = succ_vid(vid)
+        vid_next = idxmod(vid+1, n_PC);
+    end
+
+    function vid_pred = pred_vid(vid)
+        vid_pred = idxmod(vid-1, n_PC);
+    end
+
+    function [vid_pred, vid_succ] = neighbors(vid)
+        vid_pred = pred_vid(vid);
+        vid_succ = succ_vid(vid);
+    end
+
+    function filt_S_b = determine_shared_vertices
+        % the border vertex must be either the entrance or the exit of
+        % a bridge
+        filt_S_b = [false B_b(1:end-1)] | B_b;
     end
 
     function dir_b = determine_direction
@@ -193,15 +203,15 @@ vid_S = PC2VC_vid(vid_S_);
             dir_b = dir_b'; % stupid inconsistent matlab behaviour
         end
 
-        filt_b = dir_b == 'b';
-        pred_filt_idx = find(filt_b(1, :));
-        succ_filt_idx = find(filt_b(2, :));
+        filt_b_dir = dir_b == 'b';
+        pred_filt_idx = find(filt_b_dir(1, :));
+        succ_filt_idx = find(filt_b_dir(2, :));
 
-        pred_filt_vid = pred_vid(filt_b(1, :));
-        succ_filt_vid = succ_vid(filt_b(2, :));
+        pred_filt_vid = pred_vid(filt_b_dir(1, :));
+        succ_filt_vid = succ_vid(filt_b_dir(2, :));
 
-        pred_lower = PC_T(1, pred_filt_vid) < b_T(1, filt_b(1, :));
-        succ_lower = PC_T(1, succ_filt_vid) < b_T(1, filt_b(2, :));
+        pred_lower = PC_T(1, pred_filt_vid) < b_T(1, filt_b_dir(1, :));
+        succ_lower = PC_T(1, succ_filt_vid) < b_T(1, filt_b_dir(2, :));
 
         dir_b(1, pred_filt_idx( pred_lower)) = 'u'; % up
         dir_b(1, pred_filt_idx(~pred_lower)) = 'd'; % down
@@ -209,19 +219,13 @@ vid_S = PC2VC_vid(vid_S_);
         dir_b(2, succ_filt_idx(~succ_lower)) = 'u'; % up
     end
 
-    function B = determine_bridge_passing(dir, vid)
+    function B_b = determine_bridge_passing(dir, vid)
         pred = dir(1);
         succ = dir(2);
-
-        if succ == 'u'
-            B = [true; false];
-        elseif pred == 'd'
-            B = [false; true];
-        elseif (pred == 'u' || pred == 'r') && (succ == 'd' || succ == 'l')
-            B = [false; false];
-        elseif (pred == 'u' || pred == 'l') && (succ == 'd' || succ == 'r')
-            B = [true; true];
-        else % 'rr' or 'll'
+        
+        if (pred == 'u' || pred == 'l') && (succ == 'd' || succ == 'r')
+            B_b = true;
+        elseif (pred == 'l' && succ == 'l') || (pred == 'r' && succ == 'r')
             [pred_vid, succ_vid] = neighbors(vid);
 
             cur_C_T  = PC_T(:, vid);
@@ -234,11 +238,9 @@ vid_S = PC2VC_vid(vid_S_);
             m1 = -delta1(1)/delta1(2); % -cot(alpha1)
             m2 = -delta2(1)/delta2(2); % -cot(alpha2)
 
-            if m1 > m2
-                B = [false; false];
-            else % m1 < m2
-                B = [true; true];
-            end
+            B_b = m1 <= m2;
+        else
+            B_b = false;
         end
     end
 
@@ -303,7 +305,7 @@ vid_S = PC2VC_vid(vid_S_);
                 vid_cut_i(I_) = I;
                 j = j + n_I;
 
-                cur = next_vid(I(end));
+                cur = succ_vid(I(end));
                 % detect loop
                 no_loop = cur ~= vid_first;
             end
@@ -322,33 +324,31 @@ vid_S = PC2VC_vid(vid_S_);
         end
 
         function upward_cid = upward(cid)
-            B_ = B(1, 1:end-1) & B(2, 1:end-1);
-            s_S_next = s(next_vid(vid_S_(1:end-1)));
+            % side of the entrance vertex
+            s_S_next = s(succ_vid(vid_S_(1:end-1)));
+            % indicates the current border vertex
+            filt_cid = ind2filt(cid, n_S-1);
             
-            upward_cid = next(falling_edge([B_ & s_S_next ~= 'l', false], 'low'), cid);
+            % an upward bridge is passable if the entrance vertex
+            % is either the starting point (cid) or is not on the left
+            passable = B(1:end-1) & (s_S_next ~= 'l' | filt_cid);
+            
+            % go until the last passable bridge exit vertex
+            upward_cid = next(falling_edge([passable, false], 'low'), cid);
         end
 
         function downward_cid = downward(cid)
-            B_ = B(1, 1:end-1) & B(2, 1:end-1);
-            s_S_next = s(next_vid(vid_S_(2:end)));
+            % side of the entrance vertex
+            s_S_next = s(succ_vid(vid_S_(2:end)));
+            % indicates the current border vertex
+            filt_cid = ind2filt(cid-1, n_S-1);
             
-            downward_cid = prev(rising_edge([false, B_ & s_S_next ~= 'r'], 'low'), cid);
-        end
-
-        function vid_next = next_vid(vid)
-            if vid == n_PC
-                vid_next = 1;
-            else
-                vid_next = vid+1;
-            end
-        end
-
-        function vid_next = prev_vid(vid)
-            if vid == 1
-                vid_next = n_PC;
-            else
-                vid_next = vid-1;
-            end
+            % a downward bridge is passable if the entrance vertex
+            % is either the starting point (cid) or is not on the right
+            passable = B(1:end-1) & (s_S_next ~= 'r' | filt_cid);
+            
+            % go until the last passable bridge exit vertex
+            downward_cid = prev(rising_edge([false, passable], 'low'), cid);
         end
     end
 
