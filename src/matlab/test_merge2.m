@@ -7,4 +7,9 @@ V = [P4 C];
 
 [V_, vid_] = merge_polygons(V, vid_L, vid_S, V, vid_R, vid_S);
 
+
+figure(1);
+draw_polygon(vid2polygon(V, [vid_L vid_R]), 'r');
+
+figure(2);
 draw_polygon(vid2polygon(V_, vid_), 'r');

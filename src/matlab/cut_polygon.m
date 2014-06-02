@@ -74,6 +74,7 @@ N = 1 + sum( B(1, :) & B(2, :) );
 
 S_b_filt = determine_shared_b_vertices;
 vid_S_ = vid_b(S_b_filt);
+B = B(:, S_b_filt);
 
 % build independent polygon pieces
 vid_cut = build_polygons;
@@ -87,7 +88,6 @@ vid_L = cellfun(@PC2VC_vid, vid_cut(s_P == 'l'), 'UniformOutput', false);
 vid_R = cellfun(@PC2VC_vid, vid_cut(s_P == 'r'), 'UniformOutput', false);
 
 S_xT = PC_T(1, vid_S_);
-B = B(:, S_b_filt);
 % determine the set of vertices used by both sides
 vid_S = PC2VC_vid(vid_S_);
 
@@ -183,7 +183,7 @@ vid_S = PC2VC_vid(vid_S_);
 %         tmp = B_(:, 1:end-1) | B_(:, 2:end);
 %         S_b_filt = tmp(1, :) & tmp(2, :);
         
-        B_ = [false B(1, :) & B(2, :)];
+        B_ = [false, B(1, :) & B(2, :)];
         S_b_filt = B_(1:end-1) | B_(2:end);
     end
 
@@ -250,15 +250,17 @@ vid_S = PC2VC_vid(vid_S_);
         vid_cut = cell(1, N);
         vid_cut_i = zeros(1, n_P + N-1);
         
-        filt_S = ind2filt(vid_S_);
+        filt_S = ind2filt(vid_S_, n_PC);
+        filt_S_after = circshift(falling_edge(filt_S, 'circular'), [0 1]);
         
         i = 1;
         % for each polygon piece
-        while ~all(used_vertex | b_filt)
+        while ~all(used_vertex | filt_S)
             % each non-bridge vertex is used once
 
             % get first vertex after a bridge
-            vid_first = after_falling_edge_c(filt_S, 1);
+%             vid_first = after_falling_edge_c(filt_S, 1);
+            vid_first = find(~used_vertex & filt_S_after, 1, 'first');
             
 %             vid_first = find(~used_vertex & ~b_filt, 1, 'first');
 % 
@@ -274,10 +276,13 @@ vid_S = PC2VC_vid(vid_S_);
             % for each contiguous range of non-border vertices of the current
             % polygon piece
             while no_loop
+                disp(used_vertex | filt_S);
+                
 %                 % get last vertex of contiguous non-border vertices
 %                 last = find_last_contiguous(s, cur, 'x');
                 % TODO: go until next bridge
-                last = before_rising_edge_c(filt_S, cur);
+%                 last = before_rising_edge_c(filt_S, cur);
+                last = find_next_c(rising_edge(filt_S, 'high', 'circular'), cur);
 
                 I = intervalc(cur, last);
 
@@ -290,20 +295,21 @@ vid_S = PC2VC_vid(vid_S_);
 
                 % determine path along the bridges
 
-                [~, cur] = neighbors(last); % first bridge vertex
-                cid = find(vid_b == cur, 1, 'first');
+%                 [~, cur] = neighbors(last); % first bridge vertex
+                cid = find(vid_S_ == last, 1, 'first');
 
                 % go either up or downward the bridges
                 switch side
                     case 'l'
                         upward_cid = upward(cid);
-                        I_cid = cid:upward_cid;
+                        I_cid = cid+1:upward_cid;
                     case 'r'
                         downward_cid = downward(cid);
-                        I_cid = cid:-1:downward_cid;
+                        I_cid = cid-1:-1:downward_cid;
                 end
 
-                I = vid_b(I_cid);
+%                 I = vid_b(I_cid);
+                I = vid_S_(I_cid);
 
 %                 % check if the bridges go beyond the last point
 %                 last_idx = find( I == prev(vid_first), 1, 'first' );
@@ -317,7 +323,7 @@ vid_S = PC2VC_vid(vid_S_);
                 vid_cut_i(I_) = I;
                 j = j + n_I;
 
-                cur = next(I(end));
+                cur = next_vid(I(end));
                 % detect loop
                 no_loop = cur ~= vid_first;
             end
@@ -338,33 +344,38 @@ vid_S = PC2VC_vid(vid_S_);
         function upward_cid = upward(cid)
 %             upward_cid = find( ~B(1, cid:end), 1, 'first' ) + cid-1;
             
-            B_ = B(1, :) & B(2, :);
-%             upward_cid = find( ~B_(cid:end), 1, 'first' ) + cid-1;
-            upward_cid = before_next_falling_edge(B_ & s(next(vid_S_(2:end))) == 'r', cid);
+            B_ = B(1, 1:end-1) & B(2, 1:end-1);
+            r_Snext = s(next_vid(vid_S_(1:end-1))) ~= 'l';
+
+%             upward_cid = next_falling_edge([B_ & r_Snext, false], cid) + 1;
+%             upward_cid = find_next_c(falling_edge([B_ & r_Snext, false], 'low'), cid);
+            upward_cid = next(falling_edge([B_ & r_Snext, false], 'low'), cid);
         end
 
         function downward_cid = downward(cid)
 %             downward_cid = find( [true ~B(2, 1:cid-1)], 1, 'last' );
             
-            B_ = B(1, :) & B(2, :);
-%             downward_cid = find( [true ~B_(1:cid-1)], 1, 'last' );
+            B_ = B(1, 1:end-1) & B(2, 1:end-1);
+            l_Snext = s(next_vid(vid_S_(2:end))) ~= 'r';
             
-            downward_cid = after_prev_rising_edge(B_ & s(next(vid_S_(1:end-1))) == 'l', cid);
+%             downward_cid = prev_rising_edge([false, B_ & l_Snext], cid+1);
+%             downward_cid = find_prev_c(rising_edge([false, B_ & l_Snext], 'low'), cid+1);
+            downward_cid = prev(rising_edge([false, B_ & l_Snext], 'low'), cid);
         end
 
-        function next_vid = next(vid)
+        function vid_next = next_vid(vid)
             if vid == n_PC
-                next_vid = 1;
+                vid_next = 1;
             else
-                next_vid = vid+1;
+                vid_next = vid+1;
             end
         end
 
-        function prev_vid = prev(vid)
+        function vid_next = prev_vid(vid)
             if vid == 1
-                prev_vid = n_PC;
+                vid_next = n_PC;
             else
-                prev_vid = vid-1;
+                vid_next = vid-1;
             end
         end
     end
