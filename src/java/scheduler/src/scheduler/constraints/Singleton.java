@@ -1,4 +1,4 @@
-package schedular.constraints;
+package scheduler.constraints;
 
 public class Singleton implements RealSet {
 	

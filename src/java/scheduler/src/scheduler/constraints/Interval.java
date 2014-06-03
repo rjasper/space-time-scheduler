@@ -1,6 +1,6 @@
-package schedular.constraints;
+package scheduler.constraints;
 
-import schedular.constraints.RealSets.EmptyRealSet;
+import scheduler.constraints.RealSets.EmptyRealSet;
 
 public class Interval implements RealSet {
 	

@@ -1,4 +1,4 @@
-package schedular.constraints;
+package scheduler.constraints;
 
 import static java.lang.Math.*;
 

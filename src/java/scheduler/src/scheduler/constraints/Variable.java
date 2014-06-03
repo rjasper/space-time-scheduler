@@ -1,4 +1,4 @@
-package schedular.constraints;
+package scheduler.constraints;
 
 import java.util.Collections;
 import java.util.LinkedList;
