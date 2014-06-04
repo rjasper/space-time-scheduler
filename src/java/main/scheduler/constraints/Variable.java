@@ -104,7 +104,7 @@ public class Variable {
 				
 				for (RealSet c : constraints) {
 					if (!constraintStr.isEmpty())
-						constraintStr += " \u2229 ";
+						constraintStr += " \u2229 "; // \u2229 = $\cap$
 					
 					constraintStr += c;
 				}
