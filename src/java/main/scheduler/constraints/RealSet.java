@@ -13,5 +13,7 @@ public interface RealSet {
 	public RealSet intersect(RealSet set);
 	
 	public boolean contains(double value);
+	
+	public RealSet normalize();
 
 }

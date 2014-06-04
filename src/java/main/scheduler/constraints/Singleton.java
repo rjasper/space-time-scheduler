@@ -1,5 +1,8 @@
 package scheduler.constraints;
 
+import scheduler.constraints.RealSets.EmptyRealSet;
+import scheduler.constraints.RealSets.FullRealSet;
+
 public class Singleton implements RealSet {
 	
 	private final double value;
@@ -29,13 +32,28 @@ public class Singleton implements RealSet {
 
 	@Override
 	public RealSet add(RealSet set) {
-		// TODO Auto-generated method stub
-		return null;
+		if (set instanceof EmptyRealSet)
+			return RealSets.add((EmptyRealSet) set, this);
+		else if (set instanceof FullRealSet)
+			return RealSets.add((FullRealSet) set, this);
+		else if (set instanceof Singleton)
+			return RealSets.add(this, (Singleton) set);
+		else if (set instanceof Interval)
+			return RealSets.add(this, (Interval) set);
+		else if (set instanceof Relation)
+			return RealSets.add((Relation) set, this);
+		else
+			throw new IncompatibleRealSetError();
 	}
 
 	@Override
 	public RealSet intersect(RealSet set) {
 		return RealSets.intersect(this, set);
+	}
+
+	@Override
+	public RealSet normalize() {
+		return this;
 	}
 
 	@Override
@@ -79,7 +97,7 @@ public class Singleton implements RealSet {
 	 */
 	@Override
 	public String toString() {
-		return String.format("[%f]", value);
+		return String.format("{%f}", value);
 	}
 
 }

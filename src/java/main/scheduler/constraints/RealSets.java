@@ -6,10 +6,12 @@ public final class RealSets {
 	
 	private RealSets() {}
 	
-	public static final EmptyRealSet EMPTY_REAL_SET = new EmptyRealSet();
+	private static final EmptyRealSet EMPTY_REAL_SET = new EmptyRealSet();
+	
+	private static final FullRealSet FULL_REAL_SET = new FullRealSet();
 
 	public static final class EmptyRealSet implements RealSet {
-		private EmptyRealSet() {};
+		private EmptyRealSet() {}
 	
 		@Override
 		public RealSet neg() {
@@ -18,11 +20,16 @@ public final class RealSets {
 
 		@Override
 		public RealSet add(RealSet set) {
-			return emptyRealSet();
+			return RealSets.add(this, set);
 		}
 
 		@Override
-		public RealSet intersect(RealSet constraint) {
+		public RealSet intersect(RealSet set) {
+			return RealSets.intersect(this, set);
+		}
+
+		@Override
+		public RealSet normalize() {
 			return emptyRealSet();
 		}
 
@@ -30,10 +37,61 @@ public final class RealSets {
 		public boolean contains(double value) {
 			return false;
 		}
+		
+		@Override
+		public String toString() {
+			return "{}";
+		}
+	}
+	
+	public static final class FullRealSet implements RealSet {
+		private FullRealSet() {}
+		
+		@Override
+		public RealSet neg() {
+			return fullRealSet();
+		}
+
+		@Override
+		public RealSet add(RealSet set) {
+			return RealSets.add(this, set);
+		}
+
+		@Override
+		public RealSet intersect(RealSet set) {
+			return RealSets.intersect(this, set);
+		}
+
+		@Override
+		public RealSet normalize() {
+			return fullRealSet();
+		}
+
+		@Override
+		public boolean contains(double value) {
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			return "R";
+		}
 	}
 	
 	public static EmptyRealSet emptyRealSet() {
 		return EMPTY_REAL_SET;
+	}
+	
+	public static FullRealSet fullRealSet() {
+		return FULL_REAL_SET;
+	}
+	
+	public static RealSet intersect(EmptyRealSet s1, RealSet s2) {
+		return emptyRealSet();
+	}
+	
+	public static RealSet intersect(FullRealSet s1, RealSet s2) {
+		return s2;
 	}
 	
 	public static RealSet intersect(Singleton s1, RealSet s2) {
@@ -53,6 +111,21 @@ public final class RealSets {
 			return new Singleton(minValue);
 		else
 			return new Interval(minValue, maxValue);
+	}
+	
+	public static RealSet intersect(Relation s1, RealSet s2) {
+		return s1.normalize().intersect(s2);
+	}
+	
+	public static RealSet add(EmptyRealSet s1, RealSet s2) {
+		return emptyRealSet();
+	}
+	
+	public static RealSet add(FullRealSet s1, RealSet s2) {
+		if (s2 instanceof EmptyRealSet)
+			return emptyRealSet();
+		else
+			return fullRealSet();
 	}
 	
 	public static RealSet add(Singleton s1, Singleton s2) {
@@ -79,6 +152,15 @@ public final class RealSets {
 		double maxValue2 = s2.getMaxValue();
 		
 		return new Interval(minValue1 + minValue2, maxValue1 + maxValue2);
+	}
+
+	public static RealSet add(Relation s1, RealSet s2) {
+		Variable reference = s1.getReference();
+		
+		if (reference.isComplete())
+			return s1.normalize().add(s2);
+		else
+			return new Relation(reference, s1.getOffset().add(s2));
 	}
 
 }

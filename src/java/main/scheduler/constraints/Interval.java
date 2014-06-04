@@ -1,6 +1,7 @@
 package scheduler.constraints;
 
 import scheduler.constraints.RealSets.EmptyRealSet;
+import scheduler.constraints.RealSets.FullRealSet;
 
 public class Interval implements RealSet {
 	
@@ -44,20 +45,39 @@ public class Interval implements RealSet {
 
 	@Override
 	public RealSet add(RealSet set) {
-		// TODO Auto-generated method stub
-		return null;
+		if (set instanceof EmptyRealSet)
+			return RealSets.add((EmptyRealSet) set, this);
+		else if (set instanceof FullRealSet)
+			return RealSets.add((FullRealSet) set, this);
+		else if (set instanceof Singleton)
+			return RealSets.add((Singleton) set, this);
+		else if (set instanceof Interval)
+			return RealSets.add(this, (Interval) set);
+		else if (set instanceof Relation)
+			return RealSets.add((Relation) set, this);
+		else
+			throw new IncompatibleRealSetError();
 	}
 
 	@Override
 	public RealSet intersect(RealSet set) {
 		if (set instanceof EmptyRealSet)
-			return RealSets.emptyRealSet();
+			return RealSets.intersect((EmptyRealSet) set, this);
+		else if (set instanceof FullRealSet)
+			return RealSets.intersect((FullRealSet) set, this);
 		else if (set instanceof Singleton)
 			return RealSets.intersect((Singleton) set, this);
 		else if (set instanceof Interval)
 			return RealSets.intersect(this, (Interval) set);
+		else if (set instanceof Relation)
+			return RealSets.intersect((Relation) set, this);
 		else
 			throw new IncompatibleRealSetError();
+	}
+
+	@Override
+	public RealSet normalize() {
+		return this;
 	}
 
 	@Override
