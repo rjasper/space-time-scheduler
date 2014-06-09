@@ -86,15 +86,6 @@ public class Variable {
 		
 		return getDomain();
 	}
-	
-//	public void evaluate() {
-//		if (!isReady())
-//			throw new IllegalStateException("variable not ready");
-//		if (isEvaluated())
-//			return;
-//		
-//		evaluate(list());
-//	}
 
 	private List<RealSet> evaluate(fj.data.List<Variable> trace) {
 		if (isEvaluated()) {
