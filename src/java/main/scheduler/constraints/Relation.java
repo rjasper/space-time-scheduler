@@ -8,10 +8,16 @@ public class Relation implements RealSet {
 	
 	private transient RealSet evaluatedSet = null;
 
-	// TODO refuse Relation as offset?
 	public Relation(Variable reference, RealSet offset) {
+		if (offset instanceof Relation)
+			throw new IncompatibleRealSetError("cannot use a relation as offset");
+		
 		this.reference = reference;
 		this.offset = offset;
+	}
+	
+	public boolean isEvaluated() {
+		return reference.isEvaluated();
 	}
 
 	/**
@@ -44,11 +50,11 @@ public class Relation implements RealSet {
 	}
 
 	public RealSet normalize() {
-			if (evaluatedSet == null)
-				evaluatedSet = reference.getDomain().add(offset);
-			
-			return evaluatedSet;
-		}
+		if (evaluatedSet == null)
+			evaluatedSet = reference.evaluate().add(offset);
+		
+		return evaluatedSet;
+	}
 
 	@Override
 	public boolean contains(double value) {

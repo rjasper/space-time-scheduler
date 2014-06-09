@@ -7,7 +7,7 @@ public final class VariableFactory {
 		
 		var.constrain(RealSets.emptyRealSet());
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}
@@ -16,7 +16,7 @@ public final class VariableFactory {
 		Variable var = new Variable();
 		
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}
@@ -26,7 +26,7 @@ public final class VariableFactory {
 		
 		var.constrain(new Singleton(value));
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}
@@ -36,7 +36,7 @@ public final class VariableFactory {
 		
 		var.constrain(new Interval(minValue, maxValue));
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}
@@ -46,7 +46,7 @@ public final class VariableFactory {
 		
 		var.constrain(new Relation(reference, offset));
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}
@@ -64,7 +64,7 @@ public final class VariableFactory {
 		
 		var.constrain(constraints);
 		var.ready();
-		var.eval();
+		var.evaluate();
 		
 		return var;
 	}

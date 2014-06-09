@@ -3,8 +3,8 @@ package scheduler.constraints;
 public final class VariableFixtures {
 	
 	public static Variable[] mutualDependentVariables() {
-		Variable a = new Variable();
-		Variable b = new Variable();
+		Variable a = new Variable("A");
+		Variable b = new Variable("B");
 		
 		a.constrain(
 			new Interval(0., 10.),
