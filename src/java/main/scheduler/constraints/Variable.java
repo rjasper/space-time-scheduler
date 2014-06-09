@@ -20,7 +20,7 @@ public class Variable {
 	
 	private final List<RealSet> constraints = new LinkedList<RealSet>();
 	
-	private RealSet domain = null;
+	private transient RealSet domain = null;
 	
 	private boolean ready = false;
 	
