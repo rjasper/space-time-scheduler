@@ -110,15 +110,15 @@ public class VariableTest {
 		
 		a.constrain(
 				new Interval(0., 10.),
-				new Relation(b, new Interval(-20., -10.)));
+				new Relation(b, new Interval(-18., -12.)));
 		b.constrain(
 				new Interval(20., 30.),
-				new Relation(a, new Interval(10., 20.)));
+				new Relation(a, new Interval(12., 18.)));
 		a.ready();
 		b.ready();
 
-		assertEquals(new Interval(0., 10.), a.evaluate());
-		assertEquals(new Interval(20., 30.), b.evaluate());
+		assertEquals(new Interval(2., 10.), a.evaluate());
+		assertEquals(new Interval(20., 28.), b.evaluate());
 	}
 
 }
