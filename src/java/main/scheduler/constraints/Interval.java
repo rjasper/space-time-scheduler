@@ -111,8 +111,6 @@ public class Interval implements RealSet {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		// TODO what about equivalent singletons and relations?
-		
 		if (this == obj)
 			return true;
 		if (obj == null)
