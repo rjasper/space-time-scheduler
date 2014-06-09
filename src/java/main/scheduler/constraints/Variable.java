@@ -27,7 +27,7 @@ public class Variable {
 		return Collections.unmodifiableList(constraints);
 	}
 
-	public boolean isComplete() {
+	public boolean isEvaluated() {
 		return domain != null;
 	}
 	
@@ -46,8 +46,8 @@ public class Variable {
 	public RealSet getDomain() {
 		if (!isReady())
 			throw new VariableReadyError();
-		if (!isComplete())
-			throw new VariableIncompleteError();
+		if (!isEvaluated())
+			throw new UnevaluatedVariableError();
 		
 		return domain;
 	}
@@ -75,8 +75,8 @@ public class Variable {
 		ready = true;
 	}
 	
-	public void complete() {
-		if (isComplete())
+	public void eval() {
+		if (isEvaluated())
 			return;
 		
 		calculateDomain();
@@ -93,7 +93,7 @@ public class Variable {
 	
 	@Override
 	public String toString() {
-		if (isComplete()) {
+		if (isEvaluated()) {
 			return String.format("%s = %s", getName(), getDomain().toString());
 		} else {
 			String constraintStr;

@@ -6,9 +6,9 @@ public class Relation implements RealSet {
 	
 	private final RealSet offset;
 	
-	private transient RealSet calculatedSet = null;
+	private transient RealSet evaluatedSet = null;
 
-	// TODO refuse RelativeRealSet as offset?
+	// TODO refuse Relation as offset?
 	public Relation(Variable reference, RealSet offset) {
 		this.reference = reference;
 		this.offset = offset;
@@ -44,13 +44,10 @@ public class Relation implements RealSet {
 	}
 
 	public RealSet normalize() {
-	//		if (!reference.isComplete())
-	//			throw new VariableIncompleteError();
+			if (evaluatedSet == null)
+				evaluatedSet = reference.getDomain().add(offset);
 			
-			if (calculatedSet == null)
-				calculatedSet = reference.getDomain().add(offset);
-			
-			return calculatedSet;
+			return evaluatedSet;
 		}
 
 	@Override

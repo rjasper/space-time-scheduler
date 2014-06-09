@@ -23,7 +23,7 @@ public class VariableTest {
 		Variable v = realVariable();
 		
 		assertEquals(fullRealSet(), v.getDomain());
-	} 
+	}
 
 	@Test
 	public void testCompleteSingleton() {
@@ -72,8 +72,8 @@ public class VariableTest {
 		Variable v1 = vars[0];
 		Variable v2 = vars[1];
 		
-		v1.complete();
-		v2.complete();
+		v1.eval();
+		v2.eval();
 		
 		assertEquals(new Interval(5., 10.), v1.getDomain());
 		assertEquals(new Interval(10., 15.), v2.getDomain());

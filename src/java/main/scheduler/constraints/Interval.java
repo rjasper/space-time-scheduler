@@ -9,6 +9,12 @@ public class Interval implements RealSet {
 	
 	private final double maxValue;
 	
+	/**
+	 * Saves the corresponding negative interval.
+	 * 
+	 * This avoids the creation of multiple redundant interval objects when
+	 * calling {@link #neg()}.
+	 */
 	private transient Interval negInterval = null;
 
 	public Interval(double minValue, double maxValue) {
@@ -105,6 +111,8 @@ public class Interval implements RealSet {
 	 */
 	@Override
 	public boolean equals(Object obj) {
+		// TODO what about equivalent singletons and relations?
+		
 		if (this == obj)
 			return true;
 		if (obj == null)

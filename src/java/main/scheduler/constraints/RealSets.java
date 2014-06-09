@@ -157,7 +157,7 @@ public final class RealSets {
 	public static RealSet add(Relation s1, RealSet s2) {
 		Variable reference = s1.getReference();
 		
-		if (reference.isComplete())
+		if (reference.isEvaluated())
 			return s1.normalize().add(s2);
 		else
 			return new Relation(reference, s1.getOffset().add(s2));
