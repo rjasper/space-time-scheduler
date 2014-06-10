@@ -160,7 +160,7 @@ public final class RealSets {
 		if (reference.isEvaluated())
 			return s1.normalize().add(s2);
 		else
-			return new Relation(reference, s1.getOffset().add(s2));
+			return new Relation(reference, s1.getOffset().add(s2).normalize());
 	}
 
 }

@@ -3,9 +3,17 @@ package scheduler.constraints;
 import static org.junit.Assert.*;
 import static scheduler.constraints.VariableFactory.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import util.NameProvider;
+
 public class RelationTest {
+	
+	@Before
+	public void setUp() {
+		NameProvider.reset(Variable.class);
+	}
 
 	@Test
 	public void testNeg() {

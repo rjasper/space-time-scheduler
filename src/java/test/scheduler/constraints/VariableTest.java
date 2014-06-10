@@ -2,14 +2,21 @@ package scheduler.constraints;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import util.NameProvider;
 import static scheduler.constraints.VariableFactory.*;
 import static scheduler.constraints.VariableFixtures.*;
 import static scheduler.constraints.RealSets.emptyRealSet;
 import static scheduler.constraints.RealSets.fullRealSet;
 
 public class VariableTest {
+	
+	@Before
+	public void setUp() {
+		NameProvider.reset(Variable.class);
+	}
 	
 	@Test
 	public void testEmpty() {
@@ -114,6 +121,7 @@ public class VariableTest {
 		b.constrain(
 				new Interval(20., 30.),
 				new Relation(a, new Interval(12., 18.)));
+		
 		a.ready();
 		b.ready();
 

@@ -18,5 +18,9 @@ public class NameProvider {
 		
 		return String.format("$%d", counter);
 	}
+	
+	public static void reset(Class<?> clazz) {
+		counters.remove(clazz);
+	}
 
 }

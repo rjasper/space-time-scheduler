@@ -2,12 +2,19 @@ package scheduler.constraints;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import util.NameProvider;
 import static scheduler.constraints.RealSets.*;
 import static scheduler.constraints.VariableFactory.*;
 
 public class RealSetsTest {
+	
+	@Before
+	public void setUp() {
+		NameProvider.reset(Variable.class);
+	}
 
 	@Test
 	public void testIntersectSingletonSingletonEmpty() {

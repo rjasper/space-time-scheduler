@@ -53,9 +53,6 @@ public class Variable {
 		return name;
 	}
 
-	/**
-	 * @return the constraints
-	 */
 	public List<RealSet> getConstraints() {
 		return Collections.unmodifiableList(_getConstraints());
 	}
@@ -104,7 +101,7 @@ public class Variable {
 				.collect(toList());
 			
 			// Check if there are relations with references to this variable.
-			// In such an case the equation is only satisfiable if the offset
+			// In such a case the equation is only satisfiable if the offset
 			// can be chosen as zero.
 			boolean satisfiable = relations.stream()
 				.filter((r) -> r.getReference() == this)
@@ -116,7 +113,7 @@ public class Variable {
 				return singletonList(emptyRealSet());
 			}
 			
-			// check if the variable can be fully evaluate (i.e., no relations
+			// check if the variable can be fully evaluated (i.e., no relations
 			// with other variables)
 			boolean evaluatable = relations.stream()
 					.allMatch((r) -> r.getReference() == this);
