@@ -54,5 +54,12 @@ public class SingletonTest {
 		assertTrue(singleton.contains(1.));
 		assertFalse(singleton.contains(0.));
 	}
+	
+	@Test
+	public void testEquivalent() {
+		RealSet singleton = new Singleton(1.);
+		
+		assertTrue(singleton.equivalent(new Singleton(1.)));
+	}
 
 }

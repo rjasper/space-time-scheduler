@@ -91,5 +91,21 @@ public class IntervalTest {
 		
 		assertFalse(interval.contains(2));
 	}
+	
+	@Test
+	public void testEquivalentSingleton() {
+		RealSet interval = new Interval(1., 1.);
+		
+		assertTrue(interval.equivalent(new Singleton(1.)));
+		assertFalse(interval.equivalent(new Singleton(2.)));
+	}
+	
+	@Test
+	public void testEquivalentInterval() {
+		RealSet interval = new Interval(0., 1.);
+		
+		assertTrue(interval.equivalent(new Interval(0., 1.)));
+		assertFalse(interval.equivalent(new Singleton(0.)));
+	}
 
 }

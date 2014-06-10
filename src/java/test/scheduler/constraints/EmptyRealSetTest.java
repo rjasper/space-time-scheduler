@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import static scheduler.constraints.RealSets.emptyRealSet;
+import static scheduler.constraints.RealSets.fullRealSet;
 
 public class EmptyRealSetTest {
 
@@ -37,6 +38,12 @@ public class EmptyRealSetTest {
 	@Test
 	public void testContains() {
 		assertFalse(emptyRealSet().contains(0.));
+	}
+	
+	@Test
+	public void testEquivalent() {
+		assertTrue(emptyRealSet().equivalent(emptyRealSet()));
+		assertFalse(emptyRealSet().equivalent(fullRealSet()));
 	}
 
 }

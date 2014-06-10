@@ -15,5 +15,9 @@ public interface RealSet {
 	public boolean contains(double value);
 	
 	public RealSet normalize();
+	
+	public default boolean equivalent(RealSet other) {
+		return normalize().equals(other.normalize());
+	}
 
 }

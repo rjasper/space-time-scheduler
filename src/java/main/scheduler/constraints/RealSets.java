@@ -37,7 +37,7 @@ public final class RealSets {
 		public boolean contains(double value) {
 			return false;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "{}";
@@ -71,7 +71,7 @@ public final class RealSets {
 		public boolean contains(double value) {
 			return true;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "R";

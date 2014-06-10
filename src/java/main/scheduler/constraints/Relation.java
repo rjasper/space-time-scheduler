@@ -6,18 +6,14 @@ public class Relation implements RealSet {
 	
 	private final RealSet offset;
 	
-	private transient RealSet evaluatedSet = null;
+	private transient RealSet normalized = null;
 
 	public Relation(Variable reference, RealSet offset) {
 		if (offset instanceof Relation)
 			throw new IncompatibleRealSetError("cannot use a relation as offset");
 		
 		this.reference = reference;
-		this.offset = offset;
-	}
-	
-	public boolean isEvaluated() {
-		return reference.isEvaluated();
+		this.offset = offset.normalize();
 	}
 
 	/**
@@ -50,10 +46,10 @@ public class Relation implements RealSet {
 	}
 
 	public RealSet normalize() {
-		if (evaluatedSet == null)
-			evaluatedSet = reference.evaluate().add(offset);
+		if (normalized == null)
+			normalized = getReference().evaluate().add(getOffset());
 		
-		return evaluatedSet;
+		return normalized;
 	}
 
 	@Override
@@ -62,8 +58,40 @@ public class Relation implements RealSet {
 	}
 	
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		
+		int result = 1;
+		result = prime * result + ((offset == null) ? 0 : offset.hashCode());
+		result = prime * result + ((reference == null) ? 0 : reference.hashCode());
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		
+		Relation other = (Relation) obj;
+		
+		if (offset == null && other.offset != null)
+			return false;
+		else if (!offset.equals(other.offset))
+			return false;
+		if (reference != other.reference)
+			return false;
+		
+		return true;
+	}
+	
+	@Override
 	public String toString() {
-		return String.format("%s + %s", reference.getName(), offset.toString());
+		return String.format("%s + %s", getReference().getName(), getOffset().toString());
 	}
 
 }

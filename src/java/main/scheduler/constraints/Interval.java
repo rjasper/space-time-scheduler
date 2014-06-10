@@ -15,7 +15,9 @@ public class Interval implements RealSet {
 	 * This avoids the creation of multiple redundant interval objects when
 	 * calling {@link #neg()}.
 	 */
-	private transient Interval negInterval = null;
+	private transient RealSet negative = null;
+	
+	private transient RealSet normalized = null;
 
 	public Interval(double minValue, double maxValue) {
 		if (minValue > maxValue)
@@ -41,12 +43,20 @@ public class Interval implements RealSet {
 
 	@Override
 	public RealSet neg() {
-		if (negInterval == null) {
-			negInterval = new Interval(-maxValue, -minValue);
-			negInterval.negInterval = this;
+		if (negative == null) {
+			RealSet normalized = normalize();
+			
+			if (normalized instanceof Singleton)
+				negative = normalized.neg();
+			else {
+				Interval interval = new Interval(-getMaxValue(), -getMinValue());
+				interval.negative = this;
+				
+				negative = interval;
+			}
 		}
 		
-		return negInterval;
+		return negative;
 	}
 
 	@Override
@@ -83,14 +93,25 @@ public class Interval implements RealSet {
 
 	@Override
 	public RealSet normalize() {
-		return this;
+		if (normalized != null)
+			return normalized;
+		
+		double minValue = getMinValue();
+		double maxValue = getMaxValue();
+		
+		if (minValue == maxValue)
+			normalized = new Singleton(minValue);
+		else
+			normalized = this;
+			
+		return normalized;
 	}
 
 	@Override
 	public boolean contains(double value) {
-		return value >= minValue && value <= maxValue;
+		return value >= getMinValue() && value <= getMaxValue();
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -132,7 +153,7 @@ public class Interval implements RealSet {
 	 */
 	@Override
 	public String toString() {
-		return String.format("[%f, %f]", minValue, maxValue);
+		return String.format("[%f, %f]", getMinValue(), getMaxValue());
 	}
 
 }

@@ -7,7 +7,7 @@ public class Singleton implements RealSet {
 	
 	private final double value;
 	
-	private transient Singleton negSingleton = null;
+	private transient Singleton negative = null;
 
 	public Singleton(double value) {
 		this.value = value;
@@ -22,12 +22,12 @@ public class Singleton implements RealSet {
 
 	@Override
 	public RealSet neg() {
-		if (negSingleton == null) {
-			negSingleton = new Singleton(-value);
-			negSingleton.negSingleton = this;
+		if (negative == null) {
+			negative = new Singleton(-getValue());
+			negative.negative = this;
 		}
 		
-		return negSingleton;
+		return negative;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class Singleton implements RealSet {
 
 	@Override
 	public boolean contains(double value) {
-		return value == this.value;
+		return value == getValue();
 	}
 
 	/* (non-Javadoc)
@@ -97,7 +97,7 @@ public class Singleton implements RealSet {
 	 */
 	@Override
 	public String toString() {
-		return String.format("{%f}", value);
+		return String.format("{%f}", getValue());
 	}
 
 }
