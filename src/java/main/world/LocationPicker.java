@@ -130,8 +130,8 @@ public class LocationPicker {
 		
 		int pick = _getPicks() + 1;
 		int maxPicks = _getMaxPicks();
-		Point point = _getNextPoint();
 		
+		Point point = (Point) _getNextPoint().clone();
 		Point next = pick < maxPicks ? calcNextPoint() : null;
 		
 		_setPicks(pick);
