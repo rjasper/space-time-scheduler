@@ -2,28 +2,24 @@ package world;
 
 import static matchers.GeometryMatchers.*;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import geom.factories.StaticJstFactories;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class WorldMapTest {
 	
-	private static final GeometryFactory factory = new GeometryFactory();
-	
-	private static final WKTReader wkt = new WKTReader();
-	
 	private static GeometryFactory factory() {
-		return factory;
+		return StaticJstFactories.floatGeometryFactory();
 	}
 	
 	private static WKTReader wkt() {
-		return wkt;
+		return StaticJstFactories.wktReader();
 	}
 	
 	private WorldMap world;
@@ -37,29 +33,28 @@ public class WorldMapTest {
 	public void testAddNone() {
 		world.ready();
 		
-		assertThat(world._getMap(), isEmpty());
+		assertThat(world.getMap(), isEmpty());
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testAddNull1() {
-		world.add((Geometry) null);
+		world.add((Polygon) null);
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testAddNull2() {
-		world.add((Geometry[]) null);
+		world.add((Polygon[]) null);
 	}
 	
 	@Test
 	public void testAddSome() throws ParseException {
-		Geometry g1 = wkt().read("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))");
-		Geometry g2 = wkt().read("POLYGON ((20 15, 30 15, 30 25, 20 25, 20 15))");
+		Polygon p1 = (Polygon) wkt().read("POLYGON ((10 10, 20 10, 20 20, 10 20, 10 10))");
+		Polygon p2 = (Polygon) wkt().read("POLYGON ((20 15, 30 15, 30 25, 20 25, 20 15))");
 		
-		world.add(g1, g2);
+		world.add(p1, p2);
 		world.ready();
 		
-		assertTrue(g1.union(g2) .equals (world._getMap()));
-		assertThat(world.getMap(), equalTo(g1.union(g2)));
+		assertThat(world.getMap(), equalTo(p1.union(p2)));
 	}
 
 }
