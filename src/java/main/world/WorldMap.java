@@ -30,19 +30,15 @@ public class WorldMap {
 	public WorldMap() {}
 	
 	public boolean isReady() {
-		return _isReady();
-	}
-	
-	private boolean _isReady() {
 		return this.ready;
 	}
 	
-	private void _setReady(boolean ready) {
+	private void setReady(boolean ready) {
 		this.ready = ready;
 	}
 	
 	public Geometry getMap() {
-		if (!_isReady())
+		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
 		Geometry map = _getMap();
@@ -54,16 +50,16 @@ public class WorldMap {
 		return this.map;
 	}
 	
-	private void _setMap(Geometry map) {
+	private void setMap(Geometry map) {
 		this.map = map;
 	}
 	
-	private Set<Polygon> _getObstacles() {
+	private Set<Polygon> getObstacles() {
 		return this.obstacles;
 	}
 	
 	public void add(Polygon obstacle) {
-		if (_isReady())
+		if (isReady())
 			throw new IllegalStateException("already ready");
 		if (obstacle == null)
 			throw new NullPointerException("obstacle cannot be null");
@@ -72,7 +68,7 @@ public class WorldMap {
 	}
 	
 	public void add(Polygon... obstacles) {
-		if (_isReady())
+		if (isReady())
 			throw new IllegalStateException("already ready");
 		if (obstacles == null)
 			throw new NullPointerException("obstacle cannot be null");
@@ -82,28 +78,28 @@ public class WorldMap {
 	}
 	
 	private void _add(Polygon obstacle) {
-		Set<Polygon> set = _getObstacles();
+		Set<Polygon> set = getObstacles();
 		
 		set.add(obstacle);
 	}
 	
 	public void ready() {
-		if (_isReady())
+		if (isReady())
 			throw new IllegalStateException("already ready");
 		
-		Set<Polygon> obstacles = _getObstacles();
+		Set<Polygon> obstacles = getObstacles();
 		
 		Geometry map = obstacles.stream()
 			.map((o) -> (Geometry) o)
 			.reduce((acc, o) -> acc.union(o))
 			.orElse(emptyGeometry());
 		
-		_setMap(map);
-		_setReady(true);
+		setMap(map);
+		setReady(true);
 	}
 	
 	public Geometry space(Geometry mask) {
-		if (!_isReady())
+		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
 		Geometry map = _getMap();

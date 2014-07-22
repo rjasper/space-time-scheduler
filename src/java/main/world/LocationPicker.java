@@ -41,107 +41,95 @@ public class LocationPicker {
 		this.space = space;
 		this.maxPicks = maxPicks;
 		
-		_init();
+		init();
 	}
 	
-	private void _init() {
-		_initShapeFactory();
-		_initQueue();
-		_initNextPoint();
+	private void init() {
+		initShapeFactory();
+		initQueue();
+		initNextPoint();
 	}
 	
-	private void _initQueue() {
-		Queue<Envelope> queue = _getQueue();
-		Geometry space = _getSpace();
+	private void initQueue() {
+		Queue<Envelope> queue = getQueue();
+		Geometry space = getSpace();
 		Envelope envelope = space.getEnvelopeInternal();
 		
 		queue.add(envelope);
 	}
 
-	private void _initShapeFactory() {
-		GeometricShapeFactory shapeFactory = _getShapeFactory();
+	private void initShapeFactory() {
+		GeometricShapeFactory shapeFactory = getShapeFactory();
 		
 		shapeFactory.setNumPoints(4);
 	}
 	
-	private void _initNextPoint() {
+	private void initNextPoint() {
 		Point point = calcNextPoint();
 		
-		_setNextPoint(point);
-	}
-
-	public boolean isDone() {
-		return _isDone();
+		setNextPoint(point);
 	}
 	
-	private boolean _isDone() {
-		Point point = _getNextPoint();
+	public boolean isDone() {
+		Point point = getNextPoint();
 		
 		return point == null;
 	}
 	
-	private Geometry _getSpace() {
+	private Geometry getSpace() {
 		return this.space;
 	}
 	
 	public int getMaxPicks() {
-		return _getMaxPicks();
-	}
-	
-	private int _getMaxPicks() {
 		return this.maxPicks;
 	}
 	
 	public int getPicks() {
-		return _getPicks();
-	}
-	
-	private int _getPicks() {
 		return this.picks;
 	}
 	
-	private void _setPicks(int picks) {
+	private void setPicks(int picks) {
 		this.picks = picks;
 	}
 	
-	private Point _getNextPoint() {
+	private Point getNextPoint() {
 		return this.nextPoint;
 	}
 	
-	private void _setNextPoint(Point point) {
+	private void setNextPoint(Point point) {
 		this.nextPoint = point;
 	}
 	
-	private Queue<Envelope> _getQueue() {
+	private Queue<Envelope> getQueue() {
 		return this.queue;
 	}
 	
-	private Queue<PointEnvelopePair> _getRecycling() {
+	private Queue<PointEnvelopePair> getRecycling() {
 		return this.recycling;
 	}
 	
-	private GeometricShapeFactory _getShapeFactory() {
+	private GeometricShapeFactory getShapeFactory() {
 		return shapeFactory;
 	}
 	
 	public Point next() {
-		if (_isDone())
+		if (isDone())
 			throw new IllegalStateException("maximum picks reached");
 		
-		int pick = _getPicks() + 1;
-		int maxPicks = _getMaxPicks();
+		int pick = getPicks() + 1;
+		int maxPicks = getMaxPicks();
 		
-		Point point = (Point) _getNextPoint().clone();
+		Point point = (Point) getNextPoint().clone();
 		Point next = pick < maxPicks ? calcNextPoint() : null;
 		
-		_setPicks(pick);
-		_setNextPoint(next);
+		setPicks(pick);
+		setNextPoint(next);
 		
 		return point;
 	}
 	
 	private Point calcNextPoint() {
-		Queue<PointEnvelopePair> recycling = _getRecycling();
+		Queue<PointEnvelopePair> recycling = getRecycling();
 		
 		Envelope envelope;
 		Geometry subSpace;
@@ -164,7 +152,7 @@ public class LocationPicker {
 	}
 	
 	private Envelope nextEnvelope() {
-		Queue<Envelope> queue = _getQueue();
+		Queue<Envelope> queue = getQueue();
 		
 		if (queue.isEmpty()) {
 			recycle();
@@ -179,8 +167,8 @@ public class LocationPicker {
 	}
 	
 	private void recycle() {
-		Queue<Envelope> queue = _getQueue();
-		Queue<PointEnvelopePair> recycling = _getRecycling();
+		Queue<Envelope> queue = getQueue();
+		Queue<PointEnvelopePair> recycling = getRecycling();
 		
 		if (recycling.isEmpty())
 			return;
@@ -210,8 +198,8 @@ public class LocationPicker {
 	}
 
 	private Geometry calcSubSpace(Envelope envelope) {
-		GeometricShapeFactory shapeFactory = _getShapeFactory();
-		Geometry space = _getSpace();
+		GeometricShapeFactory shapeFactory = getShapeFactory();
+		Geometry space = getSpace();
 		
 		shapeFactory.setEnvelope(envelope);
 		
