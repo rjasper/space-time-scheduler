@@ -1,4 +1,4 @@
-package world;
+package picker;
 
 import static geom.factories.StaticJstFactories.*;
 

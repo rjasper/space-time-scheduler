@@ -5,7 +5,7 @@ import static geom.factories.StaticJstFactories.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import world.LocationPicker;
+import picker.LocationPicker;
 import world.WorldMap;
 import geom.factories.StaticJstFactories;
 
