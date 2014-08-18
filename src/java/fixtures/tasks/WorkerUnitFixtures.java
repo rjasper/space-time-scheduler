@@ -17,6 +17,48 @@ public final class WorkerUnitFixtures {
 		return StaticJstFactories.wktReader();
 	}
 	
+	public static WorkerUnit withTwoTasks1() {
+		WorkerUnit worker = new WorkerUnit(1.,
+			geomFactory().createPoint(new Coordinate(-3600., 0.)),
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
+		);
+		
+		worker.addTask(new Task(
+			geomFactory().createPoint(new Coordinate(-3600., 0.)),
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0),
+			Duration.ofHours(3L)
+		));
+		
+		worker.addTask(new Task(
+			geomFactory().createPoint(new Coordinate(0., 3600.)),
+			LocalDateTime.of(2000, JANUARY, 1, 7, 0),
+			Duration.ofHours(3L)
+		));
+		
+		return worker;
+	}
+	
+	public static WorkerUnit withTwoTasks2() {
+		WorkerUnit worker = new WorkerUnit(1.,
+			geomFactory().createPoint(new Coordinate(0., -3600.)),
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
+		);
+		
+		worker.addTask(new Task(
+			geomFactory().createPoint(new Coordinate(0., -3600.)),
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0),
+			Duration.ofHours(2L)
+		));
+		
+		worker.addTask(new Task(
+			geomFactory().createPoint(new Coordinate(3600., 0.)),
+			LocalDateTime.of(2000, JANUARY, 1, 8, 0),
+			Duration.ofHours(2L)
+		));
+		
+		return worker;
+	}
+	
 	public static WorkerUnit withThreeTasks() {
 		WorkerUnit worker = new WorkerUnit(1.,
 			geomFactory().createPoint(new Coordinate(0., 0.)),
