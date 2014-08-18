@@ -18,7 +18,7 @@ public final class WorkerUnitFixtures {
 	}
 	
 	public static WorkerUnit withThreeTasks() {
-		WorkerUnit worker = new WorkerUnit(
+		WorkerUnit worker = new WorkerUnit(1.,
 			geomFactory().createPoint(new Coordinate(0., 0.)),
 			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
 		);
