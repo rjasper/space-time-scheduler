@@ -11,21 +11,27 @@ import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnit {
 	
-	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
+	private final double maxSpeed;
 	
 	private final Point initialLocation;
 	
 	private final LocalDateTime initialTime;
 	
-	public WorkerUnit(Point initialLocation, LocalDateTime initialTime) {
+	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
+	
+	public WorkerUnit(double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
+		if (maxSpeed <= 0)
+			throw new IllegalArgumentException("maximum speed must be positive");
+		
+		this.maxSpeed = maxSpeed;
 		this.initialLocation = initialLocation;
 		this.initialTime = initialTime;
 	}
 	
-	public TreeMap<LocalDateTime, Task> getTasks() {
-		return tasks;
+	public double getMaxSpeed() {
+		return maxSpeed;
 	}
-
+	
 	public Point getInitialLocation() {
 		return initialLocation;
 	}
@@ -34,6 +40,10 @@ public class WorkerUnit {
 		return initialTime;
 	}
 	
+	private TreeMap<LocalDateTime, Task> getTasks() {
+		return tasks;
+	}
+
 	public boolean addTask(Task task) {
 		// TODO: proper checks (e.g. path planning)
 		TreeMap<LocalDateTime, Task> tasks = getTasks();
