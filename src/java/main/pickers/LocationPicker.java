@@ -1,4 +1,4 @@
-package picker;
+package pickers;
 
 import static geom.factories.StaticJstFactories.*;
 

@@ -1,4 +1,4 @@
-package picker;
+package pickers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
