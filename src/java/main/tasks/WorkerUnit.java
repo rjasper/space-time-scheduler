@@ -79,7 +79,9 @@ public class WorkerUnit {
 			finishLocation = t.getLocation();
 			finishTime = t.getStartTime();
 			
-			slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
+			// don't add idle slots without duration
+			if (startTime.compareTo(finishTime) < 0)
+				slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
 			
 			startLocation = t.getLocation();
 			startTime = t.getFinishTime();
@@ -95,7 +97,9 @@ public class WorkerUnit {
 			finishTime = lastTask.getStartTime();
 		}
 
-		slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
+		// don't add idle slots without duration
+		if (last == null || startTime.compareTo(finishTime) < 0)
+			slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
 		
 		return slots;
 	}

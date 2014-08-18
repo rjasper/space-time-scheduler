@@ -4,7 +4,6 @@ import static geom.factories.StaticJstFactories.geomFactory;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import static java.time.Month.*;
-import geom.factories.StaticJstFactories;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -20,7 +19,7 @@ import com.vividsolutions.jts.geom.Point;
 import tasks.WorkerUnit;
 import tasks.WorkerUnitFixtures;
 
-public class WorkerUnitPickerTest {
+public class WorkerUnitSlotPickerTest {
 
 	@Test
 	public void test() {
@@ -36,10 +35,11 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 6, 0);
 		Duration duration = Duration.ofHours(3L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
 		
-		assertThat(picker.next(), equalTo(w2));
-		assertTrue(picker.hasNext());
+		picker.next();
+		assertThat(picker.getCurrentWorker(), equalTo(w2));
+		assertFalse(picker.hasNext());
 	}
 	
 	@Test
@@ -53,9 +53,10 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 4, 30);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
 		
-		assertThat(picker.next(), equalTo(w));
+		picker.next();
+		assertThat(picker.getCurrentWorker(), equalTo(w));
 	}
 	
 	@Test
@@ -69,9 +70,9 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 3, 30);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
-		
-		assertTrue(picker.hasNext());
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
+
+		assertFalse(picker.hasNext());
 	}
 	
 	@Test
@@ -85,9 +86,10 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 9, 0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
 		
-		assertThat(picker.next(), equalTo(w));
+		picker.next();
+		assertThat(picker.getCurrentWorker(), equalTo(w));
 	}
 	
 	@Test
@@ -101,9 +103,9 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 9, 0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
-		
-		assertTrue(picker.hasNext());
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
+
+		assertFalse(picker.hasNext());
 	}
 	
 	@Test
@@ -117,9 +119,11 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 9, 0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
 
-		assertThat(picker.next(), equalTo(w));
+//		assertThat(picker.next(), equalTo(w));
+		picker.next();
+		assertThat(picker.getCurrentWorker(), equalTo(w));
 	}
 	
 	@Test
@@ -133,9 +137,9 @@ public class WorkerUnitPickerTest {
 		LocalDateTime latest = LocalDateTime.of(2000, JANUARY, 1, 9, 0);
 		Duration duration = Duration.ofHours(3L);
 		
-		WorkerUnitPicker picker = new WorkerUnitPicker(workers, location, earliest, latest, duration);
+		WorkerUnitSlotPicker picker = new WorkerUnitSlotPicker(workers, location, earliest, latest, duration);
 		
-		assertTrue(picker.hasNext());
+		assertFalse(picker.hasNext());
 	}
 
 }
