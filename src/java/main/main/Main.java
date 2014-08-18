@@ -36,7 +36,7 @@ public class Main {
 		
 		List<Point> points = new LinkedList<>();
 		
-		while (!picker.isDone())
+		while (!picker.hasNext())
 			points.add(picker.next());
 		
 		Geometry multipoint = geomFactory().createMultiPoint(points.toArray(new Point[points.size()]));

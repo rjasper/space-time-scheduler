@@ -70,7 +70,7 @@ public class LocationPicker {
 		setNextPoint(point);
 	}
 	
-	public boolean isDone() {
+	public boolean hasNext() {
 		Point point = getNextPoint();
 		
 		return point == null;
@@ -113,7 +113,7 @@ public class LocationPicker {
 	}
 	
 	public Point next() {
-		if (isDone())
+		if (hasNext())
 			throw new IllegalStateException("maximum picks reached");
 		
 		int pick = getPicks() + 1;

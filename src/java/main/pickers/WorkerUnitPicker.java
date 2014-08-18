@@ -47,7 +47,7 @@ public class WorkerUnitPicker {
 		calcNextWorker();
 	}
 	
-	public boolean isDone() {
+	public boolean hasNext() {
 		return getNextWorker() == null;
 	}
 
@@ -134,7 +134,7 @@ public class WorkerUnitPicker {
 			if (p2 != null && Duration.between(earliest, t2)
 					.compareTo(Duration.ofSeconds((long) ceil(vInv * l2))) < 0)
 				continue;
-			// enough time to do task
+			// enough time to complete task
 			// t2 - t1 < d + (l1 + l2) / v_max
 			if (p2 != null && Duration.between(t1, t2)
 					.compareTo(d.plusSeconds((long) ceil(vInv * (l1 + l2)))) < 0)
