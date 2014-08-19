@@ -1,15 +1,15 @@
 package tasks;
 
-import geom.factories.StaticJstFactories;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
+
+import jts.geom.factories.StaticJstFactories;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.io.WKTReader;
 
 import static java.time.Month.*;
-import static geom.factories.StaticJstFactories.*;
+import static jts.geom.factories.StaticJstFactories.*;
 
 public final class WorkerUnitFixtures {
 	

@@ -1,9 +1,9 @@
 package world;
 
-import geom.factories.StaticJstFactories;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import jts.geom.factories.StaticJstFactories;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;

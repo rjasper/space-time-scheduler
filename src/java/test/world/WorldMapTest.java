@@ -2,7 +2,7 @@ package world;
 
 import static matchers.GeometryMatchers.*;
 import static org.junit.Assert.assertThat;
-import geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJstFactories;
 
 import org.junit.Before;
 import org.junit.Test;

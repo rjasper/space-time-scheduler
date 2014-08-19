@@ -1,9 +1,9 @@
 package pickers;
 
-import static geom.factories.StaticJstFactories.geomFactory;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import static java.time.Month.*;
+import static jts.geom.factories.StaticJstFactories.geomFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

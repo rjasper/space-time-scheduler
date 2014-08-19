@@ -1,13 +1,13 @@
 package main;
 
-import static geom.factories.StaticJstFactories.*;
+import static jts.geom.factories.StaticJstFactories.*;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import jts.geom.factories.StaticJstFactories;
 import pickers.LocationPicker;
 import world.WorldMap;
-import geom.factories.StaticJstFactories;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
