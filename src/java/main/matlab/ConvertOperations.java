@@ -1,18 +1,30 @@
 package matlab;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.util.Collection;
+import java.util.Vector;
 
 import jts.geom.factories.StaticJstFactories;
-import util.Factory;
+import matlab.data.DynamicObstacleData;
+import matlab.data.LineStringData;
+import world.DynamicObstacle;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 
 public final class ConvertOperations {
 	
 	protected static GeometryFactory geom() {
 		return StaticJstFactories.geomFactory();
+	}
+	
+	protected static CoordinateSequenceFactory csFact() {
+		return geom().getCoordinateSequenceFactory();
 	}
 	
 	public static double[] j2mPolygon(Polygon polygon) {
@@ -51,6 +63,46 @@ public final class ConvertOperations {
 		
 		return polygon;
 	}
+	
+	public static LineStringData j2mLineString(LineString lineString) {
+//		Coordinate[] coords = lineString.getCoordinates();
+		CoordinateSequence coords = lineString.getCoordinateSequence();
+		int n = lineString.getNumPoints();
+		int dim = coords.getDimension();
+		
+		double[] data = new double[dim * n];
+		
+		int j = 0;
+		for (int i = 0; i < n; ++i) {
+			for (int d = 0; d < dim; ++d)
+				data[j++] = coords.getOrdinate(i, d);
+		}
+		
+//		return data;
+		return new LineStringData(data, dim);
+	}
+	
+	public static LineString m2jLineString(LineStringData lsData) {
+		double[] data = lsData.getData();
+		int dim = lsData.getDimension();
+		
+		return m2jLineString(data, dim);
+	}
+	
+	public static LineString m2jLineString(double[] data, int dim) {
+		int n = data.length / dim;
+		CoordinateSequence coords = csFact().create(n, dim);
+		
+		int j = 0;
+		for (int i = 0; i < n; ++i) {
+			for (int d = 0; d < dim; ++d)
+				coords.setOrdinate(i, d, data[j++]);
+		}
+		
+		LineString lineString = geom().createLineString(coords);
+		
+		return lineString;
+	}
 
 	public static Object[] j2mStaticObstaclesData(Collection<Polygon> obstacles) {
 		int n = obstacles.size();
@@ -64,16 +116,55 @@ public final class ConvertOperations {
 		return data;
 	}
 	
-	public static Collection<Polygon> m2jStaticObstacles(Factory<? super Collection<Polygon>> factory, Object[] data) {
+	public static Collection<Polygon> m2jStaticObstacles(Object[] data) {
 		int n = data.length;
 		
-		@SuppressWarnings("unchecked")
-		Collection<Polygon> obstacles = (Collection<Polygon>) factory.create();
+		Collection<Polygon> obstacles = new Vector<>(n);
 		
 		for (int i = 0; i < n; ++i)
 			obstacles.add(m2jPolygon((double[]) data[i]));
 		
 		return obstacles;
+	}
+	
+	public static DynamicObstacleData j2mDynamicObstacle(DynamicObstacle obstacle) {
+		Polygon polygon = obstacle.getPolygon();
+		LineString path = obstacle.getPath();
+		
+		double[] polygonData = j2mPolygon(polygon);
+		double[] pathData = j2mLineString(path).getData();
+		
+		DynamicObstacleData data = new DynamicObstacleData(polygonData, pathData);
+		
+		return data;
+	}
+	
+	public static DynamicObstacle m2jDynamicObstacle(DynamicObstacleData data) {
+		double[] polygonData = data.getPolygonData();
+		double[] pathData = data.getPathData();
+		
+		Polygon polygon = m2jPolygon(polygonData);
+		LineString path = m2jLineString(pathData, 2);
+		
+		DynamicObstacle obstacle = new DynamicObstacle(polygon, path);
+		
+		return obstacle;
+	}
+	
+	public static Collection<DynamicObstacleData> j2mDynamicObstacles(Collection<DynamicObstacle> obstacles) {
+		final int n = obstacles.size();
+		
+		return obstacles.stream()
+			.map(ConvertOperations::j2mDynamicObstacle)
+			.collect(toCollection(() -> new Vector<DynamicObstacleData>(n)));
+	}
+	
+	public static Collection<DynamicObstacle> m2jDynamicObstacles(Collection<DynamicObstacleData> data) {
+		final int n = data.size();
+		
+		return data.stream()
+			.map(ConvertOperations::m2jDynamicObstacle)
+			.collect(toCollection(() -> new Vector<>(n)));
 	}
 
 }

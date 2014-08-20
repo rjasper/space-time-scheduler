@@ -3,14 +3,15 @@ package matlab;
 import static org.junit.Assert.*;
 import static matlab.ConvertOperations.*;
 import static jts.geom.PolygonFixtures.*;
+import static world.DynamicObstacleFixtures.*;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Vector;
 
 import jts.geom.factories.StaticJstFactories;
+import matlab.data.DynamicObstacleData;
 import matlabcontrol.MatlabConnectionException;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
@@ -19,7 +20,7 @@ import matlabcontrol.MatlabProxyFactoryOptions;
 
 import org.junit.*;
 
-import util.Factory;
+import world.DynamicObstacle;
 
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
@@ -102,14 +103,9 @@ public class ConvertOperationsTest {
 		AccessOperations acc = new AccessOperations(m);
 		
 		Object[] data1 = j2mStaticObstaclesData(obstacles1);
-		acc.assignStaticObstacle("Os", data1);
+		acc.assignStaticObstacles("Os", data1);
 		Object[] data2 = acc.retrieveStaticObstacles("Os");
-		Collection<Polygon> obstacles2 = m2jStaticObstacles(new Factory<Collection<Polygon>>() {
-			@Override
-			public Collection<Polygon> create() {
-				return new LinkedList<>();
-			}
-		}, data2);
+		Collection<Polygon> obstacles2 = m2jStaticObstacles(data2);
 		
 		Iterator<Polygon> it1 = obstacles1.iterator();
 		Iterator<Polygon> it2 = obstacles2.iterator();
@@ -118,8 +114,35 @@ public class ConvertOperationsTest {
 			assertTrue(it1.next().equalsTopo(it2.next()));
 		
 		assertTrue(!it1.hasNext() && !it2.hasNext());
+	}
+	
+	@Test
+	public void testConvertDynamicObsticals() throws MatlabInvocationException {
+		MatlabProxy m = getProxy();
 		
-//		Object[] result = m.returningFeval("obstacles_fixture", 2);
+		Collection<DynamicObstacle> obstacles1 = new Vector<>(2);
+		obstacles1.add(movingTriangle());
+		obstacles1.add(movingSquare());
+		
+		AccessOperations acc = new AccessOperations(m);
+		
+		Collection<DynamicObstacleData> data1 = j2mDynamicObstacles(obstacles1);
+		acc.assignDynamicObstacles("Om", data1);
+		Collection<DynamicObstacleData> data2 = acc.retrieveDynamicObstacles("Om");
+		Collection<DynamicObstacle> obstacles2 = m2jDynamicObstacles(data2);
+		
+		Iterator<DynamicObstacle> it1 = obstacles1.iterator();
+		Iterator<DynamicObstacle> it2 = obstacles2.iterator();
+		
+		while (it1.hasNext() && it2.hasNext()) {
+			DynamicObstacle o1 = it1.next();
+			DynamicObstacle o2 = it2.next();
+			
+			assertTrue(o1.getPolygon().equalsTopo(o2.getPolygon()));
+			assertTrue(o1.getPath().equalsExact(o2.getPath()));
+		}
+
+		assertTrue(!it1.hasNext() && !it2.hasNext());
 	}
 
 }
