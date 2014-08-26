@@ -1,24 +1,44 @@
 %% data
 
-I = [0; 0];
-F = [10; 10];
+% I = [0; 0];
+% F = [10; 10];
+% 
+% t_F = 5;
+% v_max = 4;
+% 
+% Os = {
+%     regular_polygon(4, [4; 3], 2, deg2rad( 30))
+%     regular_polygon(3, [7; 8], 2, deg2rad(-30))
+% }';
+% 
+% P1 = regular_polygon(4, [2; 6], 1, deg2rad(45));
+% P2 = regular_polygon(4, [8; 5], 1, deg2rad(45));
+% 
+% Om = {
+%     struct( ...
+%         'polygon', regular_polygon(4, [0; 0], 1, deg2rad(45)), ...
+%         'path', [[2; 6; 0] [8; 5; 5]])
+% }';
 
-t_F = 5;
+I = [0; 0];
+F = [8; 6];
+
+t_F = 12;
 v_max = 4;
 
 Os = {
-    regular_polygon(4, [4; 3], 2, deg2rad( 30))
-    regular_polygon(3, [7; 8], 2, deg2rad(-30))
+    [1 1; 4 1; 4 3; 1 3]'
+    [5 4; 7 4; 7 6; 5 6]'
 }';
-
-P1 = regular_polygon(4, [2; 6], 1, deg2rad(45));
-P2 = regular_polygon(4, [8; 5], 1, deg2rad(45));
 
 Om = {
     struct( ...
-        'polygon', regular_polygon(4, [0; 0], 1, deg2rad(45)), ...
-        'path', [[2; 6; 0] [8; 5; 5]])
+        'polygon', [0 -1; 1 0; 0 1; -1 0]', ...
+        'path', [3 5 0; 8 0 12]')
 }';
+
+P1 = [3 4; 4 5; 3 6; 2 5]';
+P2 = [8 -1; 9 0; 8 1; 7 0]';
 
 %% calculation
 
@@ -100,4 +120,4 @@ hold off;
 % saveas(f3, 'vgraph.png');
 % saveas(f4, 'path.png');
 % saveas(f5, 'st_space.png');
-saveas(f5, 'st_edges.png');
+% saveas(f5, 'st_edges.png');

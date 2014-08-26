@@ -2,6 +2,9 @@ package matlab;
 
 import static java.util.stream.Collectors.toCollection;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -15,6 +18,7 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public final class ConvertOperations {
@@ -25,6 +29,45 @@ public final class ConvertOperations {
 	
 	protected static CoordinateSequenceFactory csFact() {
 		return geom().getCoordinateSequenceFactory();
+	}
+	
+	public static double[] j2mLocalDateTime(LocalDateTime time) {
+		Instant instant = time.toInstant(ZoneOffset.UTC);
+		
+		double millis = instant.toEpochMilli();
+		
+		// in seconds
+		return new double[] {millis * 1e-3};
+	}
+	
+	public static LocalDateTime m2jLocalDateTime(double[] data) {
+		double millis = data[0] * 1e3;
+		Instant instant = Instant.ofEpochMilli((long) millis);
+		
+		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+	}
+	
+	public static double[] j2mPoint(Point point, int dim) {
+		CoordinateSequence coords = point.getCoordinateSequence();
+//		int dim = point.getDimension();
+		double[] data = new double[dim];
+		
+		for (int d = 0; d < dim; ++d)
+			data[d] = coords.getOrdinate(0, d);
+		
+		return data;
+	}
+	
+	public static Point m2jPoint(double[] data) {
+		int dim = data.length;
+		CoordinateSequence coords = csFact().create(1, dim);
+		
+		for (int d = 0; d < dim; ++d)
+			coords.setOrdinate(0, d, data[d]);
+		
+		Point point = geom().createPoint(coords);
+		
+		return point;
 	}
 	
 	public static double[] j2mPolygon(Polygon polygon) {
@@ -64,11 +107,11 @@ public final class ConvertOperations {
 		return polygon;
 	}
 	
-	public static LineStringData j2mLineString(LineString lineString) {
+	public static LineStringData j2mLineString(LineString lineString, int dim) {
 //		Coordinate[] coords = lineString.getCoordinates();
 		CoordinateSequence coords = lineString.getCoordinateSequence();
 		int n = lineString.getNumPoints();
-		int dim = coords.getDimension();
+//		int dim = coords.getDimension();
 		
 		double[] data = new double[dim * n];
 		
@@ -82,12 +125,12 @@ public final class ConvertOperations {
 		return new LineStringData(data, dim);
 	}
 	
-	public static LineString m2jLineString(LineStringData lsData) {
-		double[] data = lsData.getData();
-		int dim = lsData.getDimension();
-		
-		return m2jLineString(data, dim);
-	}
+//	public static LineString m2jLineString(LineStringData lsData) {
+//		double[] data = lsData.getData();
+//		int dim = lsData.getDimension();
+//		
+//		return m2jLineString(data, dim);
+//	}
 	
 	public static LineString m2jLineString(double[] data, int dim) {
 		int n = data.length / dim;
@@ -104,7 +147,7 @@ public final class ConvertOperations {
 		return lineString;
 	}
 
-	public static Object[] j2mStaticObstaclesData(Collection<Polygon> obstacles) {
+	public static Object[] j2mStaticObstacles(Collection<Polygon> obstacles) {
 		int n = obstacles.size();
 		
 		double[][] data = new double[n][];
@@ -132,7 +175,7 @@ public final class ConvertOperations {
 		LineString path = obstacle.getPath();
 		
 		double[] polygonData = j2mPolygon(polygon);
-		double[] pathData = j2mLineString(path).getData();
+		double[] pathData = j2mLineString(path, 3).getData();
 		
 		DynamicObstacleData data = new DynamicObstacleData(polygonData, pathData);
 		

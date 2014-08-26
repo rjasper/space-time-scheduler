@@ -102,7 +102,7 @@ public class ConvertOperationsTest {
 		
 		AccessOperations acc = new AccessOperations(m);
 		
-		Object[] data1 = j2mStaticObstaclesData(obstacles1);
+		Object[] data1 = j2mStaticObstacles(obstacles1);
 		acc.assignStaticObstacles("Os", data1);
 		Object[] data2 = acc.retrieveStaticObstacles("Os");
 		Collection<Polygon> obstacles2 = m2jStaticObstacles(data2);

@@ -22,6 +22,21 @@ public class AccessOperations {
 		return proxy;
 	}
 	
+	public void assingPoint(String variableName, double[] data) throws MatlabInvocationException {
+		MatlabProxy m = getProxy();
+		
+		m.feval("assign_feval", variableName, "j2m_point", data);
+	}
+	
+	public double[] retrievePoint(String variableName) throws MatlabInvocationException {
+		MatlabProxy m = getProxy();
+		
+		Object[] result = m.returningFeval("retrieve_feval", 1, "m2j_point", variableName);
+		double[] data = (double[]) result[0];
+		
+		return data;
+	}
+	
 	public void assignLineString(String variableName, LineStringData lsData) throws MatlabInvocationException {
 		MatlabProxy m = getProxy();
 		
