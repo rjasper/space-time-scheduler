@@ -45,7 +45,7 @@ n_PC = size(PC, 2);
 
 % reorder vertices
 reorder_idx = calculate_vertex_order;
-PC   = PC(:, reorder_idx);
+% PC   = PC(:, reorder_idx); % not used
 PC_T = PC_T(:, reorder_idx);
 s  = s(:, reorder_idx);
 

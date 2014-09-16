@@ -58,17 +58,17 @@ for i = 1:n_V
         
         % if neighbors
         if pid(i) ~= 0 && pid(i) == pid(j) && (pred(i) == vid(j) || pred(j) == vid(i))
-            A_st(i, j) = sqrt( sum( (V_st(:, i) - V_st(:, j)).^2 ) );
+%             A_st(i, j) = sqrt( sum( (V_st(:, i) - V_st(:, j)).^2 ) );
+            A_st(i, j) = 1;
         elseif visible(V_st(:, i), V_st(:, j), l_filt) % check line of sight
             % if both vertices belong to the same polygon then check visibility
             if pid(i) ~= 0 && pid(i) == pid(j) && ~visible2(Om_st, rho, alpha, pid(i), vid(i), vid(j))
                 continue
             end
             
-            % TODO: weight does not make sense
-            
-            % distance between the two vertices
-            A_st(i, j) = sqrt( sum( (V_st(:, i) - V_st(:, j)).^2 ) );
+%             % distance between the two vertices
+%             A_st(i, j) = sqrt( sum( (V_st(:, i) - V_st(:, j)).^2 ) );
+            A_st(i, j) = 1;
         end
     end
 end
