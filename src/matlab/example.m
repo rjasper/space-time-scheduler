@@ -23,8 +23,9 @@
 I = [0; 0];
 F = [8; 6];
 
-t_F = 12;
-v_max = 4;
+% t_F = 12;
+% v_max = 4;
+v_max = 1.4;
 
 Os = {
     [1 1; 4 1; 4 3; 1 3]'
@@ -51,11 +52,17 @@ Om_st = calc_st_space(Om, V(:, path));
 L = sum(path_length(V, path));
 
 I_st = [0 0]';
-F_st = [L t_F]';
+% F_st = [L t_F]';
 
-[A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
+% [A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
+[A_st, V_st, idx_F] = minimum_time_vgraph(I_st, Om_st, L, v_max);
 [d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
-path_st = pred2path(pred_st, 2); % to F_st
+[~, idx_dmin] = min(d_st(idx_F));
+idx_F = idx_F(idx_dmin);
+path_st = pred2path(pred_st, idx_F); % to F_st
+
+F_st = V_st(:, idx_F);
+t_F = F_st(2);
 
 XYT = calc_xyt_path(V, path, V_st, path_st);
 
@@ -100,11 +107,11 @@ XYT = calc_xyt_path(V, path, V_st, path_st);
 
 f5 = figure(5);
 clf reset;
-draw_polygon(Om_st, 'g');
+% draw_polygon(Om_st, 'g');
 hold on;
 draw_graph(V_st, A_st);
 hold off;
-axis([0 L 0 5]);
+% axis([0 L 0 5]);
 
 f6 = figure(6);
 clf reset;
