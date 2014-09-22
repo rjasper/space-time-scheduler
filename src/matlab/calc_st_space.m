@@ -4,7 +4,8 @@ N_Om = size(Om, 2);
 N_path = size(path, 2);
 N_segs = N_path - 1;
 
-v = cellfun(@calc_velocity, {Om{:}.path}, 'UniformOutput', false);
+% v = cellfun(@calc_velocity, {Om{:}.path}, 'UniformOutput', false);
+v = cellfun(@calc_velocity, {Om.path}, 'UniformOutput', false);
 l = calc_path_length(path);
 s = cumsum([0 l]);
 
@@ -12,12 +13,14 @@ s = cumsum([0 l]);
 j = 0;
 
 Om_st = cellfun(@calc_Om_st, ...
-    {Om{:}.polygon}, ...
-    {Om{:}.path}, ...
+...%     {Om{:}.polygon}, ...
+...%     {Om{:}.path}, ...
+    {Om.polygon}, ...
+    {Om.path}, ...
     v, ...
     'UniformOutput', false);
 
-Om_st = [Om_st{:}];
+% Om_st = [Om_st{:}];
 
     function v = calc_velocity(path)
         dpath = diff(path, 1, 2);
@@ -115,10 +118,11 @@ Om_st = [Om_st{:}];
                 
                 switch direction
                     case 'parallel'
-                        [~, ~, ~, vid_S, S_xT, B] = cut_polygon(V, vid_i, path_i);
+                        [~, ~, ~, vid_S, S_xT, B12] = cut_polygon(V, vid_i, path_i);
                         n_S = length(vid_S);
-                        isB12 = B(1, :) & B(2, :);
-                        B_idx = find(isB12);
+%                         isB12 = B(1, :) & B(2, :);
+%                         B_idx = find(isB12);
+                        B_idx = find(B12);
 
                         s1 = s(i) + S_xT;
                         s2 = s1 + dt * e_s' * v_j;
@@ -142,8 +146,8 @@ Om_st = [Om_st{:}];
                         vid_S = {vid_S_tmin_i, vid_S_tmax_i};
                         
                         if i > 1
-                            [C, vid_i_, ~, vid_S3, ~, B, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smin);
-                            isB3 = B(1, :) & B(2, :);
+                            [C, vid_i_, ~, vid_S3, ~, B3, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smin);
+%                             isB3 = B(1, :) & B(2, :);
                             
                             vid_S(1:2) = split_shared_vertices( ...
                                 cut_smin, ...
@@ -153,19 +157,21 @@ Om_st = [Om_st{:}];
                                 vid_i, ...
                                 vid_S(1:2), ...
                                 eid_C, ...
-                                {isB12, isB12});
+... %                                 {isB12, isB12});
+                                {B12, B12});
                             
                             V_st_i = [V_st_i C];
                             vid_i = vid_i_;
                             vid_S{3} = vid_S3;
                         else
                             vid_S{3} = zeros(1, 0);
-                            isB3 = false(1, 0);
+%                             isB3 = false(1, 0);
+                            B3 = false(1, 0);
                         end
                         
                         if i < N_segs
-                            [C, vid_i_, ~, vid_S4, ~, B, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smax);
-                            isB12 = B(1, :) & B(2, :);
+                            [C, vid_i_, ~, vid_S4, ~, B12, eid_C] = cut_multipolygon(V_st_i, vid_i, cut_smax);
+%                             isB12 = B(1, :) & B(2, :);
                             
                             vid_S(1:3) = split_shared_vertices( ...
                                 cut_smax, ...
@@ -175,7 +181,8 @@ Om_st = [Om_st{:}];
                                 vid_i, ...
                                 vid_S(1:3), ...
                                 eid_C, ...
-                                {isB12, isB12, isB3});
+... %                                 {isB12, isB12, isB3});
+                                {B12, B12, B3});
                             
                             V_st_i = [V_st_i C];
                             vid_i = vid_i_;

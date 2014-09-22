@@ -15,8 +15,6 @@ vec = calc_vector(Om_st);
 rho = calc_vector_angle(vec);
 alpha = calc_vertex_angle(rho);
 
-idx_Om_st = 2:n_V_Om+1;
-
 [F_st, idx_pred] = determine_final_nodes;
 n_F = size(F_st, 2);
 V_st = [I_st V_Om F_st];
@@ -60,6 +58,8 @@ for i = 1:n_V_Om+1
     end
 end
 
+% idx_I = 1;
+% idx_Om_st = 2:n_V_Om+1;
 idx_F = 2+n_V_Om:n_V;
 
 % calculation of edges to final nodes
@@ -116,7 +116,7 @@ A_st = sparse(A_st);
             filt_j = pid ~= pid(j) | (vid ~= pred(j) & vid ~= vid(j));
         end
         
-        l_filt = l(:, filt_i(idx_Om_st) & filt_j(idx_Om_st));
+        l_filt = l(:, filt_i(2:n_Om+1) & filt_j(2:n_Om+1));
         
         if visible(V_st(:, i), V_st(:, j), l_filt)
             b = not( pid(i) ~= 0 && pid(i) == pid(j) && ~visible2(Om_st, rho, alpha, pid(i), vid(i), vid(j)) );

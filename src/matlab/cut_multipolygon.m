@@ -6,7 +6,7 @@ if isempty(vid_P)
     vid_R = {};
     vid_S = zeros(1, 0);
     S_xT = NaN(1, 0);
-    B = false(2, 0);
+    B = false(1, 0);
     eid_C = zeros(2, 0);
     
     return;
@@ -47,7 +47,7 @@ eid_C = unroll(eid_C);
 % sort shared points (points on the cut) by hit order
 [S_xT, S_idx] = sort(S_xT);
 vid_S = vid_S(S_idx);
-B = B(:, S_idx);
+B = B(S_idx);
 
     function vid_ = calc_index(vid, offset)
         if iscell(vid)

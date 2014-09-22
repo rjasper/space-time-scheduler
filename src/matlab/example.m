@@ -32,11 +32,9 @@ Os = {
     [5 4; 7 4; 7 6; 5 6]'
 }';
 
-Om = {
-    struct( ...
-        'polygon', [0 -1; 1 0; 0 1; -1 0]', ...
-        'path', [3 5 0; 8 0 12]')
-}';
+Om = struct( ...
+    'polygon', [0 -1; 1 0; 0 1; -1 0]', ...
+    'path', [3 5 0; 8 0 12]');
 
 P1 = [3 4; 4 5; 3 6; 2 5]';
 P2 = [8 -1; 9 0; 8 1; 7 0]';
@@ -48,6 +46,10 @@ P2 = [8 -1; 9 0; 8 1; 7 0]';
 path = pred2path(pred, 2);
 Om_st = calc_st_space(Om, V(:, path));
 
+unrolled = unroll(Om_st);
+Om_st = unrolled(2, :);
+idx_Om_st = unrolled(1, :);
+
 % l = sqrt(sum(diff(V(:, path), 1, 2).^2));
 L = sum(path_length(V, path));
 
@@ -55,11 +57,14 @@ I_st = [0 0]';
 % F_st = [L t_F]';
 
 % [A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
-[A_st, V_st, idx_F] = minimum_time_vgraph(I_st, Om_st, L, v_max);
+[A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, L, v_max);
 [d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
 [~, idx_dmin] = min(d_st(idx_F));
 idx_F = idx_F(idx_dmin);
 path_st = pred2path(pred_st, idx_F); % to F_st
+
+pid_path_st = unique(pid(path_st));
+evasions = idx_Om_st(pid_path_st(pid_path_st > 0));
 
 F_st = V_st(:, idx_F);
 t_F = F_st(2);

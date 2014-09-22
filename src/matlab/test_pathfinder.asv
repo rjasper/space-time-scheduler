@@ -1,0 +1,26 @@
+
+%% data
+
+t_start = 0;
+t_end = 5;
+
+I = [0; 0];
+F = [10; 10];
+
+v_max = 4;
+
+Os = {
+    regular_polygon(4, [4; 3], 2, deg2rad( 30))
+    regular_polygon(3, [7; 8], 2, deg2rad(-30))
+}';
+
+Om = struct( ...
+    'polygon', regular_polygon(4, [0; 0], 1, deg2rad(45)), ...
+    'path', [[2; 6; 0] [8; 5; 5]]);
+
+%% calculation
+
+[xyt, evasions] = pathfinder(I, F, t_start, t_end, v_max, Os, Om);
+
+%% plot
+

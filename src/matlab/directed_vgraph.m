@@ -1,4 +1,4 @@
-function [A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, s_max, v_max)
+function [A_st, V_st, pid] = directed_vgraph(I_st, F_st, Om_st, s_max, v_max)
 
 V_st = [I_st F_st [Om_st{:}]];
 l = get_edges(Om_st);

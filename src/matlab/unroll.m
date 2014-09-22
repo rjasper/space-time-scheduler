@@ -6,6 +6,14 @@ id = cellfun( ...
     num2cell( 1:length(cells) ), ...
     'UniformOutput', false);
 
-mat = [id{:}; cells{:}];
+cells = [cells{:}];
+
+if iscell(cells)
+    id = num2cell([id{:}]);
+else
+    id = id{:};
+end
+
+mat = [id; cells];
 
 end

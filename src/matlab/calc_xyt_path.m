@@ -3,6 +3,11 @@ function XYT = calc_xyt_path(V_xy, path_xy, V_st, path_st)
 XY = V_xy(:, path_xy);
 ST = V_st(:, path_st);
 
+if numel(XY) == 0 || numel(ST) == 0
+    XYT = NaN(3, 0);
+    return;
+end
+
 l_XY = path_length(V_xy, path_xy);
 s_XY = [0 cumsum(l_XY)];
 
