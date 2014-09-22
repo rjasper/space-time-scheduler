@@ -34,6 +34,8 @@ public class Pathfinder {
 	
 	private Collection<DynamicObstacle> dynamicObstacles = new LinkedList<>();
 	
+	private boolean minimumTime = true;
+	
 	private final MatlabProxy proxy;
 	
 	private final AccessOperations access;
@@ -150,6 +152,14 @@ public class Pathfinder {
 		return access;
 	}
 	
+	public void useMinimumFinishTime() {
+		minimumTime = true;
+	}
+	
+	public void useSpecifiedFinishTime() {
+		minimumTime = false;
+	}
+	
 	public LineString calculatePath() {
 		if (!isReady())
 			throw new IllegalStateException("invalid parameters");
@@ -174,8 +184,15 @@ public class Pathfinder {
 			acc.assignStaticObstacles("Os", j2mStaticObstacles(staticObstacles));
 			acc.assignDynamicObstacles("Om", j2mDynamicObstacles(dynamicObstacles));
 			
-			Object[] result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 1);
+			Object[] result;
+			if (minimumTime)
+				result = m.returningEval("pathfinder_mt(I, F, t_start, v_max, Os, Om)", 2);
+			else
+				result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
+			
 			double[] data = (double[]) result[0];
+			// TODO: process evasions
+			double[] evasions = (double[]) result[1];
 			
 			return m2jLineString(data, 3);
 		} catch (MatlabInvocationException e) {
