@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 import matlab.data.DynamicObstacleData;
 import matlab.data.LineStringData;
 import world.DynamicObstacle;
@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public final class ConvertOperations {
 	
 	protected static GeometryFactory geom() {
-		return StaticJstFactories.geomFactory();
+		return StaticJtsFactories.geomFactory();
 	}
 	
 	protected static CoordinateSequenceFactory csFact() {

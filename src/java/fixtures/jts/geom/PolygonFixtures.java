@@ -1,6 +1,6 @@
 package jts.geom;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public final class PolygonFixtures {
 	
 	protected static GeometryFactory geom() {
-		return StaticJstFactories.geomFactory();
+		return StaticJtsFactories.geomFactory();
 	}
 	
 	public static Polygon triangle() {

@@ -3,7 +3,7 @@ package world;
 import java.util.HashSet;
 import java.util.Set;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -14,7 +14,7 @@ public class World {
 	private static final Geometry EMPTY_GEOMETRY = geomFactory().createMultiPolygon(null);
 	
 	private static GeometryFactory geomFactory() {
-		return StaticJstFactories.geomFactory();
+		return StaticJtsFactories.geomFactory();
 	}
 	
 	private static Geometry emptyGeometry() {

@@ -1,11 +1,11 @@
 package main;
 
-import static jts.geom.factories.StaticJstFactories.*;
+import static jts.geom.factories.StaticJtsFactories.*;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 import pickers.LocationPicker;
 import world.World;
 
@@ -22,7 +22,7 @@ import com.vividsolutions.jts.io.WKTReader;
 public class Main {
 	
 	public static WKTReader wkt() {
-		return StaticJstFactories.wktReader();
+		return StaticJtsFactories.wktReader();
 	}
 
 	public static void main(String[] args) throws ParseException {

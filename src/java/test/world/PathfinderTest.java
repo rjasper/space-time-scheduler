@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 import matlabcontrol.MatlabConnectionException;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
@@ -48,7 +48,7 @@ public class PathfinderTest {
 	}
 	
 	private static WKTReader wkt() {
-		return StaticJstFactories.wktReader();
+		return StaticJtsFactories.wktReader();
 	}
 
 	@BeforeClass

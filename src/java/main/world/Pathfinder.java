@@ -225,14 +225,14 @@ public class Pathfinder {
 			else
 				result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
 			
-			double[] trajectory = (double[]) result[0];
+			double[] trajectoryData = (double[]) result[0];
 			double[] evasionsDouble = (double[]) result[1];
 			
 			int[] evasions = Arrays.stream(evasionsDouble)
 				.mapToInt((d) -> (int) d - 1).toArray();
 
-			// TODO what if there is no path
-			setTrajectory(m2jTrajectory(trajectory));
+			Trajectory trajectory = m2jTrajectory(trajectoryData);
+			setTrajectory(trajectory.isEmpty() ? null : trajectory);
 			storeEvasions(evasions);
 		} catch (MatlabInvocationException e) {
 			// TODO Auto-generated catch block

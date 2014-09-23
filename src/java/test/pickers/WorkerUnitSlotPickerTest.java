@@ -3,7 +3,7 @@ package pickers;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 import static java.time.Month.*;
-import static jts.geom.factories.StaticJstFactories.geomFactory;
+import static jts.geom.factories.StaticJtsFactories.geomFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package jts.geom;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.LineString;
 public final class LineStringFixtures {
 	
 	private static GeometryFactory geom() {
-		return StaticJstFactories.geomFactory();
+		return StaticJtsFactories.geomFactory();
 	}
 	
 	private static CoordinateSequenceFactory csFact() {

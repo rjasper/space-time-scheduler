@@ -3,7 +3,7 @@ package jts.geom.factories;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
 
-public final class StaticJstFactories {
+public final class StaticJtsFactories {
 	
 	private static final GeometryFactory FLOAT_GEOMETRY_FACTORY = new GeometryFactory();
 	

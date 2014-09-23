@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 import matlab.data.DynamicObstacleData;
 import matlabcontrol.MatlabConnectionException;
 import matlabcontrol.MatlabInvocationException;
@@ -79,7 +79,7 @@ public class ConvertOperationsTest {
 	public void testConvertPolygon() throws ParseException, MatlabInvocationException {
 		MatlabProxy m = getProxy();
 		
-		WKTReader wkt = StaticJstFactories.wktReader();
+		WKTReader wkt = StaticJtsFactories.wktReader();
 		Polygon p1 = (Polygon) wkt.read("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))");
 		
 		AccessOperations acc = new AccessOperations(m);

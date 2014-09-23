@@ -2,7 +2,7 @@ package world;
 
 import static matchers.GeometryMatchers.*;
 import static org.junit.Assert.assertThat;
-import jts.geom.factories.StaticJstFactories;
+import jts.geom.factories.StaticJtsFactories;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,11 +15,11 @@ import com.vividsolutions.jts.io.WKTReader;
 public class WorldMapTest {
 	
 	private static GeometryFactory factory() {
-		return StaticJstFactories.floatGeometryFactory();
+		return StaticJtsFactories.floatGeometryFactory();
 	}
 	
 	private static WKTReader wkt() {
-		return StaticJstFactories.wktReader();
+		return StaticJtsFactories.wktReader();
 	}
 	
 	private World world;

@@ -19,6 +19,10 @@ public class Trajectory {
 		this.path2d = path2d;
 		this.times = Collections.unmodifiableList(new ArrayList<>(times));
 	}
+	
+	public boolean isEmpty() {
+		return size() == 0;
+	}
 
 	public LineString getPath2d() {
 		return path2d;
