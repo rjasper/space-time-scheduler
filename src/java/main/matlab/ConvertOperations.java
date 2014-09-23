@@ -5,13 +5,17 @@ import static java.util.stream.Collectors.toCollection;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import jts.geom.factories.StaticJstFactories;
 import matlab.data.DynamicObstacleData;
 import matlab.data.LineStringData;
 import world.DynamicObstacle;
+import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
@@ -31,17 +35,17 @@ public final class ConvertOperations {
 		return geom().getCoordinateSequenceFactory();
 	}
 	
-	public static double[] j2mLocalDateTime(LocalDateTime time) {
+	public static double j2mLocalDateTime(LocalDateTime time) {
 		Instant instant = time.toInstant(ZoneOffset.UTC);
 		
 		double millis = instant.toEpochMilli();
 		
 		// in seconds
-		return new double[] {millis * 1e-3};
+		return millis * 1e-3;
 	}
 	
-	public static LocalDateTime m2jLocalDateTime(double[] data) {
-		double millis = data[0] * 1e3;
+	public static LocalDateTime m2jLocalDateTime(double data) {
+		double millis = data * 1e3;
 		Instant instant = Instant.ofEpochMilli((long) millis);
 		
 		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
@@ -146,6 +150,47 @@ public final class ConvertOperations {
 		
 		return lineString;
 	}
+	
+	public static double[] j2mTrajectory(Trajectory trajectory) {
+		int n = trajectory.size();
+		LineString path2d = trajectory.getPath2d();
+		List<LocalDateTime> times = trajectory.getTimes();
+		
+		double[] path2dData = j2mLineString(path2d, 2).getData();
+		double[] timesData = times.stream()
+			.mapToDouble(ConvertOperations::j2mLocalDateTime)
+			.toArray();
+		
+		double[] data = new double[3*n];
+		
+		for (int i = 0, j = 0, k = 0; i < n; ++i) {
+			data[k++] = path2dData[j++]; // x
+			data[k++] = path2dData[j++]; // y
+			data[k++] = timesData[i];    // t
+		}
+		
+		return data;
+	}
+	
+	public static Trajectory m2jTrajectory(double[] data) {
+		int n = data.length / 3;
+		
+		double[] path2dData = new double[2*n];
+		double[] timesData = new double[n];
+
+		for (int i = 0, j = 0, k = 0; i < n; ++i) {
+			path2dData[j++] = data[k++]; // x
+			path2dData[j++] = data[k++]; // y
+			timesData[i] = data[k++];    // t
+		}
+		
+		LineString path2d = m2jLineString(path2dData, 2);
+		List<LocalDateTime> times = Arrays.stream(timesData)
+			.mapToObj(ConvertOperations::m2jLocalDateTime)
+			.collect(Collectors.toList());
+		
+		return new Trajectory(path2d, times);
+	}
 
 	public static Object[] j2mStaticObstacles(Collection<Polygon> obstacles) {
 		int n = obstacles.size();
@@ -172,12 +217,16 @@ public final class ConvertOperations {
 	
 	public static DynamicObstacleData j2mDynamicObstacle(DynamicObstacle obstacle) {
 		Polygon polygon = obstacle.getPolygon();
-		LineString path = obstacle.getPath();
+		LineString path = obstacle.getPath2d();
+		List<LocalDateTime> times = obstacle.getTimes();
 		
 		double[] polygonData = j2mPolygon(polygon);
-		double[] pathData = j2mLineString(path, 3).getData();
+		double[] pathData = j2mLineString(path, 2).getData();
+		double[] timesData = times.stream()
+			.mapToDouble(ConvertOperations::j2mLocalDateTime)
+			.toArray();
 		
-		DynamicObstacleData data = new DynamicObstacleData(polygonData, pathData);
+		DynamicObstacleData data = new DynamicObstacleData(polygonData, pathData, timesData);
 		
 		return data;
 	}
@@ -185,11 +234,15 @@ public final class ConvertOperations {
 	public static DynamicObstacle m2jDynamicObstacle(DynamicObstacleData data) {
 		double[] polygonData = data.getPolygonData();
 		double[] pathData = data.getPathData();
+		double[] timesData = data.getTimesData();
 		
 		Polygon polygon = m2jPolygon(polygonData);
 		LineString path = m2jLineString(pathData, 2);
+		List<LocalDateTime> times = Arrays.stream(timesData)
+			.mapToObj(ConvertOperations::m2jLocalDateTime)
+			.collect(Collectors.toList());
 		
-		DynamicObstacle obstacle = new DynamicObstacle(polygon, path);
+		DynamicObstacle obstacle = new DynamicObstacle(polygon, path, times);
 		
 		return obstacle;
 	}

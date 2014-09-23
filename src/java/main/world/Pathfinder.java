@@ -1,14 +1,13 @@
 package world;
 
-import static matlab.ConvertOperations.j2mDynamicObstacles;
-import static matlab.ConvertOperations.j2mLocalDateTime;
-import static matlab.ConvertOperations.j2mPoint;
-import static matlab.ConvertOperations.j2mStaticObstacles;
-import static matlab.ConvertOperations.m2jLineString;
+import static matlab.ConvertOperations.*;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import matlab.AccessOperations;
 import matlabcontrol.MatlabInvocationException;
@@ -30,11 +29,17 @@ public class Pathfinder {
 	
 	private double maxSpeed = 0.;
 	
-	private Collection<Polygon> staticObstacles = new LinkedList<>();
+	private List<Polygon> staticObstacles = new LinkedList<>();
 	
-	private Collection<DynamicObstacle> dynamicObstacles = new LinkedList<>();
+	private List<DynamicObstacle> dynamicObstacles = new LinkedList<>();
 	
 	private boolean minimumTime = true;
+	
+//	private LineString path;
+	
+	private Trajectory trajectory;
+	
+	private List<DynamicObstacle> evadedObstacles;
 	
 	private final MatlabProxy proxy;
 	
@@ -52,6 +57,18 @@ public class Pathfinder {
 			&& latestFinishTime != null
 			&& startingTime.compareTo(latestFinishTime) < 0
 			&& maxSpeed > 0.;
+	}
+
+	public boolean isMinimumTime() {
+		return minimumTime;
+	}
+
+	public void useMinimumFinishTime() {
+		minimumTime = true;
+	}
+
+	public void useSpecifiedFinishTime() {
+		minimumTime = false;
 	}
 
 	public Point getStartingPoint() {
@@ -90,12 +107,18 @@ public class Pathfinder {
 		return maxSpeed;
 	}
 
-	private Collection<Polygon> getStaticObstacles() {
+	private List<Polygon> getStaticObstacles() {
 		return staticObstacles;
 	}
 
-	private Collection<DynamicObstacle> getDynamicObstacles() {
+	private List<DynamicObstacle> getDynamicObstacles() {
 		return dynamicObstacles;
+	}
+	
+	private DynamicObstacle[] createDynamicObstaclesArray() {
+		List<DynamicObstacle> obstacles = getDynamicObstacles();
+		
+		return obstacles.toArray(new DynamicObstacle[obstacles.size()]);
 	}
 
 	public void setMaxSpeed(double maxSpeed) {
@@ -144,6 +167,26 @@ public class Pathfinder {
 		collection.clear();
 	}
 	
+	public Trajectory getTrajectory() {
+		return trajectory;
+	}
+
+	private void setTrajectory(Trajectory trajectory) {
+		this.trajectory = trajectory;
+	}
+
+//	private void setPath(LineString path) {
+//		this.path = path;
+//	}
+	
+	public List<DynamicObstacle> getEvadedObstacles() {
+		return evadedObstacles;
+	}
+
+	private void setEvadedObstacles(List<DynamicObstacle> evadedObstacles) {
+		this.evadedObstacles = evadedObstacles;
+	}
+
 	private MatlabProxy getProxy() {
 		return proxy;
 	}
@@ -152,15 +195,7 @@ public class Pathfinder {
 		return access;
 	}
 	
-	public void useMinimumFinishTime() {
-		minimumTime = true;
-	}
-	
-	public void useSpecifiedFinishTime() {
-		minimumTime = false;
-	}
-	
-	public LineString calculatePath() {
+	public void calculatePath() {
 		if (!isReady())
 			throw new IllegalStateException("invalid parameters");
 		
@@ -185,22 +220,33 @@ public class Pathfinder {
 			acc.assignDynamicObstacles("Om", j2mDynamicObstacles(dynamicObstacles));
 			
 			Object[] result;
-			if (minimumTime)
+			if (isMinimumTime())
 				result = m.returningEval("pathfinder_mt(I, F, t_start, v_max, Os, Om)", 2);
 			else
 				result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
 			
-			double[] data = (double[]) result[0];
-			// TODO: process evasions
-			double[] evasions = (double[]) result[1];
+			double[] trajectory = (double[]) result[0];
+			double[] evasionsDouble = (double[]) result[1];
 			
-			return m2jLineString(data, 3);
+			int[] evasions = Arrays.stream(evasionsDouble)
+				.mapToInt((d) -> (int) d - 1).toArray();
+
+			// TODO what if there is no path
+			setTrajectory(m2jTrajectory(trajectory));
+			storeEvasions(evasions);
 		} catch (MatlabInvocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
-			return null;
 		}
+	}
+	
+	private void storeEvasions(int[] evasions) {
+		DynamicObstacle[] obstacles = createDynamicObstaclesArray();
+		
+		List<DynamicObstacle> evadedObstacles = Arrays.stream(evasions)
+			.mapToObj((e) -> obstacles[e]).collect(Collectors.toList());
+		
+		setEvadedObstacles(evadedObstacles);
 	}
 
 }

@@ -4,6 +4,8 @@ import static java.time.Month.JANUARY;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import jts.geom.factories.StaticJstFactories;
 import matlabcontrol.MatlabConnectionException;
@@ -78,23 +80,28 @@ public class PathfinderTest {
 
 	@Test
 	public void test() throws ParseException {
-//		fail("Not yet implemented"); // TODO
-		
 		Point startingPoint = (Point) wkt().read("POINT (0 0)");
 		Point finishPoint = (Point) wkt().read("POINT (8 6)");
 		LocalDateTime startingTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0, 0);
 		LocalDateTime finishTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0, 12);
-		double maxSpeed = 4.0;
+		double maxSpeed = 1.4;
 		
 		Polygon rectangle = (Polygon) wkt().read("POLYGON ((1 1, 4 1, 4 3, 1 3, 1 1))");
 		Polygon square = (Polygon) wkt().read("POLYGON ((5 4, 7 4, 7 6, 5 6, 5 4))");
 		Polygon rhombus = (Polygon) wkt().read("POLYGON ((0 -1, 1 0, 0 1, -1 0, 0 -1))");
-		LineString path = (LineString) wkt().read("LINESTRING (3 5 0, 8 0 12)");
-		DynamicObstacle dynamicObstacle = new DynamicObstacle(rhombus, path);
+		LineString path = (LineString) wkt().read("LINESTRING (3 5, 8 0)");
+		List<LocalDateTime> times = Arrays.asList(
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0,  0),
+			LocalDateTime.of(2000, JANUARY, 1, 0, 0, 12)
+		);
+		DynamicObstacle dynamicObstacle = new DynamicObstacle(rhombus, path, times);
 		
 		MatlabProxy m = getProxy();
 		
 		Pathfinder pf = new Pathfinder(m);
+		
+//		pf.useSpecifiedFinishTime();
+		pf.useMinimumFinishTime();
 		
 		pf.setStartingPoint(startingPoint);
 		pf.setFinishPoint(finishPoint);
@@ -105,9 +112,15 @@ public class PathfinderTest {
 		pf.addStaticObstacle(square);
 		pf.addDynamicObstacle(dynamicObstacle);
 		
-		LineString trajectory = pf.calculatePath();
+		pf.calculatePath();
+		
+		Trajectory trajectory = pf.getTrajectory();
+		List<DynamicObstacle> evadedObstacles = pf.getEvadedObstacles();
+		
+		// TODO implement proper assertions
 		
 		System.out.println(trajectory);
+		System.out.println(evadedObstacles);
 	}
 
 }

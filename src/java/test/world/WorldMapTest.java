@@ -22,11 +22,11 @@ public class WorldMapTest {
 		return StaticJstFactories.wktReader();
 	}
 	
-	private WorldMap world;
+	private World world;
 	
 	@Before
 	public void setUp() {
-		world = new WorldMap();
+		world = new World();
 	}
 	
 	@Test

@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class WorldMap {
+public class World {
 	
 	private static final Geometry EMPTY_GEOMETRY = geomFactory().createMultiPolygon(null);
 	
@@ -27,7 +27,7 @@ public class WorldMap {
 	
 	private boolean ready = false;
 	
-	public WorldMap() {}
+	public World() {}
 	
 	public boolean isReady() {
 		return this.ready;

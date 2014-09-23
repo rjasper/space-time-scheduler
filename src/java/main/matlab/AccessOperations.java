@@ -98,11 +98,12 @@ public class AccessOperations {
 	public DynamicObstacleData retrieveDynamicObstacle(String variableName) throws MatlabInvocationException {
 		MatlabProxy m = getProxy();
 		
-		Object[] result = m.returningFeval("retrieve_feval", 2, "m2j_dynamic_obstacle", variableName);
+		Object[] result = m.returningFeval("retrieve_feval", 3, "m2j_dynamic_obstacle", variableName);
 		double[] polygonData = (double[]) result[0];
 		double[] pathData = (double[]) result[1];
+		double[] timesData = (double[]) result[2];
 		
-		return new DynamicObstacleData(polygonData, pathData);
+		return new DynamicObstacleData(polygonData, pathData, timesData);
 	}
 	
 	public void assignDynamicObstacles(String variableName, Collection<DynamicObstacleData> data) throws MatlabInvocationException {
@@ -116,16 +117,21 @@ public class AccessOperations {
 			.map(DynamicObstacleData::getPathData)
 			.collect(toList())
 			.toArray();
+		Object[] timesData = data.stream()
+			.map(DynamicObstacleData::getTimesData)
+			.collect(toList())
+			.toArray();
 
-		m.feval("assign_feval", variableName, "j2m_dynamic_obstacles", polygonsData, pathsData);
+		m.feval("assign_feval", variableName, "j2m_dynamic_obstacles", polygonsData, pathsData, timesData);
 	}
 	
 	public Collection<DynamicObstacleData> retrieveDynamicObstacles(String variableName) throws MatlabInvocationException {
 		MatlabProxy m = getProxy();
 		
-		Object[] result = m.returningFeval("retrieve_feval", 2, "m2j_dynamic_obstacles", variableName);
+		Object[] result = m.returningFeval("retrieve_feval", 3, "m2j_dynamic_obstacles", variableName);
 		Object[] polygonsData = (Object[]) result[0];
 		Object[] pathsData = (Object[]) result[1];
+		Object[] timesDatas = (Object[]) result[2];
 		
 		int n = polygonsData.length;
 		Collection<DynamicObstacleData> obstaclesData = new Vector<>(n);
@@ -133,8 +139,9 @@ public class AccessOperations {
 		for (int i = 0; i < n; ++i) {
 			double[] polygonData = (double[]) polygonsData[i];
 			double[] pathData = (double[]) pathsData[i];
+			double[] timesData = (double[]) timesDatas[i];
 			
-			obstaclesData.add(new DynamicObstacleData(polygonData, pathData));
+			obstaclesData.add(new DynamicObstacleData(polygonData, pathData, timesData));
 		}
 		
 		return obstaclesData;

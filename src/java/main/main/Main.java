@@ -7,7 +7,7 @@ import java.util.List;
 
 import jts.geom.factories.StaticJstFactories;
 import pickers.LocationPicker;
-import world.WorldMap;
+import world.World;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
