@@ -74,7 +74,7 @@ public class PathfinderTest {
 	public void tearDown() throws MatlabInvocationException {
 		MatlabProxy m = getProxy();
 		
-//		m.feval("clear", "all");
+		m.feval("clear", "all");
 		m.disconnect();
 	}
 
