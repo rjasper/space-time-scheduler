@@ -36,10 +36,6 @@ public final class WorkerUnitFixtures {
 	}
 	
 	public static WorkerUnit withTwoTasks1() {
-//		WorkerUnit worker = new WorkerUnit(1.,
-//			geomFactory().createPoint(new Coordinate(-3600., 0.)),
-//			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
-//		);
 		WorkerUnit worker = basicWorker(geomFactory().createPoint(new Coordinate(-3600., 0.)));
 		
 		worker.addTask(new Task(
@@ -58,10 +54,6 @@ public final class WorkerUnitFixtures {
 	}
 	
 	public static WorkerUnit withTwoTasks2() {
-//		WorkerUnit worker = new WorkerUnit(1.,
-//			geomFactory().createPoint(new Coordinate(0., -3600.)),
-//			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
-//		);
 		WorkerUnit worker = basicWorker(geomFactory().createPoint(new Coordinate(0., -3600.)));
 		
 		worker.addTask(new Task(
@@ -80,10 +72,6 @@ public final class WorkerUnitFixtures {
 	}
 	
 	public static WorkerUnit withThreeTasks() {
-//		WorkerUnit worker = new WorkerUnit(1.,
-//			geomFactory().createPoint(new Coordinate(0., 0.)),
-//			LocalDateTime.of(2000, JANUARY, 1, 0, 0)
-//		);
 		WorkerUnit worker = basicWorker(geomFactory().createPoint(new Coordinate(0., 0.)));
 		
 		worker.addTask(new Task(

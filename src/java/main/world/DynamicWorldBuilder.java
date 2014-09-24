@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jts.geom.factories.GeometryBuilder;
+import jts.geom.factories.EnhancedGeometryBuilder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -41,7 +41,7 @@ public class DynamicWorldBuilder {
 		if (workers == null)
 			throw new NullPointerException("workers cannot be null");
 		
-		workers = new ArrayList<>(workers);
+		this.workers = new ArrayList<>(workers);
 	}
 
 	public List<DynamicObstacle> getObstacles() {
@@ -92,7 +92,7 @@ public class DynamicWorldBuilder {
 	}
 	
 	private Trajectory createStationaryTrajectoryFromTask(Task task) {
-		GeometryBuilder fact = GeometryBuilder.getInstance();
+		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
 		
 		Point location = task.getLocation();
 		
@@ -121,7 +121,7 @@ public class DynamicWorldBuilder {
 		if (lastTime.compareTo(getEndTime()) >= 0)
 			return null;
 
-		GeometryBuilder fact = GeometryBuilder.getInstance();
+		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
 		
 		return new Trajectory(
 			fact.lineString(lastLocation, lastLocation),

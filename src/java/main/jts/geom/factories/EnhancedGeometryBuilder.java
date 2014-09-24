@@ -7,22 +7,22 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
-public class GeometryBuilder extends org.geotools.geometry.jts.GeometryBuilder {
+public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryBuilder {
 	
-	private static GeometryBuilder instance;
+	private static EnhancedGeometryBuilder instance;
 	
-	public static GeometryBuilder getInstance() {
+	public static EnhancedGeometryBuilder getInstance() {
 		if (instance == null)
-			instance = new GeometryBuilder();
+			instance = new EnhancedGeometryBuilder();
 		
 		return instance;
 	}
 
-	public GeometryBuilder() {
+	public EnhancedGeometryBuilder() {
 		super(geomFactory());
 	}
 	
-	public GeometryBuilder(GeometryFactory factory) {
+	public EnhancedGeometryBuilder(GeometryFactory factory) {
 		super(factory);
 	}
 	

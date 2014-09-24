@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import jts.geom.factories.GeometryBuilder;
+import jts.geom.factories.EnhancedGeometryBuilder;
 import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Point;
@@ -92,12 +92,12 @@ public class WorkerUnit {
 	}
 	
 	private boolean planTrajectoryToTask(Task task) {
-		GeometryBuilder fact = GeometryBuilder.getInstance();
+		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
 		TreeMap<LocalDateTime, Task> tasks = _getTasks();
 		Map<Task, Trajectory> trajectories = _getTrajectories();
 		
 		Entry<LocalDateTime, Task> predEntry = tasks.floorEntry(task.getStartTime());
-		Entry<LocalDateTime, Task> succEntry   = tasks.floorEntry(task.getFinishTime());
+		Entry<LocalDateTime, Task> succEntry   = tasks.ceilingEntry(task.getFinishTime());
 		Task pred = predEntry == null ? null : predEntry.getValue();
 		Task succ = succEntry == null ? null : succEntry.getValue();
 		
