@@ -81,13 +81,12 @@ public class WorkerUnit {
 	}
 
 	public boolean addTask(Task task) {
-		Map<LocalDateTime, Task> tasks = _getTasks();
 		LocalDateTime time = task.getStartTime();
 		
 		boolean status = planTrajectoryToTask(task);
 		
 		if (status)
-			tasks.put(time, task);
+			_getTasks().put(time, task);
 		
 		return status;
 	}
@@ -104,9 +103,12 @@ public class WorkerUnit {
 		
 		// TODO implement proper path planning
 		
+		// trajectory to new task
+		
 		LocalDateTime startTime, finishTime;
 		Point startLocation, finishLocation;
 		
+		// if there is no predecessor use initial position and time
 		if (pred == null) {
 			startTime = getInitialTime();
 			startLocation = getInitialLocation();
@@ -123,6 +125,8 @@ public class WorkerUnit {
 			Arrays.asList(startTime, finishTime));
 		
 		trajectories.put(task, toTask);
+		
+		// trajectory to following task
 		
 		if (succ != null) {
 			Trajectory toSucc = new Trajectory(
