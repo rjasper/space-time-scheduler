@@ -2,6 +2,7 @@ package world;
 
 import static matlab.ConvertOperations.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +27,8 @@ public class Pathfinder {
 	private LocalDateTime startingTime = null;
 	
 	private LocalDateTime latestFinishTime = null;
+	
+	private Duration spareTime = null;
 	
 	private double maxSpeed = 0.;
 	
@@ -55,6 +58,7 @@ public class Pathfinder {
 			&& finishPoint != null
 			&& startingTime != null
 			&& latestFinishTime != null
+			&& (!minimumTime || spareTime != null)
 			&& startingTime.compareTo(latestFinishTime) < 0
 			&& maxSpeed > 0.;
 	}
@@ -101,6 +105,19 @@ public class Pathfinder {
 
 	public void setLatestFinishTime(LocalDateTime latestFinishTime) {
 		this.latestFinishTime = latestFinishTime;
+	}
+
+	private Duration getSpareTime() {
+		return spareTime;
+	}
+
+	public void setSpareTime(Duration spareTime) {
+		if (spareTime == null)
+			throw new NullPointerException("spareTime cannot be null");
+		if (spareTime.isNegative())
+			throw new IllegalArgumentException("spareTime must be non-negative");
+		
+		this.spareTime = spareTime;
 	}
 
 	public double getMaxSpeed() {
@@ -203,6 +220,7 @@ public class Pathfinder {
 		Point finishPoint = getFinishPoint();
 		LocalDateTime startingTime = getStartingTime();
 		LocalDateTime latestFinishTime = getLatestFinishTime();
+		Duration spareTime = getSpareTime();
 		double maxSpeed = getMaxSpeed();
 		Collection<Polygon> staticObstacles = getStaticObstacles();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
@@ -220,10 +238,13 @@ public class Pathfinder {
 			acc.assignDynamicObstacles("Om", j2mDynamicObstacles(dynamicObstacles));
 			
 			Object[] result;
-			if (isMinimumTime())
-				result = m.returningEval("pathfinder_mt(I, F, t_start, v_max, Os, Om)", 2);
-			else
+			if (isMinimumTime()) {
+				m.setVariable("t_spare", j2mDuration(spareTime));
+				
+				result = m.returningEval("pathfinder_mt(I, F, t_start, t_end, v_max, t_spare, Os, Om)", 2);
+			} else {
 				result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
+			}
 			
 			double[] trajectoryData = (double[]) result[0];
 			double[] evasionsDouble = (double[]) result[1];

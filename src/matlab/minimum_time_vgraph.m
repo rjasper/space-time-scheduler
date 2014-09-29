@@ -1,4 +1,4 @@
-function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, v_max)
+function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, t_max, v_max, t_spare)
 
 V_Om = [Om_st{:}];
 n_V_Om = size(V_Om, 2);
@@ -70,32 +70,46 @@ A_st = sparse(A_st);
     function [F, idx_pred] = determine_final_nodes
         s = [I_st(1) V_Om(1, :)];
         t = [I_st(2) V_Om(2, :)];
-        
-        % TODO: filter s and t using filt_within before
-        F = [
-            repmat(s_max, 1, n_V);
-            t + (s_max - s) / v_max
-        ];
     
         % check bounds
-        filt_within = s >= 0 & s <= s_max;
-        idx_within = find(filt_within);
-        n_within = size(idx_within, 2);
+        filt = s >= 0 & s <= s_max & t <= t_max;
+        idx = find(filt);
+        n_ = size(idx, 2);
+        
+        % calc final points
+        s_F = repmat(s_max, 1, n_);
+        t_F = t(filt) + (s_max - s(filt)) / v_max;
+        F = [s_F; t_F];
+        
+        % check spare time
+        vids = calc_vids(Om_st);
+        [~, ~, ~, ~, S_xT, B, ~] = ...
+            cut_multipolygon(V_Om, vids, [s_max 0 s_max 1]');
+        % bridge starts and ends
+        b1 = S_xT(B(1:end-1));
+        b2 = S_xT(B(2:end)+1);
+        
+        for k = 1:n_
+            % does time interval (t, t+t_spare) collide with obstacle?
+            filt(k) = ~any(t(k) > b2 & t(k) + t_spare < b1);
+        end
+        idx = idx(filt);
+        n_ = size(idx, 2);
+        
         % check visibility
         filt_l = cellfun(@(i) pid ~= pid(i) | (vid ~= pred(i) & vid ~= vid(i)), ...
-            num2cell(idx_within), ...
+            num2cell(idx), ...
             'UniformOutput', false);
-        filt_visible = cellfun(@(V_Om, F, filt_l, pid_i, vid_i) ...
+        filt = cellfun(@(V_Om, F, filt_l, pid_i, vid_i) ...
             visible(V_Om, F, l(:, filt_l(2:end))) && (pid_i == 0 || visible2_(pid_i, vid_i, F)), ...
-            mat2cell(V_st(:, filt_within), 2, ones(1, n_within)), ...
-            mat2cell(F(:, filt_within), 2, ones(1, n_within)), ...
+            mat2cell(V_st(:, idx), 2, ones(1, n_)), ...
+            mat2cell(F, 2, ones(1, n_)), ...
             filt_l, ...
-            num2cell(pid(idx_within)), ...
-            num2cell(vid(idx_within)));
+            num2cell(pid(idx)), ...
+            num2cell(vid(idx)));
+        idx = idx(filt);
         
-        idx = idx_within(filt_visible);
-        
-        F = F(:, idx);
+        F = F(:, filt);
         idx_pred = idx;
     end
 
@@ -153,5 +167,13 @@ A_st = sparse(A_st);
         else
             pred_vid = vid_i-1;
         end
+    end
+
+    function vids = calc_vids(P)
+        n_P = cellfun(@(p) size(p, 2), P);
+        offset = cumsum([0 n_P(1:end-1)]);
+        vids = arrayfun(@(n_P, offset) (1:n_P)+offset, ...
+            n_P, offset, ...
+            'UniformOutput', false);
     end
 end

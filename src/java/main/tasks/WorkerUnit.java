@@ -102,6 +102,7 @@ public class WorkerUnit {
 		Task succ = succEntry == null ? null : succEntry.getValue();
 		
 		// TODO implement proper path planning
+		// TODO reminder: when building dynamic world, end time must include work time
 		
 		// trajectory to new task
 		

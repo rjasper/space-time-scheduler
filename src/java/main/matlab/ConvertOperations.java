@@ -2,6 +2,7 @@ package matlab;
 
 import static java.util.stream.Collectors.toCollection;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -49,6 +50,14 @@ public final class ConvertOperations {
 		Instant instant = Instant.ofEpochMilli((long) millis);
 		
 		return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+	}
+	
+	public static double j2mDuration(Duration duration) {
+		return duration.getSeconds();
+	}
+	
+	public static Duration m2jDuration(double data) {
+		return Duration.ofSeconds((long) data);
 	}
 	
 	public static double[] j2mPoint(Point point, int dim) {

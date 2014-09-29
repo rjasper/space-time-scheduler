@@ -3,6 +3,7 @@ package world;
 import static java.time.Month.JANUARY;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +85,7 @@ public class PathfinderTest {
 		Point finishPoint = (Point) wkt().read("POINT (8 6)");
 		LocalDateTime startingTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0, 0);
 		LocalDateTime finishTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0, 12);
+		Duration duration = Duration.ofSeconds(5);
 		double maxSpeed = 1.4;
 		
 		Polygon rectangle = (Polygon) wkt().read("POLYGON ((1 1, 4 1, 4 3, 1 3, 1 1))");
@@ -107,6 +109,7 @@ public class PathfinderTest {
 		pf.setFinishPoint(finishPoint);
 		pf.setStartingTime(startingTime);
 		pf.setLatestFinishTime(finishTime);
+		pf.setSpareTime(duration);
 		pf.setMaxSpeed(maxSpeed);
 		pf.addStaticObstacle(rectangle);
 		pf.addStaticObstacle(square);
