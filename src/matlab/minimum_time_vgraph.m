@@ -1,15 +1,16 @@
 function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, t_end_min, t_end_max, v_max, t_spare)
 
+F_st = [0; t_end_min];
 V_Om = [Om_st{:}];
 n_V_Om = size(V_Om, 2);
-V_st = [I_st V_Om];
+V_st = [I_st V_Om F_st];
 n_V = size(V_st, 2);
 l = get_edges(Om_st);
 l = [l{:}];
 [pid_Om, vid_Om, n_Om] = get_ids(Om_st);
-pid = [0 pid_Om];
-vid = [1 vid_Om];
-n = [1 n_Om];
+pid = [0 pid_Om 0];
+vid = [1 vid_Om 2];
+n = [2 n_Om 2];
 
 vec = calc_vector(Om_st);
 rho = calc_vector_angle(vec);
@@ -17,7 +18,8 @@ alpha = calc_vertex_angle(rho);
 
 idx_Om_st = 2:n_V_Om+1;
 
-[F_st, idx_pred] = determine_final_nodes;
+[F_st_, idx_pred] = determine_final_nodes;
+F_st = [F_st F_st_];
 n_F = size(F_st, 2);
 V_st = [I_st V_Om F_st];
 pid = [pid zeros(1, n_F)];
@@ -27,12 +29,12 @@ n = [n_F+1 n_Om repmat(n_F+1, 1, n_F)];
 n_V = size(V_st, 2);
 A_st = zeros(n_V, n_V);
 
-for i = 1:n_V_Om+1
+for i = 1:n_V_Om+2
     if V_st(1, i) < 0 || V_st(1, i) > s_max %% TODO: use eps
         continue;
     end
     
-    for j = 1:n_V_Om+1
+    for j = 1:n_V_Om+2
 %     for j = 1:n_V
         if i == j
             continue
@@ -60,7 +62,7 @@ for i = 1:n_V_Om+1
     end
 end
 
-idx_F = 2+n_V_Om:n_V;
+idx_F = 3+n_V_Om:n_V;
 
 % calculation of edges to final nodes
 A_st(sub2ind(size(A_st), idx_pred, idx_F)) = F_st(2, :) - V_st(2, idx_pred);
@@ -72,7 +74,7 @@ A_st = sparse(A_st);
         t = [I_st(2) V_Om(2, :)];
     
         % check bounds
-        filt = s >= 0 & s <= s_max & t <= t_end_max;
+        filt = s >= 0 & s <= s_max & t >= t_end_min & t <= t_end_max;
         idx = find(filt);
         n_ = size(idx, 2);
         
