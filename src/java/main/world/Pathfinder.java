@@ -62,6 +62,10 @@ public class Pathfinder {
 			&& startingTime.compareTo(latestFinishTime) < 0
 			&& maxSpeed > 0.;
 	}
+	
+	public boolean isPathFound() {
+		return trajectory != null;
+	}
 
 	public boolean isMinimumTime() {
 		return minimumTime;

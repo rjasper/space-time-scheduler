@@ -23,9 +23,9 @@
 I = [0; 0];
 F = [8; 6];
 
-% t_F = 12;
-% v_max = 4;
+t_max = 12;
 v_max = 1.4;
+t_spare = 0;
 
 Os = {
     [1 1; 4 1; 4 3; 1 3]'
@@ -57,7 +57,7 @@ I_st = [0 0]';
 % F_st = [L t_F]';
 
 % [A_st, V_st] = directed_vgraph(I_st, F_st, Om_st, L, v_max);
-[A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, L, v_max);
+[A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, L, t_max, v_max, t_spare);
 [d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
 [~, idx_dmin] = min(d_st(idx_F));
 idx_F = idx_F(idx_dmin);

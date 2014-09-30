@@ -86,15 +86,18 @@ A_st = sparse(A_st);
         [~, ~, ~, ~, S_xT, B, ~] = ...
             cut_multipolygon(V_Om, vids, [s_max 0 s_max 1]');
         % bridge starts and ends
-        b1 = S_xT(B(1:end-1));
-        b2 = S_xT(B(2:end)+1);
+        b1 = S_xT(B(1:end));
+        S_xT_ = S_xT(2:end);
+        b2 = S_xT_(B(1:end-1));
         
+        filt = false(1, n_);
         for k = 1:n_
             % does time interval (t, t+t_spare) collide with obstacle?
-            filt(k) = ~any(t(k) > b2 & t(k) + t_spare < b1);
+            filt(k) = ~any(t_F(k) < b2 & t_F(k) + t_spare > b1);
         end
         idx = idx(filt);
         n_ = size(idx, 2);
+        F = F(:, filt);
         
         % check visibility
         filt_l = cellfun(@(i) pid ~= pid(i) | (vid ~= pred(i) & vid ~= vid(i)), ...
