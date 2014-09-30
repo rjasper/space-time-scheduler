@@ -1,5 +1,7 @@
 package world;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,6 +46,10 @@ public class World {
 		Geometry map = _getMap();
 		
 		return geomFactory().createGeometry(map);
+	}
+	
+	public Collection<Polygon> getPolygonMap() {
+		return Collections.unmodifiableCollection( getObstacles() );
 	}
 	
 	Geometry _getMap() {

@@ -1,4 +1,4 @@
-function [xyt, evasions] = pathfinder_mt(I, F, t_start, t_end, v_max, t_spare, Os, Om)
+function [xyt, evasions] = pathfinder_mt(I, F, t_start, t_end_min, t_end_max, v_max, t_spare, Os, Om)
 
 [A, V] = vgraph(I, F, Os);
 [d, pred] = dijkstra_sp(A, 1);
@@ -13,7 +13,7 @@ L = sum(path_length(V, path));
 
 I_st = [0 t_start]';
 
-[A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, L, t_end, v_max, t_spare);
+[A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, L, t_end_min, t_end_max, v_max, t_spare);
 [d_st, pred_st] = dijkstra_sp(A_st, 1); % from I_st
 [d_min, idx_dmin] = min(d_st(idx_F));
 

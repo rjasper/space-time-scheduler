@@ -41,6 +41,8 @@ public class DynamicWorldBuilderTest {
 		
 		LocalDateTime endTime = timeFact.second(15);
 		
+		// TODO fix addition of task
+		
 		w1.addTask(t1);
 		w1.addTask(t2);
 		w2.addTask(t3);

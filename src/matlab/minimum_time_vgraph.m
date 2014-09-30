@@ -1,4 +1,4 @@
-function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, t_max, v_max, t_spare)
+function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, t_end_min, t_end_max, v_max, t_spare)
 
 V_Om = [Om_st{:}];
 n_V_Om = size(V_Om, 2);
@@ -72,7 +72,7 @@ A_st = sparse(A_st);
         t = [I_st(2) V_Om(2, :)];
     
         % check bounds
-        filt = s >= 0 & s <= s_max & t <= t_max;
+        filt = s >= 0 & s <= s_max & t <= t_end_max;
         idx = find(filt);
         n_ = size(idx, 2);
         

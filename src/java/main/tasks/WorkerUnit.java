@@ -1,9 +1,13 @@
 package tasks;
 
+import static util.Comparables.*;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +17,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import world.Pathfinder;
 import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Point;
@@ -62,6 +67,18 @@ public class WorkerUnit {
 		return Collections.unmodifiableMap(tasks);
 	}
 	
+	public Task getFloorTask(LocalDateTime time) {
+		Entry<LocalDateTime, Task> entry = _getTasks().floorEntry(time);
+		
+		return entry == null ? null : entry.getValue();
+	}
+	
+	public Task getCeilingTask(LocalDateTime time) {
+		Entry<LocalDateTime, Task> entry = _getTasks().ceilingEntry(time);
+		
+		return entry == null ? null : entry.getValue();
+	}
+	
 	public Task getLastTask() {
 		Entry<LocalDateTime, Task> entry = _getTasks().lastEntry();
 		
@@ -80,66 +97,125 @@ public class WorkerUnit {
 		return trajectories;
 	}
 
-	public boolean addTask(Task task) {
-		LocalDateTime time = task.getStartTime();
-		
-		boolean status = planTrajectoryToTask(task);
-		
-		if (status)
-			_getTasks().put(time, task);
-		
-		return status;
-	}
+//	public boolean addTask(Task task) {
+//		LocalDateTime time = task.getStartTime();
+//		
+//		boolean status = planTrajectoryToTask(task);
+//		
+//		if (status)
+//			_getTasks().put(time, task);
+//		
+//		return status;
+//	}
 	
-	private boolean planTrajectoryToTask(Task task) {
-		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
-		TreeMap<LocalDateTime, Task> tasks = _getTasks();
+	public void addTask(Task task, Trajectory toTask, Trajectory fromTask) {
 		Map<Task, Trajectory> trajectories = _getTrajectories();
 		
-		Entry<LocalDateTime, Task> predEntry = tasks.floorEntry(task.getStartTime());
-		Entry<LocalDateTime, Task> succEntry   = tasks.ceilingEntry(task.getFinishTime());
-		Task pred = predEntry == null ? null : predEntry.getValue();
-		Task succ = succEntry == null ? null : succEntry.getValue();
+		LocalDateTime startTime = task.getStartTime();
+		Task pred = getFloorTask(startTime);
+		Task succ = getCeilingTask(startTime);
 		
-		// TODO implement proper path planning
-		// TODO reminder: when building dynamic world, end time must include work time
+		_getTasks().put(startTime, task);
+		trajectories.put(pred, toTask);
 		
-		// trajectory to new task
-		
-		LocalDateTime startTime, finishTime;
-		Point startLocation, finishLocation;
-		
-		// if there is no predecessor use initial position and time
-		if (pred == null) {
-			startTime = getInitialTime();
-			startLocation = getInitialLocation();
-		} else {
-			startTime = pred.getFinishTime();
-			startLocation = pred.getLocation();
-		}
-		
-		finishTime = task.getStartTime();
-		finishLocation = task.getLocation();
-		
-		Trajectory toTask = new Trajectory(
-			fact.lineString(startLocation, finishLocation),
-			Arrays.asList(startTime, finishTime));
-		
-		trajectories.put(task, toTask);
-		
-		// trajectory to following task
-		
-		if (succ != null) {
-			Trajectory toSucc = new Trajectory(
-				fact.lineString(task.getLocation(), succ.getLocation()),
-				Arrays.asList(task.getFinishTime(), succ.getStartTime())
-			);
-			
-			trajectories.put(succ, toSucc);
-		}
-		
-		return true;
+		if (succ != null)
+			trajectories.put(succ, fromTask);
 	}
+	
+//	private boolean planTrajectoryToTask(Point location, LocalDateTime earliest, LocalDateTime latest, Duration duration) {
+//		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
+//		TreeMap<LocalDateTime, Task> tasks = _getTasks();
+//		Map<Task, Trajectory> trajectories = _getTrajectories();
+//		double maxSpeed = getMaxSpeed();
+//		Pathfinder pf = Pathfinder.getInstance();
+//		
+////		Duration duration = task.getDuration();
+////		Point location = task.getLocation();
+////		Entry<LocalDateTime, Task> predEntry = tasks.floorEntry(task.getStartTime());
+////		Entry<LocalDateTime, Task> succEntry   = tasks.ceilingEntry(task.getFinishTime());
+//		Entry<LocalDateTime, Task> predEntry = tasks.floorEntry(earliest);
+//		Entry<LocalDateTime, Task> succEntry = tasks.ceilingEntry(earliest);
+//		Task pred = predEntry == null ? null : predEntry.getValue();
+//		Task succ = succEntry == null ? null : succEntry.getValue();
+//		
+//		// TODO implement proper path planning
+//		// TODO reminder: when building dynamic world, end time must include work time
+//		
+//		// trajectory to new task
+//		
+//		LocalDateTime startTime, finishTime;
+//		Point startLocation, finishLocation;
+//		
+//		// if there is no predecessor use initial position and time
+//		if (pred == null) {
+//			startTime = getInitialTime();
+//			startLocation = getInitialLocation();
+//		} else {
+//			startTime = pred.getFinishTime();
+//			startLocation = pred.getLocation();
+//		}
+//		
+////		finishTime = task.getStartTime();
+////		finishLocation = task.getLocation();
+//		
+//		// TODO calculate latest finish time
+//		LocalDateTime latestFinishTime = min(latest.plus(duration), succ.getStartTime());
+//		
+//		pf.useMinimumFinishTime();
+//		
+//		pf.setStartingPoint(startLocation);
+//		pf.setFinishPoint(location);
+//		pf.setStartingTime(startTime);
+//		pf.setEarliestFinishTime(earliest);
+//		pf.setLatestFinishTime(latestFinishTime);
+//		pf.setSpareTime(duration);
+//		pf.setMaxSpeed(maxSpeed);
+//		
+//		pf.calculatePath();
+//		
+//		if (!pf.isPathFound())
+//			return false;
+//		
+//		Trajectory toTask = pf.getTrajectory();
+//		
+////		Trajectory toTask = new Trajectory(
+////			fact.lineString(startLocation, finishLocation),
+////			Arrays.asList(startTime, finishTime));
+//		
+//		// TODO extract time
+//		LocalDateTime taskStartTime = toTask.getLastTime();
+//		
+//		// trajectory to following task
+//		
+//		if (succ != null) {
+////			Trajectory toSucc = new Trajectory(
+////				fact.lineString(task.getLocation(), succ.getLocation()),
+////				Arrays.asList(task.getFinishTime(), succ.getStartTime())
+////			);
+//			
+//			pf.useSpecifiedFinishTime();
+//			
+//			pf.setStartingPoint(location);
+//			pf.setFinishPoint(succ.getLocation());
+//			pf.setStartingTime(taskStartTime.plus(duration));
+//			pf.setLatestFinishTime(succ.getFinishTime());
+//			pf.setMaxSpeed(maxSpeed); // here actually redundant
+//			
+//			pf.calculatePath();
+//			
+//			if (!pf.isPathFound())
+//				return false;
+//			
+//			Trajectory toSucc = pf.getTrajectory();
+//			
+//			trajectories.put(succ, toSucc);
+//		}
+//		
+//		// TODO don't put yet
+//		trajectories.put(task, toTask);
+//		
+//		return true;
+//	}
 
 	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {
 		TreeMap<LocalDateTime, Task> tasks = _getTasks();

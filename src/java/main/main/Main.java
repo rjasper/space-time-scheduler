@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jts.geom.factories.StaticJtsFactories;
-import pickers.LocationPicker;
+import pickers.LocationIterator;
 import world.World;
 
 import com.vividsolutions.jts.geom.Coordinate;

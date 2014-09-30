@@ -2,6 +2,7 @@ package pickers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -10,11 +11,10 @@ import com.vividsolutions.jts.geom.Point;
 
 import tasks.IdleSlot;
 import tasks.WorkerUnit;
-
 import static java.lang.Math.ceil;
 import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
-public class WorkerUnitSlotPicker {
+public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.WorkerUnitSlot> {
 	
 	private final Collection<WorkerUnit> workers;
 	
@@ -38,13 +38,13 @@ public class WorkerUnitSlotPicker {
 	
 	private IdleSlot currentSlot = null;
 
-	public WorkerUnitSlotPicker(
+	public WorkerUnitSlotIterator(
 		Collection<WorkerUnit> workers,
 		Point location,
 		LocalDateTime earliestStartTime, LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		this.workers = Collections.unmodifiableCollection(workers);
+		this.workers = new ArrayList<>(workers);
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
@@ -128,11 +128,13 @@ public class WorkerUnitSlotPicker {
 		this.workerIterator = workerIterator;
 	}
 
-	public void next() {
+	public WorkerUnitSlot next() {
 		setCurrentWorker(getNextWorker());
 		setCurrentSlot(getNextSlot());
 		
 		nextSlot();
+		
+		return new WorkerUnitSlot(getCurrentWorker(), getCurrentSlot());
 	}
 	
 	private WorkerUnit nextWorker() {
@@ -207,6 +209,27 @@ public class WorkerUnitSlotPicker {
 			return false;
 		
 		return true;
+	}
+	
+	public static class WorkerUnitSlot {
+		
+		private final WorkerUnit workerUnit;
+		
+		private final IdleSlot idleSlot;
+
+		public WorkerUnitSlot(WorkerUnit workerUnit, IdleSlot idleSlot) {
+			this.workerUnit = workerUnit;
+			this.idleSlot = idleSlot;
+		}
+
+		public WorkerUnit getWorkerUnit() {
+			return workerUnit;
+		}
+
+		public IdleSlot getIdleSlot() {
+			return idleSlot;
+		}
+		
 	}
 	
 }

@@ -32,6 +32,10 @@ public class Trajectory {
 		return times;
 	}
 	
+	public LocalDateTime getLastTime() {
+		return times.get(size()-1);
+	}
+	
 	public int size() {
 		return times.size();
 	}

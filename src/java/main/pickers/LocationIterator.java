@@ -3,6 +3,7 @@ package pickers;
 import static jts.geom.factories.StaticJtsFactories.*;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -11,7 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
 
-public class LocationPicker {
+public class LocationIterator implements Iterator<Point> {
 	
 	private final Geometry space;
 	
@@ -37,7 +38,7 @@ public class LocationPicker {
 		}
 	};
 
-	public LocationPicker(Geometry space, int maxPicks) {
+	public LocationIterator(Geometry space, int maxPicks) {
 		this.space = space;
 		this.maxPicks = maxPicks;
 		

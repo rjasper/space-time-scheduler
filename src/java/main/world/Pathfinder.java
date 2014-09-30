@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import matlab.AccessOperations;
+import matlab.MatlabAccess;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
 
@@ -20,11 +21,17 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class Pathfinder {
 	
+	private static Pathfinder instance = null;
+	
 	private Point startingPoint = null;
 	
 	private Point finishPoint = null;
 	
 	private LocalDateTime startingTime = null;
+	
+	private LocalDateTime finishTime = null;
+	
+	private LocalDateTime earliestFinishTime = null;
 	
 	private LocalDateTime latestFinishTime = null;
 	
@@ -53,13 +60,29 @@ public class Pathfinder {
 		this.access = new AccessOperations(proxy);
 	}
 	
+	public static Pathfinder getInstance() {
+		if (instance == null)
+			instance = new Pathfinder(MatlabAccess.getProxy());
+		
+		return instance;
+	}
+	
 	public boolean isReady() {
 		return startingPoint != null
 			&& finishPoint != null
 			&& startingTime != null
-			&& latestFinishTime != null
-			&& (!minimumTime || spareTime != null)
-			&& startingTime.compareTo(latestFinishTime) < 0
+			&& ((
+				minimumTime
+					&& earliestFinishTime != null
+					&& latestFinishTime != null
+					&& startingTime.compareTo(earliestFinishTime) < 0
+					&& earliestFinishTime.compareTo(latestFinishTime) <= 0
+					&& spareTime != null
+				) || (
+				!minimumTime
+					&& finishTime != null
+					&& startingTime.compareTo(finishTime) < 0
+				))
 			&& maxSpeed > 0.;
 	}
 	
@@ -101,6 +124,22 @@ public class Pathfinder {
 
 	public void setStartingTime(LocalDateTime startingTime) {
 		this.startingTime = startingTime;
+	}
+
+	public LocalDateTime getFinishTime() {
+		return finishTime;
+	}
+
+	public void setFinishTime(LocalDateTime finishTime) {
+		this.finishTime = finishTime;
+	}
+
+	public LocalDateTime getEarliestFinishTime() {
+		return earliestFinishTime;
+	}
+
+	public void setEarliestFinishTime(LocalDateTime earliestFinishTime) {
+		this.earliestFinishTime = earliestFinishTime;
 	}
 
 	public LocalDateTime getLatestFinishTime() {
@@ -223,6 +262,7 @@ public class Pathfinder {
 		Point startingPoint = getStartingPoint();
 		Point finishPoint = getFinishPoint();
 		LocalDateTime startingTime = getStartingTime();
+		LocalDateTime earliestFinishTime = getEarliestFinishTime();
 		LocalDateTime latestFinishTime = getLatestFinishTime();
 		Duration spareTime = getSpareTime();
 		double maxSpeed = getMaxSpeed();
@@ -237,16 +277,19 @@ public class Pathfinder {
 			acc.assingPoint("F", j2mPoint(finishPoint, 2));
 			m.setVariable("v_max", maxSpeed);
 			m.setVariable("t_start", j2mLocalDateTime(startingTime));
-			m.setVariable("t_end", j2mLocalDateTime(latestFinishTime));
 			acc.assignStaticObstacles("Os", j2mStaticObstacles(staticObstacles));
 			acc.assignDynamicObstacles("Om", j2mDynamicObstacles(dynamicObstacles));
 			
 			Object[] result;
 			if (isMinimumTime()) {
 				m.setVariable("t_spare", j2mDuration(spareTime));
+				m.setVariable("t_end_min", j2mLocalDateTime(earliestFinishTime));
+				m.setVariable("t_end_max", j2mLocalDateTime(latestFinishTime));
 				
-				result = m.returningEval("pathfinder_mt(I, F, t_start, t_end, v_max, t_spare, Os, Om)", 2);
+				result = m.returningEval("pathfinder_mt(I, F, t_start, t_end_min, t_end_max, v_max, t_spare, Os, Om)", 2);
 			} else {
+				m.setVariable("t_end", j2mLocalDateTime(finishTime));
+				
 				result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
 			}
 			
