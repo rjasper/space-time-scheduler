@@ -1,6 +1,7 @@
 package world;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.LineString;
@@ -36,11 +37,15 @@ public class DynamicObstacle {
 	}
 
 	public LineString getPath2d() {
-		return trajectory.getPath2d();
+		return trajectory == null
+			? null
+			: trajectory.getPath2d();
 	}
 
 	public List<LocalDateTime> getTimes() {
-		return trajectory.getTimes();
+		return trajectory == null
+			? Collections.emptyList()
+			: trajectory.getTimes();
 	}
 
 	@Override

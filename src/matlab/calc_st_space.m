@@ -1,26 +1,27 @@
 function Om_st = calc_st_space(Om, path)
 
 N_Om = size(Om, 2);
+
+if N_Om == 0
+    Om_st = cell(1, 0);
+    return;
+end
+
 N_path = size(path, 2);
 N_segs = N_path - 1;
 
-% v = cellfun(@calc_velocity, {Om{:}.path}, 'UniformOutput', false);
 v = cellfun(@calc_velocity, {Om.path}, 'UniformOutput', false);
 l = calc_path_length(path);
 s = cumsum([0 l]);
 
 % debug
-j = 0;
+% j = 0;
 
 Om_st = cellfun(@calc_Om_st, ...
-...%     {Om{:}.polygon}, ...
-...%     {Om{:}.path}, ...
     {Om.polygon}, ...
     {Om.path}, ...
     v, ...
     'UniformOutput', false);
-
-% Om_st = [Om_st{:}];
 
     function v = calc_velocity(path)
         dpath = diff(path, 1, 2);
@@ -73,7 +74,7 @@ Om_st = cellfun(@calc_Om_st, ...
 %         Om_st = [Om_st{:}];
         
         function [V_st, vid, vid_S_tmin, vid_S_tmax] = calc_Om_st_v(p1, p2, v_j)
-            j = j + 1; % debug
+%             j = j + 1; % debug
             
             xy1 = p1(1:2);
             xy2 = p2(1:2);

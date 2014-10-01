@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import com.vividsolutions.jts.geom.Point;
@@ -16,7 +15,7 @@ import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
 public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.WorkerUnitSlot> {
 	
-	private final Collection<WorkerUnit> workers;
+//	private final Collection<WorkerUnit> workers;
 	
 	private final Point location;
 	
@@ -44,13 +43,13 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		LocalDateTime earliestStartTime, LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		this.workers = new ArrayList<>(workers);
+//		this.workers = new ArrayList<>(workers);
+		this.workerIterator = new ArrayList<>(workers).iterator();
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
 		this.duration = duration;
 		
-		this.workerIterator = workers.iterator();
 		
 		nextWorker();
 		nextSlot();
@@ -60,9 +59,9 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		return getNextWorker() != null;
 	}
 
-	private Collection<WorkerUnit> getWorkers() {
-		return workers;
-	}
+//	private Collection<WorkerUnit> getWorkers() {
+//		return workers;
+//	}
 
 	private Point getLocation() {
 		return location;
@@ -124,9 +123,9 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		this.currentSlot = currentSlot;
 	}
 
-	private void setWorkerIterator(Iterator<WorkerUnit> workerIterator) {
-		this.workerIterator = workerIterator;
-	}
+//	private void setWorkerIterator(Iterator<WorkerUnit> workerIterator) {
+//		this.workerIterator = workerIterator;
+//	}
 
 	public WorkerUnitSlot next() {
 		setCurrentWorker(getNextWorker());

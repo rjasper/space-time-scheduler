@@ -1,7 +1,5 @@
 package tasks;
 
-import static util.Comparables.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -153,25 +151,19 @@ public class TaskPlanner {
 			startLocation = pred.getLocation();
 		}
 		
-		LocalDateTime earliestFinishTime = earliestStartTime.plus(duration);
-		LocalDateTime latestFinishTime = latestStartTime.plus(duration);
-		
-		if (succ != null)
-			latestFinishTime = min(latestFinishTime, succ.getStartTime());
-		
 		pf.useMinimumFinishTime();
 		
 		pf.setStartingPoint(startLocation);
 		pf.setFinishPoint(location);
 		pf.setStartingTime(startTime);
-		pf.setEarliestFinishTime(earliestFinishTime);
-		pf.setLatestFinishTime(latestFinishTime);
+		pf.setEarliestFinishTime(earliestStartTime);
+		pf.setLatestFinishTime(latestStartTime);
 		pf.setSpareTime(duration);
 		pf.setMaxSpeed(maxSpeed);
 		
-		pf.calculatePath();
+		boolean status = pf.calculatePath();
 		
-		if (!pf.isPathFound())
+		if (!status)
 			return false;
 		
 		Trajectory toTask = pf.getTrajectory();
@@ -191,9 +183,9 @@ public class TaskPlanner {
 			pf.setFinishTime(succ.getStartTime());
 			pf.setMaxSpeed(maxSpeed); // here actually redundant
 			
-			pf.calculatePath();
+			status = pf.calculatePath();
 			
-			if (!pf.isPathFound())
+			if (!status)
 				return false;
 			
 			fromTask = pf.getTrajectory();

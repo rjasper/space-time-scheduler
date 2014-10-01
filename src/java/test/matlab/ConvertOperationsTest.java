@@ -28,44 +28,46 @@ import com.vividsolutions.jts.io.WKTReader;
 
 public class ConvertOperationsTest {
 	
-	private static MatlabProxyFactory factory;
-	
-	private MatlabProxy proxy;
-	
-	private static MatlabProxyFactory getFactory() {
-		return factory;
-	}
-
-	private static void setFactory(MatlabProxyFactory factory) {
-		ConvertOperationsTest.factory = factory;
-	}
+//	private static MatlabProxyFactory factory;
+//	
+	private static MatlabProxy proxy;
+//	
+//	private static MatlabProxyFactory getFactory() {
+//		return factory;
+//	}
+//
+//	private static void setFactory(MatlabProxyFactory factory) {
+//		ConvertOperationsTest.factory = factory;
+//	}
 
 	private MatlabProxy getProxy() {
 		return proxy;
 	}
 
-	private void setProxy(MatlabProxy proxy) {
-		this.proxy = proxy;
-	}
+//	private void setProxy(MatlabProxy proxy) {
+//		this.proxy = proxy;
+//	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		MatlabProxyFactoryOptions options = new MatlabProxyFactoryOptions.Builder()
-		.setUsePreviouslyControlledSession(true)
-		.setMatlabStartingDirectory(new File("src/matlab"))
-//		.setHidden(true) // messes with starting directory
-		.build();
+		proxy = MatlabAccess.getProxy();
 		
-		setFactory(new MatlabProxyFactory(options));
+//		MatlabProxyFactoryOptions options = new MatlabProxyFactoryOptions.Builder()
+//		.setUsePreviouslyControlledSession(true)
+//		.setMatlabStartingDirectory(new File("src/matlab"))
+////		.setHidden(true) // messes with starting directory
+//		.build();
+//		
+//		setFactory(new MatlabProxyFactory(options));
 	}
 	
-	@Before
-	public void setUp() throws MatlabConnectionException {
-		MatlabProxyFactory factory = getFactory();
-		MatlabProxy proxy = factory.getProxy();
-		
-		setProxy(proxy);
-	}
+//	@Before
+//	public void setUp() throws MatlabConnectionException {
+//		MatlabProxyFactory factory = getFactory();
+//		MatlabProxy proxy = factory.getProxy();
+//		
+//		setProxy(proxy);
+//	}
 	
 	@After
 	public void tearDown() throws MatlabInvocationException {

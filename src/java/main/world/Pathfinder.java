@@ -15,7 +15,6 @@ import matlab.MatlabAccess;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
 
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -86,9 +85,9 @@ public class Pathfinder {
 			&& maxSpeed > 0.;
 	}
 	
-	public boolean isPathFound() {
-		return trajectory != null;
-	}
+//	public boolean isPathFound() {
+//		return trajectory != null;
+//	}
 
 	public boolean isMinimumTime() {
 		return minimumTime;
@@ -255,7 +254,7 @@ public class Pathfinder {
 		return access;
 	}
 	
-	public void calculatePath() {
+	public boolean calculatePath() {
 		if (!isReady())
 			throw new IllegalStateException("invalid parameters");
 		
@@ -302,10 +301,15 @@ public class Pathfinder {
 			Trajectory trajectory = m2jTrajectory(trajectoryData);
 			setTrajectory(trajectory.isEmpty() ? null : trajectory);
 			storeEvasions(evasions);
+			
+			return trajectory != null;
 		} catch (MatlabInvocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(-1);
 		}
+		
+		return false; // unreachable
 	}
 	
 	private void storeEvasions(int[] evasions) {

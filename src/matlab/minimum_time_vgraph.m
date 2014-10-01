@@ -1,7 +1,11 @@
 function [A_st, V_st, idx_F, pid] = minimum_time_vgraph(I_st, Om_st, s_max, t_end_min, t_end_max, v_max, t_spare)
 
-F_st = [0; t_end_min];
-V_Om = [Om_st{:}];
+F_st = [s_max; t_end_min];
+if numel(Om_st) == 0
+    V_Om = NaN(2, 0);
+else
+    V_Om = [Om_st{:}];
+end
 n_V_Om = size(V_Om, 2);
 V_st = [I_st V_Om F_st];
 n_V = size(V_st, 2);
@@ -37,7 +41,7 @@ for i = 1:n_V_Om+2
     for j = 1:n_V_Om+2
 %     for j = 1:n_V
         if i == j
-            continue
+            continue;
         end
         
         if V_st(1, j) < 0 || V_st(1, j) > s_max %% TODO: use eps
@@ -62,11 +66,12 @@ for i = 1:n_V_Om+2
     end
 end
 
-idx_F = 3+n_V_Om:n_V;
+idx_F_ = 3+n_V_Om:n_V;
 
 % calculation of edges to final nodes
-A_st(sub2ind(size(A_st), idx_pred, idx_F)) = F_st(2, :) - V_st(2, idx_pred);
+A_st(sub2ind(size(A_st), idx_pred, idx_F_)) = F_st(2, :) - V_st(2, idx_pred);
 
+idx_F = [2+n_V_Om idx_F_];
 A_st = sparse(A_st);
 
     function [F, idx_pred] = determine_final_nodes
@@ -74,7 +79,7 @@ A_st = sparse(A_st);
         t = [I_st(2) V_Om(2, :)];
     
         % check bounds
-        filt = s >= 0 & s <= s_max & t >= t_end_min & t <= t_end_max;
+        filt = s >= 0 & s <= s_max & t <= t_end_max;
         idx = find(filt);
         n_ = size(idx, 2);
         
@@ -82,6 +87,11 @@ A_st = sparse(A_st);
         s_F = repmat(s_max, 1, n_);
         t_F = t(filt) + (s_max - s(filt)) / v_max;
         F = [s_F; t_F];
+        
+        filt = t_F >= t_end_min & t_F <= t_end_max;
+        idx = idx(filt);
+        n_ = size(idx, 2);
+        F = F(:, filt);
         
         % check spare time
         vids = calc_vids(Om_st);
@@ -100,6 +110,10 @@ A_st = sparse(A_st);
         idx = idx(filt);
         n_ = size(idx, 2);
         F = F(:, filt);
+        
+        if numel(F) == 0
+            F = NaN(2, 0);
+        end
         
         % check visibility
         filt_l = cellfun(@(i) pid ~= pid(i) | (vid ~= pred(i) & vid ~= vid(i)), ...
@@ -175,6 +189,11 @@ A_st = sparse(A_st);
     end
 
     function vids = calc_vids(P)
+        if numel(P) == 0
+            vids = zeros(1, 0);
+            return;
+        end
+        
         n_P = cellfun(@(p) size(p, 2), P);
         offset = cumsum([0 n_P(1:end-1)]);
         vids = arrayfun(@(n_P, offset) (1:n_P)+offset, ...
