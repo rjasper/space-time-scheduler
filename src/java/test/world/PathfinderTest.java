@@ -2,7 +2,6 @@ package world;
 
 import static java.time.Month.JANUARY;
 
-import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -10,14 +9,10 @@ import java.util.List;
 
 import jts.geom.factories.StaticJtsFactories;
 import matlab.MatlabAccess;
-import matlabcontrol.MatlabConnectionException;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
-import matlabcontrol.MatlabProxyFactory;
-import matlabcontrol.MatlabProxyFactoryOptions;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,25 +24,11 @@ import com.vividsolutions.jts.io.WKTReader;
 
 public class PathfinderTest {
 	
-//	private static MatlabProxyFactory factory;
-	
 	private static MatlabProxy proxy;
 	
-//	private static MatlabProxyFactory getFactory() {
-//		return factory;
-//	}
-//
-//	private static void setFactory(MatlabProxyFactory factory) {
-//		PathfinderTest.factory = factory;
-//	}
-
 	private MatlabProxy getProxy() {
 		return proxy;
 	}
-
-//	private void setProxy(MatlabProxy proxy) {
-//		this.proxy = proxy;
-//	}
 	
 	private static WKTReader wkt() {
 		return StaticJtsFactories.wktReader();
@@ -56,23 +37,7 @@ public class PathfinderTest {
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		proxy = MatlabAccess.getProxy();
-		
-//		MatlabProxyFactoryOptions options = new MatlabProxyFactoryOptions.Builder()
-//		.setUsePreviouslyControlledSession(true)
-//		.setMatlabStartingDirectory(new File("src/matlab"))
-////		.setHidden(true) // messes with starting directory
-//		.build();
-//		
-//		setFactory(new MatlabProxyFactory(options));
 	}
-
-//	@Before
-//	public void setUp() throws MatlabConnectionException {
-//		MatlabProxyFactory factory = getFactory();
-//		MatlabProxy proxy = factory.getProxy();
-//		
-//		setProxy(proxy);
-//	}
 	
 	@After
 	public void tearDown() throws MatlabInvocationException {

@@ -7,16 +7,11 @@ import jts.geom.factories.StaticJtsFactories;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class WorldMapTest {
-	
-	private static GeometryFactory factory() {
-		return StaticJtsFactories.floatGeometryFactory();
-	}
 	
 	private static WKTReader wkt() {
 		return StaticJtsFactories.wktReader();

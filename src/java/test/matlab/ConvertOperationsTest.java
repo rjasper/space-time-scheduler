@@ -5,18 +5,14 @@ import static matlab.ConvertOperations.*;
 import static jts.geom.PolygonFixtures.*;
 import static world.DynamicObstacleFixtures.*;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
 import jts.geom.factories.StaticJtsFactories;
 import matlab.data.DynamicObstacleData;
-import matlabcontrol.MatlabConnectionException;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
-import matlabcontrol.MatlabProxyFactory;
-import matlabcontrol.MatlabProxyFactoryOptions;
 
 import org.junit.*;
 
@@ -28,46 +24,16 @@ import com.vividsolutions.jts.io.WKTReader;
 
 public class ConvertOperationsTest {
 	
-//	private static MatlabProxyFactory factory;
-//	
 	private static MatlabProxy proxy;
-//	
-//	private static MatlabProxyFactory getFactory() {
-//		return factory;
-//	}
-//
-//	private static void setFactory(MatlabProxyFactory factory) {
-//		ConvertOperationsTest.factory = factory;
-//	}
 
 	private MatlabProxy getProxy() {
 		return proxy;
 	}
 
-//	private void setProxy(MatlabProxy proxy) {
-//		this.proxy = proxy;
-//	}
-
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		proxy = MatlabAccess.getProxy();
-		
-//		MatlabProxyFactoryOptions options = new MatlabProxyFactoryOptions.Builder()
-//		.setUsePreviouslyControlledSession(true)
-//		.setMatlabStartingDirectory(new File("src/matlab"))
-////		.setHidden(true) // messes with starting directory
-//		.build();
-//		
-//		setFactory(new MatlabProxyFactory(options));
 	}
-	
-//	@Before
-//	public void setUp() throws MatlabConnectionException {
-//		MatlabProxyFactory factory = getFactory();
-//		MatlabProxy proxy = factory.getProxy();
-//		
-//		setProxy(proxy);
-//	}
 	
 	@After
 	public void tearDown() throws MatlabInvocationException {
