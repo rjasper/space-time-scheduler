@@ -21,7 +21,7 @@ Om = struct( ...
 %% calculation
 
 [xyt, evasions] = pathfinder(I, F, t_start, t_end, v_max, Os, Om);
-[xyt_mt, evasions_mt] = pathfinder_mt(I, F, t_start, v_max, Os, Om);
+% [xyt_mt, evasions_mt] = pathfinder_mt(I, F, t_start, v_max, Os, Om);
 
 %% plot
 
@@ -30,5 +30,5 @@ clf reset;
 draw3D_obstacles(Os, Om, t_end);
 hold on;
 plot3(xyt(1, :), xyt(2, :), xyt(3, :), 'b');
-plot3(xyt_mt(1, :), xyt_mt(2, :), xyt_mt(3, :), 'r');
+% plot3(xyt_mt(1, :), xyt_mt(2, :), xyt_mt(3, :), 'r');
 hold off;

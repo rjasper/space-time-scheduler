@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class Pathfinder {
 	
-	private static Pathfinder instance = null;
+//	private static Pathfinder instance = null;
 	
 	private Point startingPoint = null;
 	
@@ -54,17 +54,21 @@ public class Pathfinder {
 	
 	private final AccessOperations access;
 	
+	public Pathfinder() {
+		this(MatlabAccess.getProxy());
+	}
+	
 	public Pathfinder(MatlabProxy proxy) {
 		this.proxy = proxy;
 		this.access = new AccessOperations(proxy);
 	}
 	
-	public static Pathfinder getInstance() {
-		if (instance == null)
-			instance = new Pathfinder(MatlabAccess.getProxy());
-		
-		return instance;
-	}
+//	public static Pathfinder getInstance() {
+//		if (instance == null)
+//			instance = new Pathfinder(MatlabAccess.getProxy());
+//		
+//		return instance;
+//	}
 	
 	public boolean isReady() {
 		return startingPoint != null
@@ -74,7 +78,7 @@ public class Pathfinder {
 				minimumTime
 					&& earliestFinishTime != null
 					&& latestFinishTime != null
-					&& startingTime.compareTo(earliestFinishTime) < 0
+					&& startingTime.compareTo(earliestFinishTime) <= 0
 					&& earliestFinishTime.compareTo(latestFinishTime) <= 0
 					&& spareTime != null
 				) || (
@@ -302,7 +306,7 @@ public class Pathfinder {
 			setTrajectory(trajectory.isEmpty() ? null : trajectory);
 			storeEvasions(evasions);
 			
-			return trajectory != null;
+			return !trajectory.isEmpty();
 		} catch (MatlabInvocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

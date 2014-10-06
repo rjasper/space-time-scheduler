@@ -26,7 +26,7 @@ public class Scheduler {
 	
 	private final List<WorkerUnit> workers;
 
-	public Scheduler(World world, List<WorkerUnit> workers) {
+	public Scheduler(World world, Collection<WorkerUnit> workers) {
 		if (!world.isReady())
 			throw new IllegalStateException("world must be ready");
 		if (workers == null)
@@ -71,10 +71,12 @@ public class Scheduler {
 			for (WorkerUnitSlot ws : workerSlots) {
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
+				LocalDateTime slotStartTime = s.getStartTime();
+				LocalDateTime slotFinishTime = s.getFinishTime();
 
 				tp.setWorker(w);
-				tp.setEarliestStartTime( max(earliest, s.getStartTime()) );
-				tp.setLatestStartTime( min(latest, s.getFinishTime()) );
+				tp.setEarliestStartTime( max(earliest, slotStartTime) );
+				tp.setLatestStartTime( slotFinishTime == null ? latest : min(latest, slotFinishTime) );
 				
 				boolean status = tp.plan();
 				

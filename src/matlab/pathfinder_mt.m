@@ -4,15 +4,24 @@ function [xyt, evasions] = pathfinder_mt(I, F, t_start, t_end_min, t_end_max, v_
 [d, pred] = dijkstra_sp(A, 1);
 path = pred2path(pred, 2);
 
+if numel(path) < 2
+    xyt = NaN(3, 0);
+    evasions = zeros(1, 0);
+    return;
+end
+
 if numel(Om) == 0
     Om_st = cell(1, 0);
     idx_Om_st = zeros(1, 0);
 else
     Om_st = calc_st_space(Om, V(:, path));
 
-    unrolled = unroll(Om_st);
-    Om_st = unrolled(2, :);
-    idx_Om_st = [unrolled{1, :}];
+    [Om_st, idx_Om_st] = unroll(Om_st);
+    
+    if numel(Om_st) == 0
+        Om_st = cell(1, 0);
+        idx_Om_st = zeros(1, 0);
+    end
 end
 
 L = sum(path_length(V, path));

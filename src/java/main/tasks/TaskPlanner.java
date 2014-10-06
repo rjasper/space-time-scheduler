@@ -127,7 +127,7 @@ public class TaskPlanner {
 			throw new IllegalStateException("not ready yet");
 		
 		double maxSpeed = worker.getMaxSpeed();
-		Pathfinder pf = Pathfinder.getInstance();
+		Pathfinder pf = new Pathfinder();
 		
 		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
 		

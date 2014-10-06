@@ -44,7 +44,7 @@ public class PathfinderTest {
 		MatlabProxy m = getProxy();
 		
 		m.feval("clear", "all");
-		m.disconnect();
+//		m.disconnect();
 	}
 
 	@Test
@@ -76,6 +76,7 @@ public class PathfinderTest {
 		pf.setStartingPoint(startingPoint);
 		pf.setFinishPoint(finishPoint);
 		pf.setStartingTime(startingTime);
+		pf.setEarliestFinishTime(finishTime);
 		pf.setLatestFinishTime(finishTime);
 		pf.setSpareTime(duration);
 		pf.setMaxSpeed(maxSpeed);

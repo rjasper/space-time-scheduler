@@ -74,7 +74,7 @@ public class LocationIterator implements Iterator<Point> {
 	public boolean hasNext() {
 		Point point = getNextPoint();
 		
-		return point == null;
+		return point != null;
 	}
 	
 	private Geometry getSpace() {
@@ -114,7 +114,7 @@ public class LocationIterator implements Iterator<Point> {
 	}
 	
 	public Point next() {
-		if (hasNext())
+		if (!hasNext())
 			throw new IllegalStateException("maximum picks reached");
 		
 		int pick = getPicks() + 1;

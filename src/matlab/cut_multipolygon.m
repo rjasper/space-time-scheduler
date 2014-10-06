@@ -39,7 +39,8 @@ vid_S = cellfun(@calc_index, vid_S, ncum_C_, 'UniformOutput', false);
 %     'UniformOutput', false);
 % eid_C = [eid_C{:}];
 
-eid_C = unroll(eid_C);
+[eid_C, idx_eid_C] = unroll(eid_C);
+eid_C = [idx_eid_C; eid_C];
 
 [C, vid_L, vid_R, vid_S, S_xT, B] = ...
     cellflatten(C, vid_L, vid_R, vid_S, S_xT, B);

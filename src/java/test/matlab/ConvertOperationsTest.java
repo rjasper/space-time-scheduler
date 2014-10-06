@@ -40,7 +40,7 @@ public class ConvertOperationsTest {
 		MatlabProxy m = getProxy();
 		
 		m.feval("clear", "all");
-		m.disconnect();
+//		m.disconnect();
 	}
 
 	@Test

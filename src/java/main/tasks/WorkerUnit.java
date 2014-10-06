@@ -92,6 +92,7 @@ public class WorkerUnit {
 
 	public void addTask(Task task, Trajectory toTask, Trajectory fromTask) {
 		// TODO check validity of trajectories
+		// TODO what if a trajectory is a single point?
 		
 		Map<Task, Trajectory> trajectories = _getTrajectories();
 		

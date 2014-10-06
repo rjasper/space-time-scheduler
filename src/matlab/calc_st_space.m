@@ -23,6 +23,12 @@ Om_st = cellfun(@calc_Om_st, ...
     v, ...
     'UniformOutput', false);
 
+        
+% dirty hack check
+if numel(Om_st) == 1 && numel(Om_st{1}) == 0
+    Om_st = cell(1, 0);
+end
+
     function v = calc_velocity(path)
         dpath = diff(path, 1, 2);
         
@@ -107,7 +113,11 @@ Om_st = cellfun(@calc_Om_st, ...
                 
                 e_s = vec_i / l(i);
                 
-                alpha = vec_vec_angle(vec_i, v_j);
+                if all(vec_i == 0) || all(v_j == 0)
+                    alpha = 0;
+                else
+                    alpha = vec_vec_angle(vec_i, v_j);
+                end
                 
                 if alpha == 0 || alpha == pi % TODO: define epsilon > 0
                     direction = 'parallel';

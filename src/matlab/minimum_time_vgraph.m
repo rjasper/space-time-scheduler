@@ -69,7 +69,7 @@ end
 idx_F_ = 3+n_V_Om:n_V;
 
 % calculation of edges to final nodes
-A_st(sub2ind(size(A_st), idx_pred, idx_F_)) = F_st(2, :) - V_st(2, idx_pred);
+A_st(sub2ind(size(A_st), idx_pred, idx_F_)) = F_st_(2, :) - V_st(2, idx_pred);
 
 idx_F = [2+n_V_Om idx_F_];
 A_st = sparse(A_st);
