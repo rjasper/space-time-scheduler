@@ -41,5 +41,17 @@ public class LocalDateTimeFactory {
 		
 		return baseTime.plusSeconds(second);
 	}
+
+	public LocalDateTime hour(long hour) {
+		LocalDateTime baseTime = getBaseTime();
+		
+		return baseTime.plusHours(hour);
+	}
+
+	public LocalDateTime time(long hour, long minute) {
+		LocalDateTime baseTime = getBaseTime();
+		
+		return baseTime.plusHours(hour).plusMinutes(minute);
+	}
 	
 }

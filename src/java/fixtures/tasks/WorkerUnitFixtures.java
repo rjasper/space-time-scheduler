@@ -13,19 +13,19 @@ public final class WorkerUnitFixtures {
 	}
 	
 	public static WorkerUnit withTwoTasks1() {
-		WorkerUnit worker = wFact.createWorkerUnit(-3600., 0.);
+		WorkerUnit worker = wFact.createWorkerUnit(0., 0.);
 		
-		wFact.addTaskWithDuration(worker, -3600.,    0., 0L * 3600L, 3L * 3600L);
-		wFact.addTaskWithDuration(worker,     0., 3600., 7L * 3600L, 3L * 3600L);
+		wFact.addTaskWithDuration(worker, -3600.,    0., 2L * 3600L, 3L * 3600L);
+		wFact.addTaskWithDuration(worker,     0., 3600., 9L * 3600L, 3L * 3600L);
 		
 		return worker;
 	}
 	
 	public static WorkerUnit withTwoTasks2() {
-		WorkerUnit worker = wFact.createWorkerUnit(0., -3600.);
+		WorkerUnit worker = wFact.createWorkerUnit(0., 0.);
 		
-		wFact.addTaskWithDuration(worker,    0., -3600., 0L * 3600L, 2L * 3600L);
-		wFact.addTaskWithDuration(worker, 3600.,     0., 7L * 3600L, 2L * 3600L);
+		wFact.addTaskWithDuration(worker,    0., -3600., 2L * 3600L, 2L * 3600L);
+		wFact.addTaskWithDuration(worker, 3600.,     0., 9L * 3600L, 2L * 3600L);
 		
 		return worker;
 	}
