@@ -89,7 +89,7 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = gBuilder.point(0., 0.);
-		LocalDateTime earliest = timeFact.time(7L, 30L);
+		LocalDateTime earliest = timeFact.time(6L, 30L);
 		LocalDateTime latest = timeFact.hour(11L);
 		Duration duration = Duration.ofHours(1L);
 		
@@ -106,7 +106,7 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = gBuilder.point(0., 0.);
-		LocalDateTime earliest = timeFact.time(8L, 30L);
+		LocalDateTime earliest = timeFact.time(7L, 30L);
 		LocalDateTime latest = timeFact.hour(11L);
 		Duration duration = Duration.ofHours(1L);
 		

@@ -179,6 +179,8 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	}
 	
 	private boolean check(WorkerUnit worker, IdleSlot s) {
+		// TODO increase precision (currently 1 second)
+		
 		Duration d = getDuration();
 		double vInv = 1. / worker.getMaxSpeed(); // TODO: repeating calculation
 		Point p = getLocation();
@@ -197,9 +199,9 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 				.compareTo(Duration.ofSeconds((long) ceil(vInv * l1))) < 0)
 			return false;
 		// task can be finished in time
-		// t2 - t_min < l2 / v_max
+		// t2 - t_min < l2 / v_max + d
 		if (p2 != null && Duration.between(earliest, t2)
-				.compareTo(Duration.ofSeconds((long) ceil(vInv * l2))) < 0)
+				.compareTo(Duration.ofSeconds((long) ceil(vInv * l2)).plus(d)) < 0)
 			return false;
 		// enough time to complete task
 		// t2 - t1 < d + (l1 + l2) / v_max
