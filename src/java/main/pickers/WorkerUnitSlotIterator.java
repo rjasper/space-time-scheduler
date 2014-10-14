@@ -190,8 +190,8 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		LocalDateTime t2 = s.getFinishTime();
 		Point p1 = s.getStartLocation();
 		Point p2 = s.getFinishLocation();
-		double l1 = distance(p1, p); // TODO: repeating calculation
-		double l2 = p2 == null ? 0. : distance(p, p2); // TODO: repeating calculation
+		double l1 = distance(p1, p);
+		double l2 = p2 == null ? 0. : distance(p, p2);
 
 		// task can be started in time
 		// t_max - t1 < l1 / v_max
