@@ -1,4 +1,4 @@
-package world;
+package world.pathfinder;
 
 import java.time.LocalDateTime;
 

@@ -1,38 +1,39 @@
-package world;
+package world.pathfinder;
 
-import static matlab.ConvertOperations.j2mDuration;
 import static matlab.ConvertOperations.j2mDynamicObstacles;
 import static matlab.ConvertOperations.j2mLocalDateTime;
 import static matlab.ConvertOperations.j2mPoint;
 import static matlab.ConvertOperations.j2mStaticObstacles;
 import static matlab.ConvertOperations.m2jTrajectory;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import world.DynamicObstacle;
+import world.Trajectory;
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
 import matlab.AccessOperations;
 import matlab.MatlabAccess;
 import matlabcontrol.MatlabInvocationException;
 import matlabcontrol.MatlabProxy;
 
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
-public class MatlabMinimumTimePathfinder extends MinimumTimePathfinder {
+public class MatlabSpecificTimePathfinder extends SpecificTimePathfinder {
 	
 	private final MatlabProxy proxy;
 	
 	private final AccessOperations access;
 	
-	public MatlabMinimumTimePathfinder() {
+	public MatlabSpecificTimePathfinder() {
 		this(MatlabAccess.getProxy());
 	}
 	
-	public MatlabMinimumTimePathfinder(MatlabProxy proxy) {
+	public MatlabSpecificTimePathfinder(MatlabProxy proxy) {
 		this.proxy = proxy;
 		this.access = new AccessOperations(proxy);
 	}
@@ -53,9 +54,7 @@ public class MatlabMinimumTimePathfinder extends MinimumTimePathfinder {
 		Point startPoint = getStartPoint();
 		Point finishPoint = getFinishPoint();
 		LocalDateTime startTime = getStartTime();
-		LocalDateTime earliestFinishTime = getEarliestFinishTime();
-		LocalDateTime latestFinishTime = getLatestFinishTime();
-		Duration spareTime = getSpareTime();
+		LocalDateTime finishTime = getFinishTime();
 		double maxSpeed = getMaxSpeed();
 		Collection<Polygon> staticObstacles = getStaticObstacles();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
@@ -66,15 +65,13 @@ public class MatlabMinimumTimePathfinder extends MinimumTimePathfinder {
 		try {
 			acc.assingPoint("I", j2mPoint(startPoint, 2));
 			acc.assingPoint("F", j2mPoint(finishPoint, 2));
-			m.setVariable("t_start", j2mLocalDateTime(startTime));
-			m.setVariable("t_end_min", j2mLocalDateTime(earliestFinishTime));
 			m.setVariable("v_max", maxSpeed);
-			m.setVariable("t_end_max", j2mLocalDateTime(latestFinishTime));
-			m.setVariable("t_spare", j2mDuration(spareTime));
+			m.setVariable("t_start", j2mLocalDateTime(startTime));
+			m.setVariable("t_end", j2mLocalDateTime(finishTime));
 			acc.assignStaticObstacles("Os", j2mStaticObstacles(staticObstacles));
 			acc.assignDynamicObstacles("Om", j2mDynamicObstacles(dynamicObstacles));
 			
-			Object[] result = m.returningEval("pathfinder_mt(I, F, t_start, t_end_min, t_end_max, v_max, t_spare, Os, Om)", 2);
+			Object[] result = m.returningEval("pathfinder(I, F, t_start, t_end, v_max, Os, Om)", 2);
 			
 			double[] trajectoryData = (double[]) result[0];
 			double[] evasionsDouble = (double[]) result[1];

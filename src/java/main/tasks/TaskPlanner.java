@@ -7,11 +7,11 @@ import java.util.Collection;
 
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
-import world.MatlabMinimumTimePathfinder;
-import world.MatlabSpecificTimePathfinder;
-import world.MinimumTimePathfinder;
-import world.SpecificTimePathfinder;
 import world.Trajectory;
+import world.pathfinder.MatlabMinimumTimePathfinder;
+import world.pathfinder.MatlabSpecificTimePathfinder;
+import world.pathfinder.MinimumTimePathfinder;
+import world.pathfinder.SpecificTimePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;

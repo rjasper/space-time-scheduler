@@ -1,9 +1,12 @@
-package world;
+package world.pathfinder;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import world.DynamicObstacle;
+import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Polygon;
 
