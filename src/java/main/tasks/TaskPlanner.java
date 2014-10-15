@@ -7,7 +7,10 @@ import java.util.Collection;
 
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
-import world.Pathfinder;
+import world.MatlabMinimumTimePathfinder;
+import world.MatlabSpecificTimePathfinder;
+import world.MinimumTimePathfinder;
+import world.SpecificTimePathfinder;
 import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Point;
@@ -127,12 +130,13 @@ public class TaskPlanner {
 			throw new IllegalStateException("not ready yet");
 		
 		double maxSpeed = worker.getMaxSpeed();
-		Pathfinder pf = new Pathfinder();
+//		MatlabPathfinder pf = new MatlabPathfinder();
+		MinimumTimePathfinder mtpf = new MatlabMinimumTimePathfinder();
 		
 		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
 		
-		pf.addAllStaticObstacles(staticObstacles);
-		pf.addAllDynamicObstacles(dynamicObstacles);
+		mtpf.setStaticObstacles(staticObstacles);
+		mtpf.setDynamicObstacles(dynamicObstacles);
 		
 		Task pred = worker.getFloorTask(earliestStartTime);
 		Task succ = worker.getCeilingTask(earliestStartTime);
@@ -151,22 +155,22 @@ public class TaskPlanner {
 			startLocation = pred.getLocation();
 		}
 		
-		pf.useMinimumFinishTime();
+//		pf.useMinimumFinishTime();
 		
-		pf.setStartingPoint(startLocation);
-		pf.setFinishPoint(location);
-		pf.setStartingTime(startTime);
-		pf.setEarliestFinishTime(earliestStartTime);
-		pf.setLatestFinishTime(latestStartTime);
-		pf.setSpareTime(duration);
-		pf.setMaxSpeed(maxSpeed);
+		mtpf.setStartPoint(startLocation);
+		mtpf.setFinishPoint(location);
+		mtpf.setStartTime(startTime);
+		mtpf.setEarliestFinishTime(earliestStartTime);
+		mtpf.setLatestFinishTime(latestStartTime);
+		mtpf.setSpareTime(duration);
+		mtpf.setMaxSpeed(maxSpeed);
 		
-		boolean status = pf.calculatePath();
+		boolean status = mtpf.calculatePath();
 		
 		if (!status)
 			return false;
 		
-		Trajectory toTask = pf.getTrajectory();
+		Trajectory toTask = mtpf.getResultTrajectory();
 		
 		LocalDateTime taskStartTime = toTask.getLastTime();
 		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
@@ -175,20 +179,22 @@ public class TaskPlanner {
 
 		Trajectory fromTask;
 		if (succ != null) {
-			pf.useSpecifiedFinishTime();
+			SpecificTimePathfinder stpf = new MatlabSpecificTimePathfinder();
 			
-			pf.setStartingPoint(location);
-			pf.setFinishPoint(succ.getLocation());
-			pf.setStartingTime(taskFinishTime);
-			pf.setFinishTime(succ.getStartTime());
-			pf.setMaxSpeed(maxSpeed); // here actually redundant
+//			stpf.useSpecifiedFinishTime();
 			
-			status = pf.calculatePath();
+			stpf.setStartPoint(location);
+			stpf.setFinishPoint(succ.getLocation());
+			stpf.setStartTime(taskFinishTime);
+			stpf.setFinishTime(succ.getStartTime());
+			stpf.setMaxSpeed(maxSpeed); // here actually redundant
+			
+			status = stpf.calculatePath();
 			
 			if (!status)
 				return false;
 			
-			fromTask = pf.getTrajectory();
+			fromTask = stpf.getResultTrajectory();
 		} else {
 			fromTask = null;
 		}
