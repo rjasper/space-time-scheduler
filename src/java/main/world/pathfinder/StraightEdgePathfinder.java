@@ -93,6 +93,10 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		double maxDistance = getMaxConnectionDistance();
 		
 		PathData pathData = pf.calc(startPoint, finishPoint, maxDistance, nodeConnector, obstacles);
+		
+		if (pathData.isError())
+			return false;
+		
 		LineString path = makeLineString(pathData);
 		boolean validPath = path.getNumPoints() >= 2;
 		

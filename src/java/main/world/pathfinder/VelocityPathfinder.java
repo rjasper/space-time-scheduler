@@ -76,15 +76,15 @@ public abstract class VelocityPathfinder {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
 	
-	public boolean calculatePath() {
+	public final boolean calculatePath() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
 		boolean status = calculatePathImpl();
 		
 		if (!status) {
-			resultTrajectory = null;
-			resultEvadedObstacles = null;
+			setResultTrajectory(null);
+			setResultEvadedObstacles(null);
 		}
 		
 		return status;
