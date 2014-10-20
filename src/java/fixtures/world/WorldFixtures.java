@@ -31,8 +31,8 @@ public class WorldFixtures {
 		
 		World world = new World();
 		
-//		world.add(wall, fence, pillar, cage);
-		world.add(fence, pillar, cage);
+		world.add(wall, fence, pillar, cage);
+//		world.add(fence, pillar, cage);
 		
 		return world;
 	}

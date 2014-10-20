@@ -1,4 +1,4 @@
-package world;
+package world.pathfinder;
 
 import static java.time.Month.JANUARY;
 

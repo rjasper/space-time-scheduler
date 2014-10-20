@@ -40,7 +40,23 @@ public abstract class SpatialPathfinder {
 		this.resultSpatialPath = resultSpatialPath;
 	}
 	
-	public boolean calculatePath() {
+	protected Point getStartPoint() {
+		return startPoint;
+	}
+
+	public void setStartPoint(Point startPoint) {
+		this.startPoint = startPoint;
+	}
+
+	protected Point getFinishPoint() {
+		return finishPoint;
+	}
+
+	public void setFinishPoint(Point finishPoint) {
+		this.finishPoint = finishPoint;
+	}
+
+	public final boolean calculatePath() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
