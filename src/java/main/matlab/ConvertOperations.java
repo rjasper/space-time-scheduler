@@ -225,7 +225,7 @@ public final class ConvertOperations {
 	}
 	
 	public static DynamicObstacleData j2mDynamicObstacle(DynamicObstacle obstacle) {
-		Polygon polygon = obstacle.getPolygon();
+		Polygon polygon = obstacle.getShape();
 		LineString path = obstacle.getPath2d();
 		List<LocalDateTime> times = obstacle.getTimes();
 		

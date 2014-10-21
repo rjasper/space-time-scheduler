@@ -5,6 +5,7 @@ import static jts.geom.factories.StaticJtsFactories.*;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 
 public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryBuilder {
@@ -27,8 +28,15 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 	}
 	
 	public LineString lineString(Point ...points) {
+		return lineString( ordinates(points) );
+	}
+	
+	public LinearRing linearRing(Point ...points) {
+		return linearRing( ordinates(points) );
+	}
+	
+	public double[] ordinates(Point ...points) {
 		int n = points.length;
-		
 		double[] ordinates = new double[2*n];
 		
 		int i = 0;
@@ -39,7 +47,7 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 			ordinates[i++] = coord.y;
 		}
 		
-		return lineString(ordinates);
+		return ordinates;
 	}
 	
 }

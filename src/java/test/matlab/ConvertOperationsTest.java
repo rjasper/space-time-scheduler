@@ -106,7 +106,7 @@ public class ConvertOperationsTest {
 			DynamicObstacle o1 = it1.next();
 			DynamicObstacle o2 = it2.next();
 			
-			assertTrue(o1.getPolygon().equalsTopo(o2.getPolygon()));
+			assertTrue(o1.getShape().equalsTopo(o2.getShape()));
 			assertTrue(o1.getPath2d().equalsExact(o2.getPath2d()));
 		}
 

@@ -9,27 +9,27 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class DynamicObstacle {
 	
-	private final Polygon polygon;
+	private final Polygon shape;
 	
 	private final Trajectory trajectory;
 
-	public DynamicObstacle(Polygon polygon, LineString path, List<LocalDateTime> times) {
+	public DynamicObstacle(Polygon shape, LineString path, List<LocalDateTime> times) {
 		// TODO check if polygon is empty
 		// TODO check size of path and times
 		
-		this.polygon = polygon;
+		this.shape = shape;
 		this.trajectory = new Trajectory(path, times);
 	}
 
 	public DynamicObstacle(Polygon polygon, Trajectory trajectory) {
 		// TODO check if polygon is empty
 		
-		this.polygon = polygon;
+		this.shape = polygon;
 		this.trajectory = trajectory;
 	}
 
-	public Polygon getPolygon() {
-		return polygon;
+	public Polygon getShape() {
+		return shape;
 	}
 	
 	public Trajectory getTrajectory() {
@@ -51,7 +51,7 @@ public class DynamicObstacle {
 	@Override
 	public String toString() {
 		return "DynamicObstacle ["
-			+ "polygon=" + getPolygon() + ", "
+			+ "shape=" + getShape() + ", "
 			+ "path="    + getPath2d()    + ", "
 			+ "times="   + getTimes()   + "]";
 	}
