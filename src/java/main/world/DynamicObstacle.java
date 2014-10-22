@@ -21,10 +21,10 @@ public class DynamicObstacle {
 		this.trajectory = new Trajectory(path, times);
 	}
 
-	public DynamicObstacle(Polygon polygon, Trajectory trajectory) {
+	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
 		// TODO check if polygon is empty
 		
-		this.shape = polygon;
+		this.shape = shape;
 		this.trajectory = trajectory;
 	}
 

@@ -40,7 +40,7 @@ public class ForbiddenRegionBuilder {
 	
 	private LineString spatialPath = null;
 	
-	private List<ForbiddenRegion> resultForbiddenRegions = null;
+	private Collection<ForbiddenRegion> resultForbiddenRegions = null;
 	
 	private LocalDateTime baseTime = null;
 	
@@ -65,7 +65,7 @@ public class ForbiddenRegionBuilder {
 		this.spatialPath = spatialPath;
 	}
 
-	public List<ForbiddenRegion> getResultForbiddenRegions() {
+	public Collection<ForbiddenRegion> getResultForbiddenRegions() {
 		return resultForbiddenRegions;
 	}
 
@@ -132,6 +132,8 @@ public class ForbiddenRegionBuilder {
 			}
 			
 			Geometry region = builder.geometryCollection(subregions).union();
+			region.normalize();
+			
 			forbiddenRegions.add(new ForbiddenRegion(region, obstacle));
 		}
 		
@@ -179,7 +181,7 @@ public class ForbiddenRegionBuilder {
 
 		Matrix arcVelocityBase = new Basic1DMatrix(2, 2);
 		arcVelocityBase.setColumn(0, arcUnitVector);
-		arcVelocityBase.setColumn(1, velocityVector);
+		arcVelocityBase.setColumn(1, velocityVector.multiply(-1.));
 		
 		return arcVelocityBase;
 	}
@@ -236,12 +238,16 @@ public class ForbiddenRegionBuilder {
 			obstacTrajectorySegment.getStartPoint(),
 			obstacTrajectorySegment.getFinishPoint());
 		
+		double snorm = spatialPathSegment.getLength();
+		
 		// extract ordinates
-		double sx = s.get(0), sy = s.get(1), vtx = vt.get(0), vty = vt.get(1);
+//		double sx = s.get(0), sy = s.get(1), vtx = vt.get(0), vty = vt.get(1);
 		
 		// calculate relative buffer size
 		// the buffer will have the size of the obstacle trajectory segment
-		double alpha = max(abs(sx / vtx), abs(sy / vty));
+//		double alpha = max(abs(sx / vtx), abs(sy / vty));
+		// alpha = abs( s * vt / ||s||^2 )
+		double alpha = Math.abs( s.toRowMatrix().multiply(vt).get(0) / (snorm*snorm) );
 		// calculate buffer vector
 		Vector salpha = s.multiply(alpha);
 		
@@ -266,7 +272,7 @@ public class ForbiddenRegionBuilder {
 		double tmin = obstTrajectorySegment.getStartTime();
 		double tmax = tmin + obstTrajectorySegment.getDuration();
 		
-		return builder.box(smin, smax, tmin, tmax);
+		return builder.box(smin, tmin, smax, tmax);
 	}
 
 	private static Geometry calcParallelObstacleShape(
@@ -308,7 +314,7 @@ public class ForbiddenRegionBuilder {
 				double t2 = t1 + obstacleTrajectorySegment.getDuration();
 				
 				regionCoords[k] = new Coordinate(s1, t1);
-				regionCoords[m-k-1] = new Coordinate(s2, t2);
+				regionCoords[2*m-k-1] = new Coordinate(s2, t2);
 			}
 			
 			regionCoords[regionCoords.length-1] = regionCoords[0];

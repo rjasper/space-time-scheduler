@@ -2,6 +2,7 @@ package world;
 
 import static java.time.Month.JANUARY;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class LocalDateTimeFactory {
@@ -41,17 +42,28 @@ public class LocalDateTimeFactory {
 		
 		return baseTime.plusSeconds(second);
 	}
+	
+	public LocalDateTime seconds(double seconds) {
+		LocalDateTime baseTime = getBaseTime();
+		long nanos = secondsToNanos(seconds);
+		
+		return baseTime.plus(Duration.ofNanos(nanos));
+	}
 
-	public LocalDateTime hour(long hour) {
+	public LocalDateTime hours(long hours) {
 		LocalDateTime baseTime = getBaseTime();
 		
-		return baseTime.plusHours(hour);
+		return baseTime.plusHours(hours);
 	}
 
 	public LocalDateTime time(long hour, long minute) {
 		LocalDateTime baseTime = getBaseTime();
 		
 		return baseTime.plusHours(hour).plusMinutes(minute);
+	}
+	
+	private static long secondsToNanos(double seconds) {
+		return (long) Math.round(seconds * 1e9);
 	}
 	
 }

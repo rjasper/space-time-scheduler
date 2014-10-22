@@ -28,4 +28,10 @@ public class ForbiddenRegion {
 		return dynamicObstacle;
 	}
 
+	@Override
+	public String toString() {
+		return "ForbiddenRegion [region=" + region + ", dynamicObstacle="
+			+ dynamicObstacle + "]";
+	}
+
 }
