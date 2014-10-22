@@ -240,15 +240,11 @@ public class ForbiddenRegionBuilder {
 		
 		double snorm = spatialPathSegment.getLength();
 		
-		// extract ordinates
-//		double sx = s.get(0), sy = s.get(1), vtx = vt.get(0), vty = vt.get(1);
-		
 		// calculate relative buffer size
 		// the buffer will have the size of the obstacle trajectory segment
-//		double alpha = max(abs(sx / vtx), abs(sy / vty));
+
 		// alpha = abs( s * vt / ||s||^2 )
 		double alpha = Math.abs( s.toRowMatrix().multiply(vt).get(0) / (snorm*snorm) );
-		// calculate buffer vector
 		Vector salpha = s.multiply(alpha);
 		
 		// buffer path segment to create mask
@@ -610,12 +606,7 @@ public class ForbiddenRegionBuilder {
 		}
 		
 		private static double durationToSeconds(Duration duration) {
-			long nanos = duration.toNanos();
-			double seconds =
-				(double)(nanos / 1_000_000_000L) +
-				(double)(nanos % 1_000_000_000L) / 1_000_000_000.;
-			
-			return seconds;
+			return (double) duration.toNanos() * 1e-9;
 		}
 		
 	}
