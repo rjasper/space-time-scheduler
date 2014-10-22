@@ -2,7 +2,11 @@ package jts.geom.factories;
 
 import static jts.geom.factories.StaticJtsFactories.*;
 
+import java.util.Collection;
+
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -33,6 +37,12 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 	
 	public LinearRing linearRing(Point ...points) {
 		return linearRing( ordinates(points) );
+	}
+	
+	public GeometryCollection geometryCollection(Collection<Geometry> geometries) {
+		Geometry[] array = geometries.stream().toArray(Geometry[]::new);
+		
+		return geometryCollection(array);
 	}
 	
 	public double[] ordinates(Point ...points) {

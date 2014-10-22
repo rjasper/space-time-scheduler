@@ -28,8 +28,6 @@ public class SchedulerTest {
 
 	@Test
 	public void test() {
-//		fail("Not yet implemented"); // TODO
-		
 		World world = WorldFixtures.twoRooms();
 		world.ready();
 		
