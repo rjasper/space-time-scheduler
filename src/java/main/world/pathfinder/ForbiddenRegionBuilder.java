@@ -1,7 +1,5 @@
 package world.pathfinder;
 
-import static java.lang.Math.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -210,7 +208,7 @@ public class ForbiddenRegionBuilder {
 		LineString spatialMask = makeSpatialLineMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
-		// TODO first and last path segment have to be masked differently
+		// TODO first and last path segment have to be masked differently (small buffer to left/right)
 		Polygon arcMask = makeArcRectangularMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
@@ -328,7 +326,7 @@ public class ForbiddenRegionBuilder {
 		Matrix transformationMatrix,
 		Polygon obstacleShape)
 	{
-		// TODO first and last path segment have to be masked differently
+		// TODO first and last path segment have to be masked differently (small buffer to left/right)
 		Polygon mask = makeParallelogramMask(spatialPathSegment, obstacleTrajectorySegment);
 		Polygon movedObstacleShape = translateGeometry(obstacleShape, obstacleTrajectorySegment.getStartPoint());
 		Geometry maskedMovedObstacleShape = movedObstacleShape.intersection(mask);
