@@ -1,12 +1,5 @@
 package world.pathfinder;
 
-import static java.time.Month.JANUARY;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
 import jts.geom.factories.StaticJtsFactories;
 import matlab.MatlabAccess;
 import matlabcontrol.MatlabInvocationException;
@@ -16,10 +9,6 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class PathfinderTest {

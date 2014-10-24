@@ -1,6 +1,7 @@
 package world.pathfinder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -8,8 +9,6 @@ import java.util.Collections;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import world.DynamicObstacle;

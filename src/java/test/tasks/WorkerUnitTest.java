@@ -1,13 +1,11 @@
 package tasks;
 
-import static org.junit.Assert.*;
+import static java.time.Month.JANUARY;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 
 import org.junit.Test;
-
-import static java.time.Month.*;
 
 public class WorkerUnitTest {
 

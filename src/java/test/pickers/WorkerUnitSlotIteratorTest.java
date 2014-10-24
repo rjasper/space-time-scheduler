@@ -1,29 +1,24 @@
 package pickers;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
-import static java.time.Month.*;
-import static jts.geom.factories.StaticJtsFactories.geomFactory;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Vector;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
-
-import tasks.SpecificationFactory;
 import tasks.WorkerUnit;
-import tasks.WorkerUnitFactory;
 import tasks.WorkerUnitFixtures;
 import world.LocalDateTimeFactory;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnitSlotIteratorTest {
 
