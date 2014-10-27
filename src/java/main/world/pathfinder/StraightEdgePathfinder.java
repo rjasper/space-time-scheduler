@@ -14,6 +14,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import straightedge.geom.KPoint;
+import straightedge.geom.KPolygon;
 import straightedge.geom.PolygonConverter;
 import straightedge.geom.path.NodeConnector;
 import straightedge.geom.path.PathBlockingObstacle;
@@ -45,13 +46,24 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		
 		double maxConnectionDistance = getMaxConnectionDistance();
 		
-		ArrayList<PathBlockingObstacle> pathBlockingObstacles = staticObstacles.stream()
-			.map((p) -> conv.makeKPolygonFromExterior(p))
-			.map((kp) -> createObstacleFromInnerPolygon(kp))
-			.collect(Collectors.toCollection(ArrayList::new));
+//		ArrayList<PathBlockingObstacle> pathBlockingObstacles = staticObstacles.stream()
+//			.map((p) -> conv.makeKPolygonFromExterior(p))
+//			.map((kp) -> createObstacleFromInnerPolygon(kp))
+//			.collect(Collectors.toCollection(ArrayList::new));
+//		
+//		for (PathBlockingObstacle o : pathBlockingObstacles)
+//			nc.addObstacle(o, pathBlockingObstacles, maxConnectionDistance);
+//		ArrayList<PathBlockingObstacle> pathBlockingObstacles = staticObstacles.stream()
 		
-		for (PathBlockingObstacle o : pathBlockingObstacles)
-			nc.addObstacle(o, pathBlockingObstacles, maxConnectionDistance);
+		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
+		
+		for (Polygon o : staticObstacles) {
+			KPolygon kp = conv.makeKPolygonFromExterior(o);
+			PathBlockingObstacle pbo = createObstacleFromInnerPolygon(kp);
+			
+			pathBlockingObstacles.add(pbo);
+			nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
+		}
 		
 		super.setStaticObstacles(staticObstacles);
 		setNodeConnector(nc);
