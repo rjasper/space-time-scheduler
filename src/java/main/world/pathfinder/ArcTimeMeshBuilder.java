@@ -45,7 +45,7 @@ public class ArcTimeMeshBuilder {
 		return forbiddenRegions;
 	}
 
-	public void setForbiddenRegions(List<ForbiddenRegion> forbiddenRegions) {
+	public void setForbiddenRegions(Collection<ForbiddenRegion> forbiddenRegions) {
 		this.forbiddenRegions = new ArrayList<>(forbiddenRegions);
 		
 		setRegionMap(null);
