@@ -125,7 +125,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 
 	private Trajectory calculateTrajectory(List<Point> arcTimePath) {
-		// TODO Auto-generated method stub
+		// TODO last edition
 		return null;
 	}
 
