@@ -3,6 +3,7 @@ package world.pathfinder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,11 +91,11 @@ public class ArcTimeMeshBuilder {
 		this.maxArc = maxArc;
 	}
 	
-	public double getMinTime() {
+	private double getMinTime() {
 		return getStartPoint().getY();
 	}
 	
-	public double getMaxTime() {
+	private double getMaxTime() {
 		return getFinishPoint().getY();
 	}
 
@@ -147,7 +148,8 @@ public class ArcTimeMeshBuilder {
 				.map(geomFact::createPoint)  // make point
 				.forEach(vertices::add));    // put point into vertices list
 		
-		return vertices;
+		// using set to ensure uniqueness of points
+		return new HashSet<>(vertices);
 	}
 	
 	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> connectVertices(Collection<Point> vertices) {
@@ -207,7 +209,9 @@ public class ArcTimeMeshBuilder {
 		Geometry regionMap = getRegionMap();
 		LineString line = geomBuilder.lineString(from, to);
 		
-		return !line.crosses(regionMap);
+		// TODO intersection matrix might be calculated twice
+		return !line.crosses(regionMap)
+			&& !regionMap.contains(line);
 	}
 	
 	private double calculateWeight(Point from, Point to) {
