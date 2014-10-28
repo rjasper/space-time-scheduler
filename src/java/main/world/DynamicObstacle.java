@@ -39,7 +39,7 @@ public class DynamicObstacle {
 	public LineString getPath2d() {
 		return trajectory == null
 			? null
-			: trajectory.getPath2d();
+			: trajectory.getSpatialPath();
 	}
 
 	public List<LocalDateTime> getTimes() {

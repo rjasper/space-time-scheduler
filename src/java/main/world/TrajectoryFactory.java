@@ -1,7 +1,6 @@
 package world;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,24 +37,27 @@ public class TrajectoryFactory {
 		
 		return instance;
 	}
+	
+	public void setBaseTime(LocalDateTime baseTime) {
+		this.timeFact = new LocalDateTimeFactory(baseTime);
+	}
 
 	public Trajectory trajectory(double[] x, double[] y, double[] t) {
-		// TODO check sizes (same size, minimum size)
+		// TODO check sizes
 		
 		int n = x.length;
 		
-		double[] xy = new double[2*n];
-		int k = 0;
-		for (int i = 0; i < n; ++i) {
-			xy[k++] = x[i];
-			xy[k++] = y[i];
-		}
+		return trajectory(x, y, t, n);
+	}
+
+	public Trajectory trajectory(double[] x, double[] y, double[] t, int n) {
+		// TODO check sizes
 		
-		LineString path = geomBuilder.lineString(xy);
+		LineString path = geomBuilder.lineString(x, y, n);
 		
-		List<LocalDateTime> times = Arrays.stream(t)
-			.mapToObj((sec) -> timeFact.seconds(sec))
-			.collect(Collectors.toCollection(ArrayList<LocalDateTime>::new));
+		List<LocalDateTime> times = Arrays.stream(t, 0, n)
+			.mapToObj(timeFact::seconds)
+			.collect(Collectors.toList());
 		
 		return new Trajectory(path, times);
 	}

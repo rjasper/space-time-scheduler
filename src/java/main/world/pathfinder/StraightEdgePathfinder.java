@@ -5,7 +5,6 @@ import static straightedge.geom.path.PathBlockingObstacleImpl.createObstacleFrom
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 

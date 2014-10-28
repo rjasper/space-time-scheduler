@@ -162,7 +162,7 @@ public final class ConvertOperations {
 	
 	public static double[] j2mTrajectory(Trajectory trajectory) {
 		int n = trajectory.size();
-		LineString path2d = trajectory.getPath2d();
+		LineString path2d = trajectory.getSpatialPath();
 		List<LocalDateTime> times = trajectory.getTimes();
 		
 		double[] path2dData = j2mLineString(path2d, 2).getData();

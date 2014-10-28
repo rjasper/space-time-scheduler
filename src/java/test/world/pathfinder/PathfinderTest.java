@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.io.WKTReader;
 
+// TODO rewrite or remove
 public class PathfinderTest {
 	
 	private static MatlabProxy proxy;

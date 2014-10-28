@@ -67,7 +67,7 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 		
 		public TrajectorySegmentIterator(Trajectory trajectory, LocalDateTime baseTime) {
 			this.spatialPathSegmentIterator =
-				new SpatialPathSegmentIterator(trajectory.getPath2d());
+				new SpatialPathSegmentIterator(trajectory.getSpatialPath());
 			this.timeIterator = trajectory.getTimes().iterator();
 			
 			if (hasNext())

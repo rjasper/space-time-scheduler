@@ -35,8 +35,20 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 		return lineString( ordinates(points) );
 	}
 	
+	public LineString lineString(double[] x, double[] y) {
+		return lineString( ordinates(x, y) );
+	}
+	
+	public LineString lineString(double[] x, double[] y, int n) {
+		return lineString( ordinates(x, y, n) );
+	}
+	
 	public LinearRing linearRing(Point ...points) {
 		return linearRing( ordinates(points) );
+	}
+	
+	public LinearRing linearRing(double[] x, double[] y) {
+		return linearRing( ordinates(x, y) );
 	}
 	
 	public GeometryCollection geometryCollection(Collection<Geometry> geometries) {
@@ -55,6 +67,29 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 			
 			ordinates[i++] = coord.x;
 			ordinates[i++] = coord.y;
+		}
+		
+		return ordinates;
+	}
+	
+	public double[] ordinates(double[] x, double[] y) {
+		if (x.length != y.length)
+			throw new IllegalArgumentException("ordinate arrays have different lengths");
+		
+		int n = x.length;
+		
+		return ordinates(x, y, n);
+	}
+	
+	public double[] ordinates(double[] x, double[] y, int n) {
+		if (x.length < n || y.length < n)
+			throw new IllegalArgumentException("ordinate arrays have different lengths");
+		
+		double[] ordinates = new double[2*n];
+		
+		for (int i = 0, j = 0; i < n; ++i) {
+			ordinates[j++] = x[i];
+			ordinates[j++] = y[i];
 		}
 		
 		return ordinates;
