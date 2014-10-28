@@ -205,6 +205,8 @@ public class ForbiddenRegionBuilder {
 		Vector arcUnitVector,
 		Polygon obstacleShape)
 	{
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+		
 		LineString spatialMask = makeSpatialLineMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
@@ -217,6 +219,11 @@ public class ForbiddenRegionBuilder {
 			obstacleShape,
 			obstacleTrajectorySegment.getStartPoint());
 		Geometry obstaclePathIntersection = movedObstacleShape.intersection(spatialMask);
+		
+		
+		if (obstaclePathIntersection.isEmpty())
+			return geomBuilder.polygon();
+			
 		Geometry transformedObstacleShape = calcParallelObstacleShape(arcUnitVector, obstacleTrajectorySegment, obstaclePathIntersection);
 		Geometry region = transformedObstacleShape.intersection(arcMask);
 		

@@ -1,14 +1,11 @@
 package world;
 
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.List;
 
 import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 
 public class TrajectoryBuilder {
 	
@@ -64,18 +61,17 @@ public class TrajectoryBuilder {
 		}
 	}
 	
-	public void setArcTimePath(List<Point> arcTimePath) {
-		int nArcTime = arcTimePath.size();
+	public void setArcTimePath(LineString arcTimePath) {
+		int nArcTime = arcTimePath.getNumPoints();
 		
 		sArcTime = new double[nArcTime];
 		tArcTime = new double[nArcTime];
 		
-		Iterator<Point> it = arcTimePath.iterator();
 		for (int i = 0; i < nArcTime; ++i) {
-			Point p = it.next();
+			Coordinate c = arcTimePath.getCoordinateN(i);
 			
-			sArcTime[i] = p.getX();
-			tArcTime[i] = p.getY();
+			sArcTime[i] = c.x;
+			tArcTime[i] = c.y;
 		}
 	}
 	
@@ -115,7 +111,7 @@ public class TrajectoryBuilder {
 		this.resultTrajectory = resultTrajectory;
 	}
 
-	public void build() {
+	public void calculate() {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 		

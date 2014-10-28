@@ -1,33 +1,34 @@
 package world.pathfinder;
 
-import com.vividsolutions.jts.geom.Point;
+import java.time.LocalDateTime;
+
 
 public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
-
-	private Point startPoint = null;
 	
-	private Point finishPoint = null;
+	private LocalDateTime startTime = null;
+	
+	private LocalDateTime finishTime = null;
 
 	public boolean isReady() {
 		return super.isReady()
-			&& startPoint != null
-			&& finishPoint != null;
+			&& startTime!= null
+			&& finishTime!= null;
 	}
 
-	protected Point getStartPoint() {
-		return startPoint;
+	protected LocalDateTime getStartTime() {
+		return startTime;
 	}
 
-	public void setStartPoint(Point startPoint) {
-		this.startPoint = startPoint;
+	public void setStartTime(LocalDateTime startTime) {
+		this.startTime = startTime;
 	}
 
-	protected Point getFinishPoint() {
-		return finishPoint;
+	protected LocalDateTime getFinishTime() {
+		return finishTime;
 	}
 
-	public void setFinishPoint(Point finishPoint) {
-		this.finishPoint = finishPoint;
+	public void setFinishTime(LocalDateTime finishTime) {
+		this.finishTime = finishTime;
 	}
-	
+
 }

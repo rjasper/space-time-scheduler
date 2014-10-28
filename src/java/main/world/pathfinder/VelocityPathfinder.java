@@ -1,6 +1,7 @@
 package world.pathfinder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public abstract class VelocityPathfinder {
 		return dynamicObstacles;
 	}
 
-	public void setDynamicObstacles(List<DynamicObstacle> dynamicObstacles) {
+	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
 		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
 	}
 

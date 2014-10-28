@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 
+import util.DurationConv;
 import world.Trajectory;
 import world.util.SpatialPathSegmentIterable.SpatialPathSegment;
 import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
@@ -76,7 +77,8 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 		
 		private void init(LocalDateTime baseTime) {
 			lastTime = timeIterator.next();
-			accSeconds = durationToSeconds( Duration.between(baseTime, lastTime) );
+			Duration duration = Duration.between(baseTime, lastTime);
+			accSeconds = DurationConv.inSeconds(duration);
 		}
 		
 		private LocalDateTime nextTime() {
@@ -96,16 +98,13 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 			LocalDateTime startTime = lastTime;
 			LocalDateTime finishTime = nextTime();
 			
-			double seconds = durationToSeconds( Duration.between(startTime, finishTime) );
+			Duration duration = Duration.between(startTime, finishTime);
+			double seconds = DurationConv.inSeconds(duration);
 			double startSeconds = accSeconds;
 			
 			accSeconds += seconds;
 			
 			return new TrajectorySegment(startPoint, finishPoint, startSeconds, seconds);
-		}
-		
-		private static double durationToSeconds(Duration duration) {
-			return (double) duration.toNanos() * 1e-9;
 		}
 		
 	}
