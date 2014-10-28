@@ -1,11 +1,9 @@
 package world.pathfinder;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,10 +25,12 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 import world.DynamicObstacle;
-import world.Trajectory;
+import world.util.SpatialPathSegmentIterable;
+import world.util.SpatialPathSegmentIterable.SpatialPathSegment;
+import world.util.TrajectorySegmentIterable;
+import world.util.TrajectorySegmentIterable.TrajectorySegment;
 
 public class ForbiddenRegionBuilder {
 	
@@ -416,197 +416,197 @@ public class ForbiddenRegionBuilder {
 		return region;
 	}
 
-	private static class SpatialPathSegment {
-		
-		private final Point startPoint;
-		private final Point finishPoint;
-		private final double startArc;
-		private final double length;
-		
-		public SpatialPathSegment(Point startPoint, Point finishPoint, double startArc, double length) {
-			this.startPoint = startPoint;
-			this.finishPoint = finishPoint;
-			this.startArc = startArc;
-			this.length = length;
-		}
-		
-		public Point getStartPoint() {
-			return startPoint;
-		}
-		
-		public Point getFinishPoint() {
-			return finishPoint;
-		}
-
-		public double getStartArc() {
-			return startArc;
-		}
-
-		public double getLength() {
-			return length;
-		}
-		
-	}
-	
-	private static class SpatialPathSegmentIterable implements Iterable<SpatialPathSegment> {
-		
-		private LineString spatialPath;
-		
-		public SpatialPathSegmentIterable(LineString spatialPath) {
-			this.spatialPath = spatialPath;
-		}
-
-		@Override
-		public Iterator<SpatialPathSegment> iterator() {
-			return new SpatialPathSegmentIterator(spatialPath);
-		}
-		
-	}
-	
-	private static class SpatialPathSegmentIterator implements Iterator<SpatialPathSegment> {
-
-		private final LineString spatialPath;
-
-		private Point lastPosition;
-		private double accLength = 0.0;
-
-		private int i = 0;
-
-		public SpatialPathSegmentIterator(LineString spatialPath) {
-			this.spatialPath = spatialPath;
-			
-			if (hasNext())
-				init();
-		}
-		
-		private void init() {
-			lastPosition = nextPoint();
-		}
-
-		private Point nextPoint() {
-			return lastPosition = spatialPath.getPointN(i++);
-		}
-
-		@Override
-		public boolean hasNext() {
-			return i < spatialPath.getNumPoints();
-		}
-
-		@Override
-		public SpatialPathSegment next() {
-			Point startPoint = lastPosition;
-			Point finishPoint = nextPoint();
-			
-			double startArc = accLength;
-			double length = DistanceOp.distance(startPoint, finishPoint);
-			
-			accLength += length;
-			
-			return new SpatialPathSegment(startPoint, finishPoint, startArc, length);
-		}
-		
-	}
-	
-	private static class TrajectorySegment {
-		
-		private final Point startPoint;
-		private final Point finishPoint;
-		private final double startTime;
-		private final double duration;
-		
-		public TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration) {
-			this.startPoint = startPoint;
-			this.finishPoint = finishPoint;
-			this.duration = duration;
-			this.startTime = startTime;
-		}
-
-		public Point getStartPoint() {
-			return startPoint;
-		}
-
-		public Point getFinishPoint() {
-			return finishPoint;
-		}
-
-		public double getStartTime() {
-			return startTime;
-		}
-
-		public double getDuration() {
-			return duration;
-		}
-		
-	}
-
-	private static class TrajectorySegmentIterable implements Iterable<TrajectorySegment> {
-		
-		private final Trajectory trajectory;
-		private final LocalDateTime baseTime;
-
-		public TrajectorySegmentIterable(Trajectory trajectory, LocalDateTime baseTime) {
-			this.trajectory = trajectory;
-			this.baseTime = baseTime;
-		}
-
-		@Override
-		public Iterator<TrajectorySegment> iterator() {
-			return new TrajectorySegmentIterator(trajectory, baseTime);
-		}
-		
-	}
-	
-	private static class TrajectorySegmentIterator implements Iterator<TrajectorySegment> {
-		
-		private final SpatialPathSegmentIterator spatialPathSegmentIterator;
-		private final Iterator<LocalDateTime> timeIterator;
-		
-		private LocalDateTime lastTime;
-		private double accSeconds;
-		
-		public TrajectorySegmentIterator(Trajectory trajectory, LocalDateTime baseTime) {
-			this.spatialPathSegmentIterator =
-				new SpatialPathSegmentIterator(trajectory.getPath2d());
-			this.timeIterator = trajectory.getTimes().iterator();
-			
-			if (hasNext())
-				init(baseTime);
-		}
-		
-		private void init(LocalDateTime baseTime) {
-			lastTime = timeIterator.next();
-			accSeconds = durationToSeconds( Duration.between(baseTime, lastTime) );
-		}
-		
-		private LocalDateTime nextTime() {
-			return lastTime = timeIterator.next();
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return timeIterator.hasNext();
-		}
-
-		@Override
-		public TrajectorySegment next() {
-			SpatialPathSegment spatialPathSegment = spatialPathSegmentIterator.next();
-			Point startPoint = spatialPathSegment.getStartPoint();
-			Point finishPoint = spatialPathSegment.getFinishPoint();
-			LocalDateTime startTime = lastTime;
-			LocalDateTime finishTime = nextTime();
-			
-			double seconds = durationToSeconds( Duration.between(startTime, finishTime) );
-			double startSeconds = accSeconds;
-			
-			accSeconds += seconds;
-			
-			return new TrajectorySegment(startPoint, finishPoint, startSeconds, seconds);
-		}
-		
-		private static double durationToSeconds(Duration duration) {
-			return (double) duration.toNanos() * 1e-9;
-		}
-		
-	}
+//	private static class SpatialPathSegment {
+//		
+//		private final Point startPoint;
+//		private final Point finishPoint;
+//		private final double startArc;
+//		private final double length;
+//		
+//		public SpatialPathSegment(Point startPoint, Point finishPoint, double startArc, double length) {
+//			this.startPoint = startPoint;
+//			this.finishPoint = finishPoint;
+//			this.startArc = startArc;
+//			this.length = length;
+//		}
+//		
+//		public Point getStartPoint() {
+//			return startPoint;
+//		}
+//		
+//		public Point getFinishPoint() {
+//			return finishPoint;
+//		}
+//
+//		public double getStartArc() {
+//			return startArc;
+//		}
+//
+//		public double getLength() {
+//			return length;
+//		}
+//		
+//	}
+//	
+//	private static class SpatialPathSegmentIterable implements Iterable<SpatialPathSegment> {
+//		
+//		private LineString spatialPath;
+//		
+//		public SpatialPathSegmentIterable(LineString spatialPath) {
+//			this.spatialPath = spatialPath;
+//		}
+//
+//		@Override
+//		public Iterator<SpatialPathSegment> iterator() {
+//			return new SpatialPathSegmentIterator(spatialPath);
+//		}
+//		
+//	}
+//	
+//	private static class SpatialPathSegmentIterator implements Iterator<SpatialPathSegment> {
+//
+//		private final LineString spatialPath;
+//
+//		private Point lastPosition;
+//		private double accLength = 0.0;
+//
+//		private int i = 0;
+//
+//		public SpatialPathSegmentIterator(LineString spatialPath) {
+//			this.spatialPath = spatialPath;
+//			
+//			if (hasNext())
+//				init();
+//		}
+//		
+//		private void init() {
+//			lastPosition = nextPoint();
+//		}
+//
+//		private Point nextPoint() {
+//			return lastPosition = spatialPath.getPointN(i++);
+//		}
+//
+//		@Override
+//		public boolean hasNext() {
+//			return i < spatialPath.getNumPoints();
+//		}
+//
+//		@Override
+//		public SpatialPathSegment next() {
+//			Point startPoint = lastPosition;
+//			Point finishPoint = nextPoint();
+//			
+//			double startArc = accLength;
+//			double length = DistanceOp.distance(startPoint, finishPoint);
+//			
+//			accLength += length;
+//			
+//			return new SpatialPathSegment(startPoint, finishPoint, startArc, length);
+//		}
+//		
+////	}
+//	
+//	private static class TrajectorySegment {
+//		
+//		private final Point startPoint;
+//		private final Point finishPoint;
+//		private final double startTime;
+//		private final double duration;
+//		
+//		public TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration) {
+//			this.startPoint = startPoint;
+//			this.finishPoint = finishPoint;
+//			this.duration = duration;
+//			this.startTime = startTime;
+//		}
+//
+//		public Point getStartPoint() {
+//			return startPoint;
+//		}
+//
+//		public Point getFinishPoint() {
+//			return finishPoint;
+//		}
+//
+//		public double getStartTime() {
+//			return startTime;
+//		}
+//
+//		public double getDuration() {
+//			return duration;
+//		}
+//		
+//	}
+//
+//	private static class TrajectorySegmentIterable implements Iterable<TrajectorySegment> {
+//		
+//		private final Trajectory trajectory;
+//		private final LocalDateTime baseTime;
+//
+//		public TrajectorySegmentIterable(Trajectory trajectory, LocalDateTime baseTime) {
+//			this.trajectory = trajectory;
+//			this.baseTime = baseTime;
+//		}
+//
+//		@Override
+//		public Iterator<TrajectorySegment> iterator() {
+//			return new TrajectorySegmentIterator(trajectory, baseTime);
+//		}
+//		
+//	}
+//	
+//	private static class TrajectorySegmentIterator implements Iterator<TrajectorySegment> {
+//		
+//		private final SpatialPathSegmentIterator spatialPathSegmentIterator;
+//		private final Iterator<LocalDateTime> timeIterator;
+//		
+//		private LocalDateTime lastTime;
+//		private double accSeconds;
+//		
+//		public TrajectorySegmentIterator(Trajectory trajectory, LocalDateTime baseTime) {
+//			this.spatialPathSegmentIterator =
+//				new SpatialPathSegmentIterator(trajectory.getPath2d());
+//			this.timeIterator = trajectory.getTimes().iterator();
+//			
+//			if (hasNext())
+//				init(baseTime);
+//		}
+//		
+//		private void init(LocalDateTime baseTime) {
+//			lastTime = timeIterator.next();
+//			accSeconds = durationToSeconds( Duration.between(baseTime, lastTime) );
+//		}
+//		
+//		private LocalDateTime nextTime() {
+//			return lastTime = timeIterator.next();
+//		}
+//		
+//		@Override
+//		public boolean hasNext() {
+//			return timeIterator.hasNext();
+//		}
+//
+//		@Override
+//		public TrajectorySegment next() {
+//			SpatialPathSegment spatialPathSegment = spatialPathSegmentIterator.next();
+//			Point startPoint = spatialPathSegment.getStartPoint();
+//			Point finishPoint = spatialPathSegment.getFinishPoint();
+//			LocalDateTime startTime = lastTime;
+//			LocalDateTime finishTime = nextTime();
+//			
+//			double seconds = durationToSeconds( Duration.between(startTime, finishTime) );
+//			double startSeconds = accSeconds;
+//			
+//			accSeconds += seconds;
+//			
+//			return new TrajectorySegment(startPoint, finishPoint, startSeconds, seconds);
+//		}
+//		
+//		private static double durationToSeconds(Duration duration) {
+//			return (double) duration.toNanos() * 1e-9;
+//		}
+//		
+//	}
 
 }
