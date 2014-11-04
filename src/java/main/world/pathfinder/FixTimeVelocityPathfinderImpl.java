@@ -25,8 +25,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	private ForbiddenRegionBuilder forbiddenRegionBuilder =
 		new ForbiddenRegionBuilder();
 	
-	private ArcTimeMeshBuilder arcTimeMeshBuilder =
-		new ArcTimeMeshBuilder();
+	private FixTimeMeshBuilder meshBuilder =
+		new FixTimeMeshBuilder();
 	
 	private TrajectoryBuilder trajBuilder =
 		new TrajectoryBuilder();
@@ -41,8 +41,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		return forbiddenRegionBuilder;
 	}
 	
-	private ArcTimeMeshBuilder getArcTimeMeshBuilder() {
-		return arcTimeMeshBuilder;
+	private FixTimeMeshBuilder getMeshBuilder() {
+		return meshBuilder;
 	}
 
 	private TrajectoryBuilder getTrajectoryBuilder() {
@@ -129,7 +129,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		Point startPoint = getArcTimeStartPoint();
 		Point finishPoint = getArcTimeFinishPoint();
 		
-		ArcTimeMeshBuilder builder = getArcTimeMeshBuilder();
+		FixTimeMeshBuilder builder = getMeshBuilder();
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);
@@ -154,6 +154,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		GraphPath<Point, DefaultWeightedEdge> graphPath =
 			dijkstra.getPath();
 		
+		// if the finish point is unreachable
 		if (graphPath == null) {
 			return null;
 		} else {

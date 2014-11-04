@@ -3,9 +3,13 @@ package world.pathfinder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.factories.StaticJtsFactories;
@@ -18,26 +22,40 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
-public class ArcTimeMeshBuilder {
+public abstract class ArcTimeMeshBuilder {
 	
 	private List<ForbiddenRegion> forbiddenRegions = null;
 	
 	private transient Geometry regionMap = null;
 
-	private Point startPoint = null;
+//	private Point startPoint = null;
 	
-	private Point finishPoint = null;
+//	private Point finishPoint = null;
 	
 	private double maxSpeed = 0.0;
 	
 	private double maxArc = 0.0;
 	
+	//	private Point startPoint = null;
+		
+	//	private Point finishPoint = null;
+		
+	private Collection<Point> coreVertices;
+
+	private Collection<Point> startVertices;
+
+	private Collection<Point> finishVertices;
+	
+	private double minTime;
+	
+	private double maxTime;
+
 	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> resultMesh = null;
 	
 	public boolean isReady() {
 		return forbiddenRegions != null
-			&& startPoint != null
-			&& finishPoint != null
+//			&& startPoint != null
+//			&& finishPoint != null
 			&& maxSpeed > 0.0;
 	}
 
@@ -59,23 +77,23 @@ public class ArcTimeMeshBuilder {
 		this.regionMap = regionMap;
 	}
 
-	private Point getStartPoint() {
-		return startPoint;
-	}
+//	private Point getStartPoint() {
+//		return startPoint;
+//	}
+//
+//	public void setStartPoint(Point startPoint) {
+//		this.startPoint = startPoint;
+//	}
+//
+//	private Point getFinishPoint() {
+//		return finishPoint;
+//	}
+//
+//	public void setFinishPoint(Point finishPoint) {
+//		this.finishPoint = finishPoint;
+//	}
 
-	public void setStartPoint(Point startPoint) {
-		this.startPoint = startPoint;
-	}
-
-	private Point getFinishPoint() {
-		return finishPoint;
-	}
-
-	public void setFinishPoint(Point finishPoint) {
-		this.finishPoint = finishPoint;
-	}
-
-	private double getMaxSpeed() {
+	protected double getMaxSpeed() {
 		return maxSpeed;
 	}
 
@@ -83,20 +101,60 @@ public class ArcTimeMeshBuilder {
 		this.maxSpeed = maxSpeed;
 	}
 
-	private double getMaxArc() {
+	protected double getMaxArc() {
 		return maxArc;
 	}
 
 	public void setMaxArc(double maxArc) {
 		this.maxArc = maxArc;
 	}
-	
+
 	private double getMinTime() {
-		return getStartPoint().getY();
+		return minTime;
+	}
+
+	private void setMinTime(double minTime) {
+		this.minTime = minTime;
+	}
+
+	private double getMaxTime() {
+		return maxTime;
+	}
+
+	private void setMaxTime(double maxTime) {
+		this.maxTime = maxTime;
+	}
+
+	protected Collection<Point> getCoreVertices() {
+		return coreVertices;
+	}
+
+	private void setCoreVertices(Collection<Point> coreVertices) {
+		this.coreVertices = coreVertices;
 	}
 	
-	private double getMaxTime() {
-		return getFinishPoint().getY();
+	public Collection<Point> getStartVertices() {
+		return Collections.unmodifiableCollection( _getStartVertices() );
+	}
+
+	protected Collection<Point> _getStartVertices() {
+		return startVertices;
+	}
+
+	private void setStartVertices(Collection<Point> startVertices) {
+		this.startVertices = startVertices;
+	}
+	
+	public Collection<Point> getFinishVertices() {
+		return Collections.unmodifiableCollection( _getFinishVertices() );
+	}
+
+	protected Collection<Point> _getFinishVertices() {
+		return finishVertices;
+	}
+
+	private void setFinishVertices(Collection<Point> finishVertices) {
+		this.finishVertices = finishVertices;
 	}
 
 	public DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> getResultMesh() {
@@ -107,6 +165,24 @@ public class ArcTimeMeshBuilder {
 		this.resultMesh = resultMesh;
 	}
 	
+	private void updateVertices() {
+		setCoreVertices( buildCoreVertices() );
+		setStartVertices( buildStartVertices() );
+		setFinishVertices( buildFinishVertices() );
+	}
+	
+	private void updateMinMaxTime() {
+		double min = _getStartVertices().stream()
+			.map(Point::getY)
+			.reduce(Double.POSITIVE_INFINITY, Math::min);
+		double max = _getFinishVertices().stream()
+			.map(Point::getY)
+			.reduce(Double.NEGATIVE_INFINITY, Math::max);
+		
+		setMinTime(min);
+		setMaxTime(max);
+	}
+	
 	public void build() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
@@ -114,10 +190,16 @@ public class ArcTimeMeshBuilder {
 		if (getRegionMap() == null)
 			updateRegionMap();
 		
-		Collection<Point> vertices =
-			buildVertices();
+//		Collection<Point> vertices =
+//			buildVertices();
+//		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
+//			connectVertices(vertices);
+		
+		updateVertices();
+		updateMinMaxTime();
+		
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
-			connectVertices(vertices);
+			buildGraph();
 		
 		setResultMesh(graph);
 	}
@@ -134,12 +216,12 @@ public class ArcTimeMeshBuilder {
 		setRegionMap(regionMap);
 	}
 	
-	private Collection<Point> buildVertices() {
+	private Collection<Point> buildCoreVertices() {
 		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
 		LinkedList<Point> vertices = new LinkedList<>();
 		
-		vertices.add(getStartPoint());
-		vertices.add(getFinishPoint());
+//		vertices.add(getStartPoint());
+//		vertices.add(getFinishPoint());
 		
 		getForbiddenRegions().stream()
 			.map(ForbiddenRegion::getRegion) // get region geometry
@@ -152,31 +234,104 @@ public class ArcTimeMeshBuilder {
 		return new HashSet<>(vertices);
 	}
 	
-	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> connectVertices(Collection<Point> vertices) {
+	protected abstract Collection<Point> buildStartVertices();
+	
+	protected abstract Collection<Point> buildFinishVertices();
+	
+	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> buildGraph() {
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
 			new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+	
+		Stream<Point> coreVertices = getCoreVertices().stream();
+		Stream<Point> startVertices = _getStartVertices().stream();
+		Stream<Point> finishVertices = _getFinishVertices().stream();
+		
+		Set<Point> vertices = Stream.concat(
+			coreVertices, Stream.concat(startVertices, finishVertices)
+		).collect(Collectors.toSet());
 		
 		// add vertices to graph
-		vertices.stream()
-			.forEach(graph::addVertex);
+		for (Point v : vertices)
+			graph.addVertex(v);
 		
-		// add edges to graph
-		for (Point from : vertices) {
-			for (Point to : vertices) {
-				if (from == to)
-					continue;
-				
-				if (checkConnection(from, to)) {
-					DefaultWeightedEdge edge = graph.addEdge(from, to);
-					graph.setEdgeWeight(edge, calculateWeight(from, to));
-				}
-			}
-		}
+		connectCoreVertices(graph);
+		connectStartVertices(graph);
+		connectFinishVertices(graph);
 		
 		return graph;
 	}
 	
-	private boolean checkConnection(Point from, Point to) {
+//	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> connectVertices(Collection<Point> vertices) {
+//		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
+//			new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+//		
+//		// add vertices to graph
+//		vertices.stream()
+//			.forEach(graph::addVertex);
+//		
+//		// add edges to graph
+//		for (Point from : vertices) {
+//			for (Point to : vertices) {
+//				if (from == to)
+//					continue;
+//				
+//				if (checkConnection(from, to)) {
+//					DefaultWeightedEdge edge = graph.addEdge(from, to);
+//					graph.setEdgeWeight(edge, calculateWeight(from, to));
+//				}
+//			}
+//		}
+//		
+//		return graph;
+//	}
+	
+	protected void connect(
+		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph,
+		Collection<Point> from, Collection<Point> to)
+	{
+		// for each from-to pair check for connection
+		for (Point f : from) {
+			for (Point t : to) {
+				if (f.equals(t))
+					continue;
+				
+				if (checkConnection(f, t))
+					connectWithoutCheck(graph, f, t);
+			}
+		}
+	}
+	
+	protected void connectWithoutCheck(
+		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph,
+		Point from, Point to)
+	{
+		DefaultWeightedEdge edge = graph.addEdge(from, to);
+		graph.setEdgeWeight(edge, calculateWeight(from, to));
+	}
+	
+	private void connectCoreVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> vertices = getCoreVertices();
+
+		connect(graph, vertices, vertices);
+	}
+
+	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> startVertices = _getStartVertices();
+		Collection<Point> finishVertices = _getFinishVertices();
+		Collection<Point> coreVertices = getCoreVertices();
+		
+		connect(graph, startVertices, finishVertices);
+		connect(graph, startVertices, coreVertices);
+	}
+
+	protected void connectFinishVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> finishVertices = _getFinishVertices();
+		Collection<Point> coreVertices = getCoreVertices();
+		
+		connect(graph, coreVertices, finishVertices);
+	}
+	
+	protected boolean checkConnection(Point from, Point to) {
 		double maxArc = getMaxArc();
 		double minTime = getMinTime();
 		double maxTime = getMaxTime();
@@ -203,7 +358,7 @@ public class ArcTimeMeshBuilder {
 		return checkVisibility(from, to);
 	}
 	
-	private boolean checkVisibility(Point from, Point to) {
+	protected boolean checkVisibility(Point from, Point to) {
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		
 		Geometry regionMap = getRegionMap();
@@ -214,15 +369,6 @@ public class ArcTimeMeshBuilder {
 			&& !regionMap.contains(line);
 	}
 	
-	private double calculateWeight(Point from, Point to) {
-		double t1 = from.getY(), t2 = to.getY();
-		
-		// TODO reconsider weight cost function
-		// for fix time pretty dumb
-		// maybe: square error to average speed
-		// (maxArc/duration - (s2-s1)/(t2-t1))^2
-		
-		return t2 - t1;
-	}
+	protected abstract double calculateWeight(Point from, Point to);
 	
 }
