@@ -21,6 +21,10 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 			&& earliestFinishTime.compareTo(latestFinishTime) <= 0
 			&& bufferDuration != null;
 	}
+	
+	protected LocalDateTime getBaseTime() {
+		return getStartTime();
+	}
 
 	public LocalDateTime getStartTime() {
 		return startTime;

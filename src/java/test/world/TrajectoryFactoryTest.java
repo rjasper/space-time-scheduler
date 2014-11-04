@@ -31,7 +31,7 @@ public class TrajectoryFactoryTest {
 		trajBuilder.setSpatialPath(spatialPath);
 		trajBuilder.setArcTimePath(arcTimePath);
 		
-		trajBuilder.calculate();
+		trajBuilder.build();
 		
 		Trajectory trajectory = trajBuilder.getResultTrajectory();
 		

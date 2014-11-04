@@ -162,7 +162,7 @@ public class TaskPlanner {
 		mtpf.setStartTime(startTime);
 		mtpf.setEarliestFinishTime(earliestStartTime);
 		mtpf.setLatestFinishTime(latestStartTime);
-		mtpf.setSpareTime(duration);
+		mtpf.setBufferDuration(duration);
 		mtpf.setMaxSpeed(maxSpeed);
 		
 		boolean status = mtpf.calculatePath();

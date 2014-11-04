@@ -111,7 +111,7 @@ public class TrajectoryBuilder {
 		this.resultTrajectory = resultTrajectory;
 	}
 
-	public void calculate() {
+	public void build() {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 		

@@ -65,7 +65,10 @@
 		<dependency>
 			<groupId>jgraph</groupId>
 			<artifactId>jgraph</artifactId>
-			<version>5.13.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
@@ -84,6 +87,16 @@
 				<groupId>org.jgrapht</groupId>
 				<artifactId>jgrapht-core</artifactId>
 				<version>0.9.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>jgraph</groupId>
+				<artifactId>jgraph</artifactId>
+				<version>5.13.0.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

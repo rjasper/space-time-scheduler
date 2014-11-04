@@ -57,7 +57,7 @@ public class MatlabMinimumTimePathfinder extends MinimumTimePathfinder {
 		LocalDateTime startTime = getStartTime();
 		LocalDateTime earliestFinishTime = getEarliestFinishTime();
 		LocalDateTime latestFinishTime = getLatestFinishTime();
-		Duration spareTime = getSpareTime();
+		Duration spareTime = getBufferDuration();
 		double maxSpeed = getMaxSpeed();
 		Collection<Polygon> staticObstacles = getStaticObstacles();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();

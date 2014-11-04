@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,9 +10,16 @@ import com.vividsolutions.jts.geom.LineString;
 
 import world.DynamicObstacle;
 import world.Trajectory;
+import world.TrajectoryBuilder;
 
 public abstract class VelocityPathfinder {
 	
+	private ForbiddenRegionBuilder forbiddenRegionBuilder = new ForbiddenRegionBuilder();
+
+	private TrajectoryBuilder trajBuilder = new TrajectoryBuilder();
+
+	private double maxArc;
+
 	private List<DynamicObstacle> dynamicObstacles = Collections.emptyList();
 	
 	private LineString spatialPath = null;
@@ -21,10 +29,28 @@ public abstract class VelocityPathfinder {
 	private Trajectory resultTrajectory = null;
 	
 	private List<DynamicObstacle> resultEvadedObstacles = null;
-	
+
 	public boolean isReady() {
 		return spatialPath != null
 			&& maxSpeed > 0.0;
+	}
+	
+	protected abstract LocalDateTime getBaseTime();
+
+	private ForbiddenRegionBuilder getForbiddenRegionBuilder() {
+		return forbiddenRegionBuilder;
+	}
+
+	private TrajectoryBuilder getTrajectoryBuilder() {
+		return trajBuilder;
+	}
+
+	protected double getMaxArc() {
+		return maxArc;
+	}
+
+	protected void updateMaxArc() {
+		maxArc = getSpatialPath().getLength();
 	}
 
 	protected List<DynamicObstacle> getDynamicObstacles() {
@@ -65,7 +91,7 @@ public abstract class VelocityPathfinder {
 		return resultTrajectory;
 	}
 
-	protected void setResultTrajectory(Trajectory resultTrajectory) {
+	private void setResultTrajectory(Trajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 
@@ -73,24 +99,65 @@ public abstract class VelocityPathfinder {
 		return resultEvadedObstacles;
 	}
 
-	protected void setResultEvadedObstacles(List<DynamicObstacle> resultEvadedObstacles) {
+	private void setResultEvadedObstacles(List<DynamicObstacle> resultEvadedObstacles) {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
 	
-	public final boolean calculatePath() {
+	public final boolean calculateTrajectory() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
-		boolean status = calculatePathImpl();
+		updateMaxArc();
 		
-		if (!status) {
-			setResultTrajectory(null);
+		Collection<ForbiddenRegion> forbiddenRegions =
+			calculateForbiddenRegions();
+		
+		LineString arcTimePath = calculateArcTimePath(forbiddenRegions);
+		
+		boolean reachable = arcTimePath != null;
+		
+		Trajectory trajectory = reachable
+			? buildTrajectory(arcTimePath)
+			: null;
+		
+		setResultTrajectory(trajectory);
+		
+		if (!reachable)
 			setResultEvadedObstacles(null);
-		}
 		
-		return status;
+		return reachable;
 	}
 	
-	protected abstract boolean calculatePathImpl();
+	private Collection<ForbiddenRegion> calculateForbiddenRegions() {
+		LocalDateTime baseTime = getBaseTime();
+		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
+		LineString spatialPath = getSpatialPath();
+		
+		ForbiddenRegionBuilder builder = getForbiddenRegionBuilder();
+		
+		builder.setBaseTime(baseTime);
+		builder.setDynamicObstacles(dynamicObstacles);
+		builder.setSpatialPath(spatialPath);
+		
+		builder.calculate();
+		
+		return builder.getResultForbiddenRegions();
+	}
 
+	protected abstract LineString calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
+
+	private Trajectory buildTrajectory(LineString arcTimePath) {
+		LocalDateTime baseTime = getBaseTime();
+		LineString spatialPath = getSpatialPath();
+		TrajectoryBuilder trajBuilder = getTrajectoryBuilder();
+
+		trajBuilder.setBaseTime(baseTime);
+		trajBuilder.setSpatialPath(spatialPath);
+		trajBuilder.setArcTimePath(arcTimePath);
+		
+		trajBuilder.build();
+		
+		return trajBuilder.getResultTrajectory();
+	}
+	
 }

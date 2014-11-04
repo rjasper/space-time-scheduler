@@ -47,7 +47,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		pf.setStartTime(startTime);
 		pf.setFinishTime(finishTime);
 		
-		boolean validPath = pf.calculatePath();
+		boolean validPath = pf.calculateTrajectory();
 		
 		assertTrue(validPath);
 		

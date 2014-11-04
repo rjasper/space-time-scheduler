@@ -68,13 +68,13 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 			.map(Candidate::getOrigin)
 			.collect(Collectors.toList());
 		
-		List<Point> finishPoints = candidates.stream()
+		List<Point> finishVertices = candidates.stream()
 			.map(Candidate::getFinishVertex)
 			.collect(Collectors.toList());
 		
 		setOrigins(origins);
 		
-		return finishPoints;
+		return finishVertices;
 	}
 	
 	private Candidate calculateFinishVertexCandidate(Point origin) {

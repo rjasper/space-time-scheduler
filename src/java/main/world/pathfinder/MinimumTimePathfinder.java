@@ -17,7 +17,7 @@ public abstract class MinimumTimePathfinder extends Pathfinder {
 	
 	private LocalDateTime latestFinishTime;
 	
-	private Duration spareTime;
+	private Duration bufferDuration;
 
 
 	protected Point getStartPoint() {
@@ -60,12 +60,12 @@ public abstract class MinimumTimePathfinder extends Pathfinder {
 		this.latestFinishTime = latestFinishTime;
 	}
 
-	protected Duration getSpareTime() {
-		return spareTime;
+	protected Duration getBufferDuration() {
+		return bufferDuration;
 	}
 
-	public void setSpareTime(Duration spareTime) {
-		this.spareTime = spareTime;
+	public void setBufferDuration(Duration bufferDuration) {
+		this.bufferDuration = bufferDuration;
 	}
 
 }

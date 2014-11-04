@@ -14,6 +14,10 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 			&& startTime!= null
 			&& finishTime!= null;
 	}
+	
+	protected LocalDateTime getBaseTime() {
+		return getStartTime();
+	}
 
 	protected LocalDateTime getStartTime() {
 		return startTime;
