@@ -32,15 +32,20 @@ public class TaskPlanner {
 	
 	private Duration duration = null;
 	
-	private Task task = null;
+	private Task resultTask = null;
 	
-	private Trajectory toTask;
+	private Trajectory resultToTask;
 	
-	private Trajectory fromTask;
+	private Trajectory resultFromTask;
 	
 	public boolean isReady() {
-		// TODO implement
-		return true;
+		return worker != null
+			&& workerPool != null
+			&& staticObstacles != null
+			&& location != null
+			&& earliestStartTime != null
+			&& latestStartTime != null
+			&& duration != null;
 	}
 	
 	// TODO check setter args
@@ -101,28 +106,28 @@ public class TaskPlanner {
 		this.duration = duration;
 	}
 
-	public Task getTask() {
-		return task;
+	public Task getResultTask() {
+		return resultTask;
 	}
 
-	private void setTask(Task task) {
-		this.task = task;
+	private void setResultTask(Task resultTask) {
+		this.resultTask = resultTask;
 	}
 
-	public Trajectory getToTask() {
-		return toTask;
+	public Trajectory getResultToTask() {
+		return resultToTask;
 	}
 
-	private void setToTask(Trajectory toTask) {
-		this.toTask = toTask;
+	private void setResultToTask(Trajectory resultToTask) {
+		this.resultToTask = resultToTask;
 	}
 
-	public Trajectory getFromTask() {
-		return fromTask;
+	public Trajectory getResultFromTask() {
+		return resultFromTask;
 	}
 
-	private void setFromTask(Trajectory fromTask) {
-		this.fromTask = fromTask;
+	private void setResultFromTask(Trajectory resultFromTask) {
+		this.resultFromTask = resultFromTask;
 	}
 
 	public boolean plan() {
@@ -201,9 +206,9 @@ public class TaskPlanner {
 		
 		Task task = new Task(location, taskStartTime, taskFinishTime);
 		
-		setTask(task);
-		setToTask(toTask);
-		setFromTask(fromTask);
+		setResultTask(task);
+		setResultToTask(toTask);
+		setResultFromTask(fromTask);
 		
 		return true;
 	}

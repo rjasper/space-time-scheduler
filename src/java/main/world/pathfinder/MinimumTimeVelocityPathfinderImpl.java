@@ -1,6 +1,5 @@
 package world.pathfinder;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,10 +18,9 @@ import com.vividsolutions.jts.geom.Point;
 
 public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfinder {
 	
-	private static final double ARC_START = 0.0;
+	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	
-	private MinimumTimeMeshBuilder meshBuilder =
-		new MinimumTimeMeshBuilder();
+	private MinimumTimeMeshBuilder meshBuilder = new MinimumTimeMeshBuilder();
 	
 	private Point arcTimeStartPoint;
 	
@@ -37,12 +35,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	}
 	
 	private void updateArcTimeStartPoint() {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
-		Duration duration = Duration.between(getBaseTime(), getStartTime());
-		double timeOffset = DurationConv.inSeconds(duration);
-		
-		arcTimeStartPoint = geomBuilder.point(ARC_START, timeOffset);
+		arcTimeStartPoint = geomBuilder.point(getMinArc(), inSeconds(getStartTime()));
 	}
 
 	private Collection<Point> getArcTimeFinishPoints() {
@@ -73,6 +66,8 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		double maxArc = getMaxArc();
 		double bufferDuration = DurationConv.inSeconds( getBufferDuration() );
 		Point startPoint = getArcTimeStartPoint();
+		double earliest = inSeconds( getEarliestFinishTime() );
+		double latest = inSeconds( getLatestFinishTime() );
 		
 		MinimumTimeMeshBuilder builder = getMeshBuilder();
 		
@@ -80,12 +75,15 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		builder.setMaxSpeed(maxSpeed);
 		builder.setMaxArc(maxArc);
 		builder.setStartPoint(startPoint);
+		builder.setEarliestFinishTime(earliest);
+		builder.setLatestFinishTime(latest);
 		builder.setBufferDuration(bufferDuration);
 		
 		builder.build();
 		
 		Collection<Point> finishVertices = builder.getFinishVertices();
 		
+		// TODO ugly side-effect
 		setArcTimeFinishPoints(finishVertices);
 		
 		return builder.getResultMesh();
@@ -118,8 +116,6 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		ClosestFirstIterator<Point, DefaultWeightedEdge> iterator,
 		Point finishVertex)
 	{
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
 		LinkedList<Point> path = new LinkedList<>();
 		
 		Point cur = finishVertex;

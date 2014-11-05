@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,11 +9,14 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.LineString;
 
+import util.DurationConv;
 import world.DynamicObstacle;
 import world.Trajectory;
 import world.TrajectoryBuilder;
 
 public abstract class VelocityPathfinder {
+	
+	protected static final double MIN_ARC = 0.0;
 	
 	private ForbiddenRegionBuilder forbiddenRegionBuilder = new ForbiddenRegionBuilder();
 
@@ -43,6 +47,10 @@ public abstract class VelocityPathfinder {
 
 	private TrajectoryBuilder getTrajectoryBuilder() {
 		return trajBuilder;
+	}
+	
+	protected double getMinArc() {
+		return MIN_ARC;
 	}
 
 	protected double getMaxArc() {
@@ -158,6 +166,12 @@ public abstract class VelocityPathfinder {
 		trajBuilder.build();
 		
 		return trajBuilder.getResultTrajectory();
+	}
+
+	protected double inSeconds(LocalDateTime time) {
+		Duration duration = Duration.between(getBaseTime(), time);
+		
+		return DurationConv.inSeconds(duration);
 	}
 	
 }

@@ -17,6 +17,10 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	
 	private Point startPoint = null;
 	
+	private double earliestFinishTime = Double.NaN;
+	
+	private double latestFinishTime = Double.NaN;
+	
 	private double bufferDuration = 0.0;
 	
 	private List<Point> origins;
@@ -24,9 +28,38 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 //	private Point getStartPoint() {
 //		return startPoint;
 //	}
+	
+	public boolean isReady() {
+		return super.isReady()
+			&& startPoint != null
+			&& !Double.isNaN(earliestFinishTime)
+			&& !Double.isNaN(latestFinishTime);
+	}
 
 	public void setStartPoint(Point startPoint) {
 		this.startPoint = startPoint;
+	}
+
+	private double getEarliestFinishTime() {
+		return earliestFinishTime;
+	}
+
+	public void setEarliestFinishTime(double earliestFinishTime) {
+		if (!Double.isFinite(earliestFinishTime))
+			throw new IllegalArgumentException("value is not finite");
+		
+		this.earliestFinishTime = earliestFinishTime;
+	}
+
+	private double getLatestFinishTime() {
+		return latestFinishTime;
+	}
+
+	public void setLatestFinishTime(double latestFinishTime) {
+		if (!Double.isFinite(latestFinishTime))
+			throw new IllegalArgumentException("value is not finite");
+		
+		this.latestFinishTime = latestFinishTime;
 	}
 
 	private double getBufferDuration() {
@@ -34,6 +67,9 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	}
 
 	public void setBufferDuration(double bufferDuration) {
+		if (!Double.isFinite(bufferDuration))
+			throw new IllegalArgumentException("value is not finite");
+		
 		this.bufferDuration = bufferDuration;
 	}
 
@@ -56,12 +92,13 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		Collection<Point> coreVertices = getCoreVertices();
 		Collection<Point> startVertices = _getStartVertices();
 		
+		double minArc = getMinArc();
 		double maxArc = getMaxArc();
 		
 		List<Candidate> candidates = Stream.concat(coreVertices.stream(), startVertices.stream())
-			.filter((v) -> v.getX() <= maxArc)         // only within bounds
+			.filter((v) -> v.getX() >= minArc && v.getX() <= maxArc) // only within bounds
 			.map(this::calculateFinishVertexCandidate) // create candidate
-			.filter(this::checkCandidate)              // check candidate (visibility and buffer)
+			.filter(this::checkCandidate)              // check candidate (time, visibility and buffer)
 			.collect(Collectors.toList());
 		
 		List<Point> origins = candidates.stream()
@@ -97,7 +134,12 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		Point origin = candidate.getOrigin();
 		Point finishVertex = candidate.getFinishVertex();
 		
-		return checkVisibility(origin, finishVertex)
+		double t = finishVertex.getY();
+		double earliest = getEarliestFinishTime();
+		double latest = getLatestFinishTime();
+		
+		return t >= earliest && t <= latest
+			&& checkVisibility(origin, finishVertex)
 			&& checkBuffer(finishVertex);
 	}
 	

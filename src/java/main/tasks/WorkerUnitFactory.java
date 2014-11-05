@@ -148,9 +148,9 @@ public class WorkerUnitFactory {
 		if (!status)
 			return false;
 		
-		Task task = tp.getTask();
-		Trajectory toTask = tp.getToTask();
-		Trajectory fromTask = tp.getFromTask();
+		Task task = tp.getResultTask();
+		Trajectory toTask = tp.getResultToTask();
+		Trajectory fromTask = tp.getResultFromTask();
 		
 		worker.addTask(task, toTask, fromTask);
 		

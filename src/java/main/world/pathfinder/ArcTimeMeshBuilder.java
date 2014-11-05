@@ -24,22 +24,16 @@ import com.vividsolutions.jts.geom.Point;
 
 public abstract class ArcTimeMeshBuilder {
 	
+	protected static final double MIN_ARC = 0.0;
+	
 	private List<ForbiddenRegion> forbiddenRegions = null;
 	
 	private transient Geometry regionMap = null;
 
-//	private Point startPoint = null;
+	private double maxSpeed = Double.NaN;
 	
-//	private Point finishPoint = null;
+	private double maxArc = Double.NaN;
 	
-	private double maxSpeed = 0.0;
-	
-	private double maxArc = 0.0;
-	
-	//	private Point startPoint = null;
-		
-	//	private Point finishPoint = null;
-		
 	private Collection<Point> coreVertices;
 
 	private Collection<Point> startVertices;
@@ -54,9 +48,8 @@ public abstract class ArcTimeMeshBuilder {
 	
 	public boolean isReady() {
 		return forbiddenRegions != null
-//			&& startPoint != null
-//			&& finishPoint != null
-			&& maxSpeed > 0.0;
+			&& !Double.isNaN(maxSpeed)
+			&& !Double.isNaN(maxArc);
 	}
 
 	private List<ForbiddenRegion> getForbiddenRegions() {
@@ -77,28 +70,16 @@ public abstract class ArcTimeMeshBuilder {
 		this.regionMap = regionMap;
 	}
 
-//	private Point getStartPoint() {
-//		return startPoint;
-//	}
-//
-//	public void setStartPoint(Point startPoint) {
-//		this.startPoint = startPoint;
-//	}
-//
-//	private Point getFinishPoint() {
-//		return finishPoint;
-//	}
-//
-//	public void setFinishPoint(Point finishPoint) {
-//		this.finishPoint = finishPoint;
-//	}
-
 	protected double getMaxSpeed() {
 		return maxSpeed;
 	}
 
 	public void setMaxSpeed(double maxSpeed) {
 		this.maxSpeed = maxSpeed;
+	}
+	
+	protected double getMinArc() {
+		return MIN_ARC;
 	}
 
 	protected double getMaxArc() {
@@ -190,11 +171,6 @@ public abstract class ArcTimeMeshBuilder {
 		if (getRegionMap() == null)
 			updateRegionMap();
 		
-//		Collection<Point> vertices =
-//			buildVertices();
-//		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
-//			connectVertices(vertices);
-		
 		updateVertices();
 		updateMinMaxTime();
 		
@@ -219,9 +195,6 @@ public abstract class ArcTimeMeshBuilder {
 	private Collection<Point> buildCoreVertices() {
 		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
 		LinkedList<Point> vertices = new LinkedList<>();
-		
-//		vertices.add(getStartPoint());
-//		vertices.add(getFinishPoint());
 		
 		getForbiddenRegions().stream()
 			.map(ForbiddenRegion::getRegion) // get region geometry
@@ -260,30 +233,6 @@ public abstract class ArcTimeMeshBuilder {
 		
 		return graph;
 	}
-	
-//	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> connectVertices(Collection<Point> vertices) {
-//		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
-//			new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-//		
-//		// add vertices to graph
-//		vertices.stream()
-//			.forEach(graph::addVertex);
-//		
-//		// add edges to graph
-//		for (Point from : vertices) {
-//			for (Point to : vertices) {
-//				if (from == to)
-//					continue;
-//				
-//				if (checkConnection(from, to)) {
-//					DefaultWeightedEdge edge = graph.addEdge(from, to);
-//					graph.setEdgeWeight(edge, calculateWeight(from, to));
-//				}
-//			}
-//		}
-//		
-//		return graph;
-//	}
 	
 	protected void connect(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph,

@@ -19,7 +19,6 @@ public abstract class MinimumTimePathfinder extends Pathfinder {
 	
 	private Duration bufferDuration;
 
-
 	protected Point getStartPoint() {
 		return startPoint;
 	}

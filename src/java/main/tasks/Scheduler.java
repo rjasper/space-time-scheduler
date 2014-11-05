@@ -81,7 +81,7 @@ public class Scheduler {
 				boolean status = tp.plan();
 				
 				if (status) {
-					w.addTask(tp.getTask(), tp.getToTask(), tp.getFromTask());
+					w.addTask(tp.getResultTask(), tp.getResultToTask(), tp.getResultFromTask());
 					return true;
 				}
 			}

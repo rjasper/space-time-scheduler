@@ -1,6 +1,5 @@
 package world.pathfinder;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -14,11 +13,9 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
-import util.DurationConv;
-
 public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
-	
-	private static final double ARC_START = 0.0;
+
+	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	
 	private FixTimeMeshBuilder meshBuilder =
 		new FixTimeMeshBuilder();
@@ -36,12 +33,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 	
 	private void updateArcTimeStartPoint() {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
-		Duration duration = Duration.between(getBaseTime(), getStartTime());
-		double timeOffset = DurationConv.inSeconds(duration);
-		
-		arcTimeStartPoint = geomBuilder.point(ARC_START, timeOffset);
+		arcTimeStartPoint = geomBuilder.point(getMinArc(), inSeconds(getStartTime()));
 	}
 
 	private Point getArcTimeFinishPoint() {
@@ -49,37 +41,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 	
 	private void updateArcTimeFinishPoint() {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
-		double maxArc = getMaxArc();
-		Duration duration = Duration.between(getBaseTime(), getFinishTime());
-		double timeOffset = DurationConv.inSeconds(duration);
-		
-		arcTimeFinishPoint = geomBuilder.point(maxArc, timeOffset);
+		arcTimeFinishPoint = geomBuilder.point(getMaxArc(), inSeconds(getFinishTime()));
 	}
-	
-//	@Override
-//	protected boolean calculateTrajectoryImpl() {
-//		updateArcTimeStartPoint();
-//		updateArcTimeFinishPoint();
-//		
-//		Collection<ForbiddenRegion> forbiddenRegions =
-//			calculateForbiddenRegions();
-//		
-//		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh =
-//			buildMesh(forbiddenRegions);
-//		
-//		LineString arcTimePath =
-//			calculateArcTimePath(mesh);
-//		
-//		Trajectory trajectory = arcTimePath == null
-//			? null
-//			: calculateTrajectory(arcTimePath);
-//		
-//		setResultTrajectory(trajectory);
-//		
-//		return trajectory != null;
-//	}
 
 	@Override
 	protected LineString calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
@@ -138,8 +101,6 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 			
 			Point[] points = Stream.concat(sourcePoints, endPoint)
 				.toArray(Point[]::new);
-			
-			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 			
 			return geomBuilder.lineString(points);
 		}
