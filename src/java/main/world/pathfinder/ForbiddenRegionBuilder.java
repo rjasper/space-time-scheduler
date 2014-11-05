@@ -125,14 +125,16 @@ public class ForbiddenRegionBuilder {
 							obstacleShape);
 					}
 					
-					subregions.add(region);
+					if (!region.isEmpty())
+						subregions.add(region);
 				}
 			}
 			
 			Geometry region = builder.geometryCollection(subregions).union();
 			region.normalize();
 			
-			forbiddenRegions.add(new ForbiddenRegion(region, obstacle));
+			if (!region.isEmpty())
+				forbiddenRegions.add(new ForbiddenRegion(region, obstacle));
 		}
 		
 		setResultForbiddenRegions(forbiddenRegions);

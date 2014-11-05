@@ -8,10 +8,10 @@ import java.util.Collection;
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
 import world.Trajectory;
-import world.pathfinder.MatlabMinimumTimePathfinder;
-import world.pathfinder.MatlabSpecificTimePathfinder;
+import world.pathfinder.JavaFixTimePathfinder;
+import world.pathfinder.JavaMinimumTimePathfinder;
 import world.pathfinder.MinimumTimePathfinder;
-import world.pathfinder.SpecificTimePathfinder;
+import world.pathfinder.FixTimePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -136,7 +136,8 @@ public class TaskPlanner {
 		
 		double maxSpeed = worker.getMaxSpeed();
 //		MatlabPathfinder pf = new MatlabPathfinder();
-		MinimumTimePathfinder mtpf = new MatlabMinimumTimePathfinder();
+//		MinimumTimePathfinder mtpf = new MatlabMinimumTimePathfinder();
+		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
 		
 		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
 		
@@ -184,15 +185,13 @@ public class TaskPlanner {
 
 		Trajectory fromTask;
 		if (succ != null) {
-			SpecificTimePathfinder stpf = new MatlabSpecificTimePathfinder();
-			
-//			stpf.useSpecifiedFinishTime();
+			FixTimePathfinder stpf = new JavaFixTimePathfinder();
 			
 			stpf.setStartPoint(location);
 			stpf.setFinishPoint(succ.getLocation());
 			stpf.setStartTime(taskFinishTime);
 			stpf.setFinishTime(succ.getStartTime());
-			stpf.setMaxSpeed(maxSpeed); // here actually redundant
+			stpf.setMaxSpeed(maxSpeed);
 			
 			status = stpf.calculatePath();
 			

@@ -45,15 +45,6 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		
 		double maxConnectionDistance = getMaxConnectionDistance();
 		
-//		ArrayList<PathBlockingObstacle> pathBlockingObstacles = staticObstacles.stream()
-//			.map((p) -> conv.makeKPolygonFromExterior(p))
-//			.map((kp) -> createObstacleFromInnerPolygon(kp))
-//			.collect(Collectors.toCollection(ArrayList::new));
-//		
-//		for (PathBlockingObstacle o : pathBlockingObstacles)
-//			nc.addObstacle(o, pathBlockingObstacles, maxConnectionDistance);
-//		ArrayList<PathBlockingObstacle> pathBlockingObstacles = staticObstacles.stream()
-		
 		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
 		
 		for (Polygon o : staticObstacles) {

@@ -106,7 +106,7 @@ public abstract class ArcTimeMeshBuilder {
 		this.maxTime = maxTime;
 	}
 
-	protected Collection<Point> getCoreVertices() {
+	protected Collection<Point> _getCoreVertices() {
 		return coreVertices;
 	}
 
@@ -215,7 +215,7 @@ public abstract class ArcTimeMeshBuilder {
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
 			new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 	
-		Stream<Point> coreVertices = getCoreVertices().stream();
+		Stream<Point> coreVertices = _getCoreVertices().stream();
 		Stream<Point> startVertices = _getStartVertices().stream();
 		Stream<Point> finishVertices = _getFinishVertices().stream();
 		
@@ -259,7 +259,7 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	private void connectCoreVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> vertices = getCoreVertices();
+		Collection<Point> vertices = _getCoreVertices();
 
 		connect(graph, vertices, vertices);
 	}
@@ -267,7 +267,7 @@ public abstract class ArcTimeMeshBuilder {
 	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
 		Collection<Point> startVertices = _getStartVertices();
 		Collection<Point> finishVertices = _getFinishVertices();
-		Collection<Point> coreVertices = getCoreVertices();
+		Collection<Point> coreVertices = _getCoreVertices();
 		
 		connect(graph, startVertices, finishVertices);
 		connect(graph, startVertices, coreVertices);
@@ -275,7 +275,7 @@ public abstract class ArcTimeMeshBuilder {
 
 	protected void connectFinishVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
 		Collection<Point> finishVertices = _getFinishVertices();
-		Collection<Point> coreVertices = getCoreVertices();
+		Collection<Point> coreVertices = _getCoreVertices();
 		
 		connect(graph, coreVertices, finishVertices);
 	}

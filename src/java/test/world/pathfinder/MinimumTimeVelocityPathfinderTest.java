@@ -11,7 +11,6 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import util.DurationConv;
 import world.DynamicObstacle;
 import world.LocalDateTimeFactory;
 import world.Trajectory;

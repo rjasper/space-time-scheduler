@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.vividsolutions.jts.geom.Point;
 
-public abstract class SpecificTimePathfinder extends Pathfinder {
+public abstract class FixTimePathfinder extends Pathfinder {
 	
 	private Point startPoint;
 	

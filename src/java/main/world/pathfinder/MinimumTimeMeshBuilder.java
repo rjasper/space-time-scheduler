@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Point;
 
 public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	
+	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+	
 	private Point startPoint = null;
 	
 	private double earliestFinishTime = Double.NaN;
@@ -23,11 +25,9 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	
 	private double bufferDuration = 0.0;
 	
-	private List<Point> origins;
-
-//	private Point getStartPoint() {
-//		return startPoint;
-//	}
+	private List<VertexPair> finishVertexPairs;
+	
+	private Point earliestFinishVertex;
 	
 	public boolean isReady() {
 		return super.isReady()
@@ -73,12 +73,20 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		this.bufferDuration = bufferDuration;
 	}
 
-	private List<Point> getOrigins() {
-		return origins;
+	private List<VertexPair> getFinishVertexPairs() {
+		return finishVertexPairs;
 	}
 
-	private void setOrigins(List<Point> origins) {
-		this.origins = origins;
+	private void setFinishVertexPairs(List<VertexPair> finishVertexPairs) {
+		this.finishVertexPairs = finishVertexPairs;
+	}
+
+	private Point getEarliestFinishVertex() {
+		return earliestFinishVertex;
+	}
+
+	private void setEarliestFinishVertex(Point earliestFinishVertex) {
+		this.earliestFinishVertex = earliestFinishVertex;
 	}
 
 	@Override
@@ -89,32 +97,35 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	@Override
 	protected Collection<Point> buildFinishVertices() {
 		// note that core and start vertices are build before finish vertices
-		Collection<Point> coreVertices = getCoreVertices();
+		Collection<Point> coreVertices = _getCoreVertices();
 		Collection<Point> startVertices = _getStartVertices();
 		
 		double minArc = getMinArc();
 		double maxArc = getMaxArc();
+		double earliest = getEarliestFinishTime();
 		
-		List<Candidate> candidates = Stream.concat(coreVertices.stream(), startVertices.stream())
+		Point earliestFinishVertex = geomBuilder.point(maxArc, earliest);
+		
+		List<VertexPair> finishVertexPairs = Stream.concat(coreVertices.stream(), startVertices.stream())
 			.filter((v) -> v.getX() >= minArc && v.getX() <= maxArc) // only within bounds
 			.map(this::calculateFinishVertexCandidate) // create candidate
 			.filter(this::checkCandidate)              // check candidate (time, visibility and buffer)
 			.collect(Collectors.toList());
 		
-		List<Point> origins = candidates.stream()
-			.map(Candidate::getOrigin)
+		List<Point> finishVertices = finishVertexPairs.stream()
+			.map(VertexPair::getSecond)
 			.collect(Collectors.toList());
 		
-		List<Point> finishVertices = candidates.stream()
-			.map(Candidate::getFinishVertex)
-			.collect(Collectors.toList());
+		finishVertices.add(earliestFinishVertex);
 		
-		setOrigins(origins);
+		// TODO ugly side-effects
+		setEarliestFinishVertex(earliestFinishVertex);
+		setFinishVertexPairs(finishVertexPairs);
 		
 		return finishVertices;
 	}
 	
-	private Candidate calculateFinishVertexCandidate(Point origin) {
+	private VertexPair calculateFinishVertexCandidate(Point origin) {
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 
 		double s = origin.getX(), t = origin.getY();
@@ -122,17 +133,17 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		double maxArc = getMaxArc();
 		
 		if (s == maxArc) {
-			return new Candidate(origin, origin);
+			return new VertexPair(origin, origin);
 		} else {
 			Point finishPoint = geomBuilder.point(maxArc, (maxArc - s) / maxSpeed + t);
 			
-			return new Candidate(origin, finishPoint);
+			return new VertexPair(origin, finishPoint);
 		}
 	}
 	
-	private boolean checkCandidate(Candidate candidate) {
-		Point origin = candidate.getOrigin();
-		Point finishVertex = candidate.getFinishVertex();
+	private boolean checkCandidate(VertexPair candidate) {
+		Point origin = candidate.getFirst();
+		Point finishVertex = candidate.getSecond();
 		
 		double t = finishVertex.getY();
 		double earliest = getEarliestFinishTime();
@@ -154,21 +165,42 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		
 		return checkVisibility(p1, p2);
 	}
+	
+	@Override
+	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> startVertices = _getStartVertices();
+		Collection<Point> coreVertices = _getCoreVertices();
+		
+		connect(graph, startVertices, coreVertices);
+	}
 
 	@Override
 	protected void connectFinishVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> finishVertices = _getFinishVertices();
-		List<Point> origins = getOrigins();
+		Collection<VertexPair> pairs = getFinishVertexPairs();
+		Point earliest = getEarliestFinishVertex();
+
+		boolean earliestIncluded = false;
 		
-		int i = 0;
-		for (Point v : finishVertices) {
-			Point o = origins.get(i++);
+		for (VertexPair p : pairs) {
+			Point origin = p.getFirst();
+			Point finish = p.getSecond();
 			
-			if (v.equals(o))
+			if (finish.equals(earliest))
+				earliestIncluded = true;
+			if (finish.equals(origin))
 				continue;
 			
 			// connect from origin to finishVertex
-			connectWithoutCheck(graph, o, v);
+			connectWithoutCheck(graph, origin, finish);
+		}
+		
+		if (!earliestIncluded) {
+			Collection<Point> core = _getCoreVertices();
+			Collection<Point> start = _getStartVertices();
+			Collection<Point> finish = Collections.singleton( getEarliestFinishVertex() );
+			
+			connect(graph, core, finish);
+			connect(graph, start, finish);
 		}
 	}
 
@@ -179,23 +211,23 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		return t2 - t1;
 	}
 	
-	private static class Candidate {
+	private static class VertexPair {
 		
-		private final Point origin;
+		private final Point first;
 		
-		private final Point finishVertex;
+		private final Point second;
 		
-		public Candidate(Point origin, Point finishVertex) {
-			this.origin = origin;
-			this.finishVertex = finishVertex;
+		public VertexPair(Point first, Point second) {
+			this.first = first;
+			this.second = second;
 		}
 
-		public Point getOrigin() {
-			return origin;
+		public Point getFirst() {
+			return first;
 		}
 
-		public Point getFinishVertex() {
-			return finishVertex;
+		public Point getSecond() {
+			return second;
 		}
 		
 	}
