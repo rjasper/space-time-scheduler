@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
@@ -17,7 +18,7 @@ import world.Trajectory;
 import world.TrajectoryFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class ForbiddenRegionBuilderTest {
@@ -30,7 +31,7 @@ public class ForbiddenRegionBuilderTest {
 	
 	@Test
 	public void testRegularCase() {
-		LineString path = geomBuilder.lineString(2., 2., 8., 8.);
+		List<Point> path = geomBuilder.points(2., 2., 8., 8.);
 		
 		double[] x = {3., 7.}, y = {7., 3.}, t = {0., 4.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
@@ -63,7 +64,7 @@ public class ForbiddenRegionBuilderTest {
 	
 	@Test
 	public void testParallelCase() {
-		LineString path = geomBuilder.lineString(2., 4., 10., 4.);
+		List<Point> path = geomBuilder.points(2., 4., 10., 4.);
 		
 		double[] x = {6., 6.}, y = {4., 4.}, t = {0., 1.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
@@ -95,7 +96,7 @@ public class ForbiddenRegionBuilderTest {
 	
 	@Test
 	public void testPathSplit() {
-		LineString path = geomBuilder.lineString(2., 4., 6., 8., 10., 4.);
+		List<Point> path = geomBuilder.points(2., 4., 6., 8., 10., 4.);
 		
 		double[] x = {6., 6.}, y = {12., 2.}, t = {0., 5.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
@@ -130,7 +131,7 @@ public class ForbiddenRegionBuilderTest {
 	
 	@Test
 	public void testTrajectorySplit() {
-		LineString path = geomBuilder.lineString(2., 6., 12., 6.);
+		List<Point> path = geomBuilder.points(2., 6., 12., 6.);
 		
 		double[] x = {3., 9., 9.}, y = {3., 9., 3.}, t = {0., 3., 6.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -17,7 +16,7 @@ public abstract class SpatialPathfinder {
 	
 	private Point finishPoint = null;
 	
-	private LineString resultSpatialPath = null;
+	private List<Point> resultSpatialPath = null;
 	
 	public boolean isReady() {
 		return startPoint != null
@@ -32,11 +31,11 @@ public abstract class SpatialPathfinder {
 		this.staticObstacles = new ArrayList<>(staticObstacles);
 	}
 
-	public LineString getResultSpatialPath() {
+	public List<Point> getResultSpatialPath() {
 		return resultSpatialPath;
 	}
 
-	protected void setResultSpatialPath(LineString resultSpatialPath) {
+	protected void setResultSpatialPath(List<Point> resultSpatialPath) {
 		this.resultSpatialPath = resultSpatialPath;
 	}
 	

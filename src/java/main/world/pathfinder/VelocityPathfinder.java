@@ -7,12 +7,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.LineString;
-
 import util.DurationConv;
+import util.PathOperations;
 import world.DynamicObstacle;
 import world.Trajectory;
 import world.TrajectoryBuilder;
+
+import com.vividsolutions.jts.geom.Point;
 
 public abstract class VelocityPathfinder {
 	
@@ -26,7 +27,7 @@ public abstract class VelocityPathfinder {
 
 	private List<DynamicObstacle> dynamicObstacles = Collections.emptyList();
 	
-	private LineString spatialPath = null;
+	private List<Point> spatialPath = null;
 	
 	private double maxSpeed = 0.0;
 	
@@ -58,7 +59,7 @@ public abstract class VelocityPathfinder {
 	}
 
 	protected void updateMaxArc() {
-		maxArc = getSpatialPath().getLength();
+		maxArc = PathOperations.length( getSpatialPath() );
 	}
 
 	protected List<DynamicObstacle> getDynamicObstacles() {
@@ -69,16 +70,16 @@ public abstract class VelocityPathfinder {
 		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
 	}
 
-	protected LineString getSpatialPath() {
+	protected List<Point> getSpatialPath() {
 		return spatialPath;
 	}
 
-	public void setSpatialPath(LineString spatialPath) {
+	public void setSpatialPath(List<Point> spatialPath) {
 		if (spatialPath == null)
 			throw new NullPointerException("path cannot be null");
-		if (spatialPath.getCoordinateSequence().getDimension() != 2)
-			throw new IllegalArgumentException("invalid path dimension");
-		if (spatialPath.getNumPoints() < 2)
+//		if (spatialPath.getCoordinateSequence().getDimension() != 2)
+//			throw new IllegalArgumentException("invalid path dimension");
+		if (spatialPath.size() < 2)
 			throw new IllegalArgumentException("path too short");
 		
 		this.spatialPath = spatialPath;
@@ -120,7 +121,7 @@ public abstract class VelocityPathfinder {
 		Collection<ForbiddenRegion> forbiddenRegions =
 			calculateForbiddenRegions();
 		
-		LineString arcTimePath = calculateArcTimePath(forbiddenRegions);
+		List<Point> arcTimePath = calculateArcTimePath(forbiddenRegions);
 		
 		boolean reachable = arcTimePath != null;
 		
@@ -139,7 +140,7 @@ public abstract class VelocityPathfinder {
 	private Collection<ForbiddenRegion> calculateForbiddenRegions() {
 		LocalDateTime baseTime = getBaseTime();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
-		LineString spatialPath = getSpatialPath();
+		List<Point> spatialPath = getSpatialPath();
 		
 		ForbiddenRegionBuilder builder = getForbiddenRegionBuilder();
 		
@@ -152,11 +153,11 @@ public abstract class VelocityPathfinder {
 		return builder.getResultForbiddenRegions();
 	}
 
-	protected abstract LineString calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
+	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
 
-	private Trajectory buildTrajectory(LineString arcTimePath) {
+	private Trajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
-		LineString spatialPath = getSpatialPath();
+		List<Point> spatialPath = getSpatialPath();
 		TrajectoryBuilder trajBuilder = getTrajectoryBuilder();
 
 		trajBuilder.setBaseTime(baseTime);

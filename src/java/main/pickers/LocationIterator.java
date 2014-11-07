@@ -147,7 +147,7 @@ public class LocationIterator implements Iterator<Point> {
 		Point point = subSpace.getInteriorPoint();
 		recycling.add(new PointEnvelopePair(point, envelope));
 		
-		// TODO: what about a dump function to limit the trash?
+		// TODO what about a dump function to limit the trash?
 		
 		return point;
 	}

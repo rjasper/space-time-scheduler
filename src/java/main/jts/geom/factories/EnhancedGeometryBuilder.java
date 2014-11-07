@@ -2,8 +2,10 @@ package jts.geom.factories;
 
 import static jts.geom.factories.StaticJtsFactories.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.collections4.iterators.ArrayIterator;
 
@@ -34,11 +36,30 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 		super(factory);
 	}
 	
+	public List<Point> points(double... ordinates) {
+		if (ordinates.length % 2 != 0)
+			throw new IllegalArgumentException("illegal number of ordinates");
+		
+		int n = ordinates.length / 2;
+		
+		ArrayList<Point> points = new ArrayList<>(n);
+		
+		int k = 0;
+		for (int i = 0; i < n; ++i) {
+			double x = ordinates[k++];
+			double y = ordinates[k++];
+			
+			points.add(point(x, y));
+		}
+		
+		return points;
+	}
+	
 	public LineString lineString(Collection<Point> points) {
 		return lineString( ordinates(points) );
 	}
 	
-	public LineString lineString(Point ...points) {
+	public LineString lineString(Point... points) {
 		return lineString( ordinates(points) );
 	}
 	
@@ -50,7 +71,7 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 		return lineString( ordinates(x, y, n) );
 	}
 	
-	public LinearRing linearRing(Point ...points) {
+	public LinearRing linearRing(Point... points) {
 		return linearRing( ordinates(points) );
 	}
 	
@@ -79,7 +100,7 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 		return ordinates;
 	}
 	
-	public double[] ordinates(Point ...points) {
+	public double[] ordinates(Point... points) {
 		return ordinates(new ArrayIterator<Point>(points), points.length);
 	}
 	
@@ -98,7 +119,7 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 	
 	public double[] ordinates(double[] x, double[] y, int n) {
 		if (x.length < n || y.length < n)
-			throw new IllegalArgumentException("ordinate arrays have different lengths");
+			throw new IllegalArgumentException("ordinate arrays are to short");
 		
 		double[] ordinates = new double[2*n];
 		

@@ -1,11 +1,12 @@
 package world;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.List;
 
 import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class TrajectoryBuilder {
 	
@@ -39,8 +40,8 @@ public class TrajectoryBuilder {
 		this.trajFact.setBaseTime(baseTime);
 	}
 	
-	public void setSpatialPath(LineString spatialPath) {
-		int nSpatial = spatialPath.getNumPoints();
+	public void setSpatialPath(List<Point> spatialPath) {
+		int nSpatial = spatialPath.size();
 
 		double arcAcc = 0.0;
 		SpatialPathSegmentIterator segments = new SpatialPathSegmentIterator(spatialPath);
@@ -49,10 +50,13 @@ public class TrajectoryBuilder {
 		ySpatial = new double[nSpatial];
 		sSpatial = new double[nSpatial];
 		
+		Iterator<Point> it = spatialPath.iterator();
+		
 		for (int i = 0; i < nSpatial; ++i) {
-			Coordinate c = spatialPath.getCoordinateN(i);
-			xSpatial[i] = c.x;
-			ySpatial[i] = c.y;
+			Point p = it.next();
+			
+			xSpatial[i] = p.getX();
+			ySpatial[i] = p.getY();
 			sSpatial[i] = arcAcc;
 			
 			// if not the last coordinate
@@ -61,17 +65,19 @@ public class TrajectoryBuilder {
 		}
 	}
 	
-	public void setArcTimePath(LineString arcTimePath) {
-		int nArcTime = arcTimePath.getNumPoints();
+	public void setArcTimePath(List<Point> arcTimePath) {
+		int nArcTime = arcTimePath.size();
+		
+		Iterator<Point> it = arcTimePath.iterator();
 		
 		sArcTime = new double[nArcTime];
 		tArcTime = new double[nArcTime];
 		
 		for (int i = 0; i < nArcTime; ++i) {
-			Coordinate c = arcTimePath.getCoordinateN(i);
+			Point p = it.next();
 			
-			sArcTime[i] = c.x;
-			tArcTime[i] = c.y;
+			sArcTime[i] = p.getX();
+			tArcTime[i] = p.getY();
 		}
 	}
 	

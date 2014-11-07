@@ -1,17 +1,16 @@
 package world.util;
 
 import java.util.Iterator;
+import java.util.List;
 
-
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 public class SpatialPathSegmentIterable implements Iterable<SpatialPathSegmentIterable.SpatialPathSegment> {
 	
-	private LineString spatialPath;
+	private List<Point> spatialPath;
 	
-	public SpatialPathSegmentIterable(LineString spatialPath) {
+	public SpatialPathSegmentIterable(List<Point> spatialPath) {
 		this.spatialPath = spatialPath;
 	}
 
@@ -54,15 +53,13 @@ public class SpatialPathSegmentIterable implements Iterable<SpatialPathSegmentIt
 
 	public static class SpatialPathSegmentIterator implements Iterator<SpatialPathSegment> {
 	
-		private final LineString spatialPath;
+		private final Iterator<Point> iterator;
 	
 		private Point lastPosition;
 		private double accLength = 0.0;
 	
-		private int i = 0;
-	
-		public SpatialPathSegmentIterator(LineString spatialPath) {
-			this.spatialPath = spatialPath;
+		public SpatialPathSegmentIterator(List<Point> spatialPath) {
+			this.iterator = spatialPath.iterator();
 			
 			if (hasNext())
 				init();
@@ -73,12 +70,12 @@ public class SpatialPathSegmentIterable implements Iterable<SpatialPathSegmentIt
 		}
 	
 		private Point nextPoint() {
-			return lastPosition = spatialPath.getPointN(i++);
+			return lastPosition = iterator.next();
 		}
 	
 		@Override
 		public boolean hasNext() {
-			return i < spatialPath.getNumPoints();
+			return iterator.hasNext();
 		}
 	
 		@Override

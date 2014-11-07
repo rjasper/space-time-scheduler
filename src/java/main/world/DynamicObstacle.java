@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class DynamicObstacle {
@@ -13,7 +13,7 @@ public class DynamicObstacle {
 	
 	private final Trajectory trajectory;
 
-	public DynamicObstacle(Polygon shape, LineString path, List<LocalDateTime> times) {
+	public DynamicObstacle(Polygon shape, List<Point> path, List<LocalDateTime> times) {
 		// TODO check if polygon is empty
 		// TODO check size of path and times
 		
@@ -36,7 +36,7 @@ public class DynamicObstacle {
 		return trajectory;
 	}
 
-	public LineString getPath2d() {
+	public List<Point> getSpatialPath() {
 		return trajectory == null
 			? null
 			: trajectory.getSpatialPath();
@@ -52,7 +52,7 @@ public class DynamicObstacle {
 	public String toString() {
 		return "DynamicObstacle ["
 			+ "shape=" + getShape() + ", "
-			+ "path="    + getPath2d()    + ", "
+			+ "spatialPath="    + getSpatialPath()    + ", "
 			+ "times="   + getTimes()   + "]";
 	}
 

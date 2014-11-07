@@ -1,7 +1,6 @@
 package pickers;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import java.time.Duration;
@@ -41,7 +40,7 @@ public class WorkerUnitSlotIteratorTest {
 		
 		picker.next();
 		assertThat(picker.getCurrentWorker(), equalTo(w2));
-		assertFalse(picker.hasNext());
+		assertThat(picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -74,7 +73,7 @@ public class WorkerUnitSlotIteratorTest {
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
 
-		assertFalse(picker.hasNext());
+		assertThat(picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -107,7 +106,7 @@ public class WorkerUnitSlotIteratorTest {
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
 
-		assertFalse(picker.hasNext());
+		assertThat(picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -140,7 +139,7 @@ public class WorkerUnitSlotIteratorTest {
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
 		
-		assertFalse(picker.hasNext());
+		assertThat(picker.hasNext(), is(false));
 	}
 
 }

@@ -1,15 +1,17 @@
 package world;
 
-import static org.junit.Assert.*;
 import static java.time.Month.JANUARY;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class TrajectoryFactoryTest {
 
@@ -20,9 +22,9 @@ public class TrajectoryFactoryTest {
 		LocalDateTimeFactory timeFact = new LocalDateTimeFactory(baseTime);
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		
-		LineString spatialPath = geomBuilder.lineString(
+		List<Point> spatialPath = geomBuilder.points(
 			0., 1., 2., 1., 2., 4., 5., 4., 5., 1.);
-		LineString arcTimePath = geomBuilder.lineString(
+		List<Point> arcTimePath = geomBuilder.points(
 			0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.);
 		
 		TrajectoryBuilder trajBuilder = new TrajectoryBuilder();
@@ -43,7 +45,7 @@ public class TrajectoryFactoryTest {
 		
 		Trajectory expected = trajFact.trajectory(x, y, t);
 		
-		assertEquals(expected, trajectory);
+		assertThat(trajectory, equalTo(expected));
 	}
 
 }

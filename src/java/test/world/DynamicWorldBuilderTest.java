@@ -1,10 +1,15 @@
 package world;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.junit.Assert.assertThat;
 
-import org.junit.Before;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Test;
 
 import tasks.WorkerUnit;
@@ -12,40 +17,50 @@ import tasks.WorkerUnitFactory;
 
 public class DynamicWorldBuilderTest {
 	
-	private WorkerUnitFactory wFact;
-	private LocalDateTimeFactory timeFact;
-
-	@Before
-	public void setUp() throws Exception {
-		wFact = WorkerUnitFactory.getInstance();
-		timeFact = LocalDateTimeFactory.getInstance();
-	}
+	private WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
+	private LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
+	private TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 
 	@Test
 	public void testBuild() {
-		// TODO implement proper test
-//		fail("Not yet implemented");
-		
 		WorkerUnit w1 = wFact.createWorkerUnit(10.0,  5.0);
-		WorkerUnit w2 = wFact.createWorkerUnit(35.0, 30.0);
 		
-		LocalDateTime endTime = timeFact.second(150L);
+		LocalDateTime endTime = timeFact.second(80L);
 		
 		wFact.addTask(w1, 10.0, 15.0,  30L,  70L);
-		wFact.addTask(w1, 15.0, 25.0, 100L, 120L);
-		wFact.addTask(w2, 25.0, 20.0,  20L,  50L);
-		wFact.addTask(w2, 25.0, 10.0,  80L, 140L);
 		
 		DynamicWorldBuilder builder = new DynamicWorldBuilder();
 		
 		builder.setEndTime(endTime);
-		builder.setWorkers(Arrays.asList(w1, w2));
+		builder.setWorkers(Collections.singleton(w1));
 		
 		builder.build();
 		
-		List<DynamicObstacle> obstacles = builder.getObstacles();
+		Collection<DynamicObstacle> obstacles = builder.getObstacles();
 		
-		System.out.println(obstacles);
+		List<Trajectory> trajectories = obstacles.stream()
+			.map(DynamicObstacle::getTrajectory)
+			.collect(Collectors.toList());
+		
+		assertThat(trajectories.size(), equalTo(3));
+		
+		assertThat(trajectories, hasItem(trajFact.trajectory(
+			new double[] {10., 10.},
+			new double[] { 5., 15.},
+			new double[] { 0., 30.}
+		)));
+		
+		assertThat(trajectories, hasItem(trajFact.trajectory(
+			new double[] {10., 10.},
+			new double[] {15., 15.},
+			new double[] {30., 70.}
+		)));
+		
+		assertThat(trajectories, hasItem(trajFact.trajectory(
+			new double[] {10., 10.},
+			new double[] {15., 15.},
+			new double[] {70., 80.}
+		)));
 	}
 
 }

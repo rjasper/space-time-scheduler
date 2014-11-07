@@ -1,20 +1,24 @@
 package world.pathfinder;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.LineString;
-
 import world.DynamicObstacle;
 import world.LocalDateTimeFactory;
 import world.Trajectory;
 import world.TrajectoryFactory;
-import static org.junit.Assert.*;
+
+import com.vividsolutions.jts.geom.Point;
 
 public abstract class FixTimeVelocityPathfinderTest {
 	
@@ -34,7 +38,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 			new DynamicObstacle(
 				geomBuilder.box(-0.5, -0.5, 0.5, 0.5),
 				trajFact.trajectory(xObst, yObst, tObst)));
-		LineString spatialPath = geomBuilder.lineString(
+		List<Point> spatialPath = geomBuilder.points(
 			1., 4., 4., 4., 4., 1., 1., 1.);
 		LocalDateTime startTime = timeFact.seconds(0.);
 		LocalDateTime finishTime = timeFact.seconds(11.);
@@ -58,7 +62,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		double[] t = {0., 2., 13./3., 47./6., 9., 11.};
 		Trajectory expected = trajFact.trajectory(x, y, t);
 		
-		assertEquals(expected, trajectory);
+		assertThat(trajectory, equalTo(expected));
 	}
 	
 

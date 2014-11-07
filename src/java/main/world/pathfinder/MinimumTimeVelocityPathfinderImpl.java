@@ -3,6 +3,7 @@ package world.pathfinder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
@@ -13,7 +14,6 @@ import org.jgrapht.traverse.ClosestFirstIterator;
 
 import util.DurationConv;
 
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfinder {
@@ -47,13 +47,13 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	}
 
 	@Override
-	protected LineString calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
+	protected List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
 		updateArcTimeStartPoint();
 		
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh =
 			buildMesh(forbiddenRegions);
 		
-		LineString arcTimePath =
+		List<Point> arcTimePath =
 			calculateShortestPath(mesh);
 		
 		return arcTimePath;
@@ -89,7 +89,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		return builder.getResultMesh();
 	}
 
-	private LineString calculateShortestPath(
+	private List<Point> calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
 		Point startVertex = getArcTimeStartPoint();
@@ -111,7 +111,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		return null;
 	}
 
-	private LineString buildPath(
+	private List<Point> buildPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh,
 		ClosestFirstIterator<Point, DefaultWeightedEdge> iterator,
 		Point finishVertex)
@@ -129,7 +129,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 			cur = Graphs.getOppositeVertex(mesh, edge, cur);
 		}
 		
-		return geomBuilder.lineString(path);
+		return path;
 	}
 
 }

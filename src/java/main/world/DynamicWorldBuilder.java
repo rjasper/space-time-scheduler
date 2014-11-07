@@ -9,13 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
+import tasks.Task;
+import tasks.WorkerUnit;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
-import tasks.Task;
-import tasks.WorkerUnit;
 
 public class DynamicWorldBuilder {
 	
@@ -92,12 +90,10 @@ public class DynamicWorldBuilder {
 	}
 	
 	private Trajectory createStationaryTrajectoryFromTask(Task task) {
-		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
-		
 		Point location = task.getLocation();
 		
 		return new Trajectory(
-			fact.lineString(location, location),
+			Arrays.asList(location, location),
 			Arrays.asList(task.getStartTime(), task.getFinishTime())
 		);
 	}
@@ -121,10 +117,8 @@ public class DynamicWorldBuilder {
 		if (lastTime.compareTo(getEndTime()) >= 0)
 			return null;
 
-		EnhancedGeometryBuilder fact = EnhancedGeometryBuilder.getInstance();
-		
 		return new Trajectory(
-			fact.lineString(lastLocation, lastLocation),
+			Arrays.asList(lastLocation, lastLocation),
 			Arrays.asList(lastTime, endTime)
 		);
 	}

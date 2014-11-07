@@ -1,8 +1,10 @@
 package world.pathfinder;
 
+import java.util.List;
+
 import world.Trajectory;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 	
@@ -16,7 +18,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 
 	@Override
 	protected boolean calculatePathImpl() {
-		LineString spatialPath = calculateSpatialPath();
+		List<Point> spatialPath = calculateSpatialPath();
 		
 		if (spatialPath == null)
 			return false;
@@ -28,7 +30,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		return trajectory != null;
 	}
 	
-	private LineString calculateSpatialPath() {
+	private List<Point> calculateSpatialPath() {
 		spatialPathfinder.setStaticObstacles(getStaticObstacles());
 		spatialPathfinder.setStartPoint(getStartPoint());
 		spatialPathfinder.setFinishPoint(getFinishPoint());
@@ -41,7 +43,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		return spatialPathfinder.getResultSpatialPath();
 	}
 	
-	private Trajectory calculateTrajectory(LineString spatialPath) {
+	private Trajectory calculateTrajectory(List<Point> spatialPath) {
 		minTimePathfinder.setDynamicObstacles(getDynamicObstacles());
 		minTimePathfinder.setSpatialPath(spatialPath);
 		minTimePathfinder.setMaxSpeed(getMaxSpeed());

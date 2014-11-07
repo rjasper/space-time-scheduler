@@ -182,7 +182,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		// TODO increase precision (currently 1 second)
 		
 		Duration d = getDuration();
-		double vInv = 1. / worker.getMaxSpeed(); // TODO: repeating calculation
+		double vInv = 1. / worker.getMaxSpeed(); // TODO repeating calculation
 		Point p = getLocation();
 		LocalDateTime earliest = getEarliestStartTime();
 		LocalDateTime latest = getLatestStartTime();

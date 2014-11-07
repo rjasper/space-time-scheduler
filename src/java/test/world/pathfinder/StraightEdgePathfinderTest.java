@@ -35,9 +35,6 @@ public class StraightEdgePathfinderTest {
 		
 		boolean status = pf.calculatePath();
 		
-		// TODO remove
-//		System.out.println(pf.getResultSpatialPath());
-		
 		assertTrue(status);
 	}
 

@@ -1,19 +1,20 @@
 package world.pathfinder;
 
+import java.util.List;
+
 import world.Trajectory;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class JavaFixTimePathfinder extends FixTimePathfinder {
 	
 	private SpatialPathfinder spatialPathfinder = new StraightEdgePathfinder();
 	
-//	private MinimumTimeVelocityPathfinder minTimePathfinder = new MinimumTimeVelocityPathfinderImpl();
 	private FixTimeVelocityPathfinder fixTimePathfinder = new FixTimeVelocityPathfinderImpl();
 
 	@Override
 	protected boolean calculatePathImpl() {
-		LineString spatialPath = calculateSpatialPath();
+		List<Point> spatialPath = calculateSpatialPath();
 		
 		if (spatialPath == null)
 			return false;
@@ -25,7 +26,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		return trajectory != null;
 	}
 	
-	private LineString calculateSpatialPath() {
+	private List<Point> calculateSpatialPath() {
 		spatialPathfinder.setStaticObstacles(getStaticObstacles());
 		spatialPathfinder.setStartPoint(getStartPoint());
 		spatialPathfinder.setFinishPoint(getFinishPoint());
@@ -38,7 +39,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		return spatialPathfinder.getResultSpatialPath();
 	}
 	
-	private Trajectory calculateTrajectory(LineString spatialPath) {
+	private Trajectory calculateTrajectory(List<Point> spatialPath) {
 		fixTimePathfinder.setDynamicObstacles(getDynamicObstacles());
 		fixTimePathfinder.setSpatialPath(spatialPath);
 		fixTimePathfinder.setMaxSpeed(getMaxSpeed());

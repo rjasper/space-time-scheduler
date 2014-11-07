@@ -1,26 +1,37 @@
 package tasks;
 
-import static java.time.Month.JANUARY;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.Test;
 
+import world.LocalDateTimeFactory;
+
 public class WorkerUnitTest {
+	
+	private static final double h = 3600.;
+	
+	private LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
+	private IdleSlotFactory slotFact = IdleSlotFactory.getInstance();
 
 	@Test
 	public void testIdleSubSet() {
-		// TODO: implement proper test
-		
 		WorkerUnit worker = WorkerUnitFixtures.withThreeTasks();
 		
 		Collection<IdleSlot> slots = worker.idleSubSet(
-			LocalDateTime.of(2000, JANUARY, 1,  3, 0),
-			LocalDateTime.of(2000, JANUARY, 1, 17, 0)
+			timeFact.hours( 3L),
+			timeFact.hours(17L)
 		);
 		
-		System.out.println(slots);
+		Collection<IdleSlot> expected = Arrays.asList(
+			slotFact.idleSlot( 0.,  0.,  0.*h, 10., 10.,  6.*h),
+			slotFact.idleSlot(10., 10.,  7.*h, 20., 10., 12.*h),
+			slotFact.idleSlot(20., 10., 15.*h, 20., 20., 18.*h));
+		
+		assertThat(slots, equalTo(expected));
 	}
 
 }

@@ -71,7 +71,7 @@ public class GraphViewer extends JFrame {
 
         GraphConstants.setBounds(attr, newBounds);
 
-        // TODO: Clean up generics once JGraph goes generic
+        // TODO Clean up generics once JGraph goes generic
         AttributeMap cellAttr = new AttributeMap();
         cellAttr.put(cell, attr);
         jgModel.edit(cellAttr, null, null, null);

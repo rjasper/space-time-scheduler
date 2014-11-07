@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class Trajectory {
 	
-	private final LineString spatialPath;
+	private final List<Point> spatialPath;
 	
 	private final List<LocalDateTime> times;
 
-	public Trajectory(LineString spatialPath, List<LocalDateTime> times) {
+	public Trajectory(List<Point> spatialPath, List<LocalDateTime> times) {
 		// TODO check sizes
 		
 		this.spatialPath = spatialPath;
@@ -55,7 +55,7 @@ public class Trajectory {
 		return size() == 0;
 	}
 
-	public LineString getSpatialPath() {
+	public List<Point> getSpatialPath() {
 		return spatialPath;
 	}
 

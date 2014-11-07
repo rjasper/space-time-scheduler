@@ -1,13 +1,14 @@
 package world;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.LineString;
-
 import jts.geom.factories.EnhancedGeometryBuilder;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class TrajectoryFactory {
 	
@@ -53,7 +54,10 @@ public class TrajectoryFactory {
 	public Trajectory trajectory(double[] x, double[] y, double[] t, int n) {
 		// TODO check sizes
 		
-		LineString path = geomBuilder.lineString(x, y, n);
+		List<Point> path = new ArrayList<>(n);
+		
+		for (int i = 0; i < n; ++i)
+			path.add(geomBuilder.point(x[i], y[i]));
 		
 		List<LocalDateTime> times = Arrays.stream(t, 0, n)
 			.mapToObj(timeFact::seconds)

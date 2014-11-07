@@ -1,6 +1,8 @@
 package world.pathfinder;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
@@ -10,7 +12,6 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
@@ -45,14 +46,14 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 
 	@Override
-	protected LineString calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
+	protected List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
 		updateArcTimeStartPoint();
 		updateArcTimeFinishPoint();
 	
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh =
 			buildMesh(forbiddenRegions);
 		
-		LineString arcTimePath =
+		List<Point> arcTimePath =
 			calculateShortestPath(mesh);
 		
 		return arcTimePath;
@@ -79,7 +80,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		return builder.getResultMesh();
 	}
 
-	private LineString calculateShortestPath(
+	private List<Point> calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
 		Point startPoint = getArcTimeStartPoint();
@@ -99,10 +100,10 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 				.map(mesh::getEdgeSource);
 			Stream<Point> endPoint = Stream.of(graphPath.getEndVertex());
 			
-			Point[] points = Stream.concat(sourcePoints, endPoint)
-				.toArray(Point[]::new);
+			List<Point> points = Stream.concat(sourcePoints, endPoint)
+				.collect(Collectors.toList());
 			
-			return geomBuilder.lineString(points);
+			return points;
 		}
 	}
 

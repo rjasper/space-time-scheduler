@@ -5,13 +5,9 @@ import static straightedge.geom.path.PathBlockingObstacleImpl.createObstacleFrom
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
-
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
 import straightedge.geom.KPoint;
 import straightedge.geom.KPolygon;
 import straightedge.geom.PolygonConverter;
@@ -19,6 +15,9 @@ import straightedge.geom.path.NodeConnector;
 import straightedge.geom.path.PathBlockingObstacle;
 import straightedge.geom.path.PathData;
 import straightedge.geom.path.PathFinder;
+
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class StraightEdgePathfinder extends SpatialPathfinder {
 	
@@ -99,8 +98,8 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		if (pathData.isError())
 			return false;
 		
-		LineString path = makeLineString(pathData);
-		boolean validPath = path.getNumPoints() >= 2;
+		List<Point> path = makeSpatialPath(pathData);
+		boolean validPath = path.size() >= 2;
 		
 		setResultSpatialPath(validPath ? path : null);
 		
@@ -117,15 +116,13 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		return builder.point(point.getX(), point.getY());
 	}
 	
-	private LineString makeLineString(PathData path) {
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-		
+	private List<Point> makeSpatialPath(PathData path) {
 		List<KPoint> points = path.getPoints();
-		Point[] jtsPoints = points.stream()
+		List<Point> jtsPoints = points.stream()
 			.map((p) -> makeJtsPoint(p))
-			.toArray(Point[]::new);
+			.collect(Collectors.toList());
 		
-		return builder.lineString( jtsPoints );
+		return jtsPoints;
 	}
 
 }

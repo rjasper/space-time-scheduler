@@ -41,6 +41,53 @@ public class IdleSlot {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+			+ ((finishLocation == null) ? 0 : finishLocation.hashCode());
+		result = prime * result
+			+ ((finishTime == null) ? 0 : finishTime.hashCode());
+		result = prime * result
+			+ ((startLocation == null) ? 0 : startLocation.hashCode());
+		result = prime * result
+			+ ((startTime == null) ? 0 : startTime.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IdleSlot other = (IdleSlot) obj;
+		if (finishLocation == null) {
+			if (other.finishLocation != null)
+				return false;
+		} else if (!finishLocation.equals(other.finishLocation))
+			return false;
+		if (finishTime == null) {
+			if (other.finishTime != null)
+				return false;
+		} else if (!finishTime.equals(other.finishTime))
+			return false;
+		if (startLocation == null) {
+			if (other.startLocation != null)
+				return false;
+		} else if (!startLocation.equals(other.startLocation))
+			return false;
+		if (startTime == null) {
+			if (other.startTime != null)
+				return false;
+		} else if (!startTime.equals(other.startTime))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "IdleSlot [startLocation=" + startLocation + ", finishLocation="
 				+ finishLocation + ", startTime=" + startTime + ", finishTime="
