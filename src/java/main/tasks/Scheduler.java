@@ -74,7 +74,7 @@ public class Scheduler {
 				LocalDateTime slotStartTime = s.getStartTime();
 				LocalDateTime slotFinishTime = s.getFinishTime();
 
-				tp.setWorker(w);
+				tp.setWorkerUnit(w);
 				tp.setEarliestStartTime( max(earliest, slotStartTime) );
 				tp.setLatestStartTime( slotFinishTime == null ? latest : min(latest, slotFinishTime) );
 				

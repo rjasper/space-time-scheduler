@@ -18,7 +18,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class TaskPlanner {
 	
-	private WorkerUnit worker = null;
+	private WorkerUnit workerUnit = null;
 	
 	private Collection<WorkerUnit> workerPool = null;
 	
@@ -39,7 +39,7 @@ public class TaskPlanner {
 	private Trajectory resultFromTask;
 	
 	public boolean isReady() {
-		return worker != null
+		return workerUnit != null
 			&& workerPool != null
 			&& staticObstacles != null
 			&& location != null
@@ -50,15 +50,15 @@ public class TaskPlanner {
 	
 	// TODO check setter args
 
-	public WorkerUnit getWorker() {
-		return worker;
+	private WorkerUnit getWorkerUnit() {
+		return workerUnit;
 	}
 
-	public void setWorker(WorkerUnit worker) {
-		this.worker = worker;
+	public void setWorkerUnit(WorkerUnit worker) {
+		this.workerUnit = worker;
 	}
 
-	public Collection<WorkerUnit> getWorkerPool() {
+	private Collection<WorkerUnit> getWorkerPool() {
 		return workerPool;
 	}
 
@@ -66,7 +66,7 @@ public class TaskPlanner {
 		this.workerPool = new ArrayList<>(workerPool);
 	}
 
-	public Collection<Polygon> getStaticObstacles() {
+	private Collection<Polygon> getStaticObstacles() {
 		return staticObstacles;
 	}
 
@@ -74,7 +74,7 @@ public class TaskPlanner {
 		this.staticObstacles = new ArrayList<>(staticObstacles);
 	}
 
-	public Point getLocation() {
+	private Point getLocation() {
 		return location;
 	}
 
@@ -82,7 +82,7 @@ public class TaskPlanner {
 		this.location = location;
 	}
 
-	public LocalDateTime getEarliestStartTime() {
+	private LocalDateTime getEarliestStartTime() {
 		return earliestStartTime;
 	}
 
@@ -90,7 +90,7 @@ public class TaskPlanner {
 		this.earliestStartTime = earliestStartTime;
 	}
 
-	public LocalDateTime getLatestStartTime() {
+	private LocalDateTime getLatestStartTime() {
 		return latestStartTime;
 	}
 
@@ -98,7 +98,7 @@ public class TaskPlanner {
 		this.latestStartTime = latestStartTime;
 	}
 
-	public Duration getDuration() {
+	private Duration getDuration() {
 		return duration;
 	}
 
@@ -134,12 +134,16 @@ public class TaskPlanner {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
+		WorkerUnit worker = getWorkerUnit();
 		double maxSpeed = worker.getMaxSpeed();
-//		MatlabPathfinder pf = new MatlabPathfinder();
-//		MinimumTimePathfinder mtpf = new MatlabMinimumTimePathfinder();
-		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
-		
+		Collection<Polygon> staticObstacles = getStaticObstacles();
 		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
+		LocalDateTime earliestStartTime = getEarliestStartTime();
+		LocalDateTime latestStartTime = getLatestStartTime();
+		Duration duration = getDuration();
+		Point location = getLocation();
+		
+		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
 		
 		mtpf.setStaticObstacles(staticObstacles);
 		mtpf.setDynamicObstacles(dynamicObstacles);
@@ -160,8 +164,6 @@ public class TaskPlanner {
 			startTime = pred.getFinishTime();
 			startLocation = pred.getLocation();
 		}
-		
-//		pf.useMinimumFinishTime();
 		
 		mtpf.setStartPoint(startLocation);
 		mtpf.setFinishPoint(location);
@@ -213,12 +215,17 @@ public class TaskPlanner {
 	}
 	
 	private Collection<DynamicObstacle> buildDynamicObstacles() {
+		WorkerUnit worker = getWorkerUnit();
+		Collection<WorkerUnit> pool = getWorkerPool();
+		LocalDateTime latestStartTime = getLatestStartTime();
+		Duration duration = getDuration();
+		
 		DynamicWorldBuilder builder = new DynamicWorldBuilder();
 		
-		Collection<WorkerUnit> otherWorkers = new ArrayList<>(workerPool);
-		otherWorkers.remove(worker);
+		Collection<WorkerUnit> others = new ArrayList<>(pool);
+		others.remove(worker);
 		
-		builder.setWorkers(otherWorkers);
+		builder.setWorkers(others);
 		builder.setEndTime(latestStartTime.plus(duration));
 		
 		builder.build();

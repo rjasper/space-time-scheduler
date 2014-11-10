@@ -137,7 +137,7 @@ public class WorkerUnitFactory {
 		LocalDateTime time = timeFactory.second(t);
 		Duration duration = Duration.ofSeconds(d);
 
-		tp.setWorker(worker);
+		tp.setWorkerUnit(worker);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);
 		tp.setLatestStartTime(time);
