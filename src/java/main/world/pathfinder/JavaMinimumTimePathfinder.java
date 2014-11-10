@@ -2,7 +2,7 @@ package world.pathfinder;
 
 import java.util.List;
 
-import world.Trajectory;
+import world.DecomposedTrajectory;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -23,7 +23,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		if (spatialPath == null)
 			return false;
 		
-		Trajectory trajectory = calculateTrajectory(spatialPath);
+		DecomposedTrajectory trajectory = calculateTrajectory(spatialPath);
 		
 		setResultTrajectory(trajectory);
 		
@@ -43,7 +43,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		return spatialPathfinder.getResultSpatialPath();
 	}
 	
-	private Trajectory calculateTrajectory(List<Point> spatialPath) {
+	private DecomposedTrajectory calculateTrajectory(List<Point> spatialPath) {
 		minTimePathfinder.setDynamicObstacles(getDynamicObstacles());
 		minTimePathfinder.setSpatialPath(spatialPath);
 		minTimePathfinder.setMaxSpeed(getMaxSpeed());

@@ -2,7 +2,7 @@ package world.pathfinder;
 
 import java.util.List;
 
-import world.Trajectory;
+import world.DecomposedTrajectory;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -19,7 +19,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		if (spatialPath == null)
 			return false;
 		
-		Trajectory trajectory = calculateTrajectory(spatialPath);
+		DecomposedTrajectory trajectory = calculateTrajectory(spatialPath);
 		
 		setResultTrajectory(trajectory);
 		
@@ -39,7 +39,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		return spatialPathfinder.getResultSpatialPath();
 	}
 	
-	private Trajectory calculateTrajectory(List<Point> spatialPath) {
+	private DecomposedTrajectory calculateTrajectory(List<Point> spatialPath) {
 		fixTimePathfinder.setDynamicObstacles(getDynamicObstacles());
 		fixTimePathfinder.setSpatialPath(spatialPath);
 		fixTimePathfinder.setMaxSpeed(getMaxSpeed());

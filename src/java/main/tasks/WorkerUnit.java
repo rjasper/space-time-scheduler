@@ -1,6 +1,5 @@
 package tasks;
 
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +10,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import world.Trajectory;
+import world.DecomposedTrajectory;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -28,7 +27,7 @@ public class WorkerUnit {
 	
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 	
-	private Map<Task, Trajectory> trajectories = new HashMap<>();
+	private Map<Task, DecomposedTrajectory> trajectories = new HashMap<>();
 	
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
 		if (maxSpeed <= 0)
@@ -78,7 +77,7 @@ public class WorkerUnit {
 		return entry == null ? null : entry.getValue();
 	}
 	
-	public Map<Task, Trajectory> getTrajectories() {
+	public Map<Task, DecomposedTrajectory> getTrajectories() {
 		return Collections.unmodifiableMap(trajectories);
 	}
 	
@@ -86,15 +85,15 @@ public class WorkerUnit {
 		return tasks;
 	}
 
-	private Map<Task, Trajectory> _getTrajectories() {
+	private Map<Task, DecomposedTrajectory> _getTrajectories() {
 		return trajectories;
 	}
 
-	public void addTask(Task task, Trajectory toTask, Trajectory fromTask) {
+	public void addTask(Task task, DecomposedTrajectory toTask, DecomposedTrajectory fromTask) {
 		// TODO check validity of trajectories
 		// TODO what if a trajectory is a single point?
 		
-		Map<Task, Trajectory> trajectories = _getTrajectories();
+		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
 		
 		LocalDateTime startTime = task.getStartTime();
 		Task succ = getCeilingTask(startTime);

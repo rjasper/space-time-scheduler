@@ -9,9 +9,8 @@ import java.util.List;
 
 import util.DurationConv;
 import util.PathOperations;
+import world.DecomposedTrajectory;
 import world.DynamicObstacle;
-import world.Trajectory;
-import world.TrajectoryComposer;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -21,8 +20,6 @@ public abstract class VelocityPathfinder {
 	
 	private ForbiddenRegionBuilder forbiddenRegionBuilder = new ForbiddenRegionBuilder();
 
-	private TrajectoryComposer trajBuilder = new TrajectoryComposer();
-
 	private double maxArc;
 
 	private List<DynamicObstacle> dynamicObstacles = Collections.emptyList();
@@ -31,7 +28,7 @@ public abstract class VelocityPathfinder {
 	
 	private double maxSpeed = 0.0;
 	
-	private Trajectory resultTrajectory = null;
+	private DecomposedTrajectory resultTrajectory = null;
 	
 	private List<DynamicObstacle> resultEvadedObstacles = null;
 
@@ -46,10 +43,6 @@ public abstract class VelocityPathfinder {
 		return forbiddenRegionBuilder;
 	}
 
-	private TrajectoryComposer getTrajectoryBuilder() {
-		return trajBuilder;
-	}
-	
 	protected double getMinArc() {
 		return MIN_ARC;
 	}
@@ -96,11 +89,11 @@ public abstract class VelocityPathfinder {
 		this.maxSpeed = maxSpeed;
 	}
 
-	public Trajectory getResultTrajectory() {
+	public DecomposedTrajectory getResultTrajectory() {
 		return resultTrajectory;
 	}
 
-	private void setResultTrajectory(Trajectory resultTrajectory) {
+	private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 
@@ -125,7 +118,7 @@ public abstract class VelocityPathfinder {
 		
 		boolean reachable = arcTimePath != null;
 		
-		Trajectory trajectory = reachable
+		DecomposedTrajectory trajectory = reachable
 			? buildTrajectory(arcTimePath)
 			: null;
 		
@@ -155,18 +148,11 @@ public abstract class VelocityPathfinder {
 
 	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
 
-	private Trajectory buildTrajectory(List<Point> arcTimePath) {
+	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		List<Point> spatialPath = getSpatialPath();
-		TrajectoryComposer trajBuilder = getTrajectoryBuilder();
-
-		trajBuilder.setBaseTime(baseTime);
-		trajBuilder.setSpatialPath(spatialPath);
-		trajBuilder.setArcTimePath(arcTimePath);
 		
-		trajBuilder.compose();
-		
-		return trajBuilder.getResultTrajectory();
+		return new DecomposedTrajectory(spatialPath, arcTimePath, baseTime);
 	}
 
 	protected double inSeconds(LocalDateTime time) {

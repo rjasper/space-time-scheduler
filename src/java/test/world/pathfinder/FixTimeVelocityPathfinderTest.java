@@ -55,7 +55,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		
 		assertTrue(validPath);
 		
-		Trajectory trajectory = pf.getResultTrajectory();
+		Trajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
 		
 		double[] x = {1., 2., 4., 4., 3., 1.};
 		double[] y = {4., 4., 4., 1., 1., 1.};

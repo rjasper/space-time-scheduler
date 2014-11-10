@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import world.DecomposedTrajectory;
 import world.DynamicObstacle;
-import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -18,7 +18,7 @@ public abstract class Pathfinder {
 	
 	private double maxSpeed = 0.0;
 	
-	private Trajectory resultTrajectory = null;
+	private DecomposedTrajectory resultTrajectory = null;
 	
 	private List<DynamicObstacle> resultEvadedObstacles = null;
 
@@ -53,11 +53,11 @@ public abstract class Pathfinder {
 		this.maxSpeed = maxSpeed;
 	};
 
-	public Trajectory getResultTrajectory() {
+	public DecomposedTrajectory getResultTrajectory() {
 		return resultTrajectory;
 	};
 
-	protected void setResultTrajectory(Trajectory resultTrajectory) {
+	protected void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 

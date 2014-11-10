@@ -1,7 +1,10 @@
 package world;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import util.DurationConv;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -35,6 +38,17 @@ public class DecomposedTrajectory {
 
 	public LocalDateTime getBaseTime() {
 		return baseTime;
+	}
+	
+	public LocalDateTime getFinishTime() {
+		List<Point> arcTimePath = getArcTimePath();
+		LocalDateTime baseTime = getBaseTime();
+		
+		int n = arcTimePath.size();
+		double t = arcTimePath.get(n-1).getY();
+		Duration duration = DurationConv.ofSeconds(t);
+		
+		return baseTime.plus(duration);
 	}
 	
 	public Trajectory getComposedTrajectory() {

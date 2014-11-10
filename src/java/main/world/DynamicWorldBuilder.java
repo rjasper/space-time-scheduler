@@ -70,10 +70,10 @@ public class DynamicWorldBuilder {
 		
 		for (WorkerUnit w : workers) {
 			Polygon shape = w.getShape();
-			Map<Task, Trajectory> trajectories = w.getTrajectories();
+			Map<Task, DecomposedTrajectory> trajectories = w.getTrajectories();
 			
 			for (Task t : w.getTasks().values()) {
-				Trajectory toTask = trajectories.get(t);
+				Trajectory toTask = trajectories.get(t).getComposedTrajectory();
 				Trajectory atTask = createStationaryTrajectoryFromTask(t);
 				
 				obstacles.add( new DynamicObstacle(shape, toTask) );

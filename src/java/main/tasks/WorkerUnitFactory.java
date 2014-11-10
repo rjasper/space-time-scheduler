@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import world.DecomposedTrajectory;
 import world.LocalDateTimeFactory;
-import world.Trajectory;
 import jts.geom.factories.EnhancedGeometryBuilder;
 
 import com.vividsolutions.jts.geom.Point;
@@ -149,8 +149,8 @@ public class WorkerUnitFactory {
 			return false;
 		
 		Task task = tp.getResultTask();
-		Trajectory toTask = tp.getResultToTask();
-		Trajectory fromTask = tp.getResultFromTask();
+		DecomposedTrajectory toTask = tp.getResultToTask();
+		DecomposedTrajectory fromTask = tp.getResultFromTask();
 		
 		worker.addTask(task, toTask, fromTask);
 		

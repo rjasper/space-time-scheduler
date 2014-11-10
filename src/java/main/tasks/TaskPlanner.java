@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
-import world.Trajectory;
 import world.pathfinder.JavaFixTimePathfinder;
 import world.pathfinder.JavaMinimumTimePathfinder;
 import world.pathfinder.MinimumTimePathfinder;
@@ -34,9 +34,9 @@ public class TaskPlanner {
 	
 	private Task resultTask = null;
 	
-	private Trajectory resultToTask;
+	private DecomposedTrajectory resultToTask;
 	
-	private Trajectory resultFromTask;
+	private DecomposedTrajectory resultFromTask;
 	
 	public boolean isReady() {
 		return workerUnit != null
@@ -114,22 +114,106 @@ public class TaskPlanner {
 		this.resultTask = resultTask;
 	}
 
-	public Trajectory getResultToTask() {
+	public DecomposedTrajectory getResultToTask() {
 		return resultToTask;
 	}
 
-	private void setResultToTask(Trajectory resultToTask) {
+	private void setResultToTask(DecomposedTrajectory resultToTask) {
 		this.resultToTask = resultToTask;
 	}
 
-	public Trajectory getResultFromTask() {
+	public DecomposedTrajectory getResultFromTask() {
 		return resultFromTask;
 	}
 
-	private void setResultFromTask(Trajectory resultFromTask) {
+	private void setResultFromTask(DecomposedTrajectory resultFromTask) {
 		this.resultFromTask = resultFromTask;
 	}
 
+//	public boolean plan() {
+//		if (!isReady())
+//			throw new IllegalStateException("not ready yet");
+//		
+//		WorkerUnit worker = getWorkerUnit();
+//		double maxSpeed = worker.getMaxSpeed();
+//		Collection<Polygon> staticObstacles = getStaticObstacles();
+//		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
+//		LocalDateTime earliestStartTime = getEarliestStartTime();
+//		LocalDateTime latestStartTime = getLatestStartTime();
+//		Duration duration = getDuration();
+//		Point location = getLocation();
+//		
+//		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
+//		
+//		mtpf.setStaticObstacles(staticObstacles);
+//		mtpf.setDynamicObstacles(dynamicObstacles);
+//		
+//		Task pred = worker.getFloorTask(earliestStartTime);
+//		Task succ = worker.getCeilingTask(earliestStartTime);
+//		
+//		// trajectory to new task
+//		
+//		LocalDateTime startTime;
+//		Point startLocation;
+//		
+//		// if there is no predecessor use initial position and time
+//		if (pred == null) {
+//			startTime = worker.getInitialTime();
+//			startLocation = worker.getInitialLocation();
+//		} else {
+//			startTime = pred.getFinishTime();
+//			startLocation = pred.getLocation();
+//		}
+//		
+//		mtpf.setStartPoint(startLocation);
+//		mtpf.setFinishPoint(location);
+//		mtpf.setStartTime(startTime);
+//		mtpf.setEarliestFinishTime(earliestStartTime);
+//		mtpf.setLatestFinishTime(latestStartTime);
+//		mtpf.setBufferDuration(duration);
+//		mtpf.setMaxSpeed(maxSpeed);
+//		
+//		boolean status = mtpf.calculatePath();
+//		
+//		if (!status)
+//			return false;
+//		
+//		Trajectory toTask = mtpf.getResultTrajectory();
+//		
+//		LocalDateTime taskStartTime = toTask.getLastTime();
+//		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
+//		
+//		// trajectory to following task
+//
+//		Trajectory fromTask;
+//		if (succ != null) {
+//			FixTimePathfinder stpf = new JavaFixTimePathfinder();
+//			
+//			stpf.setStartPoint(location);
+//			stpf.setFinishPoint(succ.getLocation());
+//			stpf.setStartTime(taskFinishTime);
+//			stpf.setFinishTime(succ.getStartTime());
+//			stpf.setMaxSpeed(maxSpeed);
+//			
+//			status = stpf.calculatePath();
+//			
+//			if (!status)
+//				return false;
+//			
+//			fromTask = stpf.getResultTrajectory();
+//		} else {
+//			fromTask = null;
+//		}
+//		
+//		Task task = new Task(location, taskStartTime, taskFinishTime);
+//		
+//		setResultTask(task);
+//		setResultToTask(toTask);
+//		setResultFromTask(fromTask);
+//		
+//		return true;
+//	}
+	
 	public boolean plan() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
@@ -178,14 +262,14 @@ public class TaskPlanner {
 		if (!status)
 			return false;
 		
-		Trajectory toTask = mtpf.getResultTrajectory();
+		DecomposedTrajectory toTask = mtpf.getResultTrajectory();
 		
-		LocalDateTime taskStartTime = toTask.getLastTime();
+		LocalDateTime taskStartTime = toTask.getFinishTime();
 		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
 		
 		// trajectory to following task
 
-		Trajectory fromTask;
+		DecomposedTrajectory fromTask;
 		if (succ != null) {
 			FixTimePathfinder stpf = new JavaFixTimePathfinder();
 			

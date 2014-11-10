@@ -59,7 +59,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		
 		assertTrue(status);
 		
-		Trajectory trajectory = pf.getResultTrajectory();
+		Trajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
 		
 		double[] x = {0., 1., 3.}, y = {2., 2., 2.}, t = {0., 2., 4.};
 		Trajectory expected = trajFact.trajectory(x, y, t);
