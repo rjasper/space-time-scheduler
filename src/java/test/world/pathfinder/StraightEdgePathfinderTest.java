@@ -33,7 +33,7 @@ public class StraightEdgePathfinderTest {
 		pf.setStartPoint(startPoint);
 		pf.setFinishPoint(finishPoint);
 		
-		boolean status = pf.calculatePath();
+		boolean status = pf.calculateSpatialPath();
 		
 		assertTrue(status);
 	}

@@ -85,7 +85,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	}
 
 	@Override
-	protected boolean calculatePathImpl() {
+	protected List<Point> calculateSpatialPathImpl() {
 		PathFinder pf = getPathFinder();
 		NodeConnector<PathBlockingObstacle> nodeConnector = getNodeConnector();
 		KPoint startPoint = makeKPoint( getStartPoint() );
@@ -96,14 +96,15 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		PathData pathData = pf.calc(startPoint, finishPoint, maxDistance, nodeConnector, obstacles);
 		
 		if (pathData.isError())
-			return false;
+			return null;
 		
 		List<Point> path = makeSpatialPath(pathData);
-		boolean validPath = path.size() >= 2;
 		
-		setResultSpatialPath(validPath ? path : null);
-		
-		return validPath;
+		// if valid Path
+		if (path.size() >= 2)
+			return path;
+		else
+			return null;
 	}
 	
 	private KPoint makeKPoint(Point point) {
