@@ -27,13 +27,13 @@ public class TrajectoryFactoryTest {
 		List<Point> arcTimePath = geomBuilder.points(
 			0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.);
 		
-		TrajectoryBuilder trajBuilder = new TrajectoryBuilder();
+		TrajectoryComposer trajBuilder = new TrajectoryComposer();
 		
 		trajBuilder.setBaseTime(baseTime);
 		trajBuilder.setSpatialPath(spatialPath);
 		trajBuilder.setArcTimePath(arcTimePath);
 		
-		trajBuilder.build();
+		trajBuilder.compose();
 		
 		Trajectory trajectory = trajBuilder.getResultTrajectory();
 		

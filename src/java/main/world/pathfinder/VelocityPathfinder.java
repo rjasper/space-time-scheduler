@@ -11,7 +11,7 @@ import util.DurationConv;
 import util.PathOperations;
 import world.DynamicObstacle;
 import world.Trajectory;
-import world.TrajectoryBuilder;
+import world.TrajectoryComposer;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -21,7 +21,7 @@ public abstract class VelocityPathfinder {
 	
 	private ForbiddenRegionBuilder forbiddenRegionBuilder = new ForbiddenRegionBuilder();
 
-	private TrajectoryBuilder trajBuilder = new TrajectoryBuilder();
+	private TrajectoryComposer trajBuilder = new TrajectoryComposer();
 
 	private double maxArc;
 
@@ -46,7 +46,7 @@ public abstract class VelocityPathfinder {
 		return forbiddenRegionBuilder;
 	}
 
-	private TrajectoryBuilder getTrajectoryBuilder() {
+	private TrajectoryComposer getTrajectoryBuilder() {
 		return trajBuilder;
 	}
 	
@@ -158,13 +158,13 @@ public abstract class VelocityPathfinder {
 	private Trajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		List<Point> spatialPath = getSpatialPath();
-		TrajectoryBuilder trajBuilder = getTrajectoryBuilder();
+		TrajectoryComposer trajBuilder = getTrajectoryBuilder();
 
 		trajBuilder.setBaseTime(baseTime);
 		trajBuilder.setSpatialPath(spatialPath);
 		trajBuilder.setArcTimePath(arcTimePath);
 		
-		trajBuilder.build();
+		trajBuilder.compose();
 		
 		return trajBuilder.getResultTrajectory();
 	}

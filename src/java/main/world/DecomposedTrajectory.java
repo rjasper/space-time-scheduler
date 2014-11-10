@@ -89,13 +89,13 @@ public class DecomposedTrajectory {
 		List<Point> arcTimePath = getArcTimePath();
 		LocalDateTime baseTime = getBaseTime();
 		
-		TrajectoryBuilder builder = new TrajectoryBuilder();
+		TrajectoryComposer builder = new TrajectoryComposer();
 		
 		builder.setSpatialPath(spatialPath);
 		builder.setArcTimePath(arcTimePath);
 		builder.setBaseTime(baseTime);
 		
-		builder.build();
+		builder.compose();
 		
 		return builder.getResultTrajectory();
 	}

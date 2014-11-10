@@ -8,7 +8,7 @@ import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class TrajectoryBuilder {
+public class TrajectoryComposer {
 	
 	private TrajectoryFactory trajFact = new TrajectoryFactory();
 	
@@ -117,7 +117,7 @@ public class TrajectoryBuilder {
 		this.resultTrajectory = resultTrajectory;
 	}
 
-	public void build() {
+	public void compose() {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 		
