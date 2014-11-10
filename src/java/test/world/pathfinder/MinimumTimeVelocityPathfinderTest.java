@@ -55,7 +55,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		pf.setLatestFinishTime(latestFinishTime);
 		pf.setBufferDuration(bufferDuration);
 		
-		boolean status = pf.calculateTrajectory();
+		boolean status = pf.calculate();
 		
 		assertTrue(status);
 		

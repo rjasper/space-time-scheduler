@@ -215,13 +215,13 @@ public abstract class ArcTimeMeshBuilder {
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph =
 			new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 	
-		Stream<Point> coreVertices = _getCoreVertices().stream();
-		Stream<Point> startVertices = _getStartVertices().stream();
-		Stream<Point> finishVertices = _getFinishVertices().stream();
+		Collection<Point> coreVertices = _getCoreVertices();
+		Collection<Point> startVertices = _getStartVertices();
+		Collection<Point> finishVertices = _getFinishVertices();
 		
-		Set<Point> vertices = Stream.concat(
-			coreVertices, Stream.concat(startVertices, finishVertices)
-		).collect(Collectors.toSet());
+		Set<Point> vertices = Stream.of(coreVertices, startVertices, finishVertices)
+			.flatMap(Collection::stream)
+			.collect(Collectors.toSet());
 		
 		// add vertices to graph
 		for (Point v : vertices)

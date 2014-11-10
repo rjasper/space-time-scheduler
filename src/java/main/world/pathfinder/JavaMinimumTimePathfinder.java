@@ -35,7 +35,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		spatialPathfinder.setStartPoint(getStartPoint());
 		spatialPathfinder.setFinishPoint(getFinishPoint());
 		
-		boolean pathExists = spatialPathfinder.calculateSpatialPath();
+		boolean pathExists = spatialPathfinder.calculate();
 		
 		if (!pathExists)
 			return null;
@@ -52,7 +52,7 @@ public class JavaMinimumTimePathfinder extends MinimumTimePathfinder {
 		minTimePathfinder.setLatestFinishTime(getLatestFinishTime());
 		minTimePathfinder.setBufferDuration(getBufferDuration());
 		
-		boolean pathExists = minTimePathfinder.calculateTrajectory();
+		boolean pathExists = minTimePathfinder.calculate();
 		
 		if (!pathExists)
 			return null;

@@ -85,7 +85,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	}
 
 	@Override
-	protected List<Point> calculateSpatialPathImpl() {
+	protected List<Point> calculateSpatialPath() {
 		PathFinder pf = getPathFinder();
 		NodeConnector<PathBlockingObstacle> nodeConnector = getNodeConnector();
 		KPoint startPoint = makeKPoint( getStartPoint() );

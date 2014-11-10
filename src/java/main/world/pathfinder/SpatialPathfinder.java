@@ -55,17 +55,17 @@ public abstract class SpatialPathfinder {
 		this.finishPoint = finishPoint;
 	}
 
-	public final boolean calculateSpatialPath() {
+	public final boolean calculate() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
-		List<Point> spatialPath = calculateSpatialPathImpl();
+		List<Point> spatialPath = calculateSpatialPath();
 		
 		setResultSpatialPath(spatialPath);
 		
 		return spatialPath != null;
 	}
 	
-	protected abstract List<Point> calculateSpatialPathImpl();
+	protected abstract List<Point> calculateSpatialPath();
 
 }

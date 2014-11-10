@@ -3,15 +3,24 @@ package world.pathfinder;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import jts.geom.factories.EnhancedGeometryBuilder;
 import util.DurationConv;
 import util.PathOperations;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 public abstract class VelocityPathfinder {
@@ -105,7 +114,7 @@ public abstract class VelocityPathfinder {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
 	
-	public final boolean calculateTrajectory() {
+	public final boolean calculate() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 		
@@ -121,11 +130,13 @@ public abstract class VelocityPathfinder {
 		DecomposedTrajectory trajectory = reachable
 			? buildTrajectory(arcTimePath)
 			: null;
+			
+		List<DynamicObstacle> evasions = reachable
+			? calculateEvadedObstacles(forbiddenRegions, arcTimePath)
+			: null;
 		
 		setResultTrajectory(trajectory);
-		
-		if (!reachable)
-			setResultEvadedObstacles(null);
+		setResultEvadedObstacles(evasions);
 		
 		return reachable;
 	}
@@ -147,6 +158,30 @@ public abstract class VelocityPathfinder {
 	}
 
 	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
+	
+	private List<DynamicObstacle> calculateEvadedObstacles(
+		Collection<ForbiddenRegion> forbiddenRegions,
+		List<Point> arcTimePath)
+	{
+		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
+		
+		Map<Point, DynamicObstacle> lookup = new HashMap<>();
+		
+		for (ForbiddenRegion fr : forbiddenRegions) {
+			DynamicObstacle o = fr.getDynamicObstacle();
+			Geometry r = fr.getRegion();
+			
+			for (Coordinate c : r.getCoordinates()) {
+				Point p = builder.point(c.x, c.y);
+				
+				lookup.put(p, o);
+			}
+		}
+		
+		return arcTimePath.stream()
+			.map(lookup::get)
+			.collect(Collectors.toList());
+	}
 
 	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();

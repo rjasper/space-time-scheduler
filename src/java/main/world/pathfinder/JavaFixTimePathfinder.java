@@ -31,7 +31,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		spatialPathfinder.setStartPoint(getStartPoint());
 		spatialPathfinder.setFinishPoint(getFinishPoint());
 		
-		boolean pathExists = spatialPathfinder.calculateSpatialPath();
+		boolean pathExists = spatialPathfinder.calculate();
 		
 		if (!pathExists)
 			return null;
@@ -46,7 +46,7 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 		fixTimePathfinder.setStartTime(getStartTime());
 		fixTimePathfinder.setFinishTime(getFinishTime());
 		
-		boolean pathExists = fixTimePathfinder.calculateTrajectory();
+		boolean pathExists = fixTimePathfinder.calculate();
 		
 		if (!pathExists)
 			return null;
