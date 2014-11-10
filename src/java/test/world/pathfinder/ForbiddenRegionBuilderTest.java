@@ -151,8 +151,6 @@ public class ForbiddenRegionBuilderTest {
 		
 		ForbiddenRegion region = regions.iterator().next();
 		
-		System.out.println(region.getRegion());
-
 		Geometry expected = geomBuilder.multiPolygon(
 			geomBuilder.polygon(
 				2., 1.,
