@@ -13,14 +13,6 @@ public class DynamicObstacle {
 	
 	private final Trajectory trajectory;
 
-	public DynamicObstacle(Polygon shape, List<Point> path, List<LocalDateTime> times) {
-		// TODO check if polygon is empty
-		// TODO check size of path and times
-		
-		this.shape = shape;
-		this.trajectory = new Trajectory(path, times);
-	}
-
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
 		// TODO check if polygon is empty
 		

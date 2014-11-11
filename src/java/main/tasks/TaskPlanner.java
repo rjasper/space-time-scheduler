@@ -314,7 +314,7 @@ public class TaskPlanner {
 		
 		builder.build();
 		
-		return builder.getObstacles();
+		return builder.getResultObstacles();
 	}
 	
 }

@@ -21,36 +21,21 @@ public class DynamicWorldBuilder {
 	
 	private LocalDateTime endTime;
 	
-	private List<DynamicObstacle> obstacles;
+	private List<DynamicObstacle> resultObstacles;
 	
 	public boolean isReady() {
 		return endTime != null;
 	}
 	
-	public boolean isDone() {
-		return obstacles != null;
-	}
-	
-	public List<WorkerUnit> getWorkers() {
+	private List<WorkerUnit> getWorkers() {
 		return workers;
 	}
 
 	public void setWorkers(Collection<WorkerUnit> workers) {
-		if (workers == null)
-			throw new NullPointerException("workers cannot be null");
-		
 		this.workers = new ArrayList<>(workers);
 	}
 
-	public List<DynamicObstacle> getObstacles() {
-		return obstacles;
-	}
-
-	private void setObstacles(List<DynamicObstacle> obstacles) {
-		this.obstacles = obstacles;
-	}
-
-	public LocalDateTime getEndTime() {
+	private LocalDateTime getEndTime() {
 		return endTime;
 	}
 
@@ -61,6 +46,14 @@ public class DynamicWorldBuilder {
 		this.endTime = endTime;
 	}
 	
+	public List<DynamicObstacle> getResultObstacles() {
+		return resultObstacles;
+	}
+
+	private void setResultObstacles(List<DynamicObstacle> obstacles) {
+		this.resultObstacles = obstacles;
+	}
+
 	public void build() {
 		if (!isReady())
 			throw new IllegalStateException("builder not ready");
@@ -86,7 +79,7 @@ public class DynamicWorldBuilder {
 				obstacles.add( new DynamicObstacle(shape, toEnd));
 		}
 		
-		setObstacles(obstacles);
+		setResultObstacles(obstacles);
 	}
 	
 	private Trajectory createStationaryTrajectoryFromTask(Task task) {

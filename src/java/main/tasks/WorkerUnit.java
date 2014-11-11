@@ -26,7 +26,7 @@ public class WorkerUnit {
 	private final LocalDateTime initialTime;
 	
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
-	
+
 	private Map<Task, DecomposedTrajectory> trajectories = new HashMap<>();
 	
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {

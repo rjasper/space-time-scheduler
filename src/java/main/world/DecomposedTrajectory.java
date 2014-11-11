@@ -10,22 +10,26 @@ import com.vividsolutions.jts.geom.Point;
 
 public class DecomposedTrajectory {
 	
+	private final LocalDateTime baseTime;
+
 	private final List<Point> spatialPath;
 	
 	private final List<Point> arcTimePath;
 	
-	private final LocalDateTime baseTime;
-	
 	private transient Trajectory composedTrajectory = null;
 
 	public DecomposedTrajectory(
+		LocalDateTime baseTime,
 		List<Point> spatialPath,
-		List<Point> arcTimePath,
-		LocalDateTime baseTime)
+		List<Point> arcTimePath)
 	{
+		this.baseTime = baseTime;
 		this.spatialPath = spatialPath;
 		this.arcTimePath = arcTimePath;
-		this.baseTime = baseTime;
+	}
+
+	public LocalDateTime getBaseTime() {
+		return baseTime;
 	}
 
 	public List<Point> getSpatialPath() {
@@ -36,10 +40,6 @@ public class DecomposedTrajectory {
 		return arcTimePath;
 	}
 
-	public LocalDateTime getBaseTime() {
-		return baseTime;
-	}
-	
 	public LocalDateTime getFinishTime() {
 		List<Point> arcTimePath = getArcTimePath();
 		LocalDateTime baseTime = getBaseTime();

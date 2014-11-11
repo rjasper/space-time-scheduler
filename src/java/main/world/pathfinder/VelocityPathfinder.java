@@ -2,15 +2,14 @@ package world.pathfinder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
@@ -19,9 +18,9 @@ import util.PathOperations;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+
+import static java.util.stream.Collectors.*;
 
 public abstract class VelocityPathfinder {
 	
@@ -165,29 +164,26 @@ public abstract class VelocityPathfinder {
 	{
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 		
-		Map<Point, DynamicObstacle> lookup = new HashMap<>();
+		// create lookup table to map points to an obstacle
+		Map<Point, DynamicObstacle> lookup = forbiddenRegions.stream()
+			// TODO remove cast as soon as ECJ is able to infer type
+			// for each coordinate of each region
+			.flatMap(fr -> (Stream<SimpleEntry<Point, DynamicObstacle>>) Arrays.stream(fr.getRegion().getCoordinates())
+				.map(c -> builder.point(c.x, c.y))                        // map to a point
+				.map(p -> new SimpleEntry<>(p, fr.getDynamicObstacle()))) // map to an entry
+			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
 		
-		for (ForbiddenRegion fr : forbiddenRegions) {
-			DynamicObstacle o = fr.getDynamicObstacle();
-			Geometry r = fr.getRegion();
-			
-			for (Coordinate c : r.getCoordinates()) {
-				Point p = builder.point(c.x, c.y);
-				
-				lookup.put(p, o);
-			}
-		}
-		
+		// return a list of each obstacle met by a point in the path
 		return arcTimePath.stream()
 			.map(lookup::get)
-			.collect(Collectors.toList());
+			.collect(toList());
 	}
 
 	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		List<Point> spatialPath = getSpatialPath();
 		
-		return new DecomposedTrajectory(spatialPath, arcTimePath, baseTime);
+		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath);
 	}
 
 	protected double inSeconds(LocalDateTime time) {
