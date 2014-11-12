@@ -1,5 +1,7 @@
 package tasks;
 
+import static java.util.Collections.*;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +13,6 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import world.DecomposedTrajectory;
-import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -31,7 +32,7 @@ public class WorkerUnit {
 	private Map<Task, DecomposedTrajectory> trajectories = new HashMap<>();
 	
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
-		if (maxSpeed <= 0)
+		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
 			throw new IllegalArgumentException("maximum speed must be positive");
 		
 		this.shape = shape;
@@ -57,7 +58,7 @@ public class WorkerUnit {
 	}
 	
 	public Map<LocalDateTime, Task> getTasks() {
-		return Collections.unmodifiableMap(tasks);
+		return unmodifiableMap(tasks);
 	}
 	
 	public Task getFloorTask(LocalDateTime time) {
@@ -99,11 +100,11 @@ public class WorkerUnit {
 		LocalDateTime startTime = task.getStartTime();
 		Task succ = getCeilingTask(startTime);
 		
-		_getTasks().put(startTime, task);
-		trajectories.put(task, toTask);
-		
 		if ((succ == null) != (fromTask == null))
 			throw new IllegalStateException("fromTask trajectory is invalid");
+		
+		_getTasks().put(startTime, task);
+		trajectories.put(task, toTask);
 		
 		if (succ != null)
 			trajectories.put(succ, fromTask);
@@ -120,10 +121,10 @@ public class WorkerUnit {
 			throw new IllegalArgumentException("unknown task");
 		
 		// check first and last coordinates
-		if (!( old.getStartTime  ().equals(trajectory.getStartTime  ())
-			&& old.getFinishTime ().equals(trajectory.getFinishTime ())
-			&& old.getStartPoint ().equals(trajectory.getStartPoint ())
-			&& old.getFinishPoint().equals(trajectory.getFinishPoint())) )
+		if (!( old.getStartTime  () .equals( trajectory.getStartTime  () )
+			&& old.getFinishTime () .equals( trajectory.getFinishTime () )
+			&& old.getStartPoint () .equals( trajectory.getStartPoint () )
+			&& old.getFinishPoint() .equals( trajectory.getFinishPoint() ) ))
 		{
 			throw new IllegalArgumentException("incompatible trajectory");
 		}
