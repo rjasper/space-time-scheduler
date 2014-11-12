@@ -35,7 +35,7 @@ public class TrajectoryFactoryTest {
 		
 		trajBuilder.compose();
 		
-		Trajectory trajectory = trajBuilder.getResultTrajectory();
+		SimpleTrajectory trajectory = trajBuilder.getResultTrajectory();
 		
 		TrajectoryFactory trajFact = new TrajectoryFactory(geomBuilder, timeFact);
 		
@@ -43,7 +43,7 @@ public class TrajectoryFactoryTest {
 		double[] y = {1., 1., 1., 3., 4. , 4., 4., 4.,  4.,  1.};
 		double[] t = {0., 2., 3., 5., 5.5, 6., 7., 9., 10., 13.};
 		
-		Trajectory expected = trajFact.trajectory(x, y, t);
+		SimpleTrajectory expected = trajFact.trajectory(x, y, t);
 		
 		assertThat(trajectory, equalTo(expected));
 	}

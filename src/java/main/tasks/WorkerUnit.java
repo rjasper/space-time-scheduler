@@ -11,6 +11,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import world.DecomposedTrajectory;
+import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -106,6 +107,28 @@ public class WorkerUnit {
 		
 		if (succ != null)
 			trajectories.put(succ, fromTask);
+	}
+	
+	public void replaceTrajectoryToTask(Task toTask, DecomposedTrajectory trajectory) {
+		// TODO check trajectory
+		
+		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
+		
+		DecomposedTrajectory old = trajectories.get(toTask);
+		
+		if (old == null)
+			throw new IllegalArgumentException("unknown task");
+		
+		// check first and last coordinates
+		if (!( old.getStartTime  ().equals(trajectory.getStartTime  ())
+			&& old.getFinishTime ().equals(trajectory.getFinishTime ())
+			&& old.getStartPoint ().equals(trajectory.getStartPoint ())
+			&& old.getFinishPoint().equals(trajectory.getFinishPoint())) )
+		{
+			throw new IllegalArgumentException("incompatible trajectory");
+		}
+		
+		trajectories.put(toTask, trajectory);
 	}
 	
 	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {

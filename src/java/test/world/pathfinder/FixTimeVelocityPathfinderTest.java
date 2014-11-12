@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import world.DynamicObstacle;
 import world.LocalDateTimeFactory;
-import world.Trajectory;
+import world.SimpleTrajectory;
 import world.TrajectoryFactory;
 
 import com.vividsolutions.jts.geom.Point;
@@ -55,12 +55,12 @@ public abstract class FixTimeVelocityPathfinderTest {
 		
 		assertTrue(validPath);
 		
-		Trajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
+		SimpleTrajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
 		
 		double[] x = {1., 2., 4., 4., 3., 1.};
 		double[] y = {4., 4., 4., 1., 1., 1.};
 		double[] t = {0., 2., 13./3., 47./6., 9., 11.};
-		Trajectory expected = trajFact.trajectory(x, y, t);
+		SimpleTrajectory expected = trajFact.trajectory(x, y, t);
 		
 		assertThat(trajectory, equalTo(expected));
 	}

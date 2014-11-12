@@ -43,7 +43,7 @@ public class TrajectoryFactory {
 		this.timeFact = new LocalDateTimeFactory(baseTime);
 	}
 
-	public Trajectory trajectory(double[] x, double[] y, double[] t) {
+	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t) {
 		// TODO check sizes
 		
 		int n = x.length;
@@ -51,7 +51,7 @@ public class TrajectoryFactory {
 		return trajectory(x, y, t, n);
 	}
 
-	public Trajectory trajectory(double[] x, double[] y, double[] t, int n) {
+	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t, int n) {
 		// TODO check sizes
 		
 		List<Point> path = new ArrayList<>(n);
@@ -63,7 +63,7 @@ public class TrajectoryFactory {
 			.mapToObj(timeFact::seconds)
 			.collect(Collectors.toList());
 		
-		return new Trajectory(path, times);
+		return new SimpleTrajectory(path, times);
 	}
 
 }

@@ -85,7 +85,7 @@ public class DynamicWorldBuilder {
 	private Trajectory createStationaryTrajectoryFromTask(Task task) {
 		Point location = task.getLocation();
 		
-		return new Trajectory(
+		return new SimpleTrajectory(
 			Arrays.asList(location, location),
 			Arrays.asList(task.getStartTime(), task.getFinishTime())
 		);
@@ -110,7 +110,7 @@ public class DynamicWorldBuilder {
 		if (lastTime.compareTo(getEndTime()) >= 0)
 			return null;
 
-		return new Trajectory(
+		return new SimpleTrajectory(
 			Arrays.asList(lastLocation, lastLocation),
 			Arrays.asList(lastTime, endTime)
 		);

@@ -24,7 +24,7 @@ public final class DynamicObstacleFixtures {
 			LocalDateTime.of(2000, JANUARY, 1, 0, 0, 10)
 		);
 		
-		return new DynamicObstacle(polygon, new Trajectory(path, times));
+		return new DynamicObstacle(polygon, new SimpleTrajectory(path, times));
 	}
 	
 	public static DynamicObstacle movingSquare() {
@@ -35,7 +35,7 @@ public final class DynamicObstacleFixtures {
 			LocalDateTime.of(2000, JANUARY, 1, 0, 0, 15)
 		);
 		
-		return new DynamicObstacle(polygon, new Trajectory(path, times));
+		return new DynamicObstacle(polygon, new SimpleTrajectory(path, times));
 	}
 
 }

@@ -22,7 +22,7 @@ public class TrajectoryComposer {
 	
 	private double[] tArcTime = null;
 	
-	private Trajectory resultTrajectory = null;
+	private SimpleTrajectory resultTrajectory = null;
 	
 	public boolean isReady() {
 		return xSpatial != null
@@ -109,11 +109,11 @@ public class TrajectoryComposer {
 		return sArcTime.length;
 	}
 
-	public Trajectory getResultTrajectory() {
+	public SimpleTrajectory getResultTrajectory() {
 		return resultTrajectory;
 	}
 
-	private void setResultTrajectory(Trajectory resultTrajectory) {
+	private void setResultTrajectory(SimpleTrajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 
@@ -143,7 +143,7 @@ public class TrajectoryComposer {
 		// build trajectory
 		TrajectoryFactory trajFact = getTrajectoryFactory();
 		
-		Trajectory trajectory = trajFact.trajectory(x, y, t, n);
+		SimpleTrajectory trajectory = trajFact.trajectory(x, y, t, n);
 		
 		setResultTrajectory(trajectory);
 	}

@@ -38,7 +38,7 @@ public class DynamicWorldBuilderTest {
 		
 		Collection<DynamicObstacle> obstacles = builder.getResultObstacles();
 		
-		List<Trajectory> trajectories = obstacles.stream()
+		List<SimpleTrajectory> trajectories = obstacles.stream()
 			.map(DynamicObstacle::getTrajectory)
 			.collect(Collectors.toList());
 		

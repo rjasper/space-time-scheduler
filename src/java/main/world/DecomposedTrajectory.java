@@ -8,40 +8,103 @@ import util.DurationConv;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class DecomposedTrajectory {
+public class DecomposedTrajectory implements Trajectory {
 	
 	private final LocalDateTime baseTime;
 
-	private final List<Point> spatialPath;
+	private final List<Point> spatialPathComponent;
 	
-	private final List<Point> arcTimePath;
+	private final List<Point> arcTimePathComponent;
 	
-	private transient Trajectory composedTrajectory = null;
+	private transient SimpleTrajectory composedTrajectory = null;
 
 	public DecomposedTrajectory(
 		LocalDateTime baseTime,
-		List<Point> spatialPath,
-		List<Point> arcTimePath)
+		List<Point> spatialPathComponent,
+		List<Point> arcTimePathComponent)
 	{
+		if (spatialPathComponent.size() == 1 || arcTimePathComponent.size() == 1)
+			throw new IllegalArgumentException("illegal path component size");
+		
 		this.baseTime = baseTime;
-		this.spatialPath = spatialPath;
-		this.arcTimePath = arcTimePath;
+		this.spatialPathComponent = spatialPathComponent;
+		this.arcTimePathComponent = arcTimePathComponent;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return spatialPathComponent.isEmpty();
+	}
+	
+	public boolean isComposed() {
+		return composedTrajectory != null;
 	}
 
 	public LocalDateTime getBaseTime() {
 		return baseTime;
 	}
 
+	public List<Point> getSpatialPathComponent() {
+		return spatialPathComponent;
+	}
+
+	public List<Point> getArcTimePathComponent() {
+		return arcTimePathComponent;
+	}
+
+	@Override
 	public List<Point> getSpatialPath() {
-		return spatialPath;
+		return getComposedTrajectory().getSpatialPath();
 	}
 
-	public List<Point> getArcTimePath() {
-		return arcTimePath;
+	@Override
+	public List<LocalDateTime> getTimes() {
+		return getComposedTrajectory().getTimes();
 	}
 
+	@Override
+	public Point getStartPoint() {
+		if (isEmpty())
+			return null;
+		
+		return getSpatialPathComponent().get(0);
+	}
+
+	@Override
+	public Point getFinishPoint() {
+		if (isEmpty())
+			return null;
+		
+		List<Point> spatialPathComponent = getSpatialPathComponent();
+		int n = spatialPathComponent.size();
+		
+		return spatialPathComponent.get(n-1);
+	}
+
+	@Override
+	public LocalDateTime getStartTime() {
+		if (isEmpty())
+			return null;
+		if (isComposed())
+			return getComposedTrajectory().getStartTime();
+		
+		List<Point> arcTimePath = getArcTimePathComponent();
+		LocalDateTime baseTime = getBaseTime();
+		
+		double t = arcTimePath.get(0).getY();
+		Duration duration = DurationConv.ofSeconds(t);
+		
+		return baseTime.plus(duration);
+	}
+
+	@Override
 	public LocalDateTime getFinishTime() {
-		List<Point> arcTimePath = getArcTimePath();
+		if (isEmpty())
+			return null;
+		if (isComposed())
+			return getComposedTrajectory().getFinishTime();
+		
+		List<Point> arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 		
 		int n = arcTimePath.size();
@@ -50,8 +113,8 @@ public class DecomposedTrajectory {
 		
 		return baseTime.plus(duration);
 	}
-	
-	public Trajectory getComposedTrajectory() {
+
+	public SimpleTrajectory getComposedTrajectory() {
 		if (composedTrajectory == null) 
 			composedTrajectory = compose();
 		
@@ -63,11 +126,11 @@ public class DecomposedTrajectory {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-			+ ((arcTimePath == null) ? 0 : arcTimePath.hashCode());
+			+ ((arcTimePathComponent == null) ? 0 : arcTimePathComponent.hashCode());
 		result = prime * result
 			+ ((baseTime == null) ? 0 : baseTime.hashCode());
 		result = prime * result
-			+ ((spatialPath == null) ? 0 : spatialPath.hashCode());
+			+ ((spatialPathComponent == null) ? 0 : spatialPathComponent.hashCode());
 		return result;
 	}
 
@@ -80,27 +143,27 @@ public class DecomposedTrajectory {
 		if (getClass() != obj.getClass())
 			return false;
 		DecomposedTrajectory other = (DecomposedTrajectory) obj;
-		if (arcTimePath == null) {
-			if (other.arcTimePath != null)
+		if (arcTimePathComponent == null) {
+			if (other.arcTimePathComponent != null)
 				return false;
-		} else if (!arcTimePath.equals(other.arcTimePath))
+		} else if (!arcTimePathComponent.equals(other.arcTimePathComponent))
 			return false;
 		if (baseTime == null) {
 			if (other.baseTime != null)
 				return false;
 		} else if (!baseTime.equals(other.baseTime))
 			return false;
-		if (spatialPath == null) {
-			if (other.spatialPath != null)
+		if (spatialPathComponent == null) {
+			if (other.spatialPathComponent != null)
 				return false;
-		} else if (!spatialPath.equals(other.spatialPath))
+		} else if (!spatialPathComponent.equals(other.spatialPathComponent))
 			return false;
 		return true;
 	}
 	
-	private Trajectory compose() {
-		List<Point> spatialPath = getSpatialPath();
-		List<Point> arcTimePath = getArcTimePath();
+	private SimpleTrajectory compose() {
+		List<Point> spatialPath = getSpatialPathComponent();
+		List<Point> arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 		
 		TrajectoryComposer builder = new TrajectoryComposer();
@@ -116,8 +179,8 @@ public class DecomposedTrajectory {
 
 	@Override
 	public String toString() {
-		return "DecomposedTrajectory [spatialPath=" + spatialPath
-			+ ", arcTimePath=" + arcTimePath + ", baseTime=" + baseTime + "]";
+		return "DecomposedTrajectory [spatialPath=" + spatialPathComponent
+			+ ", arcTimePath=" + arcTimePathComponent + ", baseTime=" + baseTime + "]";
 	}
 
 }
