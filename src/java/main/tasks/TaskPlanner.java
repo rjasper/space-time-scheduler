@@ -1,43 +1,52 @@
 package tasks;
 
+import static java.util.stream.Collectors.toList;
+import static util.DurationConv.inSeconds;
+import static util.PathOperations.length;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
-import world.pathfinder.JavaFixTimePathfinder;
-import world.pathfinder.JavaMinimumTimePathfinder;
-import world.pathfinder.MinimumTimePathfinder;
-import world.pathfinder.FixTimePathfinder;
+import world.WorkerUnitObstacle;
+import world.pathfinder.MinimumTimeVelocityPathfinder;
+import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+
 public class TaskPlanner {
-	
+
+	private SpatialPathfinder spatialPathfinder = new StraightEdgePathfinder();
+
 	private WorkerUnit workerUnit = null;
-	
+
 	private Collection<WorkerUnit> workerPool = null;
-	
+
 	private Collection<Polygon> staticObstacles = null;
-	
+
 	private Point location = null;
-	
+
 	private LocalDateTime earliestStartTime = null;
-	
+
 	private LocalDateTime latestStartTime = null;
-	
+
 	private Duration duration = null;
-	
+
 	private Task resultTask = null;
-	
+
 	private DecomposedTrajectory resultToTask;
-	
+
 	private DecomposedTrajectory resultFromTask;
-	
+
 	public boolean isReady() {
 		return workerUnit != null
 			&& workerPool != null
@@ -47,11 +56,15 @@ public class TaskPlanner {
 			&& latestStartTime != null
 			&& duration != null;
 	}
-	
+
 	// TODO check setter args
 
 	private WorkerUnit getWorkerUnit() {
 		return workerUnit;
+	}
+
+	public SpatialPathfinder getSpatialPathfinder() {
+		return spatialPathfinder;
 	}
 
 	public void setWorkerUnit(WorkerUnit worker) {
@@ -133,7 +146,7 @@ public class TaskPlanner {
 //	public boolean plan() {
 //		if (!isReady())
 //			throw new IllegalStateException("not ready yet");
-//		
+//
 //		WorkerUnit worker = getWorkerUnit();
 //		double maxSpeed = worker.getMaxSpeed();
 //		Collection<Polygon> staticObstacles = getStaticObstacles();
@@ -142,20 +155,20 @@ public class TaskPlanner {
 //		LocalDateTime latestStartTime = getLatestStartTime();
 //		Duration duration = getDuration();
 //		Point location = getLocation();
-//		
+//
 //		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
-//		
+//
 //		mtpf.setStaticObstacles(staticObstacles);
 //		mtpf.setDynamicObstacles(dynamicObstacles);
-//		
+//
 //		Task pred = worker.getFloorTask(earliestStartTime);
 //		Task succ = worker.getCeilingTask(earliestStartTime);
-//		
+//
 //		// trajectory to new task
-//		
+//
 //		LocalDateTime startTime;
 //		Point startLocation;
-//		
+//
 //		// if there is no predecessor use initial position and time
 //		if (pred == null) {
 //			startTime = worker.getInitialTime();
@@ -164,7 +177,7 @@ public class TaskPlanner {
 //			startTime = pred.getFinishTime();
 //			startLocation = pred.getLocation();
 //		}
-//		
+//
 //		mtpf.setStartPoint(startLocation);
 //		mtpf.setFinishPoint(location);
 //		mtpf.setStartTime(startTime);
@@ -172,149 +185,314 @@ public class TaskPlanner {
 //		mtpf.setLatestFinishTime(latestStartTime);
 //		mtpf.setBufferDuration(duration);
 //		mtpf.setMaxSpeed(maxSpeed);
-//		
+//
 //		boolean status = mtpf.calculatePath();
-//		
+//
 //		if (!status)
 //			return false;
-//		
+//
 //		Trajectory toTask = mtpf.getResultTrajectory();
-//		
+//
 //		LocalDateTime taskStartTime = toTask.getLastTime();
 //		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
-//		
+//
 //		// trajectory to following task
 //
 //		Trajectory fromTask;
 //		if (succ != null) {
 //			FixTimePathfinder stpf = new JavaFixTimePathfinder();
-//			
+//
 //			stpf.setStartPoint(location);
 //			stpf.setFinishPoint(succ.getLocation());
 //			stpf.setStartTime(taskFinishTime);
 //			stpf.setFinishTime(succ.getStartTime());
 //			stpf.setMaxSpeed(maxSpeed);
-//			
+//
 //			status = stpf.calculatePath();
-//			
+//
 //			if (!status)
 //				return false;
-//			
+//
 //			fromTask = stpf.getResultTrajectory();
 //		} else {
 //			fromTask = null;
 //		}
-//		
+//
 //		Task task = new Task(location, taskStartTime, taskFinishTime);
-//		
+//
 //		setResultTask(task);
 //		setResultToTask(toTask);
 //		setResultFromTask(fromTask);
-//		
+//
 //		return true;
 //	}
-	
+
 	public boolean plan() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
-		
-		WorkerUnit worker = getWorkerUnit();
-		double maxSpeed = worker.getMaxSpeed();
-		Collection<Polygon> staticObstacles = getStaticObstacles();
-		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
-		LocalDateTime earliestStartTime = getEarliestStartTime();
-		LocalDateTime latestStartTime = getLatestStartTime();
-		Duration duration = getDuration();
-		Point location = getLocation();
-		
-		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
-		
-		mtpf.setStaticObstacles(staticObstacles);
-		mtpf.setDynamicObstacles(dynamicObstacles);
-		
-		Task pred = worker.getFloorTask(earliestStartTime);
-		Task succ = worker.getCeilingTask(earliestStartTime);
-		
-		// trajectory to new task
-		
-		LocalDateTime startTime;
-		Point startLocation;
-		
-		// if there is no predecessor use initial position and time
-		if (pred == null) {
-			startTime = worker.getInitialTime();
-			startLocation = worker.getInitialLocation();
-		} else {
-			startTime = pred.getFinishTime();
-			startLocation = pred.getLocation();
-		}
-		
-		mtpf.setStartPoint(startLocation);
-		mtpf.setFinishPoint(location);
-		mtpf.setStartTime(startTime);
-		mtpf.setEarliestFinishTime(earliestStartTime);
-		mtpf.setLatestFinishTime(latestStartTime);
-		mtpf.setBufferDuration(duration);
-		mtpf.setMaxSpeed(maxSpeed);
-		
-		boolean status = mtpf.calculatePath();
-		
-		if (!status)
-			return false;
-		
-		DecomposedTrajectory toTask = mtpf.getResultTrajectory();
-		
-		LocalDateTime taskStartTime = toTask.getFinishTime();
-		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
-		
-		// trajectory to following task
 
-		DecomposedTrajectory fromTask;
-		if (succ != null) {
-			FixTimePathfinder stpf = new JavaFixTimePathfinder();
-			
-			stpf.setStartPoint(location);
-			stpf.setFinishPoint(succ.getLocation());
-			stpf.setStartTime(taskFinishTime);
-			stpf.setFinishTime(succ.getStartTime());
-			stpf.setMaxSpeed(maxSpeed);
-			
-			status = stpf.calculatePath();
-			
+		WorkerUnit worker = getWorkerUnit();
+		WorkerUnitObstacle obstacleSegment =
+			worker.getObstacleSegment( getEarliestStartTime() );
+
+		prepareSpatialPathfinder();
+
+		Point taskLocation = getLocation();
+		Point segmentStartLocation = obstacleSegment.getStartLocation();
+		Point segmentFinishLocation = obstacleSegment.getFinishLocation();
+		LocalDateTime segmentStartTime = obstacleSegment.getStartTime();
+		LocalDateTime segmentFinishTime = obstacleSegment.getFinishTime();
+
+		Duration maxDuration = Duration.between(segmentStartTime, segmentFinishTime);
+
+		List<Point> toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
+		List<Point> fromTask = calculateSpatialPath(taskLocation, segmentFinishLocation);
+
+		List<WorkerUnitObstacle> evasions = buildEvasions(obstacleSegment);
+
+		// make jobs
+		Stream<Job> createJobs = Stream.of(new CreateJob(toTask, fromTask, maxDuration));
+		Stream<Job> updateJobs = evasions.stream().map(UpdateJob::new);
+
+		// sort jobs
+		List<Job> jobs = Stream.concat(createJobs, updateJobs)
+			.sorted()
+			.collect(toList());
+
+		// execute jobs or fail
+		for (Job j : jobs) {
+			boolean status = j.calculate();
+
 			if (!status)
 				return false;
-			
-			fromTask = stpf.getResultTrajectory();
-		} else {
-			fromTask = null;
 		}
-		
-		Task task = new Task(location, taskStartTime, taskFinishTime);
-		
-		setResultTask(task);
-		setResultToTask(toTask);
-		setResultFromTask(fromTask);
-		
-		return true;
+
+		// update obstacles
+		for (Job j : jobs)
+			j.execute();
 	}
-	
+
+//	private Job makeJob(List<Point> spatialPath) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	private Job makeJob(WorkerUnitObstacle evasion) {
+//		// TODO implement
+//
+//		return null;
+//	}
+
+	private static abstract class Job implements Comparable<Job> {
+
+		private final Duration maxDuration;
+
+		private transient double laxity = Double.NaN;
+
+		public Job(Duration maxDuration) {
+			this.maxDuration = maxDuration;
+		}
+
+		public Duration getMaxDuration() {
+			return maxDuration;
+		}
+
+		// the time allowed to stop per length unit
+		public double laxity() {
+			if (Double.isNaN(laxity))
+				laxity = calcLaxity();
+
+			return laxity;
+		};
+
+		public abstract double calcLaxity();
+
+		public abstract boolean calculate();
+
+		public abstract void execute();
+
+		@Override
+		public int compareTo(Job o) {
+			// the more laxity the less favored
+			return Double.compare(laxity(), o.laxity());
+		}
+
+	}
+
+	private class CreateJob extends Job {
+
+		private double laxity = Double.NaN;
+
+		private final List<Point> toTask;
+
+		private final List<Point> fromTask;
+
+		private List<DynamicObstacle> resultEvadedObstacles;
+
+		private DecomposedTrajectory resultTrajectory;
+
+		public CreateJob(List<Point> toTask, List<Point> fromTask, WorkerUnitObstacle slot) {
+			// TODO last edit
+
+			super(maxDuration);
+
+			this.toTask = toTask;
+			this.fromTask = fromTask;
+		}
+
+		public List<Point> getToTask() {
+			return toTask;
+		}
+
+		public List<Point> getFromTask() {
+			return fromTask;
+		}
+
+		private List<DynamicObstacle> getResultEvadedObstacles() {
+			return resultEvadedObstacles;
+		}
+
+		private void setResultEvadedObstacles(
+			List<DynamicObstacle> resultEvadedObstacles) {
+			this.resultEvadedObstacles = resultEvadedObstacles;
+		}
+
+		private DecomposedTrajectory getResultTrajectory() {
+			return resultTrajectory;
+		}
+
+		private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
+			this.resultTrajectory = resultTrajectory;
+		}
+
+		@Override
+		public double calcLaxity() {
+			WorkerUnit worker = getWorkerUnit();
+			double maxSpeed = worker.getMaxSpeed();
+			double length = length( getToTask() ) + length( getFromTask() );
+			double taskDuration = inSeconds( getDuration() );
+			double maxDuration = inSeconds( getMaxDuration() );
+
+			return (maxDuration - taskDuration)/length - 1./maxSpeed;
+		}
+
+		@Override
+		public boolean calculate() {
+			// TODO Auto-generated method stub
+
+			MinimumTimeVelocityPathfinder mtpf = getMinimumTimeVelocityPathfinder();
+
+			WorkerUnit worker = getWorkerUnit();
+			double maxSpeed = worker.getMaxSpeed();
+
+			mtpf.setDynamicObstacles(dynamicObstacles);
+			mtpf.setSpatialPath( getToTask() );
+			mtpf.setMaxSpeed(maxSpeed);
+			mtpf.setStartTime();
+			mtpf.setEarliestFinishTime(earliestFinishTime);
+			mtpf.setLatestFinishTime(latestFinishTime);
+			mtpf.setBufferDuration(bufferDuration);
+
+			boolean status = mtpf.calculate();
+
+			if (status) {
+				List<DynamicObstacle> evadedObstacles = mtpf.getResultEvadedObstacles();
+				DecomposedTrajectory trajectory = mtpf.getResultTrajectory();
+
+				setResultEvadedObstacles(evadedObstacles);
+				setResultTrajectory(trajectory);
+			}
+
+			return status;
+		}
+
+		@Override
+		public void execute() {
+			// TODO Auto-generated method stub
+
+		}
+
+	}
+
+	private class UpdateJob extends Job {
+
+		private final WorkerUnitObstacle evasion;
+
+		public UpdateJob(WorkerUnitObstacle evasion) {
+			super(calcMaxDuration(evasion));
+
+			this.evasion = evasion;
+		}
+
+		public WorkerUnitObstacle getEvasion() {
+			return evasion;
+		}
+
+		@Override
+		public double calcLaxity() {
+			WorkerUnitObstacle evasion = getEvasion();
+			WorkerUnit worker = evasion.getWorkerUnit();
+			double maxSpeed = worker.getMaxSpeed();
+			double length = evasion.getTrajectory().getLength();
+			double maxDuration = inSeconds( getMaxDuration() );
+
+			return maxDuration/length - 1./maxSpeed;
+		}
+
+		@Override
+		public boolean calculate() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public void execute() {
+			// TODO Auto-generated method stub
+
+		}
+
+	}
+
+	private static Duration calcMaxDuration(WorkerUnitObstacle evasion) {
+		LocalDateTime startTime = evasion.getStartTime();
+		LocalDateTime finishTime = evasion.getFinishTime();
+
+		return Duration.between(startTime, finishTime);
+	}
+
+	private List<Point> calculateSpatialPath(Point startLocation, Point taskLocation) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private void prepareSpatialPathfinder() {
+		SpatialPathfinder pf = getSpatialPathfinder();
+
+		pf.setStaticObstacles( getStaticObstacles() );
+	}
+
+	private List<WorkerUnitObstacle> buildEvasions(WorkerUnitObstacle obstacleSegment) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private Collection<DynamicObstacle> buildDynamicObstacles() {
 		WorkerUnit worker = getWorkerUnit();
 		Collection<WorkerUnit> pool = getWorkerPool();
 		LocalDateTime latestStartTime = getLatestStartTime();
 		Duration duration = getDuration();
-		
+
 		DynamicWorldBuilder builder = new DynamicWorldBuilder();
-		
+
 		Collection<WorkerUnit> others = new ArrayList<>(pool);
 		others.remove(worker);
-		
+
 		builder.setWorkers(others);
 		builder.setEndTime(latestStartTime.plus(duration));
-		
+
 		builder.build();
-		
+
 		return builder.getResultObstacles();
 	}
-	
+
 }

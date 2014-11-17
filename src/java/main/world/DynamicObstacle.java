@@ -14,7 +14,7 @@ public class DynamicObstacle {
 	private final Trajectory trajectory;
 
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
-		// TODO check if polygon is empty
+		// TODO check if polygon or trajectory is empty
 		
 		this.shape = shape;
 		this.trajectory = trajectory;
@@ -34,10 +34,26 @@ public class DynamicObstacle {
 			: trajectory.getSpatialPath();
 	}
 
+	public Point getStartLocation() {
+		return trajectory.getStartLocation();
+	}
+
+	public Point getFinishLocation() {
+		return trajectory.getFinishLocation();
+	}
+
 	public List<LocalDateTime> getTimes() {
 		return trajectory == null
 			? Collections.emptyList()
 			: trajectory.getTimes();
+	}
+
+	public LocalDateTime getStartTime() {
+		return trajectory.getStartTime();
+	}
+
+	public LocalDateTime getFinishTime() {
+		return trajectory.getFinishTime();
 	}
 
 	@Override

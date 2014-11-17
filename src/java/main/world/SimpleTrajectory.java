@@ -1,6 +1,7 @@
 package world;
 
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableList;
+import static util.PathOperations.length;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,18 +11,20 @@ import java.util.List;
 import com.vividsolutions.jts.geom.Point;
 
 public class SimpleTrajectory implements Trajectory {
-	
+
 	private final List<Point> spatialPath;
-	
+
 	private final List<LocalDateTime> times;
+
+	private transient double length = Double.NaN;
 
 	public SimpleTrajectory(List<Point> spatialPath, List<LocalDateTime> times) {
 		// TODO check sizes
-		
+
 		this.spatialPath = spatialPath;
 		this.times = Collections.unmodifiableList(new ArrayList<>(times));
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -67,7 +70,15 @@ public class SimpleTrajectory implements Trajectory {
 	public List<LocalDateTime> getTimes() {
 		return unmodifiableList(times);
 	}
-	
+
+	@Override
+	public double getLength() {
+		if (Double.isNaN(length))
+			length = length( getSpatialPath() );
+
+		return length;
+	}
+
 	public int size() {
 		return times.size();
 	}

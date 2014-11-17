@@ -1,6 +1,6 @@
 package tasks;
 
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableMap;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -13,34 +13,49 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import world.DecomposedTrajectory;
+import world.IdlingWorkerUnitObstacle;
+import world.WorkerUnitObstacle;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnit {
-	
+
 	private final Polygon shape;
-	
+
 	private final double maxSpeed;
-	
+
 	private final Point initialLocation;
-	
+
 	private final LocalDateTime initialTime;
-	
+
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 
+	private TreeMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
+
 	private Map<Task, DecomposedTrajectory> trajectories = new HashMap<>();
-	
+
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
-			throw new IllegalArgumentException("maximum speed must be positive");
-		
+			throw new IllegalArgumentException("maximum speed must be a positive real number");
+
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialLocation = initialLocation;
 		this.initialTime = initialTime;
+
+		putInitialObstacleSegment();
 	}
-	
+
+	private void putInitialObstacleSegment() {
+		Point initialLocation = getInitialLocation();
+		LocalDateTime initialTime = getInitialTime();
+
+		WorkerUnitObstacle segment = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);
+
+		putObstacleSegment(segment);
+	}
+
 	public Polygon getShape() {
 		return shape;
 	}
@@ -48,137 +63,179 @@ public class WorkerUnit {
 	public double getMaxSpeed() {
 		return maxSpeed;
 	}
-	
+
 	public Point getInitialLocation() {
 		return initialLocation;
 	}
-	
+
 	public LocalDateTime getInitialTime() {
 		return initialTime;
 	}
-	
+
 	public Map<LocalDateTime, Task> getTasks() {
 		return unmodifiableMap(tasks);
 	}
-	
-	public Task getFloorTask(LocalDateTime time) {
-		Entry<LocalDateTime, Task> entry = _getTasks().floorEntry(time);
-		
+
+//	public Task getFloorTask(LocalDateTime time) {
+//		Entry<LocalDateTime, Task> entry = _getTasks().floorEntry(time);
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+//
+//	public Task getCeilingTask(LocalDateTime time) {
+//		Entry<LocalDateTime, Task> entry = _getTasks().ceilingEntry(time);
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+//
+//	public Task getLastTask() {
+//		Entry<LocalDateTime, Task> entry = _getTasks().lastEntry();
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+
+//	public WorkerUnitObstacle getFloorObstacle(LocalDateTime time) {
+//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
+//			.floorEntry(time);
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+//
+//	public WorkerUnitObstacle getCeilingObstacle(LocalDateTime time) {
+//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
+//			.ceilingEntry(time);
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+
+	public WorkerUnitObstacle getObstacleSegment(LocalDateTime time) {
+		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
+			.floorEntry(time);
+
 		return entry == null ? null : entry.getValue();
 	}
-	
-	public Task getCeilingTask(LocalDateTime time) {
-		Entry<LocalDateTime, Task> entry = _getTasks().ceilingEntry(time);
-		
-		return entry == null ? null : entry.getValue();
+
+//	public WorkerUnitObstacle getLastObstacle() {
+//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacles()
+//			.lastEntry();
+//
+//		return entry == null ? null : entry.getValue();
+//	}
+
+	private WorkerUnitObstacle putObstacleSegment(WorkerUnitObstacle segment) {
+		Map<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
+
+		return segments.put(segment.getStartTime(), segment);
 	}
-	
-	public Task getLastTask() {
-		Entry<LocalDateTime, Task> entry = _getTasks().lastEntry();
-		
-		return entry == null ? null : entry.getValue();
-	}
-	
+
 	public Map<Task, DecomposedTrajectory> getTrajectories() {
 		return Collections.unmodifiableMap(trajectories);
 	}
-	
+
 	private TreeMap<LocalDateTime, Task> _getTasks() {
 		return tasks;
+	}
+
+	private TreeMap<LocalDateTime, WorkerUnitObstacle> _getObstacleSegments() {
+		return obstacleSegments;
 	}
 
 	private Map<Task, DecomposedTrajectory> _getTrajectories() {
 		return trajectories;
 	}
 
-	public void addTask(Task task, DecomposedTrajectory toTask, DecomposedTrajectory fromTask) {
+	public void addTask(Task task, DecomposedTrajectory toTask,
+		DecomposedTrajectory fromTask) {
 		// TODO check validity of trajectories
 		// TODO what if a trajectory is a single point?
-		
+
 		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
-		
+
 		LocalDateTime startTime = task.getStartTime();
 		Task succ = getCeilingTask(startTime);
-		
+
 		if ((succ == null) != (fromTask == null))
 			throw new IllegalStateException("fromTask trajectory is invalid");
-		
+
 		_getTasks().put(startTime, task);
 		trajectories.put(task, toTask);
-		
+
 		if (succ != null)
 			trajectories.put(succ, fromTask);
 	}
-	
-	public void replaceTrajectoryToTask(Task toTask, DecomposedTrajectory trajectory) {
+
+	public void replaceTrajectoryToTask(Task toTask,
+		DecomposedTrajectory trajectory) {
 		// TODO check trajectory
-		
+
 		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
-		
+
 		DecomposedTrajectory old = trajectories.get(toTask);
-		
+
 		if (old == null)
 			throw new IllegalArgumentException("unknown task");
-		
+
 		// check first and last coordinates
-		if (!( old.getStartTime  () .equals( trajectory.getStartTime  () )
-			&& old.getFinishTime () .equals( trajectory.getFinishTime () )
-			&& old.getStartPoint () .equals( trajectory.getStartPoint () )
-			&& old.getFinishPoint() .equals( trajectory.getFinishPoint() ) ))
-		{
+		if (!(old.getStartTime().equals(trajectory.getStartTime())
+			&& old.getFinishTime().equals(trajectory.getFinishTime())
+			&& old.getStartLocation().equals(trajectory.getStartLocation()) && old
+			.getFinishLocation().equals(trajectory.getFinishLocation()))) {
 			throw new IllegalArgumentException("incompatible trajectory");
 		}
-		
+
 		trajectories.put(toTask, trajectory);
 	}
-	
+
 	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {
 		TreeMap<LocalDateTime, Task> tasks = _getTasks();
 		Map.Entry<LocalDateTime, Task> first = tasks.lowerEntry(from);
 		Map.Entry<LocalDateTime, Task> last = tasks.higherEntry(to);
-		NavigableMap<LocalDateTime, Task> taskSubSet = tasks.subMap(from, true, to, true);
-		
+		NavigableMap<LocalDateTime, Task> taskSubSet = tasks.subMap(from, true,
+			to, true);
+
 		Point startLocation, finishLocation;
 		LocalDateTime startTime, finishTime;
-		
+
 		if (first == null) {
 			startLocation = getInitialLocation();
 			startTime = getInitialTime();
 		} else {
 			Task firstTask = first.getValue();
-			
+
 			startLocation = firstTask.getLocation();
 			startTime = firstTask.getFinishTime();
 		}
-		
+
 		Collection<IdleSlot> slots = new LinkedList<>();
-		
+
 		for (Task t : taskSubSet.values()) {
 			finishLocation = t.getLocation();
 			finishTime = t.getStartTime();
-			
+
 			// don't add idle slots without duration
 			if (startTime.compareTo(finishTime) < 0)
-				slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
-			
+				slots.add(new IdleSlot(startLocation, finishLocation,
+					startTime, finishTime));
+
 			startLocation = t.getLocation();
 			startTime = t.getFinishTime();
 		}
-		
+
 		if (last == null) {
 			finishLocation = null;
 			finishTime = null;
 		} else {
 			Task lastTask = last.getValue();
-			
+
 			finishLocation = lastTask.getLocation();
 			finishTime = lastTask.getStartTime();
 		}
 
 		// don't add idle slots without duration
 		if (last == null || startTime.compareTo(finishTime) < 0)
-			slots.add(new IdleSlot(startLocation, finishLocation, startTime, finishTime));
-		
+			slots.add(new IdleSlot(startLocation, finishLocation, startTime,
+				finishTime));
+
 		return slots;
 	}
 
