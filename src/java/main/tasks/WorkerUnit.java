@@ -144,25 +144,25 @@ public class WorkerUnit {
 		return trajectories;
 	}
 
-	public void addTask(Task task, DecomposedTrajectory toTask,
-		DecomposedTrajectory fromTask) {
-		// TODO check validity of trajectories
-		// TODO what if a trajectory is a single point?
-
-		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
-
-		LocalDateTime startTime = task.getStartTime();
-		Task succ = getCeilingTask(startTime);
-
-		if ((succ == null) != (fromTask == null))
-			throw new IllegalStateException("fromTask trajectory is invalid");
-
-		_getTasks().put(startTime, task);
-		trajectories.put(task, toTask);
-
-		if (succ != null)
-			trajectories.put(succ, fromTask);
-	}
+//	public void addTask(Task task, DecomposedTrajectory toTask,
+//		DecomposedTrajectory fromTask) {
+//		// TODO check validity of trajectories
+//		// TODO what if a trajectory is a single point?
+//
+//		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
+//
+//		LocalDateTime startTime = task.getStartTime();
+//		Task succ = getCeilingTask(startTime);
+//
+//		if ((succ == null) != (fromTask == null))
+//			throw new IllegalStateException("fromTask trajectory is invalid");
+//
+//		_getTasks().put(startTime, task);
+//		trajectories.put(task, toTask);
+//
+//		if (succ != null)
+//			trajectories.put(succ, fromTask);
+//	}
 
 	public void replaceTrajectoryToTask(Task toTask,
 		DecomposedTrajectory trajectory) {
@@ -237,6 +237,27 @@ public class WorkerUnit {
 				finishTime));
 
 		return slots;
+	}
+
+	public void removeObstacleSegment(WorkerUnitObstacle segment) {
+		// TODO Auto-generated method stub
+
+		boolean status = _getObstacleSegments().remove(segment.getStartTime(), segment);
+
+		if (!status)
+			throw new IllegalArgumentException("unknown obstacle segment");
+	}
+
+	public void addObstacleSegment(WorkerUnitObstacle segment) {
+		// TODO Auto-generated method stub
+
+		putObstacleSegment(segment);
+	}
+
+	public void addTask(Task task) {
+		// TODO Auto-generated method stub
+
+		_getTasks().put(task.getStartTime(), task);
 	}
 
 }

@@ -1,5 +1,6 @@
 package world;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,6 +51,10 @@ public interface Trajectory {
 
 		return times.get(n-1);
 	};
+
+	public default Duration getDuration() {
+		return Duration.between(getStartTime(), getFinishTime());
+	}
 
 	public abstract double getLength();
 

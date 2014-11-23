@@ -14,7 +14,9 @@ import java.util.stream.Stream;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 import world.DynamicWorldBuilder;
+import world.Trajectory;
 import world.WorkerUnitObstacle;
+import world.pathfinder.FixTimeVelocityPathfinder;
 import world.pathfinder.MinimumTimeVelocityPathfinder;
 import world.pathfinder.SpatialPathfinder;
 import world.pathfinder.StraightEdgePathfinder;
@@ -251,11 +253,11 @@ public class TaskPlanner {
 		List<WorkerUnitObstacle> evasions = buildEvasions(obstacleSegment);
 
 		// make jobs
-		Stream<Job> createJobs = Stream.of(new CreateJob(toTask, fromTask, maxDuration));
+		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, obstacleSegment));
 		Stream<Job> updateJobs = evasions.stream().map(UpdateJob::new);
 
 		// sort jobs
-		List<Job> jobs = Stream.concat(createJobs, updateJobs)
+		List<Job> jobs = Stream.concat(createJob, updateJobs)
 			.sorted()
 			.collect(toList());
 
@@ -270,6 +272,8 @@ public class TaskPlanner {
 		// update obstacles
 		for (Job j : jobs)
 			j.execute();
+
+		return true;
 	}
 
 //	private Job makeJob(List<Point> spatialPath) {
@@ -327,42 +331,133 @@ public class TaskPlanner {
 
 		private final List<Point> fromTask;
 
-		private List<DynamicObstacle> resultEvadedObstacles;
+		private final WorkerUnitObstacle segment;
 
-		private DecomposedTrajectory resultTrajectory;
+		private Collection<DynamicObstacle> dynamicObstacles;
 
-		public CreateJob(List<Point> toTask, List<Point> fromTask, WorkerUnitObstacle slot) {
+		private Task resultTask;
+
+		private List<WorkerUnitObstacle> resultEvadedObstaclesToTask;
+
+		private List<WorkerUnitObstacle> resultEvadedObstaclesFromTask;
+
+		private DecomposedTrajectory resultTrajectoryToTask;
+
+//		private DecomposedTrajectory resultTrajectoryAtTask;
+
+		private DecomposedTrajectory resultTrajectoryFromTask;
+
+		private WorkerUnitObstacle resultSegmentToTask;
+
+		private WorkerUnitObstacle resultSegmentAtTask;
+
+		private WorkerUnitObstacle resultSegmentFromTask;
+
+		public CreateJob(List<Point> toTask, List<Point> fromTask, WorkerUnitObstacle segment) {
 			// TODO last edit
 
-			super(maxDuration);
+			super(segment.getDuration());
 
 			this.toTask = toTask;
 			this.fromTask = fromTask;
+			this.segment = segment;
 		}
 
-		public List<Point> getToTask() {
+		private List<Point> getToTask() {
 			return toTask;
 		}
 
-		public List<Point> getFromTask() {
+		private List<Point> getFromTask() {
 			return fromTask;
 		}
 
-		private List<DynamicObstacle> getResultEvadedObstacles() {
-			return resultEvadedObstacles;
+		private WorkerUnitObstacle getSegment() {
+			return segment;
 		}
 
-		private void setResultEvadedObstacles(
-			List<DynamicObstacle> resultEvadedObstacles) {
-			this.resultEvadedObstacles = resultEvadedObstacles;
+		private Collection<DynamicObstacle> getDynamicObstacles() {
+			return dynamicObstacles;
 		}
 
-		private DecomposedTrajectory getResultTrajectory() {
-			return resultTrajectory;
+		private void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
+			this.dynamicObstacles = dynamicObstacles;
 		}
 
-		private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
-			this.resultTrajectory = resultTrajectory;
+		private Task getResultTask() {
+			return resultTask;
+		}
+
+		private void setResultTask(Task resultTask) {
+			this.resultTask = resultTask;
+		}
+
+		private List<WorkerUnitObstacle> getResultEvadedObstaclesToTask() {
+			return resultEvadedObstaclesToTask;
+		}
+
+		private void setResultEvadedObstaclesToTask(
+			List<WorkerUnitObstacle> resultEvadedObstaclesToTask) {
+			this.resultEvadedObstaclesToTask = resultEvadedObstaclesToTask;
+		}
+
+		private List<WorkerUnitObstacle> getResultEvadedObstaclesFromTask() {
+			return resultEvadedObstaclesFromTask;
+		}
+
+		private void setResultEvadedObstaclesFromTask(
+			List<WorkerUnitObstacle> resultEvadedObstaclesFromTask) {
+			this.resultEvadedObstaclesFromTask = resultEvadedObstaclesFromTask;
+		}
+
+		private DecomposedTrajectory getResultTrajectoryToTask() {
+			return resultTrajectoryToTask;
+		}
+
+		private void setResultTrajectoryToTask(
+			DecomposedTrajectory resultTrajectoryToTask) {
+			this.resultTrajectoryToTask = resultTrajectoryToTask;
+		}
+
+//		private DecomposedTrajectory getResultTrajectoryAtTask() {
+//			return resultTrajectoryAtTask;
+//		}
+//
+//		private void setResultTrajectoryAtTask(
+//			DecomposedTrajectory resultTrajectoryAtTask) {
+//			this.resultTrajectoryAtTask = resultTrajectoryAtTask;
+//		}
+
+		private DecomposedTrajectory getResultTrajectoryFromTask() {
+			return resultTrajectoryFromTask;
+		}
+
+		private void setResultTrajectoryFromTask(
+			DecomposedTrajectory resultTrajectoryFromTask) {
+			this.resultTrajectoryFromTask = resultTrajectoryFromTask;
+		}
+
+		private WorkerUnitObstacle getResultSegmentToTask() {
+			return resultSegmentToTask;
+		}
+
+		private void setResultSegmentToTask(WorkerUnitObstacle resultSegmentToTask) {
+			this.resultSegmentToTask = resultSegmentToTask;
+		}
+
+		private WorkerUnitObstacle getResultSegmentAtTask() {
+			return resultSegmentAtTask;
+		}
+
+		private void setResultSegmentAtTask(WorkerUnitObstacle resultSegmentAtTask) {
+			this.resultSegmentAtTask = resultSegmentAtTask;
+		}
+
+		private WorkerUnitObstacle getResultSegmentFromTask() {
+			return resultSegmentFromTask;
+		}
+
+		private void setResultSegmentFromTask(WorkerUnitObstacle resultSegmentFromTask) {
+			this.resultSegmentFromTask = resultSegmentFromTask;
 		}
 
 		@Override
@@ -378,38 +473,117 @@ public class TaskPlanner {
 
 		@Override
 		public boolean calculate() {
-			// TODO Auto-generated method stub
-
-			MinimumTimeVelocityPathfinder mtpf = getMinimumTimeVelocityPathfinder();
+			boolean status;
 
 			WorkerUnit worker = getWorkerUnit();
-			double maxSpeed = worker.getMaxSpeed();
+			setDynamicObstacles( buildDynamicObstaclesFor(worker) );
 
-			mtpf.setDynamicObstacles(dynamicObstacles);
-			mtpf.setSpatialPath( getToTask() );
-			mtpf.setMaxSpeed(maxSpeed);
-			mtpf.setStartTime();
-			mtpf.setEarliestFinishTime(earliestFinishTime);
-			mtpf.setLatestFinishTime(latestFinishTime);
-			mtpf.setBufferDuration(bufferDuration);
+			status = calculateTrajectoryToTask();
 
-			boolean status = mtpf.calculate();
+			if (!status)
+				return status;
 
-			if (status) {
-				List<DynamicObstacle> evadedObstacles = mtpf.getResultEvadedObstacles();
-				DecomposedTrajectory trajectory = mtpf.getResultTrajectory();
+			Trajectory trajToTask = getResultTrajectoryToTask();
+			Task task = makeTask( trajToTask.getFinishTime() );
+			setResultTask(task);
 
-				setResultEvadedObstacles(evadedObstacles);
-				setResultTrajectory(trajectory);
-			}
+			status = calculateTrajectoryFromTask();
+
+			if (!status)
+				return status;
+
+			WorkerUnitObstacle segmentAtTask = makeIdlingWorkerUnitObstacle(task);
+			setResultSegmentAtTask( segmentAtTask );
+			addDynamicObstacle( segmentAtTask );
 
 			return status;
 		}
 
+		private boolean calculateTrajectoryToTask() {
+			MinimumTimeVelocityPathfinder pf = getMinimumTimeVelocityPathfinder();
+
+			WorkerUnit worker = getWorkerUnit();
+			WorkerUnitObstacle segment = getSegment();
+
+			pf.setDynamicObstacles  ( getDynamicObstacles()  );
+			pf.setSpatialPath       ( getToTask()            );
+			pf.setMaxSpeed          ( worker.getMaxSpeed()   );
+			pf.setStartTime         ( segment.getStartTime() );
+			pf.setEarliestFinishTime( getEarliestStartTime() );
+			pf.setLatestFinishTime  ( getLatestStartTime()   );
+			pf.setBufferDuration    ( getDuration()          );
+
+			boolean status = pf.calculate();
+
+			if (!status)
+				return status; // false
+
+			List<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
+			DecomposedTrajectory trajToTask = pf.getResultTrajectory();
+
+//			setResultEvadedObstacles(evadedObstacles);
+//			setResultTrajectory(trajToTask);
+			setResultEvadedObstaclesToTask(evadedObstacles);
+			setResultTrajectoryToTask(trajToTask);
+
+			addDynamicObstacle( makeDynamicObstacle(worker, trajToTask) );
+
+			return status; // true
+		}
+
+		private boolean calculateTrajectoryFromTask() {
+			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
+
+			WorkerUnit worker = getWorkerUnit();
+			WorkerUnitObstacle segment = getSegment();
+			Task task = getResultTask();
+
+			pf.setDynamicObstacles( getDynamicObstacles()   );
+			pf.setSpatialPath     ( getFromTask()           );
+			pf.setMaxSpeed        ( worker.getMaxSpeed()    );
+			pf.setStartTime       ( task.getFinishTime()    );
+			pf.setFinishTime      ( segment.getFinishTime() );
+
+			boolean status = pf.calculate();
+
+			if (!status)
+				return status; // false
+
+			List<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
+			DecomposedTrajectory trajFromTask = pf.getResultTrajectory();
+
+			// TODO set results
+			setResultEvadedObstaclesFromTask(evadedObstacles);
+			setResultTrajectoryFromTask(trajFromTask);
+
+			addDynamicObstacle( makeDynamicObstacle(worker, trajFromTask) );
+
+			return status; // true
+		}
+
 		@Override
 		public void execute() {
-			// TODO Auto-generated method stub
+			WorkerUnit worker = getWorkerUnit();
+			Task task = getResultTask();
 
+			// construct worker unit obstacles
+
+			WorkerUnitObstacle segmentToTask = getSegmentToTask();
+			WorkerUnitObstacle segmentAtTask = getSegmentAtTask();
+			WorkerUnitObstacle segmentFromTask = getSegmentFromTask();
+
+			// register evasions
+			for (WorkerUnitObstacle e : getResultEvadedObstaclesToTask())
+				e.addEvasion(segmentToTask);
+			for (WorkerUnitObstacle e : getResultEvadedObstaclesFromTask())
+				e.addEvasion(segmentFromTask);
+
+			// add obstacle segments and task
+			worker.removeObstacleSegment(getSegment());
+			worker.addObstacleSegment(segmentToTask);
+			worker.addObstacleSegment(segmentAtTask);
+			worker.addObstacleSegment(segmentFromTask);
+			worker.addTask(task);
 		}
 
 	}

@@ -1,5 +1,6 @@
 package world;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -8,14 +9,14 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class DynamicObstacle {
-	
+
 	private final Polygon shape;
-	
+
 	private final Trajectory trajectory;
 
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
 		// TODO check if polygon or trajectory is empty
-		
+
 		this.shape = shape;
 		this.trajectory = trajectory;
 	}
@@ -23,7 +24,7 @@ public class DynamicObstacle {
 	public Polygon getShape() {
 		return shape;
 	}
-	
+
 	public Trajectory getTrajectory() {
 		return trajectory;
 	}
@@ -54,6 +55,10 @@ public class DynamicObstacle {
 
 	public LocalDateTime getFinishTime() {
 		return trajectory.getFinishTime();
+	}
+
+	public Duration getDuration() {
+		return trajectory.getDuration();
 	}
 
 	@Override

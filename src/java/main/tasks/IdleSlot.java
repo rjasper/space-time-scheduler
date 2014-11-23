@@ -1,18 +1,21 @@
 package tasks;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import com.vividsolutions.jts.geom.Point;
 
 public class IdleSlot {
-	
+
 	private final Point startLocation;
-	
+
 	private final Point finishLocation;
-	
+
 	private final LocalDateTime startTime;
-	
+
 	private final LocalDateTime finishTime;
+
+	private transient Duration duration = null;
 
 	public IdleSlot(
 			Point startLocation, Point finishLocation,
@@ -38,6 +41,13 @@ public class IdleSlot {
 
 	public LocalDateTime getFinishTime() {
 		return finishTime;
+	}
+
+	public Duration getDuration() {
+		if (duration == null)
+			duration = Duration.between(getStartTime(), getFinishTime());
+
+		return duration;
 	}
 
 	@Override
