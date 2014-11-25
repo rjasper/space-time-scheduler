@@ -28,8 +28,8 @@ public class JavaFixTimePathfinder extends FixTimePathfinder {
 	
 	private List<Point> calculateSpatialPath() {
 		spatialPathfinder.setStaticObstacles(getStaticObstacles());
-		spatialPathfinder.setStartPoint(getStartPoint());
-		spatialPathfinder.setFinishPoint(getFinishPoint());
+		spatialPathfinder.setStartLocation(getStartPoint());
+		spatialPathfinder.setFinishLocation(getFinishPoint());
 		
 		boolean pathExists = spatialPathfinder.calculate();
 		

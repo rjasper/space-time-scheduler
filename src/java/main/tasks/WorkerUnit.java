@@ -1,27 +1,29 @@
 package tasks;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import world.DecomposedTrajectory;
 import world.IdlingWorkerUnitObstacle;
 import world.WorkerUnitObstacle;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnit {
 
 	private final Polygon shape;
+
+	private transient double radius = Double.NaN;
 
 	private final double maxSpeed;
 
@@ -32,8 +34,6 @@ public class WorkerUnit {
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 
 	private TreeMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
-
-	private Map<Task, DecomposedTrajectory> trajectories = new HashMap<>();
 
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
@@ -60,6 +60,24 @@ public class WorkerUnit {
 		return shape;
 	}
 
+	public double getRadius() {
+		if (Double.isNaN(radius))
+			radius = calcRadius();
+
+		return radius;
+	}
+
+	private double calcRadius() {
+		Coordinate[] coords = getShape().getCoordinates();
+
+		double sqRadius = Arrays.stream( coords )
+			.mapToDouble(c -> c.x*c.x + c.y*c.y)
+			.max()
+			.getAsDouble();
+
+		return Math.sqrt(sqRadius);
+	}
+
 	public double getMaxSpeed() {
 		return maxSpeed;
 	}
@@ -76,37 +94,21 @@ public class WorkerUnit {
 		return unmodifiableMap(tasks);
 	}
 
-//	public Task getFloorTask(LocalDateTime time) {
-//		Entry<LocalDateTime, Task> entry = _getTasks().floorEntry(time);
-//
-//		return entry == null ? null : entry.getValue();
-//	}
-//
-//	public Task getCeilingTask(LocalDateTime time) {
-//		Entry<LocalDateTime, Task> entry = _getTasks().ceilingEntry(time);
-//
-//		return entry == null ? null : entry.getValue();
-//	}
-//
-//	public Task getLastTask() {
-//		Entry<LocalDateTime, Task> entry = _getTasks().lastEntry();
-//
-//		return entry == null ? null : entry.getValue();
-//	}
+	private TreeMap<LocalDateTime, Task> _getTasks() {
+		return tasks;
+	}
 
-//	public WorkerUnitObstacle getFloorObstacle(LocalDateTime time) {
-//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
-//			.floorEntry(time);
-//
-//		return entry == null ? null : entry.getValue();
-//	}
-//
-//	public WorkerUnitObstacle getCeilingObstacle(LocalDateTime time) {
-//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
-//			.ceilingEntry(time);
-//
-//		return entry == null ? null : entry.getValue();
-//	}
+	public void addTask(Task task) {
+		_getTasks().put(task.getStartTime(), task);
+	}
+
+	public Collection<WorkerUnitObstacle> getObstacleSegments() {
+		return unmodifiableCollection(obstacleSegments.values());
+	}
+
+	private TreeMap<LocalDateTime, WorkerUnitObstacle> _getObstacleSegments() {
+		return obstacleSegments;
+	}
 
 	public WorkerUnitObstacle getObstacleSegment(LocalDateTime time) {
 		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
@@ -115,75 +117,21 @@ public class WorkerUnit {
 		return entry == null ? null : entry.getValue();
 	}
 
-//	public WorkerUnitObstacle getLastObstacle() {
-//		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacles()
-//			.lastEntry();
-//
-//		return entry == null ? null : entry.getValue();
-//	}
+	public void addObstacleSegment(WorkerUnitObstacle segment) {
+		putObstacleSegment(segment);
+	}
 
 	private WorkerUnitObstacle putObstacleSegment(WorkerUnitObstacle segment) {
 		Map<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
-
+	
 		return segments.put(segment.getStartTime(), segment);
 	}
 
-	public Map<Task, DecomposedTrajectory> getTrajectories() {
-		return Collections.unmodifiableMap(trajectories);
-	}
-
-	private TreeMap<LocalDateTime, Task> _getTasks() {
-		return tasks;
-	}
-
-	private TreeMap<LocalDateTime, WorkerUnitObstacle> _getObstacleSegments() {
-		return obstacleSegments;
-	}
-
-	private Map<Task, DecomposedTrajectory> _getTrajectories() {
-		return trajectories;
-	}
-
-//	public void addTask(Task task, DecomposedTrajectory toTask,
-//		DecomposedTrajectory fromTask) {
-//		// TODO check validity of trajectories
-//		// TODO what if a trajectory is a single point?
-//
-//		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
-//
-//		LocalDateTime startTime = task.getStartTime();
-//		Task succ = getCeilingTask(startTime);
-//
-//		if ((succ == null) != (fromTask == null))
-//			throw new IllegalStateException("fromTask trajectory is invalid");
-//
-//		_getTasks().put(startTime, task);
-//		trajectories.put(task, toTask);
-//
-//		if (succ != null)
-//			trajectories.put(succ, fromTask);
-//	}
-
-	public void replaceTrajectoryToTask(Task toTask,
-		DecomposedTrajectory trajectory) {
-		// TODO check trajectory
-
-		Map<Task, DecomposedTrajectory> trajectories = _getTrajectories();
-
-		DecomposedTrajectory old = trajectories.get(toTask);
-
-		if (old == null)
-			throw new IllegalArgumentException("unknown task");
-
-		// check first and last coordinates
-		if (!(old.getStartTime().equals(trajectory.getStartTime())
-			&& old.getFinishTime().equals(trajectory.getFinishTime())
-			&& old.getStartLocation().equals(trajectory.getStartLocation()) && old
-			.getFinishLocation().equals(trajectory.getFinishLocation()))) {
-			throw new IllegalArgumentException("incompatible trajectory");
-		}
-
-		trajectories.put(toTask, trajectory);
+	public void removeObstacleSegment(WorkerUnitObstacle segment) {
+		boolean status = _getObstacleSegments().remove(segment.getStartTime(), segment);
+	
+		if (!status)
+			throw new IllegalArgumentException("unknown obstacle segment");
 	}
 
 	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {
@@ -237,27 +185,6 @@ public class WorkerUnit {
 				finishTime));
 
 		return slots;
-	}
-
-	public void removeObstacleSegment(WorkerUnitObstacle segment) {
-		// TODO Auto-generated method stub
-
-		boolean status = _getObstacleSegments().remove(segment.getStartTime(), segment);
-
-		if (!status)
-			throw new IllegalArgumentException("unknown obstacle segment");
-	}
-
-	public void addObstacleSegment(WorkerUnitObstacle segment) {
-		// TODO Auto-generated method stub
-
-		putObstacleSegment(segment);
-	}
-
-	public void addTask(Task task) {
-		// TODO Auto-generated method stub
-
-		_getTasks().put(task.getStartTime(), task);
 	}
 
 }

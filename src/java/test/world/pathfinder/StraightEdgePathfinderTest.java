@@ -30,8 +30,8 @@ public class StraightEdgePathfinderTest {
 		
 		pf.setMaxConnectionDistance(100.0);
 		pf.setStaticObstacles(obstacles);
-		pf.setStartPoint(startPoint);
-		pf.setFinishPoint(finishPoint);
+		pf.setStartLocation(startPoint);
+		pf.setFinishLocation(finishPoint);
 		
 		boolean status = pf.calculate();
 		

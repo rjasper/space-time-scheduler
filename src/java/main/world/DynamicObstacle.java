@@ -8,11 +8,11 @@ import java.util.List;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class DynamicObstacle {
+public class DynamicObstacle implements Cloneable {
 
-	private final Polygon shape;
+	private Polygon shape;
 
-	private final Trajectory trajectory;
+	private Trajectory trajectory;
 
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
 		// TODO check if polygon or trajectory is empty
@@ -59,6 +59,26 @@ public class DynamicObstacle {
 
 	public Duration getDuration() {
 		return trajectory.getDuration();
+	}
+
+	public DynamicObstacle buffer(double distance) {
+		if (!Double.isFinite(distance) || distance < 0.0)
+			throw new IllegalArgumentException("invalid distance");
+
+		DynamicObstacle clone = clone();
+
+		clone.shape = (Polygon) getShape().buffer(distance);
+
+		return clone;
+	}
+
+	@Override
+	public DynamicObstacle clone() {
+		try {
+			return (DynamicObstacle) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

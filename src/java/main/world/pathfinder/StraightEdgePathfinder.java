@@ -20,40 +20,42 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class StraightEdgePathfinder extends SpatialPathfinder {
-	
+
 	private PathFinder pathFinder = new PathFinder();
 
 	private NodeConnector<PathBlockingObstacle> nodeConnector = new NodeConnector<>();
-	
+
 	private ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>();
-	
-	private double maxConnectionDistance = 0.0;
-	
-	public boolean isReady() {
-		return super.isReady()
-			&& maxConnectionDistance > 0.0;
-	}
+
+//	private double maxConnectionDistance = 0.0;
+	private double maxConnectionDistance = Double.POSITIVE_INFINITY;
+
+//	public boolean isReady() {
+//		return super.isReady()
+//			&& maxConnectionDistance > 0.0;
+//	}
 
 	private PathFinder getPathFinder() {
 		return pathFinder;
 	}
 
+	@Override
 	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
 		NodeConnector<PathBlockingObstacle> nc = new NodeConnector<>();
 		PolygonConverter conv = new PolygonConverter();
-		
+
 		double maxConnectionDistance = getMaxConnectionDistance();
-		
+
 		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
-		
+
 		for (Polygon o : staticObstacles) {
 			KPolygon kp = conv.makeKPolygonFromExterior(o);
 			PathBlockingObstacle pbo = createObstacleFromInnerPolygon(kp);
-			
+
 			pathBlockingObstacles.add(pbo);
 			nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
 		}
-		
+
 		super.setStaticObstacles(staticObstacles);
 		setNodeConnector(nc);
 		setPathBlockingObstacles(pathBlockingObstacles);
@@ -88,41 +90,41 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	protected List<Point> calculateSpatialPath() {
 		PathFinder pf = getPathFinder();
 		NodeConnector<PathBlockingObstacle> nodeConnector = getNodeConnector();
-		KPoint startPoint = makeKPoint( getStartPoint() );
-		KPoint finishPoint = makeKPoint( getFinishPoint() );
+		KPoint startPoint = makeKPoint( getStartLocation() );
+		KPoint finishPoint = makeKPoint( getFinishLocation() );
 		List<PathBlockingObstacle> obstacles = getPathBlockingObstacles();
 		double maxDistance = getMaxConnectionDistance();
-		
+
 		PathData pathData = pf.calc(startPoint, finishPoint, maxDistance, nodeConnector, obstacles);
-		
+
 		if (pathData.isError())
 			return null;
-		
+
 		List<Point> path = makeSpatialPath(pathData);
-		
+
 		// if valid Path
 		if (path.size() >= 2)
 			return path;
 		else
 			return null;
 	}
-	
+
 	private KPoint makeKPoint(Point point) {
 		return new KPoint(point.getX(), point.getY());
 	}
-	
+
 	private Point makeJtsPoint(KPoint point) {
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-		
+
 		return builder.point(point.getX(), point.getY());
 	}
-	
+
 	private List<Point> makeSpatialPath(PathData path) {
 		List<KPoint> points = path.getPoints();
 		List<Point> jtsPoints = points.stream()
 			.map((p) -> makeJtsPoint(p))
 			.collect(Collectors.toList());
-		
+
 		return jtsPoints;
 	}
 
