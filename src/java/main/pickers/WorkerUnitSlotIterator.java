@@ -205,9 +205,9 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 				.compareTo(DurationConv.ofSeconds(vInv * l2).plus(d)) < 0)
 			return false;
 		// enough time to complete task
-		// t2 - t1 < d + (l1 + l2) / v_max
+		// t2 - t1 < (l1 + l2) / v_max + d
 		if (p2 != null && Duration.between(t1, t2)
-				.compareTo(d.plus(DurationConv.ofSeconds(vInv * (l1 + l2)))) < 0)
+				.compareTo(DurationConv.ofSeconds(vInv * (l1 + l2)).plus(d)) < 0)
 			return false;
 
 		return true;
