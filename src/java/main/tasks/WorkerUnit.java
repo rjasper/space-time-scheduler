@@ -37,7 +37,8 @@ public class WorkerUnit {
 
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
-			throw new IllegalArgumentException("maximum speed must be a positive real number");
+			throw new IllegalArgumentException("maximum speed is not a positive real number");
+		// TODO check initialLocation
 
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
@@ -123,13 +124,13 @@ public class WorkerUnit {
 
 	private WorkerUnitObstacle putObstacleSegment(WorkerUnitObstacle segment) {
 		Map<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
-	
+
 		return segments.put(segment.getStartTime(), segment);
 	}
 
 	public void removeObstacleSegment(WorkerUnitObstacle segment) {
 		boolean status = _getObstacleSegments().remove(segment.getStartTime(), segment);
-	
+
 		if (!status)
 			throw new IllegalArgumentException("unknown obstacle segment");
 	}

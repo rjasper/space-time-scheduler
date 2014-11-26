@@ -48,12 +48,6 @@ public class TaskPlanner {
 
 	private Duration duration = null;
 
-//	private Task resultTask = null;
-
-//	private DecomposedTrajectory resultToTask;
-
-//	private DecomposedTrajectory resultFromTask;
-
 	private SpatialPathfinder spatialPathfinder = new StraightEdgePathfinder();
 
 	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
@@ -75,10 +69,6 @@ public class TaskPlanner {
 
 	private WorkerUnit getWorkerUnit() {
 		return workerUnit;
-	}
-
-	public SpatialPathfinder getSpatialPathfinder() {
-		return spatialPathfinder;
 	}
 
 	public void setWorkerUnit(WorkerUnit worker) {
@@ -157,113 +147,9 @@ public class TaskPlanner {
 		this.duration = duration;
 	}
 
-//	public Task getResultTask() {
-//		return resultTask;
-//	}
-
-//	private void setResultTask(Task resultTask) {
-//		this.resultTask = resultTask;
-//	}
-
-//	public DecomposedTrajectory getResultToTask() {
-//		return resultToTask;
-//	}
-
-//	private void setResultToTask(DecomposedTrajectory resultToTask) {
-//		this.resultToTask = resultToTask;
-//	}
-
-//	public DecomposedTrajectory getResultFromTask() {
-//		return resultFromTask;
-//	}
-
-//	private void setResultFromTask(DecomposedTrajectory resultFromTask) {
-//		this.resultFromTask = resultFromTask;
-//	}
-
-//	public boolean plan() {
-//		if (!isReady())
-//			throw new IllegalStateException("not ready yet");
-//
-//		WorkerUnit worker = getWorkerUnit();
-//		double maxSpeed = worker.getMaxSpeed();
-//		Collection<Polygon> staticObstacles = getStaticObstacles();
-//		Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstacles();
-//		LocalDateTime earliestStartTime = getEarliestStartTime();
-//		LocalDateTime latestStartTime = getLatestStartTime();
-//		Duration duration = getDuration();
-//		Point location = getLocation();
-//
-//		MinimumTimePathfinder mtpf = new JavaMinimumTimePathfinder();
-//
-//		mtpf.setStaticObstacles(staticObstacles);
-//		mtpf.setDynamicObstacles(dynamicObstacles);
-//
-//		Task pred = worker.getFloorTask(earliestStartTime);
-//		Task succ = worker.getCeilingTask(earliestStartTime);
-//
-//		// trajectory to new task
-//
-//		LocalDateTime startTime;
-//		Point startLocation;
-//
-//		// if there is no predecessor use initial position and time
-//		if (pred == null) {
-//			startTime = worker.getInitialTime();
-//			startLocation = worker.getInitialLocation();
-//		} else {
-//			startTime = pred.getFinishTime();
-//			startLocation = pred.getLocation();
-//		}
-//
-//		mtpf.setStartPoint(startLocation);
-//		mtpf.setFinishPoint(location);
-//		mtpf.setStartTime(startTime);
-//		mtpf.setEarliestFinishTime(earliestStartTime);
-//		mtpf.setLatestFinishTime(latestStartTime);
-//		mtpf.setBufferDuration(duration);
-//		mtpf.setMaxSpeed(maxSpeed);
-//
-//		boolean status = mtpf.calculatePath();
-//
-//		if (!status)
-//			return false;
-//
-//		Trajectory toTask = mtpf.getResultTrajectory();
-//
-//		LocalDateTime taskStartTime = toTask.getLastTime();
-//		LocalDateTime taskFinishTime = taskStartTime.plus(duration);
-//
-//		// trajectory to following task
-//
-//		Trajectory fromTask;
-//		if (succ != null) {
-//			FixTimePathfinder stpf = new JavaFixTimePathfinder();
-//
-//			stpf.setStartPoint(location);
-//			stpf.setFinishPoint(succ.getLocation());
-//			stpf.setStartTime(taskFinishTime);
-//			stpf.setFinishTime(succ.getStartTime());
-//			stpf.setMaxSpeed(maxSpeed);
-//
-//			status = stpf.calculatePath();
-//
-//			if (!status)
-//				return false;
-//
-//			fromTask = stpf.getResultTrajectory();
-//		} else {
-//			fromTask = null;
-//		}
-//
-//		Task task = new Task(location, taskStartTime, taskFinishTime);
-//
-//		setResultTask(task);
-//		setResultToTask(toTask);
-//		setResultFromTask(fromTask);
-//
-//		return true;
-//	}
+	private SpatialPathfinder getSpatialPathfinder() {
+		return spatialPathfinder;
+	}
 
 	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
 		return fixTimeVelocityPathfinder;
@@ -288,11 +174,13 @@ public class TaskPlanner {
 		WorkerUnit worker = getWorkerUnit();
 		WorkerUnitObstacle segment = worker.getObstacleSegment( getEarliestStartTime() );
 
-		prepareSpatialPathfinder();
-
 		Point taskLocation = getLocation();
 		Point segmentStartLocation = segment.getStartLocation();
-		Point segmentFinishLocation = segment.getFinishLocation();
+		Point segmentFinishLocation = segment instanceof IdlingWorkerUnitObstacle
+			? taskLocation
+			: segment.getFinishLocation();
+
+		prepareSpatialPathfinder();
 
 		List<Point> toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
 		if (toTask == null)
@@ -333,6 +221,8 @@ public class TaskPlanner {
 
 	private void prepareSpatialPathfinder() {
 		SpatialPathfinder pf = getSpatialPathfinder();
+
+		// TODO use buffered obstacles
 
 		pf.setStaticObstacles( getStaticObstacles() );
 	}

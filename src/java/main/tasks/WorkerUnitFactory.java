@@ -36,7 +36,7 @@ public class WorkerUnitFactory {
 
 	private double maxSpeed;
 
-	private long initialSeconds;
+	private double initialSeconds;
 
 	public WorkerUnitFactory() {
 		this(
@@ -103,11 +103,11 @@ public class WorkerUnitFactory {
 		this.maxSpeed = maxSpeed;
 	}
 
-	private long getInitialSeconds() {
+	private double getInitialSeconds() {
 		return initialSeconds;
 	}
 
-	public void setInitialSeconds(long initialSeconds) {
+	public void setInitialSeconds(double initialSeconds) {
 		this.initialSeconds = initialSeconds;
 	}
 
@@ -115,12 +115,12 @@ public class WorkerUnitFactory {
 		return createWorkerUnit(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, long t) {
+	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, double t) {
 		EnhancedGeometryBuilder geomFact = getGeometryBuilder();
 		LocalDateTimeFactory timeFact = getTimeFactory();
 
 		Point initialLocation = geomFact.point(x, y);
-		LocalDateTime initialTime = timeFact.second(t);
+		LocalDateTime initialTime = timeFact.seconds(t);
 
 		return new WorkerUnit(shape, maxSpeed, initialLocation, initialTime);
 	}
