@@ -1,7 +1,10 @@
 package world.pathfinder;
 
+import static java.util.stream.Collectors.toList;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -31,9 +34,15 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.util.LineStringExtracter;
 import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 public class ForbiddenRegionBuilder {
+
+	/**
+	 * used to buffer masks along the spatial path
+	 */
+	private static final double BUFFER_FACTOR = 0.1;
 
 	private List<DynamicObstacle> dynamicObstacles = Collections.emptyList();
 
@@ -150,80 +159,28 @@ public class ForbiddenRegionBuilder {
 		setResultForbiddenRegions(forbiddenRegions);
 	}
 
-	private static Vector makeVector(Point point) {
-		return new BasicVector(new double[] {point.getX(), point.getY()});
-	}
-
-	private static Vector makeVector(Point startPoint, Point finishPoint) {
-		double x1 = startPoint.getX();
-		double y1 = startPoint.getY();
-		double x2 = finishPoint.getX();
-		double y2 = finishPoint.getY();
-
-		return new BasicVector(new double[] {x2 - x1, y2 - y1});
-	}
-
-	private static Vector makeUnitVector(Point startPoint, Point finishPoint) {
-		Vector vec = makeVector(startPoint, finishPoint);
-		double norm = vec.fold(Vectors.mkEuclideanNormAccumulator());
-
-		if (norm == 0.0)
-			return null;
-
-		return vec.divide(norm);
-	}
-
-	private static Vector makeVelocityVector(Point startPoint, Point finishPoint, double duration) {
-		Vector vec = makeVector(startPoint, finishPoint);
-
-		return vec.divide(duration);
-	}
-
-	private static Matrix makeArcVelocityBase(
-		Vector arcUnitVector,
-		TrajectorySegment obstacleTrajectorySegment)
-	{
-		Point obstacleStartPoint = obstacleTrajectorySegment.getStartPoint();
-		Point obstacleFinishPoint = obstacleTrajectorySegment.getFinishPoint();
-		double obstacleDuration = obstacleTrajectorySegment.getDuration();
-
-		Vector velocityVector = makeVelocityVector(
-			obstacleStartPoint,
-			obstacleFinishPoint,
-			obstacleDuration);
-
-		Matrix arcVelocityBase = new Basic1DMatrix(2, 2);
-		arcVelocityBase.setColumn(0, arcUnitVector);
-		arcVelocityBase.setColumn(1, velocityVector.multiply(-1.));
-
-		return arcVelocityBase;
-	}
-
-	private static Matrix calcTransformationMatrix(Matrix arcVelocityBase) {
-		Matrix transformationMatrix;
-
-		try {
-			transformationMatrix = arcVelocityBase.withInverter(LinearAlgebra.INVERTER).inverse();
-		} catch (IllegalArgumentException e) {
-			if (e.getMessage().equals("This matrix is not invertible."))
-				transformationMatrix = null;
-			else
-				throw e;
-		}
-
-		return transformationMatrix;
-	}
-
 	private static Geometry calcStationaryCase(
 		SpatialPathSegment spatialPathSegment,
 		TrajectorySegment obstacleTrajectorySegment,
 		Polygon obstacleShape)
 	{
-		// XXX last edition
+		boolean first = spatialPathSegment.isFirst();
+		boolean last = spatialPathSegment.isLast();
 
-		// TODO Auto-generated method stub
+		// background:
+		//
+		// This case normally results in only less than 2-dimensional regions.
+		// Since those are irrelevant as a forbidden region they could be
+		// disregarded. However, for the first and last segment it is important
+		// to include a small buffer area to the sides. Otherwise the
+		// ArcTimeMesher could connect vertices through moving obstacles.
+		//
+		// If the obstacle's trajectory segment is stationary the result
+		// would be a time parallel line at most which can be disregarded.
 
-		// TODO what if obstacle does not move?
+		// if there is no buffer necessary then return an empty polygon
+		if (obstacleTrajectorySegment.isStationary() || (!first && !last))
+			return EnhancedGeometryBuilder.getInstance().polygon();
 
 		// make mask
 		LineString mask = makePointTraceMask(
@@ -231,49 +188,153 @@ public class ForbiddenRegionBuilder {
 			obstacleTrajectorySegment);
 
 		// translate obstacle
-		Polygon movedObstacleShape = translateGeometry(
+		Polygon moved = translateGeometry(
 			obstacleShape,
 			obstacleTrajectorySegment.getStartPoint());
 
 		// boundary is expected to be composed of 1-dimensional components
-		Geometry boundary = movedObstacleShape.getBoundary();
+		Geometry boundary = moved.getBoundary();
 
 		// calculate intersection with obstacle's interior
-		// I* = A \cap int(B) = (A \cap B) \ (A \cap ext(B))
-		// I = I* \wedge ext(I*)
 
-		Geometry fullIntersection = movedObstacleShape.intersection(mask);
+		// A = mask, B = movedObstacleShape
+		// I* = A \cap int(B) = (A \cap B) \ (A \cap bdy(B))
+		// I = I* \wedge bdy(I*)
+
+		Geometry fullIntersection = moved.intersection(mask); // (A \cap B)
 		// JTS' difference operation can't handle general GeometryCollections
-		// therefore remove points
-		Geometry boundaryIntersection = onlyLines( boundary.intersection(mask) );
-		Geometry maskedMovedObstacleShape = fullIntersection.difference(boundaryIntersection);
+		// therefore, remove points
+		Geometry boundaryIntersection = onlyLines( boundary.intersection(mask) ); // (A \cap bdy(B))
+		// JTS geometries always include own boundary
+		Geometry masked = fullIntersection.difference(boundaryIntersection); // I
 
 		// transform intersection to forbidden region
-		Geometry transformedObstacleShape = calcPointTracedObstacleShape(
+		Geometry transformed = transformStationaryObstacle(
 			spatialPathSegment,
 			obstacleTrajectorySegment,
-			maskedMovedObstacleShape);
+			masked);
 
-		// TODO buffer region
+		// buffer region
+		Geometry buffered = bufferLineStrings(transformed, first, last);
 
-		return null;
+		return buffered;
 	}
 
 	private static LineString makePointTraceMask(
 		SpatialPathSegment spatialPathSegment,
 		TrajectorySegment obstacleTrajectorySegment)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+
+		// first and last point are expected to be the same
+		Point spatialPathPoint = spatialPathSegment.getStartPoint();
+		// first and last point are expected to differ
+		Point vt1 = obstacleTrajectorySegment.getStartPoint();
+		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
+
+		return geomBuilder.lineString(
+			translateGeometry(vt1, spatialPathPoint),
+			translateGeometry(vt2, spatialPathPoint));
 	}
 
-	private static Geometry calcPointTracedObstacleShape(
+	private static Geometry transformStationaryObstacle(
 		SpatialPathSegment spatialPathSegment,
 		TrajectorySegment obstacleTrajectorySegment,
 		Geometry maskedMovedObstacleShape)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Point xy0 = spatialPathSegment.getStartPoint();
+		Point vt1 = obstacleTrajectorySegment.getStartPoint();
+		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
+		// note that the start is vt2 and finish vt1
+		Matrix pointTraceUnitRowMatrix = makeUnitVector(vt2, vt1).toRowMatrix();
+
+		// origin
+		double x0 = xy0.getX();
+		double y0 = xy0.getY();
+		double s0 = spatialPathSegment.getStartArc();
+		double t0 = obstacleTrajectorySegment.getStartTime();
+
+		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
+
+		transformed.apply(new CoordinateFilter() {
+			@Override
+			public void filter(Coordinate c) {
+				// translated xy-vector with (x0, y1) as origin
+				Vector xyT = new BasicVector(new double[] {c.x - x0, c.y - y0});
+
+				// s = s0
+				c.x = s0;
+				// t = t0 + vt*(xy - xy0)
+				c.y = t0 + pointTraceUnitRowMatrix.multiply(xyT).get(0);
+			}
+		});
+
+		return transformed;
+	}
+
+	private static Geometry bufferLineStrings(Geometry geometry, boolean left, boolean right) {
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+
+		@SuppressWarnings("unchecked") // getLines returns raw List
+		Collection<LineString> lines = LineStringExtracter.getLines(geometry);
+
+		Collection<Polygon> buffered = lines.stream()
+			.map(l -> bufferLineString(l, left, right))
+			.collect(toList());
+
+		return geomBuilder.geometryCollection(buffered);
+	}
+
+	private static Polygon bufferLineString(LineString lineString, boolean left, boolean right) {
+		// left and right are not expected to be both unset
+		if (!left && !right)
+			return EnhancedGeometryBuilder.getInstance().polygon();
+
+		int n = lineString.getNumPoints();
+		int m = 2*n + 1;
+		Coordinate[] lineStringCoords = lineString.getCoordinates();
+
+		// calculate buffer
+
+		// left side
+		Coordinate[] leftCoords;
+		if (left) {
+			leftCoords = Arrays.stream(lineStringCoords)
+				.map(c -> new Coordinate(leftBuffer(c.x), c.y))
+				.toArray(Coordinate[]::new);
+		} else {
+			leftCoords = lineStringCoords;
+		}
+
+		// right side
+		Coordinate[] rightCoords;
+		if (right) {
+			rightCoords = Arrays.stream(lineStringCoords)
+				.map(c -> new Coordinate(rightBuffer(c.x), c.y))
+				.toArray(Coordinate[]::new);
+		} else {
+			rightCoords = lineStringCoords;
+		}
+
+		// construct coordinate array
+
+		Coordinate[] bufferedCoords = new Coordinate[m];
+		int k = 0;
+
+		// left
+		for (int i = 0; i < n; ++i)
+			bufferedCoords[k++] = leftCoords[i];
+		// right
+		for (int i = n-1; i >= 0; --i) // reversed
+			bufferedCoords[k++] = rightCoords[i];
+		// connect start and end
+		bufferedCoords[m-1] = bufferedCoords[0];
+
+		// construct polygon
+
+		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
+
+		return geomFact.createPolygon(bufferedCoords);
 	}
 
 	private static Geometry calcParallelCase(
@@ -287,7 +348,6 @@ public class ForbiddenRegionBuilder {
 		LineString spatialMask = makeSpatialLineMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
-		// TODO first and last path segment have to be masked differently (small buffer to left/right)
 		Polygon arcMask = makeArcRectangularMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
@@ -300,7 +360,7 @@ public class ForbiddenRegionBuilder {
 		if (obstaclePathIntersection.isEmpty())
 			return geomBuilder.polygon();
 
-		Geometry transformedObstacleShape = calcParallelObstacleShape(
+		Geometry transformedObstacleShape = transformParallelObstacle(
 			spatialPathSegment,
 			arcUnitVector,
 			obstacleTrajectorySegment,
@@ -312,7 +372,7 @@ public class ForbiddenRegionBuilder {
 
 	private static LineString makeSpatialLineMask(
 		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacTrajectorySegment)
+		TrajectorySegment obstacleTrajectorySegment)
 	{
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 
@@ -320,8 +380,8 @@ public class ForbiddenRegionBuilder {
 		Vector s2 = makeVector(spatialPathSegment.getFinishPoint());
 		Vector s = s2.subtract(s1);
 		Vector vt = makeVector(
-			obstacTrajectorySegment.getStartPoint(),
-			obstacTrajectorySegment.getFinishPoint());
+			obstacleTrajectorySegment.getStartPoint(),
+			obstacleTrajectorySegment.getFinishPoint());
 
 		double snorm = spatialPathSegment.getLength();
 
@@ -353,10 +413,15 @@ public class ForbiddenRegionBuilder {
 		double tmin = obstTrajectorySegment.getStartTime();
 		double tmax = tmin + obstTrajectorySegment.getDuration();
 
+		if (spatialPathSegment.isFirst())
+			smin = leftBuffer(smin);
+		if (spatialPathSegment.isLast())
+			smax = rightBuffer(smax);
+
 		return builder.box(smin, tmin, smax, tmax);
 	}
 
-	private static Geometry calcParallelObstacleShape(
+	private static Geometry transformParallelObstacle(
 		SpatialPathSegment spatialPathSegment,
 		Vector arcUnitVector,
 		TrajectorySegment obstacleTrajectorySegment,
@@ -423,11 +488,10 @@ public class ForbiddenRegionBuilder {
 		Matrix transformationMatrix,
 		Polygon obstacleShape)
 	{
-		// TODO first and last path segment have to be masked differently (small buffer to left/right)
 		Polygon mask = makeParallelogramMask(spatialPathSegment, obstacleTrajectorySegment);
 		Polygon movedObstacleShape = translateGeometry(obstacleShape, obstacleTrajectorySegment.getStartPoint());
 		Geometry maskedMovedObstacleShape = movedObstacleShape.intersection(mask);
-		Geometry region = calcTransformedObstacleShape(
+		Geometry region = transformRegularObstacle(
 			spatialPathSegment,
 			obstacleTrajectorySegment,
 			maskedMovedObstacleShape,
@@ -440,31 +504,45 @@ public class ForbiddenRegionBuilder {
 		SpatialPathSegment spatialPathSegment,
 		TrajectorySegment obstacleTrajectorySegment)
 	{
+		Point s1p = spatialPathSegment.getStartPoint();
+		Point s2p = spatialPathSegment.getFinishPoint();
+
+		Vector s1v = makeVector(s1p);
+		Vector s2v = makeVector(s2p);
+		Vector vtv = makeVector(
+			obstacleTrajectorySegment.getStartPoint(),
+			obstacleTrajectorySegment.getFinishPoint());
+
+		boolean first = spatialPathSegment.isFirst();
+		boolean last = spatialPathSegment.isLast();
+
+		// used to buffer along s direction if needed
+		Vector buffer = first || last ?
+			// BUFFER_FACTOR * (s2 - s1)
+			s2v.subtract(s1v).multiply(BUFFER_FACTOR) : null;
+
+		// calculate point vectors
+		Vector v1 = first ? s1v.subtract(buffer) : s1v;
+		Vector v2 = last  ? s2v.add     (buffer) : s2v;
+		Vector v3 = v2.subtract(vtv);
+		Vector v4 = v1.subtract(vtv);
+
+		// make points
+		Point p1 = makePoint(v1);
+		Point p2 = makePoint(v2);
+		Point p3 = makePoint(v3);
+		Point p4 = makePoint(v4);
+
+		// make polygon
+
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-
-		Point s1 = spatialPathSegment.getStartPoint();
-		Point s2 = spatialPathSegment.getFinishPoint();
-		Point vt1 = obstacleTrajectorySegment.getStartPoint();
-		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
-
-		double vtx = vt2.getX() - vt1.getX();
-		double vty = vt2.getY() - vt1.getY();
-		double x3 = s2.getX() - vtx;
-		double y3 = s2.getY() - vty;
-		double x4 = s1.getX() - vtx;
-		double y4 = s1.getY() - vty;
-
-		Point p1 = s1;
-		Point p2 = s2;
-		Point p3 = builder.point(x3, y3);
-		Point p4 = builder.point(x4, y4);
 
 		LinearRing shell = builder.linearRing(p1, p2, p3, p4, p1);
 
 		return builder.polygon(shell);
 	}
 
-	private static Geometry calcTransformedObstacleShape(
+	private static Geometry transformRegularObstacle(
 		SpatialPathSegment spatialPathSegment,
 		TrajectorySegment obstacleTrajectorySegment,
 		Geometry maskedMovedObstacleShape,
@@ -495,6 +573,76 @@ public class ForbiddenRegionBuilder {
 		return region;
 	}
 
+	private static Point makePoint(Vector vector) {
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+
+		return geomBuilder.point(vector.get(0), vector.get(1));
+	}
+
+	private static Vector makeVector(Point point) {
+		return new BasicVector(new double[] {point.getX(), point.getY()});
+	}
+
+	private static Vector makeVector(Point startPoint, Point finishPoint) {
+		double x1 = startPoint.getX();
+		double y1 = startPoint.getY();
+		double x2 = finishPoint.getX();
+		double y2 = finishPoint.getY();
+
+		return new BasicVector(new double[] {x2 - x1, y2 - y1});
+	}
+
+	private static Vector makeUnitVector(Point startPoint, Point finishPoint) {
+		Vector vec = makeVector(startPoint, finishPoint);
+		double norm = vec.fold(Vectors.mkEuclideanNormAccumulator());
+
+		if (norm == 0.0)
+			return null;
+
+		return vec.divide(norm);
+	}
+
+	private static Vector makeVelocityVector(Point startPoint, Point finishPoint, double duration) {
+		Vector vec = makeVector(startPoint, finishPoint);
+
+		return vec.divide(duration);
+	}
+
+	private static Matrix makeArcVelocityBase(
+		Vector arcUnitVector,
+		TrajectorySegment obstacleTrajectorySegment)
+	{
+		Point obstacleStartPoint = obstacleTrajectorySegment.getStartPoint();
+		Point obstacleFinishPoint = obstacleTrajectorySegment.getFinishPoint();
+		double obstacleDuration = obstacleTrajectorySegment.getDuration();
+
+		Vector velocityVector = makeVelocityVector(
+			obstacleStartPoint,
+			obstacleFinishPoint,
+			obstacleDuration);
+
+		Matrix arcVelocityBase = new Basic1DMatrix(2, 2);
+		arcVelocityBase.setColumn(0, arcUnitVector);
+		arcVelocityBase.setColumn(1, velocityVector.multiply(-1.));
+
+		return arcVelocityBase;
+	}
+
+	private static Matrix calcTransformationMatrix(Matrix arcVelocityBase) {
+		Matrix transformationMatrix;
+
+		try {
+			transformationMatrix = arcVelocityBase.withInverter(LinearAlgebra.INVERTER).inverse();
+		} catch (IllegalArgumentException e) {
+			if (e.getMessage().equals("This matrix is not invertible."))
+				transformationMatrix = null;
+			else
+				throw e;
+		}
+
+		return transformationMatrix;
+	}
+
 	private static <T extends Geometry> T translateGeometry(T geometry, Point translation) {
 		@SuppressWarnings("unchecked")
 		T clone = (T) geometry.clone();
@@ -511,6 +659,14 @@ public class ForbiddenRegionBuilder {
 		});
 
 		return clone;
+	}
+
+	private static double leftBuffer(double s) {
+		return (1.0-BUFFER_FACTOR) * s;
+	}
+
+	private static double rightBuffer(double s) {
+		return (1.0+BUFFER_FACTOR) * s;
 	}
 
 	private static Geometry onlyLines(Geometry geometry) {
