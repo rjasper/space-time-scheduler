@@ -38,7 +38,7 @@ public abstract class VelocityPathfinder {
 	
 	private DecomposedTrajectory resultTrajectory = null;
 	
-	private List<DynamicObstacle> resultEvadedObstacles = null;
+	private Collection<DynamicObstacle> resultEvadedObstacles = null;
 
 	public boolean isReady() {
 		return spatialPath != null
@@ -105,11 +105,11 @@ public abstract class VelocityPathfinder {
 		this.resultTrajectory = resultTrajectory;
 	}
 
-	public List<DynamicObstacle> getResultEvadedObstacles() {
+	public Collection<DynamicObstacle> getResultEvadedObstacles() {
 		return resultEvadedObstacles;
 	}
 
-	private void setResultEvadedObstacles(List<DynamicObstacle> resultEvadedObstacles) {
+	private void setResultEvadedObstacles(Collection<DynamicObstacle> resultEvadedObstacles) {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
 	
@@ -130,7 +130,7 @@ public abstract class VelocityPathfinder {
 			? buildTrajectory(arcTimePath)
 			: null;
 			
-		List<DynamicObstacle> evasions = reachable
+		Collection<DynamicObstacle> evasions = reachable
 			? calculateEvadedObstacles(forbiddenRegions, arcTimePath)
 			: null;
 		
@@ -158,7 +158,7 @@ public abstract class VelocityPathfinder {
 
 	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
 	
-	private List<DynamicObstacle> calculateEvadedObstacles(
+	private Collection<DynamicObstacle> calculateEvadedObstacles(
 		Collection<ForbiddenRegion> forbiddenRegions,
 		List<Point> arcTimePath)
 	{
@@ -176,7 +176,7 @@ public abstract class VelocityPathfinder {
 		// return a list of each obstacle met by a point in the path
 		return arcTimePath.stream()
 			.map(lookup::get)
-			.collect(toList());
+			.collect(toSet());
 	}
 
 	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {

@@ -1,16 +1,16 @@
 package world;
 
-import static util.PathOperations.length;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import util.DurationConv;
+import util.PathOperations;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class DecomposedTrajectory implements Trajectory {
+public class DecomposedTrajectory extends CachedTrajectory {
 
 	private final LocalDateTime baseTime;
 
@@ -19,8 +19,6 @@ public class DecomposedTrajectory implements Trajectory {
 	private final List<Point> arcTimePathComponent;
 
 	private transient SimpleTrajectory composedTrajectory = null;
-
-	private transient double length = Double.NaN;
 
 	public DecomposedTrajectory(
 		LocalDateTime baseTime,
@@ -118,19 +116,21 @@ public class DecomposedTrajectory implements Trajectory {
 		return baseTime.plus(duration);
 	}
 
-	@Override
-	public double getLength() {
-		if (Double.isNaN(length))
-			length = length( getSpatialPathComponent() );
-
-		return length;
-	}
-
 	public SimpleTrajectory getComposedTrajectory() {
 		if (composedTrajectory == null)
 			composedTrajectory = compose();
 
 		return composedTrajectory;
+	}
+
+	@Override
+	protected double calcLength() {
+		return PathOperations.length( getSpatialPathComponent() );
+	}
+
+	@Override
+	protected Geometry calcTrace() {
+		return PathOperations.calcTrace( getSpatialPathComponent() );
 	}
 
 	private SimpleTrajectory compose() {

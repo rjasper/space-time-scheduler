@@ -208,6 +208,9 @@ public class ForbiddenRegionBuilder {
 		// JTS geometries always include own boundary
 		Geometry masked = fullIntersection.difference(boundaryIntersection); // I
 
+		if (masked.isEmpty())
+			return masked; // empty geometry
+
 		// transform intersection to forbidden region
 		Geometry transformed = transformStationaryObstacle(
 			spatialPathSegment,
@@ -228,13 +231,15 @@ public class ForbiddenRegionBuilder {
 
 		// first and last point are expected to be the same
 		Point spatialPathPoint = spatialPathSegment.getStartPoint();
+		Vector s = makeVector(spatialPathPoint);
 		// first and last point are expected to differ
-		Point vt1 = obstacleTrajectorySegment.getStartPoint();
-		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
+		Vector vt = makeVector(
+			obstacleTrajectorySegment.getStartPoint(),
+			obstacleTrajectorySegment.getFinishPoint());
 
 		return geomBuilder.lineString(
-			translateGeometry(vt1, spatialPathPoint),
-			translateGeometry(vt2, spatialPathPoint));
+			spatialPathPoint,
+			makePoint( s.subtract(vt) ));
 	}
 
 	private static Geometry transformStationaryObstacle(

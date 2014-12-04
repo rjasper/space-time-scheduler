@@ -1,6 +1,7 @@
 package tasks;
 
 import static java.util.stream.Collectors.toList;
+import static util.Comparables.max;
 import static util.DurationConv.inSeconds;
 import static util.PathOperations.length;
 
@@ -124,7 +125,9 @@ public class TaskPlanner {
 	}
 
 	private LocalDateTime getEarliestStartTime() {
-		return earliestStartTime;
+		LocalDateTime initialTime = getWorkerUnit().getInitialTime();
+
+		return max(earliestStartTime, initialTime);
 	}
 
 	public void setEarliestStartTime(LocalDateTime earliestStartTime) {
@@ -172,6 +175,11 @@ public class TaskPlanner {
 			throw new IllegalStateException("not ready yet");
 
 		WorkerUnit worker = getWorkerUnit();
+
+		// cannot plan with worker which is not initialized yet
+		if (getLatestStartTime().compareTo( worker.getInitialTime() ) < 0)
+			return false;
+
 		WorkerUnitObstacle segment = worker.getObstacleSegment( getEarliestStartTime() );
 
 		Point taskLocation = getLocation();
@@ -193,7 +201,7 @@ public class TaskPlanner {
 
 		// prepare current dynamic obstacles
 		addAllDynamicObstacles( getDynamicObstacles() );
-		addAllDynamicObstacles( buildWorkerPoolSegments(evasions) );
+		addAllDynamicObstacles( buildWorkerPoolSegments(evasions, segment) );
 
 		// make jobs
 		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, segment));
@@ -204,7 +212,7 @@ public class TaskPlanner {
 			.sorted()
 			.collect(toList());
 
-		// execute jobs or fail
+		// calculate jobs or fail
 		for (Job j : jobs) {
 			boolean status = j.calculate();
 
@@ -289,9 +297,9 @@ public class TaskPlanner {
 
 		private Task resultTask;
 
-		private List<WorkerUnitObstacle> resultEvadedWorkersToTask;
+		private Collection<WorkerUnitObstacle> resultEvadedWorkersToTask;
 
-		private List<WorkerUnitObstacle> resultEvadedWorkersFromTask;
+		private Collection<WorkerUnitObstacle> resultEvadedWorkersFromTask;
 
 		private DecomposedTrajectory resultTrajectoryToTask;
 
@@ -339,19 +347,19 @@ public class TaskPlanner {
 			this.resultTask = resultTask;
 		}
 
-		private List<WorkerUnitObstacle> getResultEvadedWorkersToTask() {
+		private Collection<WorkerUnitObstacle> getResultEvadedWorkersToTask() {
 			return resultEvadedWorkersToTask;
 		}
 
-		private void setResultEvadedWorkersToTask(List<WorkerUnitObstacle> resultEvadedObstaclesToTask) {
+		private void setResultEvadedWorkersToTask(Collection<WorkerUnitObstacle> resultEvadedObstaclesToTask) {
 			this.resultEvadedWorkersToTask = resultEvadedObstaclesToTask;
 		}
 
-		private List<WorkerUnitObstacle> getResultEvadedWorkersFromTask() {
+		private Collection<WorkerUnitObstacle> getResultEvadedWorkersFromTask() {
 			return resultEvadedWorkersFromTask;
 		}
 
-		private void setResultEvadedWorkersFromTask(List<WorkerUnitObstacle> resultEvadedObstaclesFromTask) {
+		private void setResultEvadedWorkersFromTask(Collection<WorkerUnitObstacle> resultEvadedObstaclesFromTask) {
 			this.resultEvadedWorkersFromTask = resultEvadedObstaclesFromTask;
 		}
 
@@ -477,8 +485,8 @@ public class TaskPlanner {
 			if (!status)
 				return false;
 
-			List<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			List<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
+			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
+			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
 			DecomposedTrajectory trajToTask = pf.getResultTrajectory();
 
 			setResultEvadedWorkersToTask(evadedWorkers);
@@ -507,8 +515,8 @@ public class TaskPlanner {
 			if (!status)
 				return false;
 
-			List<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			List<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
+			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
+			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
 			DecomposedTrajectory trajFromTask = pf.getResultTrajectory();
 
 			setResultEvadedWorkersFromTask(evadedWorkers);
@@ -552,7 +560,7 @@ public class TaskPlanner {
 
 		private MovingWorkerUnitObstacle resultSegment;
 
-		private List<WorkerUnitObstacle> resultEvadedWorkers;
+		private Collection<WorkerUnitObstacle> resultEvadedWorkers;
 
 		public UpdateJob(MovingWorkerUnitObstacle segment) {
 			super(calcMaxDuration(segment));
@@ -572,11 +580,11 @@ public class TaskPlanner {
 			this.resultSegment = resultSegment;
 		}
 
-		private List<WorkerUnitObstacle> getResultEvadedWorkers() {
+		private Collection<WorkerUnitObstacle> getResultEvadedWorkers() {
 			return resultEvadedWorkers;
 		}
 
-		private void setResultEvadedWorkers(List<WorkerUnitObstacle> resultEvadedWorkers) {
+		private void setResultEvadedWorkers(Collection<WorkerUnitObstacle> resultEvadedWorkers) {
 			this.resultEvadedWorkers = resultEvadedWorkers;
 		}
 
@@ -615,8 +623,8 @@ public class TaskPlanner {
 				return false;
 
 			DecomposedTrajectory trajectory = pf.getResultTrajectory();
-			List<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			List<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
+			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
+			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
 			Task goal = segment.getGoal();
 			MovingWorkerUnitObstacle resultSegment = new MovingWorkerUnitObstacle(worker, trajectory, goal);
 
@@ -632,7 +640,7 @@ public class TaskPlanner {
 			MovingWorkerUnitObstacle evasion = getSegment();
 			WorkerUnit worker = evasion.getWorkerUnit();
 			MovingWorkerUnitObstacle resultSegment = getResultSegment();
-			List<WorkerUnitObstacle> evadedWorkers = getResultEvadedWorkers();
+			Collection<WorkerUnitObstacle> evadedWorkers = getResultEvadedWorkers();
 
 			// register evasions
 			for (WorkerUnitObstacle e : evadedWorkers)
@@ -652,7 +660,7 @@ public class TaskPlanner {
 		return Duration.between(startTime, finishTime);
 	}
 
-	private static List<WorkerUnitObstacle> onlyWorkerUnitObstacles(List<DynamicObstacle> obstacles) {
+	private static Collection<WorkerUnitObstacle> onlyWorkerUnitObstacles(Collection<DynamicObstacle> obstacles) {
 		return obstacles.stream()
 			.filter(o -> o instanceof WorkerUnitObstacle)
 			.map(o -> (WorkerUnitObstacle) o)
@@ -673,12 +681,15 @@ public class TaskPlanner {
 		return Stream.concat(self, ancestors);
 	}
 
-	private Collection<DynamicObstacle> buildWorkerPoolSegments(Collection<? extends WorkerUnitObstacle> exclusions) {
+	private Collection<DynamicObstacle> buildWorkerPoolSegments(
+		Collection<? extends WorkerUnitObstacle> exclusions,
+		WorkerUnitObstacle obsoleteSegment)
+	{
 		Collection<WorkerUnit> pool = getWorkerPool();
 
 		return pool.stream()
 			.flatMap(w -> w.getObstacleSegments().stream())
-			.filter(o -> !exclusions.contains(o))
+			.filter(o -> !exclusions.contains(o) && !o.equals(obsoleteSegment))
 			.collect(toList());
 	}
 

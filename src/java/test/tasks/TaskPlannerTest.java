@@ -45,7 +45,7 @@ public class TaskPlannerTest {
 	public void test() {
 //		fail("Not yet implemented"); // TODO
 
-		Polygon shape = geomBuilder.box(-0.5, -0.5, 0.5, 0.5);
+		Polygon shape = geomBuilder.box(-0.25, -0.25, 0.25, 0.25);
 		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
 		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
 
@@ -67,6 +67,8 @@ public class TaskPlannerTest {
 
 		assertThat("unable to plan task", status, equalTo(true));
 
+		System.out.println( w1.calcMergedTrajectory().getTrace() );
+
 		// w = w2, P = (5, 3), t = 10, d = 2
 		status = planTask(tp, w2,
 			geomBuilder.point(5.0, 3.0),
@@ -75,15 +77,20 @@ public class TaskPlannerTest {
 
 		assertThat("unable to plan task", status, equalTo(true));
 
+		System.out.println( w2.calcMergedTrajectory().getTrace() );
+
 		// TODO check evasions
 
 		// w = w1, P = (1, 3), t = 4, d = 2
-		status = planTask(tp, w2,
+		status = planTask(tp, w1,
 			geomBuilder.point(1.0, 3.0),
 			timeFact.seconds(4.0),
 			DurationConv.ofSeconds(2.0));
 
 		assertThat("unable to plan task", status, equalTo(true));
+
+		System.out.println( w1.calcMergedTrajectory().getTrace() );
+		System.out.println( w2.calcMergedTrajectory() );
 
 		// TODO check evasions
 	}

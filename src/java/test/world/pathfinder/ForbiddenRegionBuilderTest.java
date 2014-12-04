@@ -23,11 +23,12 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class ForbiddenRegionBuilderTest {
 
-
 	private static EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	private static TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 	private static LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
 	private static LocalDateTime baseTime = timeFact.second(0);
+
+	// TODO test stationary case
 
 	@Test
 	public void testRegularCase() {
@@ -64,7 +65,7 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testParallelCase() {
-		List<Point> path = geomBuilder.points(2., 4., 10., 4.);
+		List<Point> path = geomBuilder.points(0., 4., 10., 4.);
 
 		double[] x = {6., 6.}, y = {4., 4.}, t = {0., 1.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);

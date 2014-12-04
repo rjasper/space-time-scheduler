@@ -1,22 +1,22 @@
 package world;
 
 import static java.util.Collections.unmodifiableList;
-import static util.PathOperations.length;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import util.PathOperations;
+
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class SimpleTrajectory implements Trajectory {
+public class SimpleTrajectory extends CachedTrajectory {
 
 	private final List<Point> spatialPath;
 
 	private final List<LocalDateTime> times;
-
-	private transient double length = Double.NaN;
 
 	public SimpleTrajectory(List<Point> spatialPath, List<LocalDateTime> times) {
 		// TODO check sizes
@@ -72,11 +72,13 @@ public class SimpleTrajectory implements Trajectory {
 	}
 
 	@Override
-	public double getLength() {
-		if (Double.isNaN(length))
-			length = length( getSpatialPath() );
+	protected double calcLength() {
+		return PathOperations.length( getSpatialPath() );
+	}
 
-		return length;
+	@Override
+	protected Geometry calcTrace() {
+		return PathOperations.calcTrace( getSpatialPath() );
 	}
 
 	public int size() {
