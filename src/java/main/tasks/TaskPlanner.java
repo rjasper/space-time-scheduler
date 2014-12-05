@@ -604,7 +604,7 @@ public class TaskPlanner {
 			MovingWorkerUnitObstacle segment = getSegment();
 			WorkerUnit worker = segment.getWorkerUnit();
 			Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstaclesFor(worker);
-			List<Point> spatialPath = segment.getSpatialPath();
+			List<Point> spatialPath = segment.getSpatialPathComponent();
 			double maxSpeed = worker.getMaxSpeed();
 			LocalDateTime startTime = segment.getStartTime();
 			LocalDateTime finishTime = segment.getFinishTime();
@@ -696,8 +696,7 @@ public class TaskPlanner {
 	private Collection<DynamicObstacle> buildDynamicObstaclesFor(WorkerUnit worker) {
 		Collection<DynamicObstacle> dynamicObstacles = getCurrentDynamicObstacles();
 
-		// might overestimate largest diameter
-		double bufferDistance = 2.0*worker.getRadius();
+		double bufferDistance = worker.getRadius();
 
 		// an exact solution would be to calculate the minkowski sum
 		// of each obstacle and the worker's shape

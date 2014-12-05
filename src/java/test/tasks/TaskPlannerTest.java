@@ -90,7 +90,7 @@ public class TaskPlannerTest {
 		assertThat("unable to plan task", status, equalTo(true));
 
 		System.out.println( w1.calcMergedTrajectory().getTrace() );
-		System.out.println( w2.calcMergedTrajectory() );
+		System.out.println( w2.calcMergedTrajectory().getTrace() );
 
 		// TODO check evasions
 	}

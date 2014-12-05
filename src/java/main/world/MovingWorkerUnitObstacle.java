@@ -1,5 +1,9 @@
 package world;
 
+import java.util.List;
+
+import com.vividsolutions.jts.geom.Point;
+
 import tasks.Task;
 import tasks.WorkerUnit;
 
@@ -16,6 +20,14 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 	@Override
 	public DecomposedTrajectory getTrajectory() {
 		return (DecomposedTrajectory) super.getTrajectory();
+	}
+	
+	public List<Point> getSpatialPathComponent() {
+		return getTrajectory().getSpatialPathComponent();
+	}
+	
+	public List<Point> getArcTimePathComponent() {
+		return getTrajectory().getArcTimePathComponent();
 	}
 	
 	public Task getGoal() {
