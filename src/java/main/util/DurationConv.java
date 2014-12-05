@@ -5,11 +5,20 @@ import java.time.Duration;
 public final class DurationConv {
 	
 	public static double inSeconds(Duration duration) {
-		return (double) duration.toNanos() * 1e-9;
+		double seconds = duration.getSeconds();
+		double nano = duration.getNano();
+		
+		return seconds + 1e-9 * nano;
 	}
 	
 	public static Duration ofSeconds(double seconds) {
-		return Duration.ofNanos((long) (seconds * 1e9));
+		if (seconds < Long.MIN_VALUE || seconds > Long.MAX_VALUE)
+			throw new IllegalArgumentException("seconds exceeds Duration range");
+		
+		double floorSeconds = Math.floor(seconds);
+		double nano = 1e9 * (seconds - floorSeconds);
+		
+		return Duration.ofSeconds((long) floorSeconds, (long) nano);
 	}
 
 }
