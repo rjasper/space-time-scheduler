@@ -1,5 +1,6 @@
-package tasks;
+package tasks.fixtures;
 
+import tasks.WorkerUnit;
 import tasks.factories.WorkerUnitFactory;
 import jts.geom.factories.StaticJtsFactories;
 

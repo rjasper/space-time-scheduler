@@ -1,4 +1,6 @@
-package world;
+package world.fixtures;
+
+import world.World;
 
 import com.vividsolutions.jts.geom.Polygon;
 

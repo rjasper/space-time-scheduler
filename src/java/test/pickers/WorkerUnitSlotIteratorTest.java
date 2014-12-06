@@ -14,7 +14,7 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 import org.junit.Test;
 
 import tasks.WorkerUnit;
-import tasks.WorkerUnitFixtures;
+import tasks.fixtures.WorkerUnitFixtures;
 import world.LocalDateTimeFactory;
 
 import com.vividsolutions.jts.geom.Point;

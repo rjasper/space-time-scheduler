@@ -13,7 +13,7 @@ import org.junit.Test;
 import tasks.factories.SpecificationFactory;
 import tasks.factories.WorkerUnitFactory;
 import world.World;
-import world.WorldFixtures;
+import world.fixtures.WorldFixtures;
 
 public class SchedulerTest {
 
