@@ -5,8 +5,8 @@
 	<artifactId>space-time-scheduler</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
-		<sourceDirectory>src/java/main</sourceDirectory>
-		<testSourceDirectory>src/java/test</testSourceDirectory>
+		<sourceDirectory>src/main</sourceDirectory>
+		<testSourceDirectory>src/test</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
