@@ -24,7 +24,7 @@ public class GeometryIsEmpty extends BaseMatcher<Geometry> {
 
 	@Override
 	public void describeTo(Description description) {
-		description.appendText("EMPTY");
+		description.appendText("an empty geometry");
 	}
 	
 	@Factory
