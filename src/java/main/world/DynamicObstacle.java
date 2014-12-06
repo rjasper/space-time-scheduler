@@ -81,6 +81,7 @@ public class DynamicObstacle implements Cloneable {
 		}
 	}
 
+	// TODO toString not very helpful right now
 	@Override
 	public String toString() {
 		return "DynamicObstacle ["

@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import util.NameProvider;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
@@ -138,59 +139,6 @@ public class WorkerUnit {
 			throw new IllegalArgumentException("unknown obstacle segment");
 	}
 
-//	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {
-//		TreeMap<LocalDateTime, Task> tasks = _getTasks();
-//		Map.Entry<LocalDateTime, Task> first = tasks.lowerEntry(from);
-//		Map.Entry<LocalDateTime, Task> last = tasks.higherEntry(to);
-//		NavigableMap<LocalDateTime, Task> taskSubSet = tasks.subMap(from, true,
-//			to, true);
-//
-//		Point startLocation, finishLocation;
-//		LocalDateTime startTime, finishTime;
-//
-//		if (first == null) {
-//			startLocation = getInitialLocation();
-//			startTime = getInitialTime();
-//		} else {
-//			Task firstTask = first.getValue();
-//
-//			startLocation = firstTask.getLocation();
-//			startTime = firstTask.getFinishTime();
-//		}
-//
-//		Collection<IdleSlot> slots = new LinkedList<>();
-//
-//		for (Task t : taskSubSet.values()) {
-//			finishLocation = t.getLocation();
-//			finishTime = t.getStartTime();
-//
-//			// don't add idle slots without duration
-//			if (startTime.compareTo(finishTime) < 0)
-//				slots.add(new IdleSlot(startLocation, finishLocation,
-//					startTime, finishTime));
-//
-//			startLocation = t.getLocation();
-//			startTime = t.getFinishTime();
-//		}
-//
-//		if (last == null) {
-//			finishLocation = null;
-//			finishTime = null;
-//		} else {
-//			Task lastTask = last.getValue();
-//
-//			finishLocation = lastTask.getLocation();
-//			finishTime = lastTask.getStartTime();
-//		}
-//
-//		// don't add idle slots without duration
-//		if (last == null || startTime.compareTo(finishTime) < 0)
-//			slots.add(new IdleSlot(startLocation, finishLocation, startTime,
-//				finishTime));
-//
-//		return slots;
-//	}
-
 	public Collection<IdleSlot> idleSubSet(LocalDateTime from, LocalDateTime to) {
 		TreeMap<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
 		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = segments.lowerEntry(from);
@@ -221,6 +169,11 @@ public class WorkerUnit {
 			.map(DynamicObstacle::getTrajectory)
 			.reduce((u, v) -> u.merge(v))
 			.get();
+	}
+	
+	@Override
+	public String toString() {
+		return NameProvider.nameFor(this);
 	}
 
 }

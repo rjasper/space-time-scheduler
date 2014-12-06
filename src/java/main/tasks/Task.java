@@ -3,6 +3,8 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import util.NameProvider;
+
 import com.vividsolutions.jts.geom.Point;
 
 public class Task {
@@ -49,6 +51,11 @@ public class Task {
 
 	public Duration getDuration() {
 		return duration;
+	}
+	
+	@Override
+	public String toString() {
+		return NameProvider.nameFor(this);
 	}
 
 }
