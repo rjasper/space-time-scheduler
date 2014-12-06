@@ -23,11 +23,11 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public abstract class MinimumTimeVelocityPathfinderTest {
 
-	protected abstract MinimumTimeVelocityPathfinder getPathfinder();
+	protected abstract MinimumTimeVelocityPathfinder createPathfinder();
 	
 	@Test
 	public void test() {
-		MinimumTimeVelocityPathfinder pf = getPathfinder();
+		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		TrajectoryFactory trajFact = TrajectoryFactory.getInstance();

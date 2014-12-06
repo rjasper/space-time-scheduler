@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeometryMatchers {
 	
-	public static Matcher<Geometry> equalTo(Geometry operand) {
+	public static Matcher<Geometry> topologicallyEqualTo(Geometry operand) {
 		return GeometryIsEqual.isEqual(operand);
 	}
 	

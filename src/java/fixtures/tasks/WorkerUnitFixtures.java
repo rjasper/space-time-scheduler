@@ -1,5 +1,6 @@
 package tasks;
 
+import tasks.factories.WorkerUnitFactory;
 import jts.geom.factories.StaticJtsFactories;
 
 import com.vividsolutions.jts.io.WKTReader;

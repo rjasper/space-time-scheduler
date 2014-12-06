@@ -22,7 +22,7 @@ import com.vividsolutions.jts.geom.Point;
 
 public abstract class FixTimeVelocityPathfinderTest {
 	
-	protected abstract FixTimeVelocityPathfinder getInstance();
+	protected abstract FixTimeVelocityPathfinder createPathfinder();
 	
 	@Test
 	public void test() {
@@ -43,7 +43,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		LocalDateTime startTime = timeFact.seconds(0.);
 		LocalDateTime finishTime = timeFact.seconds(11.);
 		
-		FixTimeVelocityPathfinder pf = getInstance();
+		FixTimeVelocityPathfinder pf = createPathfinder();
 
 		pf.setMaxSpeed(maxSpeed);
 		pf.setDynamicObstacles(dynamicObstacles);

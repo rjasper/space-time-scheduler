@@ -143,6 +143,7 @@ public class TrajectoryComposer {
 		// build trajectory
 		TrajectoryFactory trajFact = getTrajectoryFactory();
 		
+		// TODO don't use factory
 		SimpleTrajectory trajectory = trajFact.trajectory(x, y, t, n);
 		
 		setResultTrajectory(trajectory);
@@ -159,7 +160,6 @@ public class TrajectoryComposer {
 		for (int i = 0, j = 0; i < nSpatial; ++i) {
 			while (j < nArcTime-1 && sSpatial[i] > sArcTime[j])
 				++j;
-			
 			
 			if (sSpatial[i] == sArcTime[j]) {
 				tSpatial[i] = tArcTime[j];
@@ -192,12 +192,11 @@ public class TrajectoryComposer {
 			while (j < nSpatial-1 && sArcTime[i] > sSpatial[j])
 				++j;
 			
-			
 			if (sArcTime[i] == sSpatial[j]) {
 				xArcTime[i] = xSpatial[j];
 				yArcTime[i] = ySpatial[j];
 			} else { // sSpatial[j-1] < sArcTime[i] < sSpatial[j]
-				// linear interpolation of time
+				// linear interpolation of spatial coordinates
 				
 				double s = sArcTime[i];
 				double s1 = sSpatial[j-1];

@@ -20,6 +20,8 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
+import tasks.factories.WorkerUnitFactory;
+
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 

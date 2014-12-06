@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import tasks.factories.IdleSlotFactory;
 import world.LocalDateTimeFactory;
 
 public class WorkerUnitTest {

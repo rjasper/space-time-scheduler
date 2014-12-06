@@ -1,6 +1,6 @@
 package world.pathfinder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
@@ -8,13 +8,15 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
 import world.World;
 import world.WorldFixtures;
 
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
 public class StraightEdgePathfinderTest {
+	
+	// TODO implement abstract general spatial pathfinder test
 
 	@Test
 	public void test() {

@@ -1,4 +1,4 @@
-package tasks;
+package tasks.factories;
 
 import static java.util.Collections.emptyList;
 
@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import tasks.TaskPlanner;
+import tasks.WorkerUnit;
 import world.LocalDateTimeFactory;
 
 import com.vividsolutions.jts.geom.Point;

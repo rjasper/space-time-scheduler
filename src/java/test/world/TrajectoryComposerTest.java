@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class TrajectoryFactoryTest {
+public class TrajectoryComposerTest {
 
 	@Test
 	public void test() {
@@ -27,15 +27,15 @@ public class TrajectoryFactoryTest {
 		List<Point> arcTimePath = geomBuilder.points(
 			0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.);
 		
-		TrajectoryComposer trajBuilder = new TrajectoryComposer();
+		TrajectoryComposer composer = new TrajectoryComposer();
 		
-		trajBuilder.setBaseTime(baseTime);
-		trajBuilder.setSpatialPath(spatialPath);
-		trajBuilder.setArcTimePath(arcTimePath);
+		composer.setBaseTime(baseTime);
+		composer.setSpatialPath(spatialPath);
+		composer.setArcTimePath(arcTimePath);
 		
-		trajBuilder.compose();
+		composer.compose();
 		
-		SimpleTrajectory trajectory = trajBuilder.getResultTrajectory();
+		SimpleTrajectory trajectory = composer.getResultTrajectory();
 		
 		TrajectoryFactory trajFact = new TrajectoryFactory(geomBuilder, timeFact);
 		

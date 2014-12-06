@@ -10,6 +10,8 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import tasks.factories.SpecificationFactory;
+import tasks.factories.WorkerUnitFactory;
 import world.World;
 import world.WorldFixtures;
 

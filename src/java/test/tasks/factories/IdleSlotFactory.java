@@ -1,9 +1,10 @@
-package tasks;
+package tasks.factories;
 
 import java.time.LocalDateTime;
 
 import com.vividsolutions.jts.geom.Point;
 
+import tasks.IdleSlot;
 import world.LocalDateTimeFactory;
 import jts.geom.factories.EnhancedGeometryBuilder;
 

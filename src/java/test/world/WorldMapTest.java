@@ -1,6 +1,7 @@
 package world;
 
-import static matchers.GeometryMatchers.*;
+import static matchers.GeometryMatchers.isEmpty;
+import static matchers.GeometryMatchers.topologicallyEqualTo;
 import static org.junit.Assert.assertThat;
 import jts.geom.factories.EnhancedGeometryBuilder;
 
@@ -46,7 +47,7 @@ public class WorldMapTest {
 		world.add(p1, p2);
 		world.ready();
 		
-		assertThat(world.getMap(), equalTo(p1.union(p2)));
+		assertThat(world.getMap(), topologicallyEqualTo(p1.union(p2)));
 	}
 
 }

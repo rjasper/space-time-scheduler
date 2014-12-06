@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import pickers.LocationIteratorFactory;
+import org.apache.commons.collections4.iterators.IteratorIterable;
+
+import pickers.LocationIterator;
+import pickers.WorkerUnitSlotIterator;
 import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
-import pickers.WorkerUnitSlotIteratorFactory;
 import world.World;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -62,12 +64,12 @@ public class Scheduler {
 		tp.setDynamicObstacles(emptyList());
 		tp.setDuration(duration);
 
-		LocationIteratorFactory locations =
-			new LocationIteratorFactory(locationSpace, MAX_LOCATION_PICKS);
+		Iterable<Point> locations = new IteratorIterable<>(
+			new LocationIterator(locationSpace, MAX_LOCATION_PICKS));
 
 		for (Point loc : locations) {
-			WorkerUnitSlotIteratorFactory workerSlots =
-				new WorkerUnitSlotIteratorFactory(workers, loc, earliest, latest, duration);
+			Iterable<WorkerUnitSlot> workerSlots = new IteratorIterable<>(
+				new WorkerUnitSlotIterator(workers, loc, earliest, latest, duration));
 
 			tp.setLocation(loc);
 

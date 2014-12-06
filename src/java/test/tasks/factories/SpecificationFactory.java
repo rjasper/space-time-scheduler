@@ -1,13 +1,13 @@
-package tasks;
+package tasks.factories;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import jts.geom.factories.EnhancedGeometryBuilder;
+import tasks.Specification;
 import world.LocalDateTimeFactory;
 
 import com.vividsolutions.jts.geom.Polygon;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 public class SpecificationFactory {
 	

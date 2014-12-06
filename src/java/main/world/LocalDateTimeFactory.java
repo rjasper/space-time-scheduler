@@ -1,5 +1,7 @@
 package world;
 
+// TODO move to tests or replace by SimpleTimeFactory
+
 import static java.time.Month.JANUARY;
 
 import java.time.Duration;

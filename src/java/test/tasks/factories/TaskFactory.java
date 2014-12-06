@@ -1,12 +1,14 @@
-package tasks;
+package tasks.factories;
 
 import java.time.LocalDateTime;
 
+import jts.geom.factories.EnhancedGeometryBuilder;
+import tasks.Task;
 import world.LocalDateTimeFactory;
 
 import com.vividsolutions.jts.geom.Point;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
+// TODO currently not used, may delete
 
 public class TaskFactory {
 	
