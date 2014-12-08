@@ -55,18 +55,6 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 		super(world, spatialPathfinderSupplier);
 	}
 
-	private WorldPerspectiveReference createPerspective(double radius) {
-		World world = getWorld().buffer(radius);
-
-		SpatialPathfinder spatialPathfinder = createSpatialPathfinder();
-		spatialPathfinder.setStaticObstacles(world.getPolygonMap());
-
-		WorldPerspective perspective = new WorldPerspective(world, spatialPathfinder);
-		WorldPerspectiveReference reference = new WorldPerspectiveReference(radius, perspective);
-
-		return reference;
-	}
-
 	private void addRadiusReference(double radius, WorldPerspectiveReference reference) {
 		radiusReferences.put(radius, reference);
 	}
@@ -90,6 +78,18 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	private WorldPerspectiveReference lookUpByPerceiver(WorkerUnit perceiver) {
 		return perceiverReferences.get(perceiver);
+	}
+
+	private WorldPerspectiveReference createPerspective(double radius) {
+		World world = getWorld().buffer(radius);
+	
+		SpatialPathfinder spatialPathfinder = createSpatialPathfinder();
+		spatialPathfinder.setStaticObstacles(world.getPolygonMap());
+	
+		WorldPerspective perspective = new WorldPerspective(world, spatialPathfinder);
+		WorldPerspectiveReference reference = new WorldPerspectiveReference(radius, perspective);
+	
+		return reference;
 	}
 
 	@Override
