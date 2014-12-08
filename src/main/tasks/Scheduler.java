@@ -1,5 +1,6 @@
 package tasks;
 
+import static java.util.stream.Collectors.toList;
 import static util.Comparables.max;
 import static util.Comparables.min;
 
@@ -16,6 +17,7 @@ import pickers.WorkerUnitSlotIterator;
 import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
+import world.WorldPerspective;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
 
@@ -72,8 +74,11 @@ public class Scheduler {
 			new LocationIterator(locationSpace, MAX_LOCATION_PICKS));
 
 		for (Point loc : locations) {
+			// Worker units have different perspectives of the world.
+			// The LocationIterator might pick a location which is inaccessible
+			// for a unit. Therefore, the workers are filtered by the location
 			Iterable<WorkerUnitSlot> workerSlots = new IteratorIterable<>(
-				new WorkerUnitSlotIterator(workers, loc, earliest, latest, duration));
+				new WorkerUnitSlotIterator(filterByLocation(loc), loc, earliest, latest, duration));
 
 			tp.setLocation(loc);
 
@@ -95,6 +100,22 @@ public class Scheduler {
 		}
 
 		return false;
+	}
+
+	private boolean checkLocationFor(Point location, WorkerUnit worker) {
+		WorldPerspectiveCache cache = getPerspectiveCache();
+		WorldPerspective perspective = cache.getPerspectiveFor(worker);
+		Geometry map = perspective.getWorld().getMap();
+
+		return !map.contains(location);
+	}
+
+	private Collection<WorkerUnit> filterByLocation(Point location) {
+		Collection<WorkerUnit> workers = getWorkers();
+
+		return workers.stream()
+			.filter(w -> checkLocationFor(location, w))
+			.collect(toList());
 	}
 
 }
