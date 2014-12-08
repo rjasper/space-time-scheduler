@@ -1,5 +1,6 @@
 package tasks;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static util.Comparables.max;
 import static util.DurationConv.inSeconds;
@@ -19,15 +20,15 @@ import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
 import world.OccupiedWorkerUnitObstacle;
 import world.WorkerUnitObstacle;
+import world.WorldPerspective;
+import world.WorldPerspectiveCache;
 import world.pathfinder.FixTimeVelocityPathfinder;
 import world.pathfinder.FixTimeVelocityPathfinderImpl;
 import world.pathfinder.MinimumTimeVelocityPathfinder;
 import world.pathfinder.MinimumTimeVelocityPathfinderImpl;
 import world.pathfinder.SpatialPathfinder;
-import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class TaskPlanner {
 
@@ -35,9 +36,7 @@ public class TaskPlanner {
 
 	private Collection<WorkerUnit> workerPool = null;
 
-	private Collection<Polygon> staticObstacles = null;
-
-	private Collection<DynamicObstacle> dynamicObstacles = null;
+	private WorldPerspectiveCache perspectiveCache = null;
 
 	private Collection<DynamicObstacle> currentDynamicObstacles = new LinkedList<>();
 
@@ -49,8 +48,6 @@ public class TaskPlanner {
 
 	private Duration duration = null;
 
-	private SpatialPathfinder spatialPathfinder = new StraightEdgePathfinder();
-
 	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
 
 	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
@@ -58,8 +55,7 @@ public class TaskPlanner {
 	public boolean isReady() {
 		return workerUnit        != null
 			&& workerPool        != null
-			&& staticObstacles   != null
-			&& dynamicObstacles  != null
+			&& perspectiveCache  != null
 			&& location          != null
 			&& earliestStartTime != null
 			&& latestStartTime   != null
@@ -84,20 +80,18 @@ public class TaskPlanner {
 		this.workerPool = new ArrayList<>(workerPool);
 	}
 
-	private Collection<Polygon> getStaticObstacles() {
-		return staticObstacles;
+	private WorldPerspectiveCache getPerspectiveCache() {
+		return perspectiveCache;
 	}
 
-	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
-		this.staticObstacles = new ArrayList<>(staticObstacles);
+	public void setPerspectiveCache(WorldPerspectiveCache perspectiveCache) {
+		this.perspectiveCache = perspectiveCache;
 	}
 
 	private Collection<DynamicObstacle> getDynamicObstacles() {
-		return dynamicObstacles;
-	}
+		// TODO retrieve dynamic obstacles from perspective as soon as implemented
 
-	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
-		this.dynamicObstacles = dynamicObstacles;
+		return emptyList();
 	}
 
 	private Collection<DynamicObstacle> getCurrentDynamicObstacles() {
@@ -151,7 +145,12 @@ public class TaskPlanner {
 	}
 
 	private SpatialPathfinder getSpatialPathfinder() {
-		return spatialPathfinder;
+		WorkerUnit worker = getWorkerUnit();
+		WorldPerspectiveCache cache = getPerspectiveCache();
+
+		WorldPerspective perspective = cache.getPerspectiveFor(worker);
+
+		return perspective.getSpatialPathfinder();
 	}
 
 	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
@@ -188,8 +187,6 @@ public class TaskPlanner {
 			? taskLocation
 			: segment.getFinishLocation();
 
-		prepareSpatialPathfinder();
-
 		List<Point> toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
 		if (toTask == null)
 			return false;
@@ -222,17 +219,9 @@ public class TaskPlanner {
 
 		// update obstacles
 		for (Job j : jobs)
-			j.execute();
+			j.commit();
 
 		return true;
-	}
-
-	private void prepareSpatialPathfinder() {
-		SpatialPathfinder pf = getSpatialPathfinder();
-
-		// TODO use buffered obstacles
-
-		pf.setStaticObstacles( getStaticObstacles() );
 	}
 
 	private List<Point> calculateSpatialPath(Point startLocation, Point finishLocation) {
@@ -275,7 +264,7 @@ public class TaskPlanner {
 
 		public abstract boolean calculate();
 
-		public abstract void execute();
+		public abstract void commit();
 
 		@Override
 		public int compareTo(Job o) {
@@ -526,7 +515,7 @@ public class TaskPlanner {
 		}
 
 		@Override
-		public void execute() {
+		public void commit() {
 			WorkerUnit worker = getWorkerUnit();
 			Task task = getResultTask();
 
@@ -636,7 +625,7 @@ public class TaskPlanner {
 		}
 
 		@Override
-		public void execute() {
+		public void commit() {
 			MovingWorkerUnitObstacle evasion = getSegment();
 			WorkerUnit worker = evasion.getWorkerUnit();
 			MovingWorkerUnitObstacle resultSegment = getResultSegment();

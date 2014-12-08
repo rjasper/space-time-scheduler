@@ -9,6 +9,10 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 import tasks.TaskPlanner;
 import tasks.WorkerUnit;
 import world.LocalDateTimeFactory;
+import world.RadiusBasedWorldPerspectiveCache;
+import world.World;
+import world.WorldPerspectiveCache;
+import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -57,8 +61,11 @@ public class WorkerUnitFactory {
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
 
-		taskPlanner.setStaticObstacles(emptyList());
-		taskPlanner.setDynamicObstacles(emptyList());
+		World world = new World(emptyList());
+		WorldPerspectiveCache perspectiveCache =
+			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
+
+		taskPlanner.setPerspectiveCache(perspectiveCache);
 		taskPlanner.setWorkerPool(emptyList());
 	}
 

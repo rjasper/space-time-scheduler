@@ -1,118 +1,69 @@
 package world;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
-import jts.geom.factories.StaticJtsFactories;
+import jts.geom.factories.EnhancedGeometryBuilder;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.util.GeometryCombiner;
 
 public class World {
-	
-	private static final Geometry EMPTY_GEOMETRY = geomFactory().createMultiPolygon(null);
-	
-	private static GeometryFactory geomFactory() {
-		return StaticJtsFactories.geomFactory();
+
+	private final Collection<Polygon> staticObstacles;
+
+	private final Geometry map;
+
+	public World(Collection<Polygon> staticObstacles) {
+		this.staticObstacles = new ArrayList<>(staticObstacles);
+
+		this.map = makeMap(staticObstacles);
 	}
-	
-	private static Geometry emptyGeometry() {
-		return EMPTY_GEOMETRY;
+
+	private Geometry makeMap(Collection<Polygon> staticObstacles) {
+		// for some reason the geometry combinder returns null when receiving
+		// an empty list instead of some empty geometry
+		if (staticObstacles.size() == 0) {
+			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+
+			return geomBuilder.polygon();
+		}
+
+		GeometryCombiner combinder = new GeometryCombiner(staticObstacles);
+		Geometry map = combinder.combine();
+
+		return map;
 	}
-	
-	private final Set<Polygon> obstacles = new HashSet<>();
-	
-	private Geometry map;
-	
-	private boolean ready = false;
-	
-	public World() {}
-	
-	public boolean isReady() {
-		return this.ready;
-	}
-	
-	private void setReady(boolean ready) {
-		this.ready = ready;
-	}
-	
+
 	public Geometry getMap() {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
-		
-		Geometry map = _getMap();
-		
-		return geomFactory().createGeometry(map);
+		return map;
 	}
-	
+
 	public Collection<Polygon> getPolygonMap() {
-		return Collections.unmodifiableCollection( getObstacles() );
+		return Collections.unmodifiableCollection( getStaticObstacles() );
 	}
-	
-	Geometry _getMap() {
-		return this.map;
+
+	private Collection<Polygon> getStaticObstacles() {
+		return this.staticObstacles;
 	}
-	
-	private void setMap(Geometry map) {
-		this.map = map;
-	}
-	
-	private Set<Polygon> getObstacles() {
-		return this.obstacles;
-	}
-	
-	public void add(Polygon obstacle) {
-		if (isReady())
-			throw new IllegalStateException("already ready");
-		if (obstacle == null)
-			throw new NullPointerException("obstacle cannot be null");
-		
-		_add(obstacle);
-	}
-	
-	public void add(Polygon... obstacles) {
-		if (isReady())
-			throw new IllegalStateException("already ready");
-		if (obstacles == null)
-			throw new NullPointerException("obstacle cannot be null");
-		
-		for (Polygon o : obstacles)
-			_add(o);
-	}
-	
-	private void _add(Polygon obstacle) {
-		Set<Polygon> set = getObstacles();
-		
-		set.add(obstacle);
-	}
-	
-	public void ready() {
-		if (isReady())
-			throw new IllegalStateException("already ready");
-		
-		Set<Polygon> obstacles = getObstacles();
-		
-		Geometry map = obstacles.stream()
-			.map((o) -> (Geometry) o)
-			.reduce((acc, o) -> acc.union(o))
-			.orElse(emptyGeometry());
-		
-		setMap(map);
-		setReady(true);
-	}
-	
+
 	public Geometry space(Geometry mask) {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
-		
-		Geometry map = _getMap();
-		
+		Geometry map = getMap();
 		Geometry space = mask.difference(map);
-		
+
 		return space;
+	}
+
+	public World buffer(double distance) {
+		Collection<Polygon> staticObstacles = getStaticObstacles().stream()
+			.map(o -> (Polygon) o.buffer(distance)) // buffer always returns a polygon
+			.collect(toList());
+
+		return new World(staticObstacles);
 	}
 
 }

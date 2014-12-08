@@ -1,6 +1,5 @@
 package tasks;
 
-import static java.util.Collections.emptyList;
 import static util.Comparables.max;
 import static util.Comparables.min;
 
@@ -15,11 +14,13 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 import pickers.LocationIterator;
 import pickers.WorkerUnitSlotIterator;
 import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
+import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
+import world.WorldPerspectiveCache;
+import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class Scheduler {
 
@@ -27,20 +28,25 @@ public class Scheduler {
 
 	private final World world;
 
+	private final WorldPerspectiveCache perspectiveCache;
+
 	private final List<WorkerUnit> workers;
 
 	public Scheduler(World world, Collection<WorkerUnit> workers) {
-		if (!world.isReady())
-			throw new IllegalStateException("world must be ready");
 		if (workers == null)
-			throw new NullPointerException("workers cannot be null");
+			throw new NullPointerException("workers is null");
 
 		this.world = world;
+		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 		this.workers = new ArrayList<>(workers);
 	}
 
 	private World getWorld() {
 		return world;
+	}
+
+	private WorldPerspectiveCache getPerspectiveCache() {
+		return perspectiveCache;
 	}
 
 	private List<WorkerUnit> getWorkers() {
@@ -50,7 +56,7 @@ public class Scheduler {
 	public boolean schedule(Specification spec) {
 		World world = getWorld();
 		List<WorkerUnit> workers = getWorkers();
-		Collection<Polygon> obstacles = world.getPolygonMap();
+		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
 		Geometry locationSpace = world.space(spec.getLocationSpace());
 		LocalDateTime earliest = spec.getEarliestStartTime();
 		LocalDateTime latest = spec.getLatestStartTime();
@@ -59,9 +65,7 @@ public class Scheduler {
 		TaskPlanner tp = new TaskPlanner();
 
 		tp.setWorkerPool(workers);
-		tp.setStaticObstacles(obstacles);
-		// TODO as soon as World supports independent DynamicObstacles add them here
-		tp.setDynamicObstacles(emptyList());
+		tp.setPerspectiveCache(perspectiveCache);
 		tp.setDuration(duration);
 
 		Iterable<Point> locations = new IteratorIterable<>(

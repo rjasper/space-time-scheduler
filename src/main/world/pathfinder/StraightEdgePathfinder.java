@@ -27,13 +27,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 
 	private ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>();
 
-//	private double maxConnectionDistance = 0.0;
 	private double maxConnectionDistance = Double.POSITIVE_INFINITY;
-
-//	public boolean isReady() {
-//		return super.isReady()
-//			&& maxConnectionDistance > 0.0;
-//	}
 
 	private PathFinder getPathFinder() {
 		return pathFinder;

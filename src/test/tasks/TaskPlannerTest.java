@@ -21,6 +21,10 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 import org.junit.Test;
 
 import tasks.factories.WorkerUnitFactory;
+import world.RadiusBasedWorldPerspectiveCache;
+import world.World;
+import world.WorldPerspectiveCache;
+import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -51,17 +55,19 @@ public class TaskPlannerTest {
 		Polygon shape = geomBuilder.box(-0.25, -0.25, 0.25, 0.25);
 		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
 		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
-		
+
 		setNameFor(w1, "w1");
 		setNameFor(w2, "w2");
 
+		World world = new World(emptyList());
+		WorldPerspectiveCache perspectiveCache =
+			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
 
 		TaskPlanner tp = new TaskPlanner();
 
 		tp.setWorkerPool(workers);
-		tp.setStaticObstacles(emptyList());
-		tp.setDynamicObstacles(emptyList());
+		tp.setPerspectiveCache(perspectiveCache);
 
 		boolean status;
 
