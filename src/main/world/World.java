@@ -48,11 +48,11 @@ public class World {
 		return map;
 	}
 
-	public Collection<Polygon> getPolygonMap() {
-		return Collections.unmodifiableCollection( getStaticObstacles() );
+	public Collection<Polygon> getStaticObstacles() {
+		return Collections.unmodifiableCollection( _getStaticObstacles() );
 	}
 
-	private Collection<Polygon> getStaticObstacles() {
+	private Collection<Polygon> _getStaticObstacles() {
 		return this.staticObstacles;
 	}
 
@@ -64,7 +64,7 @@ public class World {
 	}
 
 	public World buffer(double distance) {
-		Collection<Polygon> staticObstacles = getStaticObstacles().stream()
+		Collection<Polygon> staticObstacles = _getStaticObstacles().stream()
 			.map(o -> (Polygon) o.buffer(distance)) // buffer always returns a polygon
 			.collect(toList());
 

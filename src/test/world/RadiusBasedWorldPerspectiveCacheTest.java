@@ -117,7 +117,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);
 
 		double radius = perceiver.getRadius();
-		Collection<Polygon> bufferedObstacles = perspective.getWorld().getPolygonMap();
+		Collection<Polygon> bufferedObstacles = perspective.getWorld().getStaticObstacles();
 		Polygon bufferedObstacle = bufferedObstacles.iterator().next();
 
 		assertThat("did not buffer perspective correctly",

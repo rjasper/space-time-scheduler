@@ -84,7 +84,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 		World world = getWorld().buffer(radius);
 	
 		SpatialPathfinder spatialPathfinder = createSpatialPathfinder();
-		spatialPathfinder.setStaticObstacles(world.getPolygonMap());
+		spatialPathfinder.setStaticObstacles(world.getStaticObstacles());
 	
 		WorldPerspective perspective = new WorldPerspective(world, spatialPathfinder);
 		WorldPerspectiveReference reference = new WorldPerspectiveReference(radius, perspective);

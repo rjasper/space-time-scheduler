@@ -23,7 +23,7 @@ public class StraightEdgePathfinderTest {
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 		
 		World world = WorldFixtures.twoRooms();
-		Collection<Polygon> obstacles = world.getPolygonMap();
+		Collection<Polygon> obstacles = world.getStaticObstacles();
 		
 		Point startPoint = builder.point(23.0, 29.0);
 		Point finishPoint = builder.point(11.0, 11.0);

@@ -14,7 +14,7 @@ public class WorldPerspective {
 		if (spatialPathfinder == null)
 			throw new NullPointerException("spatialPathfinder is null");
 
-		spatialPathfinder.setStaticObstacles(world.getPolygonMap());
+		spatialPathfinder.setStaticObstacles(world.getStaticObstacles());
 
 		this.world = world;
 		this.spatialPathfinder = spatialPathfinder;
