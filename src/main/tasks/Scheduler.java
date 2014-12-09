@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.collections4.iterators.IteratorIterable;
 
@@ -24,6 +25,7 @@ import world.pathfinder.StraightEdgePathfinder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+// TODO document Scheduler class
 public class Scheduler {
 
 	/**
@@ -38,32 +40,31 @@ public class Scheduler {
 	private final World world;
 
 	/**
-	 * A cache of the perspectives of the workers.
+	 * A cache of the {@link WorldPerspective perspectives} of the
+	 * {@link WorkerUnit workers}.
 	 */
 	private final WorldPerspectiveCache perspectiveCache;
 
 	/**
 	 * The workers managed by this scheduler.
 	 */
-	private final List<WorkerUnit> workers;
+	private final List<WorkerUnit> workerPool;
 
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
 	 * The workers are expected to be managed exclusively by this scheduler.
 	 *
 	 * @param world
-	 * @param workers
+	 * @param workerPool
 	 * @throws NullPointerException if world or workers is null
 	 */
-	public Scheduler(World world, Collection<WorkerUnit> workers) {
-		if (world == null)
-			throw new NullPointerException("world is null");
-		if (workers == null)
-			throw new NullPointerException("workers is null");
+	public Scheduler(World world, Collection<WorkerUnit> workerPool) {
+		Objects.requireNonNull(world, "world");
+		Objects.requireNonNull(workerPool, "workerPool");
 
 		this.world = world;
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-		this.workers = new ArrayList<>(workers);
+		this.workerPool = new ArrayList<>(workerPool);
 	}
 
 	/**
@@ -83,8 +84,8 @@ public class Scheduler {
 	/**
 	 * @return the workers.
 	 */
-	private List<WorkerUnit> getWorkers() {
-		return workers;
+	private List<WorkerUnit> getWorkerPool() {
+		return workerPool;
 	}
 
 	/**
@@ -95,10 +96,12 @@ public class Scheduler {
 	 *         could be scheduled satisfying the specification.
 	 */
 	public boolean schedule(Specification specification) {
+		Objects.requireNonNull(specification, "specification");
+
 		// get necessary information
 
 		World world = getWorld();
-		List<WorkerUnit> workers = getWorkers();
+		List<WorkerUnit> pool = getWorkerPool();
 		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
 		Geometry locationSpace = world.space(specification.getLocationSpace());
 		LocalDateTime earliest = specification.getEarliestStartTime();
@@ -109,7 +112,7 @@ public class Scheduler {
 
 		TaskPlanner tp = new TaskPlanner();
 
-		tp.setWorkerPool(workers);
+		tp.setWorkerPool(pool);
 		tp.setPerspectiveCache(perspectiveCache);
 		tp.setDuration(duration);
 
@@ -171,16 +174,16 @@ public class Scheduler {
 	}
 
 	/**
-	 * Filters the collection of workers which are able to reach a location in
+	 * Filters the pool of workers which are able to reach a location in
 	 * regard to their individual size.
 	 *
 	 * @param location
 	 * @return the filtered workers which are able to reach the location.
 	 */
 	private Collection<WorkerUnit> filterByLocation(Point location) {
-		Collection<WorkerUnit> workers = getWorkers();
+		Collection<WorkerUnit> pool = getWorkerPool();
 
-		return workers.stream()
+		return pool.stream()
 			.filter(w -> checkLocationFor(location, w))
 			.collect(toList());
 	}

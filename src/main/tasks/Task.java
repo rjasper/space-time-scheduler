@@ -99,7 +99,7 @@ public class Task {
 	 * @param duration
 	 */
 	public Task(Point location, LocalDateTime startTime, Duration duration) {
-		this(location, startTime, startTime.minus(duration), duration);
+		this(location, startTime, startTime.plus(duration), duration);
 	}
 
 	/**

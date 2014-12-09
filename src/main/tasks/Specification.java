@@ -2,6 +2,7 @@ package tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import util.NameProvider;
@@ -46,7 +47,7 @@ public class Specification {
 
 	/**
 	 * Constructs a new Specification defining an interval for the location and
-	 * start time and the duration of a task.
+	 * start time and the duration of a {@link Task task}.
 	 *
 	 * @param locationSpace
 	 * @param earliestStartTime
@@ -68,14 +69,10 @@ public class Specification {
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		if (locationSpace == null)
-			throw new NullPointerException("locationSpace is null");
-		if (earliestStartTime == null)
-			throw new NullPointerException("earliestStartTime is null");
-		if (latestStartTime == null)
-			throw new NullPointerException("latestStartTime is null");
-		if (duration == null)
-			throw new NullPointerException("duration is null");
+		Objects.requireNonNull(locationSpace, "locationSpace");
+		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
+		Objects.requireNonNull(latestStartTime, "latestStartTime");
+		Objects.requireNonNull(duration, "duration");
 
 		if (locationSpace.isEmpty() || !locationSpace.isSimple() || !locationSpace.isValid())
 			throw new IllegalArgumentException("illegal locationSpace");
@@ -91,7 +88,7 @@ public class Specification {
 	}
 
 	/**
-	 * @return the spatial space for a valid location.
+	 * @return the spatial space for a valid {@link Point location}.
 	 */
 	public Polygon getLocationSpace() {
 		return locationSpace;

@@ -2,6 +2,7 @@ package tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -67,14 +68,10 @@ public class IdleSlot {
 		LocalDateTime startTime,
 		LocalDateTime finishTime)
 	{
-		if (startLocation == null)
-			throw new NullPointerException("startLocation is null");
-		if (finishLocation == null)
-			throw new NullPointerException("finishLocation is null");
-		if (startTime == null)
-			throw new NullPointerException("startTime is null");
-		if (finishTime == null)
-			throw new NullPointerException("finishTime is null");
+		Objects.requireNonNull(startLocation, "startLocation");
+		Objects.requireNonNull(finishLocation, "finishLocation");
+		Objects.requireNonNull(startTime, "startTime");
+		Objects.requireNonNull(finishTime, "finishTime");
 
 		if (startLocation.isEmpty() || !startLocation.isValid())
 			throw new IllegalArgumentException("illegal startLocation");
