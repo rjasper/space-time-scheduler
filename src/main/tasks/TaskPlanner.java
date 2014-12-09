@@ -548,7 +548,7 @@ public class TaskPlanner {
 		// result. trajToTask is needed to create the new task.
 
 		/**
-		 * The evaded workers to the new task.
+		 * The evaded path segments to the new task.
 		 */
 		private Collection<WorkerUnitObstacle> evadedToTask;
 
@@ -569,7 +569,7 @@ public class TaskPlanner {
 		// called after the task is created.
 
 		/**
-		 * The evaded workers from the new task to the next one.
+		 * The evaded path segments from the new task to the next one.
 		 */
 		private Collection<WorkerUnitObstacle> evadedFromTask;
 
@@ -774,8 +774,6 @@ public class TaskPlanner {
 		 */
 		@Override
 		public void commit() {
-			WorkerUnit worker = getWorkerUnit();
-
 			// register evasions
 			for (WorkerUnitObstacle e : evadedToTask)
 				e.addEvasion(segmentToTask);
@@ -787,6 +785,7 @@ public class TaskPlanner {
 			}
 
 			// add obstacle segments and task
+			WorkerUnit worker = getWorkerUnit();
 			worker.removeObstacleSegment(segment);
 			worker.addObstacleSegment(segmentToTask);
 			worker.addObstacleSegment(segmentAtTask);
@@ -796,43 +795,46 @@ public class TaskPlanner {
 
 	}
 
+	/**
+	 * An UpdateJob recalculates the existing velocity profile of a path
+	 * segment of a worker directly or indirectly affected by the new spatial
+	 * path of the current worker.
+	 */
 	private class UpdateJob extends Job {
 
+		/**
+		 * The path segment to be updated.
+		 */
 		private final MovingWorkerUnitObstacle segment;
 
-		private MovingWorkerUnitObstacle resultSegment;
+		// The next two fields are set by calculate.
 
-		private Collection<WorkerUnitObstacle> resultEvadedWorkers;
+		/**
+		 * The resulting updated path segment.
+		 */
+		private MovingWorkerUnitObstacle updatedSegment;
 
+		/**
+		 * Evaded obstacles by the updated path segment.
+		 */
+		private Collection<WorkerUnitObstacle> evaded;
+
+		/**
+		 * Constructs a UpdateJob which updates the velocity profile of the
+		 * given path segment.
+		 *
+		 * @param segment
+		 */
 		public UpdateJob(MovingWorkerUnitObstacle segment) {
+			// doesn't check inputs since class is private
+
 			super(calcMaxDuration(segment));
 
 			this.segment = segment;
 		}
 
-		private MovingWorkerUnitObstacle getSegment() {
-			return segment;
-		}
-
-		private MovingWorkerUnitObstacle getResultSegment() {
-			return resultSegment;
-		}
-
-		private void setResultSegment(MovingWorkerUnitObstacle resultSegment) {
-			this.resultSegment = resultSegment;
-		}
-
-		private Collection<WorkerUnitObstacle> getResultEvadedWorkers() {
-			return resultEvadedWorkers;
-		}
-
-		private void setResultEvadedWorkers(Collection<WorkerUnitObstacle> resultEvadedWorkers) {
-			this.resultEvadedWorkers = resultEvadedWorkers;
-		}
-
 		@Override
 		public double calcLaxity() {
-			WorkerUnitObstacle segment = getSegment();
 			WorkerUnit worker = segment.getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
 			double length = segment.getTrajectory().getLength();
@@ -841,56 +843,50 @@ public class TaskPlanner {
 			return maxDuration/length - 1./maxSpeed;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 *
+		 * Sets evaded and updatedSegment.
+		 *
+		 * @see tasks.TaskPlanner.Job#calculate()
+		 */
 		@Override
 		public boolean calculate() {
-			MovingWorkerUnitObstacle segment = getSegment();
-			WorkerUnit worker = segment.getWorkerUnit();
-			Collection<DynamicObstacle> dynamicObstacles = buildDynamicObstaclesFor(worker);
-			List<Point> spatialPath = segment.getSpatialPathComponent();
-			double maxSpeed = worker.getMaxSpeed();
-			LocalDateTime startTime = segment.getStartTime();
-			LocalDateTime finishTime = segment.getFinishTime();
+			// XXX last edition
 
+			WorkerUnit worker = segment.getWorkerUnit();
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
-			pf.setDynamicObstacles(dynamicObstacles);
-			pf.setSpatialPath(spatialPath);
-			pf.setMaxSpeed(maxSpeed);
-			pf.setStartTime(startTime);
-			pf.setFinishTime(finishTime);
+			pf.setDynamicObstacles( buildDynamicObstaclesFor(worker)  );
+			pf.setSpatialPath     ( segment.getSpatialPathComponent() );
+			pf.setMaxSpeed        ( worker.getMaxSpeed()              );
+			pf.setStartTime       ( segment.getStartTime()            );
+			pf.setFinishTime      ( segment.getFinishTime()           );
 
 			boolean status = pf.calculate();
 
 			if (!status)
 				return false;
 
-			DecomposedTrajectory trajectory = pf.getResultTrajectory();
-			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
-			Task goal = segment.getGoal();
-			MovingWorkerUnitObstacle resultSegment = new MovingWorkerUnitObstacle(worker, trajectory, goal);
+			evaded = onlyWorkerUnitObstacles( pf.getResultEvadedObstacles() );
+			updatedSegment = new MovingWorkerUnitObstacle(
+				worker, pf.getResultTrajectory(), segment.getGoal());
 
-			setResultSegment(resultSegment);
-			setResultEvadedWorkers(evadedWorkers);
-			addWorkerUnitObstacle(resultSegment);
+			addWorkerUnitObstacle(updatedSegment);
 
 			return true;
 		}
 
 		@Override
 		public void commit() {
-			MovingWorkerUnitObstacle evasion = getSegment();
-			WorkerUnit worker = evasion.getWorkerUnit();
-			MovingWorkerUnitObstacle resultSegment = getResultSegment();
-			Collection<WorkerUnitObstacle> evadedWorkers = getResultEvadedWorkers();
-
 			// register evasions
-			for (WorkerUnitObstacle e : evadedWorkers)
-				e.addEvasion(resultSegment);
+			for (WorkerUnitObstacle e : evaded)
+				e.addEvasion(updatedSegment);
 
 			// update obstacle segment
-			worker.removeObstacleSegment(evasion);
-			worker.addObstacleSegment(resultSegment);
+			WorkerUnit worker = segment.getWorkerUnit();
+			worker.removeObstacleSegment(segment);
+			worker.addObstacleSegment(updatedSegment);
 		}
 
 	}
