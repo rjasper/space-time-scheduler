@@ -2,10 +2,10 @@ package world;
 
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Point;
-
 import tasks.Task;
 import tasks.WorkerUnit;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 

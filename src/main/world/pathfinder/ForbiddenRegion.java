@@ -1,8 +1,8 @@
 package world.pathfinder;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 import world.DynamicObstacle;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 public class ForbiddenRegion { 
 	

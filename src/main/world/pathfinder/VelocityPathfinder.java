@@ -1,5 +1,8 @@
 package world.pathfinder;
 
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap.SimpleEntry;
@@ -19,8 +22,6 @@ import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 
 import com.vividsolutions.jts.geom.Point;
-
-import static java.util.stream.Collectors.*;
 
 public abstract class VelocityPathfinder {
 	

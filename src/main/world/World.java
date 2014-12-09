@@ -1,7 +1,7 @@
 package world;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
-import static java.util.Collections.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

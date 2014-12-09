@@ -1,6 +1,6 @@
 package pickers;
 
-import static jts.geom.factories.StaticJtsFactories.*;
+import static jts.geom.factories.StaticJtsFactories.geomFactory;
 
 import java.util.Comparator;
 import java.util.Iterator;

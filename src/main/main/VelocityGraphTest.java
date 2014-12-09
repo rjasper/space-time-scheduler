@@ -9,12 +9,12 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import com.vividsolutions.jts.geom.Point;
-
 import world.DynamicObstacle;
 import world.graph.view.GraphViewer;
 import world.pathfinder.ForbiddenRegion;
 import world.pathfinder.MinimumTimeMeshBuilder;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class VelocityGraphTest {
 
