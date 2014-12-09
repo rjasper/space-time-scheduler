@@ -1,6 +1,7 @@
 package world;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.Collections.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +18,10 @@ public class World {
 	private final Collection<Polygon> staticObstacles;
 
 	private final Geometry map;
+
+	public World() {
+		this(emptyList());
+	}
 
 	public World(Collection<Polygon> staticObstacles) {
 		this.staticObstacles = new ArrayList<>(staticObstacles);
