@@ -436,6 +436,8 @@ public class TaskPlanner {
 		 */
 		private final Duration maxDuration;
 
+		// TODO don't cache since class is private and outside behavior is known
+
 		/**
 		 * Cached laxity value.
 		 */
@@ -489,7 +491,8 @@ public class TaskPlanner {
 		public abstract boolean calculate();
 
 		/**
-		 * Commits the calculated path segments and replaces the old ones.
+		 * Commits the calculated path segments and replaces the old ones. One
+		 * can assume that calculate is always called before commit.
 		 */
 		public abstract void commit();
 
@@ -509,6 +512,14 @@ public class TaskPlanner {
 	 */
 	private class CreateJob extends Job {
 
+		// Since I am using side-effect to be more concise here,
+		// I ordered the fields in the order they are assigned during
+		// the livespan of this object to make life a bit easier for the reader.
+		//
+		// Conciseness was also the reason to omit any getter or setters.
+
+		// The first three fields are set by the constructor.
+
 		/**
 		 * The spatial path to the new task.
 		 */
@@ -524,52 +535,79 @@ public class TaskPlanner {
 		 */
 		private final WorkerUnitObstacle segment;
 
+		// dynamicObstacles is set in the very beginning of calculate
+		// and is used by calculateTrajectoryToTask and
+		// calculateTrajectoryFromTask which are called by calculate.
+
 		/**
 		 * The view of the current worker on the dynamic obstacles.
 		 */
 		private Collection<DynamicObstacle> dynamicObstacles;
 
+		// The next two fields are set by calculateTrajectoryToTask as its
+		// result. trajToTask is needed to create the new task.
+
+		/**
+		 * The evaded workers to the new task.
+		 */
+		private Collection<WorkerUnitObstacle> evadedToTask;
+
+		/**
+		 * The trajectory to the new task.
+		 */
+		private DecomposedTrajectory trajToTask;
+
+		// The task is created after calculateTrajectoryToTask has finished.
+		// It is needed by calculateTrajectoryFromTask.
+
 		/**
 		 * The resulting task.
 		 */
-		private Task resultTask;
+		private Task task;
+
+		// The next two fields are set by calculateTrajectoryFrom which is
+		// called after the task is created.
 
 		/**
-		 * The resulting evaded workers to the new task.
+		 * The evaded workers from the new task to the next one.
 		 */
-		private Collection<WorkerUnitObstacle> resultEvadedWorkersToTask;
+		private Collection<WorkerUnitObstacle> evadedFromTask;
 
 		/**
-		 * The resulting evaded workers from the new task to the next one.
+		 * The trajectory from the new task to the next one.
 		 */
-		private Collection<WorkerUnitObstacle> resultEvadedWorkersFromTask;
+		private DecomposedTrajectory trajFromTask;
+
+		// After both trajectories are calculated, the three segments which
+		// will replace the old segment are created. They are needed by
+		// the commit operation which is called externally.
 
 		/**
-		 * The resulting trajectory to the new task.
+		 * The path segment to the new task.
 		 */
-		private DecomposedTrajectory resultTrajectoryToTask;
+		private MovingWorkerUnitObstacle segmentToTask;
 
 		/**
-		 * The resulting trajectory from the new task to the next one.
+		 * The path segment at the new task.
 		 */
-		private DecomposedTrajectory resultTrajectoryFromTask;
+		private OccupiedWorkerUnitObstacle segmentAtTask;
 
 		/**
-		 * The resulting path segment to the new task.
+		 * The path segment form the new task to the next one.
 		 */
-		private MovingWorkerUnitObstacle resultSegmentToTask;
+		private WorkerUnitObstacle segmentFromTask;
 
 		/**
-		 * The resulting path segment at the new task.
+		 * Constructs a CreateJob using the spatial path to the new task and to
+		 * the one after and the segment to be replaced.
+		 *
+		 * @param toTask
+		 * @param fromTask
+		 * @param segment
 		 */
-		private OccupiedWorkerUnitObstacle resultSegmentAtTask;
-
-		/**
-		 * The resulting path segment form the new task to the next one.
-		 */
-		private WorkerUnitObstacle resultSegmentFromTask;
-
 		public CreateJob(List<Point> toTask, List<Point> fromTask, WorkerUnitObstacle segment) {
+			// doesn't check inputs since class is private
+
 			super(segment.getDuration());
 
 			this.toTask = toTask;
@@ -577,95 +615,19 @@ public class TaskPlanner {
 			this.segment = segment;
 		}
 
-		private List<Point> getToTask() {
-			return toTask;
-		}
-
-		private List<Point> getFromTask() {
-			return fromTask;
-		}
-
-		private WorkerUnitObstacle getSegment() {
-			return segment;
-		}
-
-		private Collection<DynamicObstacle> getDynamicObstacles() {
-			return dynamicObstacles;
-		}
-
-		private void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
-			this.dynamicObstacles = dynamicObstacles;
-		}
-
-		private Task getResultTask() {
-			return resultTask;
-		}
-
-		private void setResultTask(Task resultTask) {
-			this.resultTask = resultTask;
-		}
-
-		private Collection<WorkerUnitObstacle> getResultEvadedWorkersToTask() {
-			return resultEvadedWorkersToTask;
-		}
-
-		private void setResultEvadedWorkersToTask(Collection<WorkerUnitObstacle> resultEvadedObstaclesToTask) {
-			this.resultEvadedWorkersToTask = resultEvadedObstaclesToTask;
-		}
-
-		private Collection<WorkerUnitObstacle> getResultEvadedWorkersFromTask() {
-			return resultEvadedWorkersFromTask;
-		}
-
-		private void setResultEvadedWorkersFromTask(Collection<WorkerUnitObstacle> resultEvadedObstaclesFromTask) {
-			this.resultEvadedWorkersFromTask = resultEvadedObstaclesFromTask;
-		}
-
-		private DecomposedTrajectory getResultTrajectoryToTask() {
-			return resultTrajectoryToTask;
-		}
-
-		private void setResultTrajectoryToTask(DecomposedTrajectory resultTrajectoryToTask) {
-			this.resultTrajectoryToTask = resultTrajectoryToTask;
-		}
-
-		private DecomposedTrajectory getResultTrajectoryFromTask() {
-			return resultTrajectoryFromTask;
-		}
-
-		private void setResultTrajectoryFromTask(DecomposedTrajectory resultTrajectoryFromTask) {
-			this.resultTrajectoryFromTask = resultTrajectoryFromTask;
-		}
-
-		private MovingWorkerUnitObstacle getResultSegmentToTask() {
-			return resultSegmentToTask;
-		}
-
-		private void setResultSegmentToTask(MovingWorkerUnitObstacle resultSegmentToTask) {
-			this.resultSegmentToTask = resultSegmentToTask;
-		}
-
-		private OccupiedWorkerUnitObstacle getResultSegmentAtTask() {
-			return resultSegmentAtTask;
-		}
-
-		private void setResultSegmentAtTask(OccupiedWorkerUnitObstacle resultSegmentAtTask) {
-			this.resultSegmentAtTask = resultSegmentAtTask;
-		}
-
-		private WorkerUnitObstacle getResultSegmentFromTask() {
-			return resultSegmentFromTask;
-		}
-
-		private void setResultSegmentFromTask(WorkerUnitObstacle resultSegmentFromTask) {
-			this.resultSegmentFromTask = resultSegmentFromTask;
-		}
-
+		/*
+		 * (non-Javadoc)
+		 *
+		 * calcLaxity need toTask and fromTask to be set. This is already done
+		 * by the constructor.
+		 *
+		 * @see tasks.TaskPlanner.Job#calcLaxity()
+		 */
 		@Override
 		public double calcLaxity() {
 			WorkerUnit worker = getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
-			double length = length( getToTask() ) + length( getFromTask() );
+			double length = length( toTask ) + length( fromTask );
 			double taskDuration = inSeconds( getDuration() );
 			double maxDuration = inSeconds( getMaxDuration() );
 
@@ -675,38 +637,40 @@ public class TaskPlanner {
 		@Override
 		public boolean calculate() {
 			boolean status;
-
 			WorkerUnit worker = getWorkerUnit();
-			setDynamicObstacles( buildDynamicObstaclesFor(worker) );
+			dynamicObstacles = buildDynamicObstaclesFor(worker);
 
+			// calculate trajectory to task
+
+			// sets trajToTask and evadedToTask
 			status = calculateTrajectoryToTask();
 
 			if (!status)
 				return false;
 
+			// create task
+
 			Point taskLocation = getLocation();
 			Duration taskDuration = getDuration();
-			DecomposedTrajectory trajToTask = getResultTrajectoryToTask();
 			LocalDateTime taskStartTime = trajToTask.getFinishTime();
-			Task task = new Task(taskLocation, taskStartTime, taskDuration);
-			MovingWorkerUnitObstacle segmentToTask = new MovingWorkerUnitObstacle(worker, trajToTask, task);
 
-			setResultTask(task);
-			setResultSegmentToTask(segmentToTask);
-			addWorkerUnitObstacle(segmentToTask);
+			task = new Task(taskLocation, taskStartTime, taskDuration);
 
+			// calculate trajectory from task
+
+			// needs task; sets trajFromTask and evadedFromTask
 			status = calculateTrajectoryFromTask();
 
 			if (!status)
 				return false;
 
-			WorkerUnitObstacle segment = getSegment();
-			OccupiedWorkerUnitObstacle segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
-			DecomposedTrajectory trajFromTask = getResultTrajectoryFromTask();
+			// create segments
 
-			// what if the trajFromTask's duration is 0?
+			segmentToTask = new MovingWorkerUnitObstacle(worker, trajToTask, task);
+			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
 
-			WorkerUnitObstacle segmentFromTask;
+			// TODO what if the trajFromTask's duration is 0?
+
 			if (segment instanceof MovingWorkerUnitObstacle) {
 				Task nextTask = ((MovingWorkerUnitObstacle) segment).getGoal();
 				segmentFromTask = new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
@@ -718,23 +682,34 @@ public class TaskPlanner {
 				throw new ClassCastException("unexpected WorkerUnitObstacle");
 			}
 
-			setResultSegmentAtTask(segmentAtTask);
-			setResultSegmentFromTask(segmentFromTask);
+			// add segments to current dynamic obstacles
+
+			addWorkerUnitObstacle(segmentToTask);
 			addWorkerUnitObstacle(segmentAtTask);
 			addWorkerUnitObstacle(segmentFromTask);
 
 			return true;
 		}
 
+		/**
+		 * <p>Calculates the trajectory to the new task.</p>
+		 *
+		 * <p>This method makes use of side-effects where it isn't always easy
+		 * to follow what effects it has on the object. This was done to keep
+		 * the code more concise since this is only an inner helper class.</p>
+		 *
+		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
+		 * and {@link #segment} are already set. It sets {@link #evadedToTask}
+		 * and {@link #trajToTask} if the path calculation was successful.</p>
+		 *
+		 * @return {@code true} iff a trajectory to the new task could be calculated.
+		 */
 		private boolean calculateTrajectoryToTask() {
 			MinimumTimeVelocityPathfinder pf = getMinimumTimeVelocityPathfinder();
 
-			WorkerUnit worker = getWorkerUnit();
-			WorkerUnitObstacle segment = getSegment();
-
-			pf.setDynamicObstacles  ( getDynamicObstacles()  );
-			pf.setSpatialPath       ( getToTask()            );
-			pf.setMaxSpeed          ( worker.getMaxSpeed()   );
+			pf.setDynamicObstacles  ( dynamicObstacles  );
+			pf.setSpatialPath       ( toTask            );
+			pf.setMaxSpeed          ( getWorkerUnit().getMaxSpeed()   );
 			pf.setStartTime         ( segment.getStartTime() );
 			pf.setEarliestFinishTime( getEarliestStartTime() );
 			pf.setLatestFinishTime  ( getLatestStartTime()   );
@@ -745,28 +720,35 @@ public class TaskPlanner {
 			if (!status)
 				return false;
 
-			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
-			DecomposedTrajectory trajToTask = pf.getResultTrajectory();
-
-			setResultEvadedWorkersToTask(evadedWorkers);
-			setResultTrajectoryToTask(trajToTask);
+			evadedToTask = onlyWorkerUnitObstacles( pf.getResultEvadedObstacles() );
+			trajToTask = pf.getResultTrajectory();
 
 			return true;
 		}
 
+		/**
+		 * <p>Calculates the trajectory from the new task to the next one.</p>
+		 *
+		 * <p>This method makes use of side-effects where it isn't always easy
+		 * to follow what effects it has on the object. This was done to keep
+		 * the code more concise since this is only an inner helper class.</p>
+		 *
+		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
+		 * {@link #task}, and {@link #segment} are already set. It sets
+		 * {@link #evadedFromTask} and {@link #trajFromTask} if the path
+		 * calculation was successful.</p>
+		 *
+		 * @return {@code true} iff a trajectory from the new task to the next
+		 *         one could be calculated.
+		 */
 		private boolean calculateTrajectoryFromTask() {
 			// TODO IdlingWorkerUnitObstacle cannot evade other workers
 
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
-			WorkerUnit worker = getWorkerUnit();
-			WorkerUnitObstacle segment = getSegment();
-			Task task = getResultTask();
-
-			pf.setDynamicObstacles( getDynamicObstacles()   );
-			pf.setSpatialPath     ( getFromTask()           );
-			pf.setMaxSpeed        ( worker.getMaxSpeed()    );
+			pf.setDynamicObstacles( dynamicObstacles   );
+			pf.setSpatialPath     ( fromTask           );
+			pf.setMaxSpeed        ( getWorkerUnit().getMaxSpeed()    );
 			pf.setStartTime       ( task.getFinishTime()    );
 			pf.setFinishTime      ( segment.getFinishTime() );
 
@@ -775,37 +757,37 @@ public class TaskPlanner {
 			if (!status)
 				return false;
 
-			Collection<DynamicObstacle> evadedObstacles = pf.getResultEvadedObstacles();
-			Collection<WorkerUnitObstacle> evadedWorkers = onlyWorkerUnitObstacles(evadedObstacles);
-			DecomposedTrajectory trajFromTask = pf.getResultTrajectory();
-
-			setResultEvadedWorkersFromTask(evadedWorkers);
-			setResultTrajectoryFromTask(trajFromTask);
+			evadedFromTask = onlyWorkerUnitObstacles( pf.getResultEvadedObstacles() );
+			trajFromTask = pf.getResultTrajectory();
 
 			return true;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 *
+		 * commit needs segment, evadedToTask, evadedFromTask, segmentToTask,
+		 * segmentAtTask, segmentFromTask, and task to be set. It expects
+		 * that calculate was called before.
+		 *
+		 * @see tasks.TaskPlanner.Job#commit()
+		 */
 		@Override
 		public void commit() {
 			WorkerUnit worker = getWorkerUnit();
-			Task task = getResultTask();
-
-			MovingWorkerUnitObstacle segmentToTask = getResultSegmentToTask();
-			WorkerUnitObstacle segmentAtTask = getResultSegmentAtTask();
-			WorkerUnitObstacle segmentFromTask = getResultSegmentFromTask();
 
 			// register evasions
-			for (WorkerUnitObstacle e : getResultEvadedWorkersToTask())
+			for (WorkerUnitObstacle e : evadedToTask)
 				e.addEvasion(segmentToTask);
 
 			// TODO IdlingWorkerUnitObstacles should also be able to evade
 			if (segmentFromTask instanceof MovingWorkerUnitObstacle) {
-				for (WorkerUnitObstacle e : getResultEvadedWorkersFromTask())
+				for (WorkerUnitObstacle e : evadedFromTask)
 					e.addEvasion((MovingWorkerUnitObstacle) segmentFromTask);
 			}
 
 			// add obstacle segments and task
-			worker.removeObstacleSegment(getSegment());
+			worker.removeObstacleSegment(segment);
 			worker.addObstacleSegment(segmentToTask);
 			worker.addObstacleSegment(segmentAtTask);
 			worker.addObstacleSegment(segmentFromTask);
