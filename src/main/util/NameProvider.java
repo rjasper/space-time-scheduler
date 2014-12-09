@@ -3,6 +3,8 @@ package util;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public class NameProvider {
 
@@ -10,37 +12,37 @@ public class NameProvider {
 	private static Map<Object, String> names = new IdentityHashMap<>();
 
 	public static String nameFor(Object obj) {
-		return nameForOrDefault(obj, null);
+		return nameForOrDefault(obj, () -> generateNameFor(obj));
 	}
 
 	public static String nameForOrDefault(Object obj, String defaultName) {
-		if (obj == null)
-			throw new NullPointerException("obj is null");
+		return nameForOrDefault(obj, () -> defaultName);
+	}
 
-		Class<?> clazz = obj.getClass();
+	public static String nameForOrDefault(Object obj, Supplier<String> defaultSupplier) {
+		Objects.requireNonNull(obj, "obj");
+		Objects.requireNonNull(defaultSupplier, "defaultSupplier");
 
-//		IdentityKey key = identityKey(obj);
-		String name = names.getOrDefault(obj, defaultName);
+		String name = names.get(obj);
 
 		if (name != null)
 			return name;
 
-		name = generateNameFor(clazz);
+		name = defaultSupplier.get();
 		names.put(obj, name);
 
 		return name;
 	}
 
 	public static void setNameFor(Object obj, String name) {
-		if (obj == null)
-			throw new NullPointerException("obj is null");
-		if (name == null)
-			throw new NullPointerException("name is null");
+		Objects.requireNonNull(obj, "obj");
+		Objects.requireNonNull(name, "name");
 
-		names.putIfAbsent(obj, name);
+		names.put(obj, name);
 	}
 
-	private static String generateNameFor(Class<?> clazz) {
+	private static String generateNameFor(Object object) {
+		Class<?> clazz = object.getClass();
 		Counter counter = counters.get(clazz);
 
 		if (counter == null) {
@@ -67,55 +69,5 @@ public class NameProvider {
 			return counter;
 		}
 	}
-
-//	private static IdentityKey identityKey(Object obj) {
-//		return new IdentityKey(obj);
-//	}
-
-//	private static class IdentityKey {
-//		private final int hash;
-//		private final Object obj;
-//
-//		public IdentityKey(Object obj) {
-//			this.hash = System.identityHashCode(obj);
-//			this.obj = obj;
-//		}
-//
-//		@Override
-//		public int hashCode() {
-//			return hash;
-//		}
-//
-//		@Override
-//		public boolean equals(Object obj) {
-//			if (this == obj)
-//				return true;
-//			if (obj == null)
-//				return false;
-//			if (getClass() != obj.getClass())
-//				return false;
-//			IdentityKey other = (IdentityKey) obj;
-//			if (this.obj == null) {
-//				if (other.obj != null)
-//					return false;
-//			} else if (this.obj != other.obj)
-//				return false;
-//			return true;
-//		}
-//
-//	}
-
-//	private static class NameWrapper {
-//		private final String name;
-//
-//		public NameWrapper(Object obj) {
-//			this.name = nameFor(obj);
-//		}
-//
-//		@Override
-//		public String toString() {
-//			return name;
-//		}
-//	}
 
 }

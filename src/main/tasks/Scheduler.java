@@ -26,15 +26,38 @@ import com.vividsolutions.jts.geom.Point;
 
 public class Scheduler {
 
+	/**
+	 * The default amount of location picks tried by the scheduler before
+	 * giving up.
+	 */
 	public static final int MAX_LOCATION_PICKS = 10;
 
+	/**
+	 * The physical outside world representation where the workers are located.
+	 */
 	private final World world;
 
+	/**
+	 * A cache of the perspectives of the workers.
+	 */
 	private final WorldPerspectiveCache perspectiveCache;
 
+	/**
+	 * The workers managed by this scheduler.
+	 */
 	private final List<WorkerUnit> workers;
 
+	/**
+	 * Constructs a scheduler using the given world and set of workers.
+	 * The workers are expected to be managed exclusively by this scheduler.
+	 *
+	 * @param world
+	 * @param workers
+	 * @throws NullPointerException if world or workers is null
+	 */
 	public Scheduler(World world, Collection<WorkerUnit> workers) {
+		if (world == null)
+			throw new NullPointerException("world is null");
 		if (workers == null)
 			throw new NullPointerException("workers is null");
 
@@ -43,26 +66,46 @@ public class Scheduler {
 		this.workers = new ArrayList<>(workers);
 	}
 
+	/**
+	 * @return the physical outside world representation where the workers are located.
+	 */
 	private World getWorld() {
 		return world;
 	}
 
+	/**
+	 * @return the perspective cache.
+	 */
 	private WorldPerspectiveCache getPerspectiveCache() {
 		return perspectiveCache;
 	}
 
+	/**
+	 * @return the workers.
+	 */
 	private List<WorkerUnit> getWorkers() {
 		return workers;
 	}
 
-	public boolean schedule(Specification spec) {
+	/**
+	 * Tries to schedule a new task satisfying the given specification.
+	 *
+	 * @param specification
+	 * @return {@code true} iff a task was scheduled. {@code false} iff no task
+	 *         could be scheduled satisfying the specification.
+	 */
+	public boolean schedule(Specification specification) {
+		// get necessary information
+
 		World world = getWorld();
 		List<WorkerUnit> workers = getWorkers();
 		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
-		Geometry locationSpace = world.space(spec.getLocationSpace());
-		LocalDateTime earliest = spec.getEarliestStartTime();
-		LocalDateTime latest = spec.getLatestStartTime();
-		Duration duration = spec.getDuration();
+		Geometry locationSpace = world.space(specification.getLocationSpace());
+		LocalDateTime earliest = specification.getEarliestStartTime();
+		LocalDateTime latest = specification.getLatestStartTime();
+		Duration duration = specification.getDuration();
+
+		// initialize the task planner
 
 		TaskPlanner tp = new TaskPlanner();
 
@@ -70,38 +113,55 @@ public class Scheduler {
 		tp.setPerspectiveCache(perspectiveCache);
 		tp.setDuration(duration);
 
+		// iterate over possible locations
+
 		Iterable<Point> locations = new IteratorIterable<>(
 			new LocationIterator(locationSpace, MAX_LOCATION_PICKS));
 
 		for (Point loc : locations) {
+			tp.setLocation(loc);
+
+			// iterate over possible worker time slots.
+
 			// Worker units have different perspectives of the world.
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the workers are filtered by the location
 			Iterable<WorkerUnitSlot> workerSlots = new IteratorIterable<>(
 				new WorkerUnitSlotIterator(filterByLocation(loc), loc, earliest, latest, duration));
 
-			tp.setLocation(loc);
-
 			for (WorkerUnitSlot ws : workerSlots) {
+				// get slot information
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
 				LocalDateTime slotStartTime = s.getStartTime();
 				LocalDateTime slotFinishTime = s.getFinishTime();
 
 				tp.setWorkerUnit(w);
-				tp.setEarliestStartTime( max(earliest, slotStartTime) );
-				tp.setLatestStartTime( slotFinishTime == null ? latest : min(latest, slotFinishTime) );
+				// don't exceed the slot's time window
+				tp.setEarliestStartTime( max(earliest, slotStartTime ) );
+				tp.setLatestStartTime  ( min(latest  , slotFinishTime) );
 
+				// plan the routes of affected workers and schedule task
 				boolean status = tp.plan();
 
+				// if planning was successful then return
 				if (status)
 					return true;
 			}
 		}
 
+		// all possible variable combinations are depleted without being able
+		// to schedule a task
 		return false;
 	}
 
+	/**
+	 * Checks if a worker is able to reach a location in regard to its size.
+	 *
+	 * @param location
+	 * @param worker
+	 * @return {@code true} iff worker is able to reach the location.
+	 */
 	private boolean checkLocationFor(Point location, WorkerUnit worker) {
 		WorldPerspectiveCache cache = getPerspectiveCache();
 		WorldPerspective perspective = cache.getPerspectiveFor(worker);
@@ -110,6 +170,13 @@ public class Scheduler {
 		return !map.contains(location);
 	}
 
+	/**
+	 * Filters the collection of workers which are able to reach a location in
+	 * regard to their individual size.
+	 *
+	 * @param location
+	 * @return the filtered workers which are able to reach the location.
+	 */
 	private Collection<WorkerUnit> filterByLocation(Point location) {
 		Collection<WorkerUnit> workers = getWorkers();
 
