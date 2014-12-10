@@ -23,7 +23,7 @@ public class WorkerUnitTest {
 	public void testIdleSubSet() {
 		WorkerUnit worker = WorkerUnitFixtures.withThreeTasks();
 		
-		Collection<IdleSlot> slots = worker.idleSubSet(
+		Collection<IdleSlot> slots = worker.idleSlots(
 			timeFact.hours( 3L),
 			timeFact.hours(17L)
 		);

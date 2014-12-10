@@ -25,7 +25,16 @@ import world.pathfinder.StraightEdgePathfinder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-// TODO document Scheduler class
+/**
+ * <p>The Scheduler manages the distribution of task to a set of
+ * {@link WorkerUnit}s. A new task can be scheduled by providing a
+ * {@link Specification}. The {@link #schedule(Specification)} method tries
+ * to find a realizable configuration which satisfies the specification. In
+ * the successful case a task will be created and assigned to an appropriate
+ * worker.</p>
+ *
+ * @author Rico Jasper
+ */
 public class Scheduler {
 
 	/**
@@ -59,8 +68,13 @@ public class Scheduler {
 	 * @throws NullPointerException if world or workers is null
 	 */
 	public Scheduler(World world, Collection<WorkerUnit> workerPool) {
+		// TODO reduce visibility to restrict access to worker units
+
 		Objects.requireNonNull(world, "world");
 		Objects.requireNonNull(workerPool, "workerPool");
+
+		// TODO check validity of world and workerPool
+		//      (e.g. no overlapping of obstacles)
 
 		this.world = world;
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);

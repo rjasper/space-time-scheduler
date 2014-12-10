@@ -145,7 +145,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 
 		Iterator<WorkerUnit> it = getWorkerIterator();
 		WorkerUnit worker = it.next();
-		Collection<IdleSlot> slots = worker.idleSubSet(earliest, latest);
+		Collection<IdleSlot> slots = worker.idleSlots(earliest, latest);
 
 		setNextWorker(worker);
 		setSlotIterator(slots.iterator());
