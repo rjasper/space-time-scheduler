@@ -31,6 +31,35 @@ import world.pathfinder.SpatialPathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
+ * It requires multiple parameters which determine the {@link WorkerUnit worker}
+ * to execute the new task, and the location, duration, and time interval of the
+ * execution. It is also responsible for ensuring that the designated worker is
+ * able to reach the task's location with colliding with any other object; be it
+ * stationary or another worker.</p>
+ *
+ * <p>Should it be impossible to plan the new task then the TaskPlanner will
+ * not change the current task set. This might be the case when the designated
+ * worker is unable to reach the location without violating any time
+ * constraints.</p>
+ *
+ * <p>The planning involves the calculation of a spatial path from the previous
+ * location of the worker to the task's location and the successive path to
+ * the next location the worker is required to be. The next step is to calculate
+ * a velocity profile to evade dynamic obstacles. Since the old path which
+ * the worker was previously planned to follow will be obsolete other workers
+ * might be affected. Workers which were previously evading the now obsolete
+ * path segment should update their affected path segments with a new
+ * velocity profile.</p>
+ *
+ * <p>The TaskPlanner creates a job queue to calculate the new velocity profile
+ * for the new spatial paths of the designated worker and all other affected
+ * path segments of other workers. The jobs are sorted by the
+ * {@link Job#laxity()} to give priority to workers in a hurry.</p>
+ *
+ * @author Rico Jasper
+ */
 public class TaskPlanner {
 
 	/**
@@ -373,7 +402,7 @@ public class TaskPlanner {
 			return false;
 
 		// determine the path segments to be recalculated
-		List<MovingWorkerUnitObstacle> evasions = buildEvasions(segment);
+		Collection<MovingWorkerUnitObstacle> evasions = buildEvasions(segment);
 
 		// prepare current dynamic obstacles
 		addAllDynamicObstacles( getDynamicObstacles() );
@@ -432,9 +461,9 @@ public class TaskPlanner {
 	private static abstract class Job implements Comparable<Job> {
 
 		/**
-		 * The maximum duration available to complete a path.
+		 * The duration available to complete a path.
 		 */
-		private final Duration maxDuration;
+		private final Duration jobDuration;
 
 		// TODO don't cache since class is private and outside behavior is known
 
@@ -444,19 +473,19 @@ public class TaskPlanner {
 		private transient double laxity = Double.NaN;
 
 		/**
-		 * Constructs a Job with a maximum duration.
+		 * Constructs a Job with a duration.
 		 *
-		 * @param maxDuration
+		 * @param jobDuration
 		 */
-		public Job(Duration maxDuration) {
-			this.maxDuration = maxDuration;
+		public Job(Duration jobDuration) {
+			this.jobDuration = jobDuration;
 		}
 
 		/**
 		 * @return the maximum duration available to complete a path.
 		 */
-		public Duration getMaxDuration() {
-			return maxDuration;
+		public Duration getJobDuration() {
+			return jobDuration;
 		}
 
 		/**
@@ -629,7 +658,7 @@ public class TaskPlanner {
 			double maxSpeed = worker.getMaxSpeed();
 			double length = length( toTask ) + length( fromTask );
 			double taskDuration = inSeconds( getDuration() );
-			double maxDuration = inSeconds( getMaxDuration() );
+			double maxDuration = inSeconds( getJobDuration() );
 
 			return (maxDuration - taskDuration)/length - 1./maxSpeed;
 		}
@@ -707,9 +736,9 @@ public class TaskPlanner {
 		private boolean calculateTrajectoryToTask() {
 			MinimumTimeVelocityPathfinder pf = getMinimumTimeVelocityPathfinder();
 
-			pf.setDynamicObstacles  ( dynamicObstacles  );
-			pf.setSpatialPath       ( toTask            );
-			pf.setMaxSpeed          ( getWorkerUnit().getMaxSpeed()   );
+			pf.setDynamicObstacles  ( dynamicObstacles       );
+			pf.setSpatialPath       ( toTask                 );
+			pf.setMaxSpeed          ( getWorkerUnit().getMaxSpeed() );
 			pf.setStartTime         ( segment.getStartTime() );
 			pf.setEarliestFinishTime( getEarliestStartTime() );
 			pf.setLatestFinishTime  ( getLatestStartTime()   );
@@ -746,9 +775,9 @@ public class TaskPlanner {
 
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
-			pf.setDynamicObstacles( dynamicObstacles   );
-			pf.setSpatialPath     ( fromTask           );
-			pf.setMaxSpeed        ( getWorkerUnit().getMaxSpeed()    );
+			pf.setDynamicObstacles( dynamicObstacles        );
+			pf.setSpatialPath     ( fromTask                );
+			pf.setMaxSpeed        ( getWorkerUnit().getMaxSpeed() );
 			pf.setStartTime       ( task.getFinishTime()    );
 			pf.setFinishTime      ( segment.getFinishTime() );
 
@@ -828,7 +857,8 @@ public class TaskPlanner {
 		public UpdateJob(MovingWorkerUnitObstacle segment) {
 			// doesn't check inputs since class is private
 
-			super(calcMaxDuration(segment));
+//			super(calcMaxDuration(segment));
+			super(Duration.between(segment.getStartTime(), segment.getFinishTime()));
 
 			this.segment = segment;
 		}
@@ -838,7 +868,7 @@ public class TaskPlanner {
 			WorkerUnit worker = segment.getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
 			double length = segment.getTrajectory().getLength();
-			double maxDuration = inSeconds( getMaxDuration() );
+			double maxDuration = inSeconds( getJobDuration() );
 
 			return maxDuration/length - 1./maxSpeed;
 		}
@@ -846,7 +876,7 @@ public class TaskPlanner {
 		/*
 		 * (non-Javadoc)
 		 *
-		 * Sets evaded and updatedSegment.
+		 * Sets evaded and updatedSegment if path could be found.
 		 *
 		 * @see tasks.TaskPlanner.Job#calculate()
 		 */
@@ -877,6 +907,13 @@ public class TaskPlanner {
 			return true;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 *
+		 * Uses all fields. Expects that calculate was already called and successful.
+		 *
+		 * @see tasks.TaskPlanner.Job#commit()
+		 */
 		@Override
 		public void commit() {
 			// register evasions
@@ -891,13 +928,20 @@ public class TaskPlanner {
 
 	}
 
-	private static Duration calcMaxDuration(WorkerUnitObstacle evasion) {
-		LocalDateTime startTime = evasion.getStartTime();
-		LocalDateTime finishTime = evasion.getFinishTime();
+//	private static Duration calcMaxDuration(WorkerUnitObstacle evasion) {
+//		LocalDateTime startTime = evasion.getStartTime();
+//		LocalDateTime finishTime = evasion.getFinishTime();
+//
+//		return Duration.between(startTime, finishTime);
+//	}
 
-		return Duration.between(startTime, finishTime);
-	}
-
+	/**
+	 * Filters a given list of dynamic obstacles. Only accepts
+	 * {@code WorkerUnitObstacle}s.
+	 *
+	 * @param obstacles
+	 * @return
+	 */
 	private static Collection<WorkerUnitObstacle> onlyWorkerUnitObstacles(Collection<DynamicObstacle> obstacles) {
 		return obstacles.stream()
 			.filter(o -> o instanceof WorkerUnitObstacle)
@@ -905,12 +949,27 @@ public class TaskPlanner {
 			.collect(toList());
 	}
 
-	private static List<MovingWorkerUnitObstacle> buildEvasions(WorkerUnitObstacle obstacleSegment) {
+	/**
+	 * Builds a collection of all potentially affected path segments when
+	 * removing the original path segment of the current worker.
+	 *
+	 * @param obstacleSegment the original path segment to be removed
+	 * @return the potentially affected path segments
+	 */
+	private static Collection<MovingWorkerUnitObstacle> buildEvasions(WorkerUnitObstacle obstacleSegment) {
 		return obstacleSegment.getEvasions().stream()
 			.flatMap(TaskPlanner::buildEvasionsStream)
 			.collect(toList());
 	}
 
+	/**
+	 * Helps building a collection of affected evasions. Builds a stream
+	 * all ancestor evasions of the given segment and the segment itself.
+	 *
+	 * @param obstacleSegment
+	 * @return
+	 * @see #buildEvasions(WorkerUnitObstacle)
+	 */
 	private static Stream<MovingWorkerUnitObstacle> buildEvasionsStream(MovingWorkerUnitObstacle obstacleSegment) {
 		Stream<MovingWorkerUnitObstacle> self = Stream.of(obstacleSegment);
 		Stream<MovingWorkerUnitObstacle> ancestors = obstacleSegment.getEvasions().stream()
@@ -919,6 +978,15 @@ public class TaskPlanner {
 		return Stream.concat(self, ancestors);
 	}
 
+	/**
+	 * Builds a collection of worker obstacles using the {@link #workerPool}.
+	 * Exculdes all path segments given by exclusions and the obsolete segment
+	 * to be removed.
+	 *
+	 * @param exclusions
+	 * @param obsoleteSegment
+	 * @return
+	 */
 	private Collection<DynamicObstacle> buildWorkerPoolSegments(
 		Collection<? extends WorkerUnitObstacle> exclusions,
 		WorkerUnitObstacle obsoleteSegment)
@@ -931,15 +999,22 @@ public class TaskPlanner {
 			.collect(toList());
 	}
 
+	/**
+	 * Builds the the given worker's perspective on the dynamic obstacles.
+	 * It buffers all {@link #currentDynamicObstacles obstacles of interests}
+	 * by the worker's radius and excludes the path segments of the worker
+	 * itself.
+	 *
+	 * @param worker to build the perspective for
+	 * @return a collection of dynamic obstacles in the worker's perspective.
+	 */
 	private Collection<DynamicObstacle> buildDynamicObstaclesFor(WorkerUnit worker) {
-		Collection<DynamicObstacle> dynamicObstacles = getCurrentDynamicObstacles();
-
 		double bufferDistance = worker.getRadius();
 
 		// an exact solution would be to calculate the minkowski sum
 		// of each obstacle and the worker's shape
 
-		return dynamicObstacles.stream()
+		return getCurrentDynamicObstacles().stream()
 			.filter(o -> !(o instanceof WorkerUnitObstacle)
 				|| ((WorkerUnitObstacle) o).getWorkerUnit() != worker)
 			.map(o -> o.buffer(bufferDistance))
