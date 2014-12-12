@@ -21,7 +21,7 @@ import com.vividsolutions.jts.util.GeometricShapeFactory;
 // TODO elaborate
 
 /**
- * An iterator that extracts points from an Geometry.
+ * An iterator that extracts points from a Geometry.
  *
  * @author Rico Jasper
  */
