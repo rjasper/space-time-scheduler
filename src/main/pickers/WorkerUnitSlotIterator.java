@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 
 import tasks.IdleSlot;
 import tasks.WorkerUnit;
@@ -126,6 +127,14 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 * @param earliestStartTime the earliest time to begin the task execution
 	 * @param latestStartTime the latest time to begin the task execution
 	 * @param duration of the task
+	 *
+	 * @throws NullPointerException if any argument is {@code null}.
+	 * @throws IllegalArgumentException if any of the following is true:
+	 * <ul>
+	 * <li>The location is empty or invalid.</li>
+	 * <li>The earliestStartTime is after the latestStartTime.</li>
+	 * <li>The duration is negative.</li>
+	 * </ul>
 	 */
 	public WorkerUnitSlotIterator(
 		Collection<WorkerUnit> workers,
@@ -134,6 +143,19 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
+		Objects.requireNonNull(workers, "workers");
+		Objects.requireNonNull(location, "location");
+		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
+		Objects.requireNonNull(latestStartTime, "latestStartTime");
+		Objects.requireNonNull(duration, "duration");
+
+		if (location.isEmpty() || !location.isValid())
+			throw new IllegalArgumentException("illegal location");
+		if (earliestStartTime.compareTo(latestStartTime) > 0)
+			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
+		if (duration.isNegative())
+			throw new IllegalArgumentException("duration is negative");
+
 		this.workerIterator = new ArrayList<>(workers).iterator();
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;

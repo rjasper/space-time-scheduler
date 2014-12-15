@@ -11,8 +11,22 @@ import world.util.SpatialPathSegmentIterable.SpatialPathSegment;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * {@code PathOperations} provides static utility methods for paths. A path is
+ * a {@link List} of {@link Point}s.
+ *
+ * @author Rico Jasper
+ */
 public final class PathOperations {
 
+	private PathOperations() {}
+
+	/**
+	 * Calculates the euclidean length of the path.
+	 *
+	 * @param path
+	 * @return the length.
+	 */
 	public static double length(List<Point> path) {
 		double acc = 0;
 
@@ -24,13 +38,23 @@ public final class PathOperations {
 		return acc;
 	}
 
-	public static Geometry calcTrace(List<Point> spatialPath) {
-		if (spatialPath.size() == 1) {
-			return (Point) spatialPath.get(0).clone();
+	/**
+	 * Calculates the trace of a path. The trace is a geometry which only
+	 * includes all points of the path.
+	 *
+	 * @param path
+	 * @return the trace.
+	 */
+	public static Geometry calcTrace(List<Point> path) {
+		// if the size is 1 then the trace is only a point
+		if (path.size() == 1) {
+			return (Point) path.get(0).clone();
+		// otherwise it is a LineString (empty if the size was zero)
 		} else {
-			List<Point> points = new LinkedList<>(spatialPath);
+			List<Point> points = new LinkedList<>(path);
 			Iterator<Point> it = points.iterator();
 
+			// removes points which are identical to their predecessor
 			Point last = null;
 			while (it.hasNext()) {
 				Point p = it.next();
@@ -40,6 +64,8 @@ public final class PathOperations {
 
 				last = p;
 			}
+
+			// construct LineString
 
 			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 
