@@ -23,7 +23,7 @@ public class OccupiedWorkerUnitObstacle extends WorkerUnitObstacle {
 		return occupation;
 	}
 
-	private static SimpleTrajectory buildTrajectory(Task task) {
+	private static Trajectory buildTrajectory(Task task) {
 		Point location = task.getLocation();
 		LocalDateTime startTime = task.getStartTime();
 		LocalDateTime finishTime = task.getFinishTime();
