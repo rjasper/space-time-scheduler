@@ -3,6 +3,7 @@ package tasks;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -110,9 +111,9 @@ public class WorkerUnit {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
 			throw new IllegalArgumentException("maximum speed is not a positive finite number");
 
-		this.shape = shape;
+		this.shape = immutable(shape);
 		this.maxSpeed = maxSpeed;
-		this.initialLocation = initialLocation;
+		this.initialLocation = immutable(initialLocation);
 		this.initialTime = initialTime;
 
 		putInitialObstacleSegment();

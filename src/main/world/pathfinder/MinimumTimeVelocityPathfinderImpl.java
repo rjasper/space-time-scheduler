@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +37,8 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	}
 	
 	private void updateArcTimeStartPoint() {
-		arcTimeStartPoint = geomBuilder.point(getMinArc(), inSeconds(getStartTime()));
+		arcTimeStartPoint = immutable(
+			geomBuilder.point(getMinArc(), inSeconds(getStartTime())));
 	}
 
 	private Collection<Point> getArcTimeFinishPoints() {

@@ -1,5 +1,7 @@
 package world;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,7 +56,7 @@ public class DynamicObstacle implements Cloneable {
 		if (trajectory.isEmpty())
 			throw new IllegalArgumentException("illegal trajectory");
 
-		this.shape = shape;
+		this.shape = immutable(shape);
 		this.trajectory = trajectory;
 	}
 

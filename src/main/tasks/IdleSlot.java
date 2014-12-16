@@ -1,5 +1,7 @@
 package tasks;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -80,8 +82,8 @@ public class IdleSlot {
 		if (startTime.compareTo(finishTime) >= 0)
 			throw new IllegalArgumentException("startTime is after finishTime");
 
-		this.startLocation = startLocation;
-		this.finishLocation = finishLocation;
+		this.startLocation = immutable(startLocation);
+		this.finishLocation = immutable(finishLocation);
 		this.startTime = startTime;
 		this.finishTime = finishTime;
 	}

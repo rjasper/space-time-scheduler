@@ -230,7 +230,7 @@ public class LocationIterator implements Iterator<Point> {
 		int pick = getPicks() + 1;
 		int maxPicks = getMaxPicks();
 
-		Point point = (Point) getNextPoint().clone();
+		Point point = getNextPoint();
 		Point next = pick < maxPicks ? calcNextPoint() : null;
 
 		setPicks(pick);

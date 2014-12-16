@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +36,12 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 	
 	private void updateArcTimeStartPoint() {
-		arcTimeStartPoint = geomBuilder.point(getMinArc(), inSeconds(getStartTime()));
+		// The mesh builder uses immutable geometries.
+		// It is important that the start point and the finish point
+		// are structurally the same to the ones used in the mesh. Therefore,
+		// the points are already converted immutable here.
+		arcTimeStartPoint = immutable(
+			geomBuilder.point(getMinArc(), inSeconds(getStartTime())));
 	}
 
 	private Point getArcTimeFinishPoint() {
@@ -42,7 +49,12 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 	
 	private void updateArcTimeFinishPoint() {
-		arcTimeFinishPoint = geomBuilder.point(getMaxArc(), inSeconds(getFinishTime()));
+		// The mesh builder uses immutable geometries.
+		// It is important that the start point and the finish point
+		// are structurally the same to the ones used in the mesh. Therefore,
+		// the points are already converted immutable here.
+		arcTimeFinishPoint = immutable(
+			geomBuilder.point(getMaxArc(), inSeconds(getFinishTime())));
 	}
 
 	@Override

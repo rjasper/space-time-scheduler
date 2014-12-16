@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +31,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	
 	private Point earliestFinishVertex;
 	
+	@Override
 	public boolean isReady() {
 		return super.isReady()
 			&& startPoint != null
@@ -37,7 +40,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	}
 
 	public void setStartPoint(Point startPoint) {
-		this.startPoint = startPoint;
+		this.startPoint = immutable(startPoint);
 	}
 
 	private double getEarliestFinishTime() {

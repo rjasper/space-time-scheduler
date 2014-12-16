@@ -13,7 +13,6 @@ import world.DynamicObstacle;
 import world.graph.view.GraphViewer;
 import world.pathfinder.FixTimeMeshBuilder;
 import world.pathfinder.ForbiddenRegion;
-import world.pathfinder.MinimumTimeMeshBuilder;
 
 import com.vividsolutions.jts.geom.Point;
 

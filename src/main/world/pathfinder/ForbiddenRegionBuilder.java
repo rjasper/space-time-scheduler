@@ -1,6 +1,8 @@
 package world.pathfinder;
 
 import static java.util.stream.Collectors.toList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.mutableOrClone;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -70,7 +72,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	public void setSpatialPath(List<Point> spatialPath) {
-		this.spatialPath = spatialPath;
+		this.spatialPath = immutable(spatialPath);
 	}
 
 	public Collection<ForbiddenRegion> getResultForbiddenRegions() {
@@ -259,6 +261,7 @@ public class ForbiddenRegionBuilder {
 		double s0 = spatialPathSegment.getStartArc();
 		double t0 = obstacleTrajectorySegment.getStartTime();
 
+		// TODO might not be necessary to clone
 		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
 
 		transformed.apply(new CoordinateFilter() {
@@ -553,6 +556,7 @@ public class ForbiddenRegionBuilder {
 		Geometry maskedMovedObstacleShape,
 		Matrix transformationMatrix)
 	{
+		// TODO might not be necessary to clone
 		Geometry region = (Geometry) maskedMovedObstacleShape.clone();
 		Vector spatialOffset = makeVector( spatialPathSegment.getStartPoint() );
 		Vector arcTimeOffset = new BasicVector(new double[] {
@@ -649,8 +653,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	private static <T extends Geometry> T translateGeometry(T geometry, Point translation) {
-		@SuppressWarnings("unchecked")
-		T clone = (T) geometry.clone();
+		T clone = mutableOrClone(geometry);
 
 		final double dx = translation.getX();
 		final double dy = translation.getY();

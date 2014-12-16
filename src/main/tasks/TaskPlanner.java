@@ -2,6 +2,7 @@ package tasks;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static util.Comparables.max;
 import static util.DurationConv.inSeconds;
 import static util.PathOperations.length;
@@ -259,7 +260,7 @@ public class TaskPlanner {
 	 * @param location
 	 */
 	public void setLocation(Point location) {
-		this.location = location;
+		this.location = immutable(location);
 	}
 
 	/**

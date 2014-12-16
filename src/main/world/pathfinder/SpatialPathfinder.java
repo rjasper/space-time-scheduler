@@ -1,8 +1,8 @@
 package world.pathfinder;
 
-import java.util.ArrayList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.Point;
@@ -10,8 +10,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public abstract class SpatialPathfinder {
 
-	// TODO initialize with null (also update #isReady)
-	private List<Polygon> staticObstacles = Collections.emptyList();
+	private List<Polygon> staticObstacles = null;
 
 	private Point startLocation = null;
 
@@ -20,7 +19,8 @@ public abstract class SpatialPathfinder {
 	private List<Point> resultSpatialPath = null;
 
 	public boolean isReady() {
-		return startLocation != null
+		return staticObstacles != null
+			&& startLocation != null
 			&& finishLocation != null;
 	}
 
@@ -29,7 +29,7 @@ public abstract class SpatialPathfinder {
 	}
 
 	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
-		this.staticObstacles = new ArrayList<>(staticObstacles);
+		this.staticObstacles = immutable(staticObstacles);
 	}
 
 	public List<Point> getResultSpatialPath() {
@@ -45,7 +45,7 @@ public abstract class SpatialPathfinder {
 	}
 
 	public void setStartLocation(Point startLocation) {
-		this.startLocation = startLocation;
+		this.startLocation = immutable(startLocation);
 	}
 
 	protected Point getFinishLocation() {
@@ -53,7 +53,7 @@ public abstract class SpatialPathfinder {
 	}
 
 	public void setFinishLocation(Point finishLocation) {
-		this.finishLocation = finishLocation;
+		this.finishLocation = immutable(finishLocation);
 	}
 
 	public final boolean calculate() {

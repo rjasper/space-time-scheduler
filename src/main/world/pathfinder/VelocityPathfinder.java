@@ -2,6 +2,7 @@ package world.pathfinder;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -84,7 +85,7 @@ public abstract class VelocityPathfinder {
 		if (spatialPath.size() < 2)
 			throw new IllegalArgumentException("path too short");
 		
-		this.spatialPath = spatialPath;
+		this.spatialPath = immutable(spatialPath);
 	}
 
 	protected double getMaxSpeed() {
@@ -167,7 +168,7 @@ public abstract class VelocityPathfinder {
 		
 		// create lookup table to map points to an obstacle
 		Map<Point, DynamicObstacle> lookup = forbiddenRegions.stream()
-			// TODO remove cast as soon as ECJ is able to infer type
+			// TODO remove cast as soon as ECJ is able to infer type (Stream<SimpleEntry<Point, DynamicObstacle>>)
 			// for each coordinate of each region
 			.flatMap(fr -> (Stream<SimpleEntry<Point, DynamicObstacle>>) Arrays.stream(fr.getRegion().getCoordinates())
 				.map(c -> builder.point(c.x, c.y))                        // map to a point

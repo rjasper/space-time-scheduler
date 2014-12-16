@@ -1,5 +1,7 @@
 package world;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +13,7 @@ import com.vividsolutions.jts.geom.Point;
 public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 
 	public IdlingWorkerUnitObstacle(WorkerUnit worker, Point location, LocalDateTime startTime) {
-		super(worker, buildTrajectory(location, startTime));
+		super(worker, buildTrajectory(immutable(location), startTime));
 	}
 
 	private static Trajectory buildTrajectory(Point location, LocalDateTime startTime) {

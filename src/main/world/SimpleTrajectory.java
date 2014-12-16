@@ -1,6 +1,7 @@
 package world;
 
 import static java.util.Collections.unmodifiableList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 		// TODO check if times is causal (sorted)
 
-		this.spatialPath = spatialPath;
+		this.spatialPath = immutable(spatialPath);
 		this.times = Collections.unmodifiableList(new ArrayList<>(times));
 	}
 
@@ -95,6 +96,8 @@ public class SimpleTrajectory extends CachedTrajectory {
 			if (other.spatialPath != null)
 				return false;
 		} else if (!spatialPath.equals(other.spatialPath))
+		// TODO quick check, no fix
+//		} else if (!mutable(spatialPath).equals(mutable(other.spatialPath)))
 			return false;
 		if (times == null) {
 			if (other.times != null)

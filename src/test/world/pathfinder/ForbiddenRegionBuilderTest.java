@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.ImmutableGeometries.mutable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -60,7 +61,7 @@ public class ForbiddenRegionBuilderTest {
 			4.*sqrt2, 2.,
 			3.*sqrt2, 1.);
 
-		assertTrue(expected.norm().equalsExact( region.getRegion(), 1e-10 ));
+		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
 	@Test
@@ -92,7 +93,7 @@ public class ForbiddenRegionBuilderTest {
 			8., 0.,
 			4., 0.);
 
-		assertTrue(expected.norm().equalsExact( region.getRegion(), 1e-10 ));
+		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
 	@Test
@@ -126,8 +127,8 @@ public class ForbiddenRegionBuilderTest {
 			6.*sqrt2, 2.,
 			4.*sqrt2, 1.,
 			2.*sqrt2, 2.);
-
-		assertTrue(expected.norm().equalsExact( region.getRegion(), 1e-10 ));
+		
+		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
 	@Test
@@ -166,8 +167,8 @@ public class ForbiddenRegionBuilderTest {
 				8., 4.,
 				6., 4.)
 		);
-
-		assertTrue(expected.norm().equalsExact( region.getRegion(), 1e-10 ));
+		
+		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
 }

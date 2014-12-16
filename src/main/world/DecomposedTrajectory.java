@@ -1,8 +1,9 @@
 package world;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,8 +95,8 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		// * causal arc time path (time ordinates must be non-strictly increasing)
 
 		this.baseTime = baseTime;
-		this.spatialPathComponent = new ArrayList<>(spatialPathComponent);
-		this.arcTimePathComponent = new ArrayList<>(arcTimePathComponent);
+		this.spatialPathComponent = immutable(spatialPathComponent);
+		this.arcTimePathComponent = immutable(arcTimePathComponent);
 	}
 
 	@Override

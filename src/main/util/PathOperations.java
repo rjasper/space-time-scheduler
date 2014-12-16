@@ -48,7 +48,7 @@ public final class PathOperations {
 	public static Geometry calcTrace(List<Point> path) {
 		// if the size is 1 then the trace is only a point
 		if (path.size() == 1) {
-			return (Point) path.get(0).clone();
+			return path.get(0);
 		// otherwise it is a LineString (empty if the size was zero)
 		} else {
 			List<Point> points = new LinkedList<>(path);

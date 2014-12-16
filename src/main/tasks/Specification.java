@@ -1,5 +1,7 @@
 package tasks;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -81,7 +83,7 @@ public class Specification {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("duration is negative");
 
-		this.locationSpace = locationSpace;
+		this.locationSpace = immutable(locationSpace);
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
 		this.duration = duration;

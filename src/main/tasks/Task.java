@@ -1,5 +1,7 @@
 package tasks;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -72,7 +74,7 @@ public class Task {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("negative duration");
 
-		this.location = location;
+		this.location = immutable(location);
 		this.startTime = startTime;
 		this.finishTime = finishTime;
 		this.duration = duration;

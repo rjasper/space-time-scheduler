@@ -2,8 +2,8 @@ package world;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -24,9 +24,8 @@ public class World {
 	}
 
 	public World(Collection<Polygon> staticObstacles) {
-		this.staticObstacles = new ArrayList<>(staticObstacles);
-
-		this.map = makeMap(staticObstacles);
+		this.staticObstacles = immutable(staticObstacles);
+		this.map = immutable(makeMap(staticObstacles));
 	}
 
 	private Geometry makeMap(Collection<Polygon> staticObstacles) {
