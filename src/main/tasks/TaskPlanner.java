@@ -869,8 +869,6 @@ public class TaskPlanner {
 		 */
 		@Override
 		public boolean calculate() {
-			// XXX last edition
-
 			WorkerUnit worker = segment.getWorkerUnit();
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
