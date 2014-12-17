@@ -151,6 +151,10 @@ public class DynamicObstacle implements Cloneable {
 		return clone;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
 	@Override
 	public DynamicObstacle clone() {
 		try {
@@ -160,13 +164,17 @@ public class DynamicObstacle implements Cloneable {
 		}
 	}
 
-	// TODO toString not very helpful right now
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
+		// TODO toString not very helpful right now
 		return "DynamicObstacle ["
 			+ "shape=" + getShape() + ", "
-			+ "spatialPath="    + getSpatialPath()    + ", "
-			+ "times="   + getTimes()   + "]";
+			+ "spatialPath=" + getSpatialPath() + ", "
+			+ "times=" + getTimes() + "]";
 	}
 
 }
