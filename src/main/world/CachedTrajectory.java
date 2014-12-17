@@ -1,5 +1,6 @@
 package world;
 
+import static jts.geom.immutable.ImmutableGeometries.immutable;
 import java.time.Duration;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -54,7 +55,7 @@ public abstract class CachedTrajectory implements Trajectory {
 	@Override
 	public Geometry getTrace() {
 		if (trace == null)
-			trace = calcTrace();
+			trace = immutable( calcTrace() );
 
 		return trace;
 	}

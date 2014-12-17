@@ -1,7 +1,6 @@
 package tasks;
 
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
@@ -10,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -48,9 +48,9 @@ public class WorkerUnit {
 	private final Polygon shape;
 
 	/**
-	 * The cached radius of the shape.
+	 * The radius of the shape.
 	 */
-	private transient double radius = Double.NaN;
+	private final double radius;
 
 	/**
 	 * The maximum velocity of this worker.
@@ -73,9 +73,21 @@ public class WorkerUnit {
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 
 	/**
+	 * An unmodifiable view on {@link #tasks}.
+	 */
+	private NavigableMap<LocalDateTime, Task> unmodifiableTasks
+		= unmodifiableNavigableMap(tasks);
+
+	/**
 	 * All obstacle segments of this worker.
 	 */
 	private TreeMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
+
+	/**
+	 * An unmodifiable view on {@link #obstacleSegments}.
+	 */
+	private NavigableMap<LocalDateTime, WorkerUnitObstacle> unmodifiableObstacleSegments
+		= unmodifiableNavigableMap(obstacleSegments);
 
 	/**
 	 * Constructs a worker defining its shape, maximum velocity, initial
@@ -115,6 +127,7 @@ public class WorkerUnit {
 		this.maxSpeed = maxSpeed;
 		this.initialLocation = immutable(initialLocation);
 		this.initialTime = initialTime;
+		this.radius = calcRadius(shape);
 
 		putInitialObstacleSegment();
 	}
@@ -141,27 +154,20 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * Calculates and caches the radius of this worker.
-	 *
 	 * @return the radius of this worker's shape.
 	 */
 	public double getRadius() {
-		// TODO caching might not be reasonable
-		//      (is essentially always calculated)
-
-		if (Double.isNaN(radius))
-			radius = calcRadius();
-
 		return radius;
 	}
 
 	/**
 	 * Calculates the radius.
 	 *
+	 * @param shape of the worker
 	 * @return the radius.
 	 */
-	private double calcRadius() {
-		Coordinate[] coords = getShape().getCoordinates();
+	private static double calcRadius(Polygon shape) {
+		Coordinate[] coords = shape.getCoordinates();
 
 		// determine the maximum square-distance to the origin
 		double sqRadius = Arrays.stream(coords)
@@ -192,14 +198,20 @@ public class WorkerUnit {
 	public LocalDateTime getInitialTime() {
 		return initialTime;
 	}
+	
+	/**
+	 * @return all tasks this unit is assigned to.
+	 */
+	public Collection<Task> getTasks() {
+		return unmodifiableTasks.values();
+	}
 
 	/**
 	 * @return an unmodifiable view on the time ordered map of tasks assigned to
 	 * this worker.
 	 */
-	public Map<LocalDateTime, Task> getTasks() {
-		// TODO might be better to store
-		return unmodifiableMap(tasks);
+	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
+		return unmodifiableTasks;
 	}
 
 	/**
@@ -215,17 +227,17 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * @return an unmodifiable view on the obstacle segments of this worker.
+	 * @return the obstacle segments of this worker.
 	 */
 	public Collection<WorkerUnitObstacle> getObstacleSegments() {
-		return unmodifiableCollection(obstacleSegments.values());
+		return unmodifiableObstacleSegments.values();
 	}
-
+	
 	/**
-	 * @return the actual obstacle segments.
+	 * @return an unmodifiable view on the time ordered map of obstacle segments.
 	 */
-	private TreeMap<LocalDateTime, WorkerUnitObstacle> _getObstacleSegments() {
-		return obstacleSegments;
+	public NavigableMap<LocalDateTime, WorkerUnitObstacle> getNavigableObstacleSegments() {
+		return unmodifiableObstacleSegments;
 	}
 
 	/**
@@ -239,8 +251,7 @@ public class WorkerUnit {
 	public WorkerUnitObstacle getObstacleSegment(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
 
-		Entry<LocalDateTime, WorkerUnitObstacle> entry = _getObstacleSegments()
-			.floorEntry(time);
+		Entry<LocalDateTime, WorkerUnitObstacle> entry = obstacleSegments.floorEntry(time);
 
 		return entry == null ? null : entry.getValue();
 	}
@@ -263,9 +274,7 @@ public class WorkerUnit {
 	 * @param segment
 	 */
 	private void putObstacleSegment(WorkerUnitObstacle segment) {
-		Map<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
-
-		segments.put(segment.getStartTime(), segment);
+		obstacleSegments.put(segment.getStartTime(), segment);
 	}
 
 	/**
@@ -280,7 +289,7 @@ public class WorkerUnit {
 	public void removeObstacleSegment(WorkerUnitObstacle segment) {
 		Objects.requireNonNull(segment, "segment");
 
-		boolean status = _getObstacleSegments().remove(segment.getStartTime(), segment);
+		boolean status = obstacleSegments.remove(segment.getStartTime(), segment);
 
 		if (!status)
 			throw new IllegalArgumentException("unknown obstacle segment");
@@ -303,9 +312,8 @@ public class WorkerUnit {
 		if (from.compareTo(to) > 0)
 			throw new IllegalArgumentException("from is after to");
 
-		TreeMap<LocalDateTime, WorkerUnitObstacle> segments = _getObstacleSegments();
-		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = segments.lowerEntry(from);
-		Collection<WorkerUnitObstacle> segmentsSubSet = segments.subMap(from, to).values();
+		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = obstacleSegments.lowerEntry(from);
+		Collection<WorkerUnitObstacle> segmentsSubSet = obstacleSegments.subMap(from, to).values();
 
 		// first segment might not exist
 		Stream<WorkerUnitObstacle> first =
@@ -333,7 +341,7 @@ public class WorkerUnit {
 	 * @return the merged trajectory
 	 */
 	public Trajectory calcMergedTrajectory() {
-		return _getObstacleSegments().values().stream()
+		return obstacleSegments.values().stream()
 			.filter(o -> !(o instanceof IdlingWorkerUnitObstacle))
 			.map(DynamicObstacle::getTrajectory)
 			.reduce((u, v) -> u.merge(v))

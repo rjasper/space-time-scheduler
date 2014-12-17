@@ -115,6 +115,7 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	public Collection<Point> getStartVertices() {
+		// TODO use a stored unmodifiable view
 		return Collections.unmodifiableCollection( _getStartVertices() );
 	}
 
@@ -127,6 +128,7 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	public Collection<Point> getFinishVertices() {
+		// TODO use a stored unmodifiable view
 		return Collections.unmodifiableCollection( _getFinishVertices() );
 	}
 
@@ -147,6 +149,8 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	private void updateVertices() {
+		// TODO how to ensure that vertices are immutable?
+		
 		setCoreVertices( buildCoreVertices() );
 		setStartVertices( buildStartVertices() );
 		setFinishVertices( buildFinishVertices() );

@@ -71,8 +71,8 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 		// TODO check if times is causal (sorted)
 
-		this.spatialPath = immutable(spatialPath);
-		this.times = Collections.unmodifiableList(new ArrayList<>(times));
+		this.spatialPath = unmodifiableList( immutable(spatialPath) );
+		this.times = unmodifiableList(new ArrayList<>(times));
 	}
 
 	/*
@@ -131,7 +131,7 @@ public class SimpleTrajectory extends CachedTrajectory {
 	 */
 	@Override
 	public List<Point> getSpatialPath() {
-		return unmodifiableList(spatialPath);
+		return spatialPath;
 	}
 
 	/*
@@ -140,7 +140,7 @@ public class SimpleTrajectory extends CachedTrajectory {
 	 */
 	@Override
 	public List<LocalDateTime> getTimes() {
-		return unmodifiableList(times);
+		return times;
 	}
 
 	/*

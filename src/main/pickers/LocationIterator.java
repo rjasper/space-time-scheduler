@@ -76,17 +76,19 @@ public class LocationIterator implements Iterator<Point> {
 	private static final int TRASH_AFTER_DUMP = 20;
 
 	/**
-	 * Constructs a new LocationIterator. Picks points from the given space
-	 * but not more than {@code maxPicks} times.
+	 * Constructs a new LocationIterator. Picks points from the given space but
+	 * not more than {@code maxPicks} times.
 	 *
 	 * @param space
 	 * @param maxPicks
-	 * @throws NullPointerException if space is null
-	 * @throws IllegalArgumentException if any of the following is true:
-	 * <ul>
-	 * <li>{@code space} is non-simple or invalid</li>
-	 * <li>{@code maxPicks} is negative</li>
-	 * </ul>
+	 * @throws NullPointerException
+	 *             if space is null
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>{@code space} is non-simple or invalid</li>
+	 *             <li>{@code maxPicks} is negative</li>
+	 *             </ul>
 	 */
 	public LocationIterator(Geometry space, int maxPicks) {
 		Objects.requireNonNull(space, "space");

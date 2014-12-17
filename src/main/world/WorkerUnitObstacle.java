@@ -38,6 +38,8 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 * Stores the path segments of worker which where evading this one.
 	 */
 	private final Set<MovingWorkerUnitObstacle> evasions = new HashSet<>();
+	
+	private final Set<MovingWorkerUnitObstacle> unmodifiableEvations = unmodifiableSet(evasions);
 
 	/**
 	 * Creates a new {@code WorkerUnitObstacle} for the given worker along the
@@ -81,7 +83,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 * @return other worker's path segments which had to evade this obstacle.
 	 */
 	public Set<MovingWorkerUnitObstacle> getEvasions() {
-		return unmodifiableSet(evasions);
+		return unmodifiableEvations;
 	}
 
 	/**
