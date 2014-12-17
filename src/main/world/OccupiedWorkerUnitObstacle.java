@@ -32,6 +32,7 @@ public class OccupiedWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public OccupiedWorkerUnitObstacle(WorkerUnit worker, Task occupation) {
+		// throws NullPointerException
 		super(worker, buildTrajectory(occupation));
 		
 		Objects.requireNonNull(occupation, "occupation");
