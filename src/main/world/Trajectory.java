@@ -93,6 +93,15 @@ public interface Trajectory {
 	 *         spatial path.
 	 */
 	public abstract Geometry getTrace();
+	
+	/**
+	 * Calculates the arc time path (s-t) of this trajectory in relation to the
+	 * given base time.
+	 * 
+	 * @param baseTime
+	 * @return the arc time path.
+	 */
+	public abstract List<Point> calcArcTimePath(LocalDateTime baseTime);
 
 	/**
 	 * Calculates the merge of two trajectories. This trajectory serves as

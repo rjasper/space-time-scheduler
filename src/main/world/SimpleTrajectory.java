@@ -1,6 +1,9 @@
 package world;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.ORDERED;
+import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.LocalDateTime;
@@ -8,8 +11,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
+import jts.geom.factories.EnhancedGeometryBuilder;
 import util.PathOperations;
+import world.util.TrajectoryVertexIterator;
+import world.util.TrajectoryVertexIterator.TrajectoryVertex;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -191,6 +200,19 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 		return times.get(n-1);
 	};
+
+	@Override
+	public List<Point> calcArcTimePath(LocalDateTime baseTime) {
+		TrajectoryVertexIterator it = new TrajectoryVertexIterator(this, baseTime);
+		Spliterator<TrajectoryVertex> spliterator =
+			Spliterators.spliterator(it, size(), IMMUTABLE | ORDERED);
+		
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+		
+		return StreamSupport.stream(spliterator, false)
+			.map(s -> geomBuilder.point(s.getArc(), s.getT()))
+			.collect(toList());
+	}
 
 	/*
 	 * (non-Javadoc)

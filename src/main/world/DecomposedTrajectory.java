@@ -1,12 +1,17 @@
 package world;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.*;
+import static util.DurationConv.*;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.factories.EnhancedGeometryBuilder;
 import util.DurationConv;
 import util.PathOperations;
 
@@ -93,10 +98,12 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		// TODO check components
 		// * same euclidean length (tolerating error?)
 		// * causal arc time path (time ordinates must be non-strictly increasing)
+		
+		// TODO initialize as unmodifiable
 
 		this.baseTime = baseTime;
-		this.spatialPathComponent = immutable(spatialPathComponent);
-		this.arcTimePathComponent = immutable(arcTimePathComponent);
+		this.spatialPathComponent = unmodifiableList( immutable(spatialPathComponent) );
+		this.arcTimePathComponent = unmodifiableList( immutable(arcTimePathComponent) );
 	}
 
 	@Override
@@ -216,6 +223,23 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		Duration duration = DurationConv.ofSeconds(t);
 
 		return baseTime.plus(duration);
+	}
+
+	@Override
+	public List<Point> calcArcTimePath(LocalDateTime baseTime) {
+		LocalDateTime ownBaseTime = getBaseTime();
+		List<Point> arcTimePathComponent = getArcTimePathComponent();
+		
+		if (baseTime.equals(ownBaseTime))
+			return new ArrayList<>();
+		
+		double offset = inSeconds( Duration.between(baseTime, ownBaseTime) );
+		
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
+		
+		return arcTimePathComponent.stream()
+			.map(p -> geomBuilder.point(p.getX(), p.getY() + offset))
+			.collect(toList());
 	}
 
 	/**

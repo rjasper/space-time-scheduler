@@ -1,6 +1,5 @@
 package tasks;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static util.Comparables.max;
@@ -84,7 +83,7 @@ public class TaskPlanner {
 	 * {@link Task} the list of DynamicObstacles might be extended multiple
 	 * times.
 	 */
-	private Collection<DynamicObstacle> currentDynamicObstacles = new LinkedList<>();
+	private Collection<WorkerUnitObstacle> workerObstacles = new LinkedList<>();
 
 	/**
 	 * The location of the {@link Task task}.
@@ -117,7 +116,7 @@ public class TaskPlanner {
 	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
 
 	/**
-	 * <p>Returns {@code true} iff all necessary parameters are set.</p>
+	 * <p>Returns {@code true} if all necessary parameters are set.</p>
 	 *
 	 * <p>The following parameters are to be set by their respective setters:
 	 * <ul>
@@ -131,7 +130,7 @@ public class TaskPlanner {
 	 * </ul>
 	 * </p>
 	 *
-	 * @return {@code true} iff all necessary parameters are set.
+	 * @return {@code true} if all necessary parameters are set.
 	 */
 	public boolean isReady() {
 		return workerUnit        != null
@@ -157,7 +156,7 @@ public class TaskPlanner {
 	 * {@link Task} which is executed by this worker.
 	 *
 	 * @param worker to execute the task
-	 * @throws NullPointerException iff worker is null
+	 * @throws NullPointerException if worker is null
 	 */
 	public void setWorkerUnit(WorkerUnit worker) {
 		Objects.requireNonNull(worker, "worker");
@@ -177,7 +176,7 @@ public class TaskPlanner {
 	 * as {@link DynamicObstacle dynamic obstacles}.
 	 *
 	 * @param workerPool
-	 * @throws iff workerPool is null
+	 * @throws NullPointerException if workerPool is null
 	 */
 	public void setWorkerPool(Collection<WorkerUnit> workerPool) {
 		this.workerPool = new ArrayList<>(workerPool); // throws NullPointException
@@ -194,7 +193,7 @@ public class TaskPlanner {
 	 * Sets the perspective cache.
 	 *
 	 * @param perspectiveCache
-	 * @throws NullPointerException iff perspectiveCache is null
+	 * @throws NullPointerException if perspectiveCache is null
 	 */
 	public void setPerspectiveCache(WorldPerspectiveCache perspectiveCache) {
 		Objects.requireNonNull(perspectiveCache, "perspectiveCache");
@@ -203,48 +202,36 @@ public class TaskPlanner {
 	}
 
 	/**
-	 * Returns the dynamic obstacles of the world. Does not include the worker
-	 * pool.
-	 *
-	 * @return the dynamic obstacles of the world
-	 */
-	private Collection<DynamicObstacle> getDynamicObstacles() {
-		// TODO retrieve dynamic obstacles from perspective as soon as implemented
-
-		return emptyList();
-	}
-
-	/**
-	 * @return the dynamic obstacles currently of interest. This also includes
+	 * @return the worker obstacles currently of interest. This also includes
 	 *         already planned path segments of workers.
 	 */
-	private Collection<DynamicObstacle> getCurrentDynamicObstacles() {
-		return currentDynamicObstacles;
+	private Collection<WorkerUnitObstacle> getWorkerObstacles() {
+		return workerObstacles;
 	}
 
 	/**
-	 * Adds a path segment of a worker to the dynamic obstacles of interests.
+	 * Adds a path segment of a worker to the worker obstacles of interests.
 	 *
 	 * @param segment
 	 */
 	private void addWorkerUnitObstacle(WorkerUnitObstacle segment) {
-		currentDynamicObstacles.add(segment);
+		workerObstacles.add(segment);
 	}
 
 	/**
-	 * Adds multiple dynamic obstacles to the ones of interest.
+	 * Adds multiple worker obstacles to the ones of interest.
 	 *
 	 * @param segments
 	 */
-	private void addAllDynamicObstacles(Collection<DynamicObstacle> segments) {
-		currentDynamicObstacles.addAll(segments);
+	private void addAllWorkerObstacles(Collection<WorkerUnitObstacle> segments) {
+		workerObstacles.addAll(segments);
 	}
 
 	/**
 	 * Clears the collection of dynamic obstacles of interests.
 	 */
 	private void clearCurrentDynamicObstacles() {
-		currentDynamicObstacles.clear();
+		workerObstacles.clear();
 	}
 
 	/**
@@ -355,7 +342,7 @@ public class TaskPlanner {
 	 * workers might also trigger the recalculation of segments of other
 	 * workers recursively.</p>
 	 *
-	 * @return {@code true} iff the task has been successfully planned.
+	 * @return {@code true} if the task has been successfully planned.
 	 */
 	public boolean plan() {
 		if (!isReady())
@@ -375,7 +362,7 @@ public class TaskPlanner {
 	 * is the easier call to {@link #clearCurrentDynamicObstacles() clear}
 	 * the list of dynamic obstacles.</p>
 	 *
-	 * @return {@code true} iff the task has been successfully planned.
+	 * @return {@code true} if the task has been successfully planned.
 	 */
 	private boolean planImpl() {
 		WorkerUnit worker = getWorkerUnit();
@@ -405,9 +392,8 @@ public class TaskPlanner {
 		// determine the path segments to be recalculated
 		Collection<MovingWorkerUnitObstacle> evasions = buildEvasions(segment);
 
-		// prepare current dynamic obstacles
-		addAllDynamicObstacles( getDynamicObstacles() );
-		addAllDynamicObstacles( buildWorkerPoolSegments(evasions, segment) );
+		// prepare worker obstacles
+		addAllWorkerObstacles( buildWorkerPoolSegments(evasions, segment) );
 
 		// make jobs
 		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, segment));
@@ -438,7 +424,7 @@ public class TaskPlanner {
 	 *
 	 * @param startLocation
 	 * @param finishLocation
-	 * @return {@code true} iff a path connecting both locations was found.
+	 * @return {@code true} if a path connecting both locations was found.
 	 */
 	private List<Point> calculateSpatialPath(Point startLocation, Point finishLocation) {
 		SpatialPathfinder pf = getSpatialPathfinder();
@@ -516,7 +502,7 @@ public class TaskPlanner {
 		 * directly or indirectly. The calculation might be unsuccessful if
 		 * a worker is unable to reach its destination in time.
 		 *
-		 * @return {@code true} iff valid path segments could be calculated.
+		 * @return {@code true} if valid path segments could be calculated.
 		 */
 		public abstract boolean calculate();
 
@@ -732,7 +718,7 @@ public class TaskPlanner {
 		 * and {@link #segment} are already set. It sets {@link #evadedToTask}
 		 * and {@link #trajToTask} if the path calculation was successful.</p>
 		 *
-		 * @return {@code true} iff a trajectory to the new task could be calculated.
+		 * @return {@code true} if a trajectory to the new task could be calculated.
 		 */
 		private boolean calculateTrajectoryToTask() {
 			MinimumTimeVelocityPathfinder pf = getMinimumTimeVelocityPathfinder();
@@ -768,7 +754,7 @@ public class TaskPlanner {
 		 * {@link #evadedFromTask} and {@link #trajFromTask} if the path
 		 * calculation was successful.</p>
 		 *
-		 * @return {@code true} iff a trajectory from the new task to the next
+		 * @return {@code true} if a trajectory from the new task to the next
 		 *         one could be calculated.
 		 */
 		private boolean calculateTrajectoryFromTask() {
@@ -988,7 +974,7 @@ public class TaskPlanner {
 	 * @param obsoleteSegment
 	 * @return
 	 */
-	private Collection<DynamicObstacle> buildWorkerPoolSegments(
+	private Collection<WorkerUnitObstacle> buildWorkerPoolSegments(
 		Collection<? extends WorkerUnitObstacle> exclusions,
 		WorkerUnitObstacle obsoleteSegment)
 	{
@@ -1002,7 +988,7 @@ public class TaskPlanner {
 
 	/**
 	 * Builds the the given worker's perspective on the dynamic obstacles.
-	 * It buffers all {@link #currentDynamicObstacles obstacles of interests}
+	 * It buffers all {@link #workerObstacles obstacles of interests}
 	 * by the worker's radius and excludes the path segments of the worker
 	 * itself.
 	 *
@@ -1014,11 +1000,19 @@ public class TaskPlanner {
 
 		// an exact solution would be to calculate the minkowski sum
 		// of each obstacle and the worker's shape
-
-		return getCurrentDynamicObstacles().stream()
+		
+		Stream<DynamicObstacle> worldObstacles = getPerspectiveCache()
+			.getPerspectiveFor(worker)
+			.getWorld()
+			.getDynamicObstacles()
+			.stream();
+		
+		Stream<DynamicObstacle> workerObstacles = getWorkerObstacles().stream()
 			.filter(o -> !(o instanceof WorkerUnitObstacle)
-				|| ((WorkerUnitObstacle) o).getWorkerUnit() != worker)
-			.map(o -> o.buffer(bufferDistance))
+				|| o.getWorkerUnit() != worker)
+			.map(o -> o.buffer(bufferDistance));
+
+		return Stream.concat(worldObstacles, workerObstacles)
 			.collect(toList());
 	}
 

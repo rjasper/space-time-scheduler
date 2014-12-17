@@ -61,7 +61,7 @@ public class WorkerUnitFactory {
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
 
-		World world = new World(emptyList());
+		World world = new World();
 		WorldPerspectiveCache perspectiveCache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 

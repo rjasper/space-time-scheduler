@@ -21,7 +21,7 @@ public class WorldTest {
 
 	@Test
 	public void testEmpty() {
-		World world = new World(emptyList());
+		World world = new World();
 
 		assertThat(world.getMap(), isEmpty());
 	}
@@ -33,7 +33,7 @@ public class WorldTest {
 
 		Collection<Polygon> staticObstacles = Arrays.asList(p1, p2);
 
-		World world = new World(staticObstacles);
+		World world = new World(staticObstacles, emptyList());
 
 		assertThat(world.getMap(), topologicallyEqualTo(p1.union(p2)));
 	}

@@ -1,5 +1,7 @@
 package world.fixtures;
 
+import static java.util.Collections.emptyList;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -34,7 +36,7 @@ public class WorldFixtures {
 			 8.,  6.);
 
 		Collection<Polygon> staticObstacles = Arrays.asList(wall, fence, pillar, cage);
-		World world = new World(staticObstacles);
+		World world = new World(staticObstacles, emptyList());
 
 		return world;
 	}

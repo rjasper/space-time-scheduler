@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import util.NameProvider;
+
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -170,11 +172,13 @@ public class DynamicObstacle implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		// TODO toString not very helpful right now
-		return "DynamicObstacle ["
+		// TODO default string not very helpful right now
+		
+		return NameProvider.nameForOrDefault(this, () ->
+			"DynamicObstacle ["
 			+ "shape=" + getShape() + ", "
 			+ "spatialPath=" + getSpatialPath() + ", "
-			+ "times=" + getTimes() + "]";
+			+ "times=" + getTimes() + "]");
 	}
 
 }

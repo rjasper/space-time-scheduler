@@ -32,12 +32,14 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 		private final Point finishPoint;
 		private final double startTime;
 		private final double duration;
+		private final double length;
 
-		public TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration) {
+		public TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration, double length) {
 			this.startPoint = startPoint;
 			this.finishPoint = finishPoint;
 			this.duration = duration;
 			this.startTime = startTime;
+			this.length = length;
 		}
 
 		public boolean isStationary() {
@@ -58,6 +60,10 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 
 		public double getDuration() {
 			return duration;
+		}
+
+		public double getLength() {
+			return length;
 		}
 
 	}
@@ -104,11 +110,12 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 
 			Duration duration = Duration.between(startTime, finishTime);
 			double seconds = DurationConv.inSeconds(duration);
+			double length = spatialPathSegment.getLength();
 			double startSeconds = accSeconds;
 
 			accSeconds += seconds;
 
-			return new TrajectorySegment(startPoint, finishPoint, startSeconds, seconds);
+			return new TrajectorySegment(startPoint, finishPoint, startSeconds, seconds, length);
 		}
 
 	}

@@ -129,7 +129,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	}
 
 	private WorldPerspectiveCache makeCacheFrom(Collection<Polygon> staticObstacles) {
-		World world = new World(staticObstacles);
+		World world = new World(staticObstacles, emptyList());
 		RadiusBasedWorldPerspectiveCache cache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 
