@@ -1,16 +1,15 @@
 package world;
 
-import static java.util.Collections.*;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
-import util.CollectionsRequire;
 import jts.geom.factories.EnhancedGeometryBuilder;
+import util.CollectionsRequire;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
