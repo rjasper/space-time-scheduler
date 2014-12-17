@@ -29,7 +29,6 @@ import world.util.TrajectorySegmentIterable;
 import world.util.TrajectorySegmentIterable.TrajectorySegment;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -264,17 +263,14 @@ public class ForbiddenRegionBuilder {
 		// TODO might not be necessary to clone
 		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
 
-		transformed.apply(new CoordinateFilter() {
-			@Override
-			public void filter(Coordinate c) {
-				// translated xy-vector with (x0, y1) as origin
-				Vector xyT = new BasicVector(new double[] {c.x - x0, c.y - y0});
+		transformed.apply((Coordinate c) -> {
+			// translated xy-vector with (x0, y1) as origin
+			Vector xyT = new BasicVector(new double[] {c.x - x0, c.y - y0});
 
-				// s = s0
-				c.x = s0;
-				// t = t0 + vt*(xy - xy0)
-				c.y = t0 + pointTraceUnitRowMatrix.multiply(xyT).get(0);
-			}
+			// s = s0
+			c.x = s0;
+			// t = t0 + vt*(xy - xy0)
+			c.y = t0 + pointTraceUnitRowMatrix.multiply(xyT).get(0);
 		});
 
 		return transformed;
@@ -564,19 +560,16 @@ public class ForbiddenRegionBuilder {
 			obstacleTrajectorySegment.getStartTime()
 		});
 
-		region.apply(new CoordinateFilter() {
-			@Override
-			public void filter(Coordinate coord) {
-				Vector spatialVector = new BasicVector(new double[] {coord.x, coord.y});
+		region.apply((Coordinate coord) -> {
+			Vector spatialVector = new BasicVector(new double[] {coord.x, coord.y});
 
-				// ST = M * (XY - XY_0) + ST_0
-				Vector arcTimeVector = transformationMatrix
-					.multiply( spatialVector.subtract(spatialOffset) )
-					.add     ( arcTimeOffset );
+			// ST = M * (XY - XY_0) + ST_0
+			Vector arcTimeVector = transformationMatrix
+				.multiply( spatialVector.subtract(spatialOffset) )
+				.add     ( arcTimeOffset );
 
-				coord.x = arcTimeVector.get(0);
-				coord.y = arcTimeVector.get(1);
-			}
+			coord.x = arcTimeVector.get(0);
+			coord.y = arcTimeVector.get(1);
 		});
 
 		return region;
@@ -658,12 +651,9 @@ public class ForbiddenRegionBuilder {
 		final double dx = translation.getX();
 		final double dy = translation.getY();
 
-		clone.apply(new CoordinateFilter() {
-			@Override
-			public void filter(Coordinate coord) {
-				coord.x += dx;
-				coord.y += dy;
-			}
+		clone.apply((Coordinate c) -> {
+			c.x += dx;
+			c.y += dy;
 		});
 
 		return clone;

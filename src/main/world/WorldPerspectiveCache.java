@@ -31,14 +31,11 @@ public abstract class WorldPerspectiveCache {
 		if (spatialPathfinderClass == null)
 			throw new NullPointerException("spatialPathfinderClass is null");
 
-		return new Supplier<SpatialPathfinder>() {
-			@Override
-			public SpatialPathfinder get() {
-				try {
-					return spatialPathfinderClass.newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new RuntimeException(e);
-				}
+		return () -> {
+			try {
+				return spatialPathfinderClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
 			}
 		};
 	}

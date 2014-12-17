@@ -35,10 +35,11 @@ public class SchedulerTest {
 
 		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
 
-		Specification s1 = sFact.specification( 9., 29., 4., 4., 0, 60, 60);
+		// TODO use other specifications
+//		Specification s1 = sFact.specification( 9., 29., 4., 4., 0, 60, 60);
 		Specification s2 = sFact.specification(21., 27., 6., 6., 0, 60, 60);
 		Specification s3 = sFact.specification( 9.,  7., 6., 6., 0, 60, 60);
-		Specification s4 = sFact.specification(23.,  9., 4., 4., 0, 60, 60);
+//		Specification s4 = sFact.specification(23.,  9., 4., 4., 0, 60, 60);
 
 		Scheduler sc = new Scheduler(world, workers);
 

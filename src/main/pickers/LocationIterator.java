@@ -62,15 +62,8 @@ public class LocationIterator implements Iterator<Point> {
 	/**
 	 * Compares to Envelops by their area size.
 	 */
-	private static final Comparator<Envelope> envelopePriorityComparator = new Comparator<Envelope>() {
-		@Override
-		public int compare(Envelope o1, Envelope o2) {
-			double a1 = o1.getArea();
-			double a2 = o2.getArea();
-
-			return Double.compare(a2, a1);
-		}
-	};
+	private static final Comparator<Envelope> envelopePriorityComparator =
+		(o1, o2) -> Double.compare(o1.getArea(), o2.getArea());
 
 	private static final int MAX_TRASH = 30;
 	private static final int TRASH_AFTER_DUMP = 20;
