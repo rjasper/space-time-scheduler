@@ -71,7 +71,7 @@ public class World {
 	 * @return the map.
 	 */
 	private static Geometry makeMap(Collection<Polygon> staticObstacles) {
-		// for some reason the geometry combinder returns null when receiving
+		// for some reason the geometry combiner returns null when receiving
 		// an empty list instead of some empty geometry
 		if (staticObstacles.size() == 0) {
 			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
