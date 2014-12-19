@@ -53,20 +53,16 @@ public final class ImmutableGeometries {
 		throw new IllegalArgumentException("unknown geometry");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T[] immutable(T[] geometries) {
 		if (geometries == null)
 			return null;
-		
-		int n = geometries.length;
+
 		Class<?> componentType = geometries.getClass().getComponentType();
 		
-		@SuppressWarnings("unchecked")
-		T[] immutables = (T[]) Array.newInstance(componentType, n);
-		
-		for (int i = 0; i < n; ++i)
-			immutables[i] = immutable(geometries[i]);
-		
-		return immutables;
+		return Arrays.stream(geometries)
+			.map(ImmutableGeometries::immutable)
+			.toArray(n -> (T[]) Array.newInstance(componentType, n));
 	}
 	
 	public static <T extends Geometry> List<T> immutable(Collection<T> collection) {
@@ -88,6 +84,9 @@ public final class ImmutableGeometries {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T[] mutable(T[] geometries) {
+		if (geometries == null)
+			return null;
+		
 		Class<?> componentType = geometries.getClass().getComponentType();
 		
 		return Arrays.stream(geometries)
