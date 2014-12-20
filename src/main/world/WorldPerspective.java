@@ -1,5 +1,7 @@
 package world;
 
+import java.util.Objects;
+
 import world.pathfinder.SpatialPathfinder;
 
 public class WorldPerspective {
@@ -9,10 +11,8 @@ public class WorldPerspective {
 	private final SpatialPathfinder spatialPathfinder;
 
 	public WorldPerspective(World world, SpatialPathfinder spatialPathfinder) {
-		if (world == null)
-			throw new NullPointerException("world is null");
-		if (spatialPathfinder == null)
-			throw new NullPointerException("spatialPathfinder is null");
+		Objects.requireNonNull(world, "world");
+		Objects.requireNonNull(spatialPathfinder, "spatialPathfinder");
 
 		spatialPathfinder.setStaticObstacles(world.getStaticObstacles());
 
