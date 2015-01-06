@@ -869,8 +869,6 @@ public class TaskPlanner {
 		 */
 		@Override
 		public boolean calculate() {
-			// XXX last edition
-
 			WorkerUnit worker = segment.getWorkerUnit();
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
@@ -914,13 +912,6 @@ public class TaskPlanner {
 		}
 
 	}
-
-//	private static Duration calcMaxDuration(WorkerUnitObstacle evasion) {
-//		LocalDateTime startTime = evasion.getStartTime();
-//		LocalDateTime finishTime = evasion.getFinishTime();
-//
-//		return Duration.between(startTime, finishTime);
-//	}
 
 	/**
 	 * Filters a given list of dynamic obstacles. Only accepts
@@ -1003,7 +994,7 @@ public class TaskPlanner {
 		
 		Stream<DynamicObstacle> worldObstacles = getPerspectiveCache()
 			.getPerspectiveFor(worker)
-			.getWorld()
+			.getView()
 			.getDynamicObstacles()
 			.stream();
 		

@@ -1,13 +1,11 @@
 package world;
 
 import static java.util.Collections.*;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import util.CollectionsRequire;
 import jts.geom.factories.EnhancedGeometryBuilder;
@@ -71,7 +69,7 @@ public class World {
 	 * @return the map.
 	 */
 	private static Geometry makeMap(Collection<Polygon> staticObstacles) {
-		// for some reason the geometry combinder returns null when receiving
+		// for some reason the geometry combiner returns null when receiving
 		// an empty list instead of some empty geometry
 		if (staticObstacles.size() == 0) {
 			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
