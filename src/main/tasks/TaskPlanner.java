@@ -528,9 +528,9 @@ public class TaskPlanner {
 	 */
 	private class CreateJob extends Job {
 
-		// Since I am using side-effect to be more concise here,
+		// Since I am using side-effects to be more concise here,
 		// I ordered the fields in the order they are assigned during
-		// the livespan of this object to make life a bit easier for the reader.
+		// the lifespan of this object to make life a bit easier for the reader.
 		//
 		// Conciseness was also the reason to omit any getter or setters.
 
