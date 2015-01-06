@@ -100,8 +100,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	@Override
 	protected Collection<Point> buildFinishVertices() {
 		// note that core and start vertices are build before finish vertices
-		Collection<Point> coreVertices = _getCoreVertices();
-		Collection<Point> startVertices = _getStartVertices();
+		Collection<Point> coreVertices = getCoreVertices();
+		Collection<Point> startVertices = getStartVertices();
 		
 		double minArc = getMinArc();
 		double maxArc = getMaxArc();
@@ -171,8 +171,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	
 	@Override
 	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> startVertices = _getStartVertices();
-		Collection<Point> coreVertices = _getCoreVertices();
+		Collection<Point> startVertices = getStartVertices();
+		Collection<Point> coreVertices = getCoreVertices();
 		
 		connect(graph, startVertices, coreVertices);
 	}
@@ -198,8 +198,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		}
 		
 		if (!earliestIncluded) {
-			Collection<Point> core = _getCoreVertices();
-			Collection<Point> start = _getStartVertices();
+			Collection<Point> core = getCoreVertices();
+			Collection<Point> start = getStartVertices();
 			Collection<Point> finish = Collections.singleton( getEarliestFinishVertex() );
 			
 			connect(graph, core, finish);

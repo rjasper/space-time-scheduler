@@ -37,7 +37,8 @@ public class TrajectoryVertexIterator implements Iterator<TrajectoryVertexIterat
 	public TrajectoryVertex next() {
 		Point location = spatialPath.next();
 		LocalDateTime time = times.next();
-		double s = previous == null ? 0.0
+		double s = previous == null
+			? 0.0
 			: previous.s + distance(previous.location, location);
 		double t = inSeconds(Duration.between(baseTime, time));
 		TrajectoryVertex vertex = new TrajectoryVertex(s, t, location, time);

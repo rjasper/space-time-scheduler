@@ -3,6 +3,7 @@ package world;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
 
@@ -50,11 +51,21 @@ public class TrajectoryComposer {
 	private SimpleTrajectory resultTrajectory = null;
 
 	/**
-	 * @return {@code true} if all parameters are provided.
+	 * Checks if parameters are validly set.
+	 * 
+	 * @throws NullPointerException
+	 *             if any parameter is {@code null}.
+	 * @throws IllegalStateException
+	 *             if one component is empty while the other is not.
 	 */
-	public boolean isReady() {
-		return xSpatial != null && ySpatial != null && sSpatial != null
-			&& sArcTime != null && tArcTime != null;
+	public void checkParameters() {
+		// TODO check base time
+		
+		Objects.requireNonNull(xSpatial, "xSpatial");
+		Objects.requireNonNull(sArcTime, "sArcTime");
+		
+		if ((getSpatialPathSize() == 0) ^ (getArcTimePathSize() == 0))
+			throw new IllegalStateException("inconsistent array lengths");
 	}
 
 	// TODO remove
@@ -80,6 +91,9 @@ public class TrajectoryComposer {
 		// TODO use SpatialPathVertexIterator
 
 		int nSpatial = spatialPathComponent.size();
+		
+		if (nSpatial == 1)
+			throw new IllegalArgumentException("singleton list");
 
 		double arcAcc = 0.0;
 		SpatialPathSegmentIterator segments = new SpatialPathSegmentIterator(
@@ -113,6 +127,9 @@ public class TrajectoryComposer {
 		// TODO use ArcTimePathVertexIterator
 
 		int nArcTime = arcTimePathComponent.size();
+		
+		if (nArcTime == 1)
+			throw new IllegalArgumentException("singleton list");
 
 		Iterator<Point> it = arcTimePathComponent.iterator();
 
@@ -125,41 +142,6 @@ public class TrajectoryComposer {
 			sArcTime[i] = p.getX();
 			tArcTime[i] = p.getY();
 		}
-	}
-
-	/**
-	 * @return the spatial x-ordinates.
-	 */
-	private double[] getXSpatial() {
-		return xSpatial;
-	}
-
-	/**
-	 * @return the spatial y-ordinates.
-	 */
-	private double[] getYSpatial() {
-		return ySpatial;
-	}
-
-	/**
-	 * @return the spatial s-ordinates (arc).
-	 */
-	private double[] getSSpatial() {
-		return sSpatial;
-	}
-
-	/**
-	 * @return the arc-time s-ordinates (arc).
-	 */
-	private double[] getSArcTime() {
-		return sArcTime;
-	}
-
-	/**
-	 * @return the arc-time t-ordinates.
-	 */
-	private double[] getTArcTime() {
-		return tArcTime;
 	}
 
 	/**
@@ -199,6 +181,8 @@ public class TrajectoryComposer {
 	 * components.
 	 */
 	public void compose() {
+		checkParameters();
+		
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 
@@ -241,9 +225,6 @@ public class TrajectoryComposer {
 	private void interpolateSpatialTime(double[] tSpatial) {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
-		double[] sSpatial = getSSpatial();
-		double[] sArcTime = getSArcTime();
-		double[] tArcTime = getTArcTime();
 
 		for (int i = 0, j = 0; i < nSpatial; ++i) {
 			while (j < nArcTime - 1 && sSpatial[i] > sArcTime[j])
@@ -278,10 +259,6 @@ public class TrajectoryComposer {
 	private void interpolateArcTimePoints(double[] xArcTime, double[] yArcTime) {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
-		double[] sArcTime = getSArcTime();
-		double[] sSpatial = getSSpatial();
-		double[] xSpatial = getXSpatial();
-		double[] ySpatial = getYSpatial();
 
 		for (int i = 0, j = 0; i < nArcTime; ++i) {
 			while (j < nSpatial - 1 && sArcTime[i] > sSpatial[j])
@@ -330,11 +307,6 @@ public class TrajectoryComposer {
 		double[] yArcTime, double[] x, double[] y, double[] t) {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
-		double[] sSpatial = getSSpatial();
-		double[] xSpatial = getXSpatial();
-		double[] ySpatial = getYSpatial();
-		double[] sArcTime = getSArcTime();
-		double[] tArcTime = getTArcTime();
 
 		int k = 0;
 
