@@ -36,13 +36,11 @@ public class WorldPerspective {
 	 *            of the view.
 	 */
 	public WorldPerspective(World view, SpatialPathfinder spatialPathfinder) {
-		Objects.requireNonNull(view, "view");
-		Objects.requireNonNull(spatialPathfinder, "spatialPathfinder");
+		this.view = Objects.requireNonNull(view, "view");;
+		this.spatialPathfinder = Objects.requireNonNull(spatialPathfinder, "spatialPathfinder");;
 
 		spatialPathfinder.setStaticObstacles(view.getStaticObstacles());
 
-		this.view = view;
-		this.spatialPathfinder = spatialPathfinder;
 	}
 
 	/**
