@@ -41,7 +41,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		// are structurally the same to the ones used in the mesh. Therefore,
 		// the points are already converted immutable here.
 		arcTimeStartPoint = immutable(
-			geomBuilder.point(getMinArc(), inSeconds(getStartTime())));
+			geomBuilder.point(getStartArc(), inSeconds(getStartTime())));
 	}
 
 	private Point getArcTimeFinishPoint() {
@@ -54,7 +54,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		// are structurally the same to the ones used in the mesh. Therefore,
 		// the points are already converted immutable here.
 		arcTimeFinishPoint = immutable(
-			geomBuilder.point(getMaxArc(), inSeconds(getFinishTime())));
+			geomBuilder.point(getFinishArc(), inSeconds(getFinishTime())));
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		Collection<ForbiddenRegion> forbiddenRegions)
 	{
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getMaxArc();
+		double maxArc = getFinishArc();
 		Point startPoint = getArcTimeStartPoint();
 		Point finishPoint = getArcTimeFinishPoint();
 		

@@ -38,7 +38,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	
 	private void updateArcTimeStartPoint() {
 		arcTimeStartPoint = immutable(
-			geomBuilder.point(getMinArc(), inSeconds(getStartTime())));
+			geomBuilder.point(getStartArc(), inSeconds(getStartTime())));
 	}
 
 	private Collection<Point> getArcTimeFinishPoints() {
@@ -66,7 +66,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		Collection<ForbiddenRegion> forbiddenRegions)
 	{
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getMaxArc();
+		double maxArc = getFinishArc();
 		double bufferDuration = DurationConv.inSeconds( getBufferDuration() );
 		Point startPoint = getArcTimeStartPoint();
 		double earliest = inSeconds( getEarliestFinishTime() );
