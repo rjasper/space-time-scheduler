@@ -10,8 +10,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
- * The {@code SpatialPathfinder} is the abstract base class for spatial
- * pathfinders. A spatial pathfinder searches the path connecting two locations
+ * The {@code SpatialPathfinder} is the abstract base class for spatial path
+ * finders. A spatial path finder searches the path connecting two locations
  * while avoiding any static obstacle.
  * 
  * @author Rico
