@@ -54,5 +54,7 @@ class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {
 	public ImmutableLinearRing clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

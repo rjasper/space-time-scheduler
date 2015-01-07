@@ -62,5 +62,7 @@ class ImmutableMultiLineString extends MultiLineString implements ImmutableGeome
 	public ImmutableMultiLineString clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

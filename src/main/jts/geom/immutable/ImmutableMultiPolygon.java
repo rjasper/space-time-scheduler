@@ -62,5 +62,7 @@ class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeometry {
 	public ImmutableMultiPolygon clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

@@ -50,5 +50,7 @@ class ImmutablePoint extends Point implements ImmutableGeometry {
 	public ImmutablePoint clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

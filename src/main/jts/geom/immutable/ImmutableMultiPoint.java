@@ -62,5 +62,7 @@ class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry {
 	public ImmutableMultiPoint clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }
