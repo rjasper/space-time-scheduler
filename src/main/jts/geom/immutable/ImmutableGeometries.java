@@ -26,6 +26,7 @@ public final class ImmutableGeometries {
 		return geometry instanceof ImmutableGeometry;
 	}
 	
+	// TODO split into specialized methods like "ImmutablePoint immutable(Point)"
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T immutable(T geometry) {
 		if (geometry == null)
