@@ -1,15 +1,11 @@
 package world.pathfinder;
 
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
-import static com.vividsolutions.jts.geom.Location.*;
-import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
+import static com.vividsolutions.jts.geom.Location.INTERIOR;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -136,6 +132,10 @@ public abstract class ArcTimeMeshBuilder {
 		this.regionMap = regionMap;
 	}
 
+	/**
+	 * Rebuilds the {@link #regionMap} by calculating the union of all forbidden
+	 * regions.
+	 */
 	private void updateRegionMap() {
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		
