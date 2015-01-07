@@ -16,25 +16,50 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Implements a {@link FixTimeVelocityPathfinder}. The resulting velocity
+ * profile consists of straight line segments along the vertices of forbidden
+ * regions. While this is a very simple solution it may result in unnecessary
+ * slow movement instead of stopping and waiting.
+ * 
+ * @author Rico
+ */
 public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 
 	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	
-	private FixTimeMeshBuilder meshBuilder =
-		new FixTimeMeshBuilder();
+	/**
+	 * The mesh builder.
+	 */
+	private FixTimeMeshBuilder meshBuilder = new FixTimeMeshBuilder();
 	
+	/**
+	 * The arc-time start point.
+	 */
 	private Point arcTimeStartPoint;
 	
+	/**
+	 * The arc-time finish point.
+	 */
 	private Point arcTimeFinishPoint;
 	
+	/**
+	 * @return the mesh builder.
+	 */
 	private FixTimeMeshBuilder getMeshBuilder() {
 		return meshBuilder;
 	}
 
+	/**
+	 * @return the arc-time start point.
+	 */
 	private Point getArcTimeStartPoint() {
 		return arcTimeStartPoint;
 	}
 	
+	/**
+	 * Updates the arc-time start point using the start arc and time.
+	 */
 	private void updateArcTimeStartPoint() {
 		// The mesh builder uses immutable geometries.
 		// It is important that the start point and the finish point
@@ -44,10 +69,16 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 			geomBuilder.point(getStartArc(), inSeconds(getStartTime())));
 	}
 
+	/**
+	 * @return the arc-time finish point.
+	 */
 	private Point getArcTimeFinishPoint() {
 		return arcTimeFinishPoint;
 	}
 	
+	/**
+	 * Updates the arc-time finish point using the finish arc and time.
+	 */
 	private void updateArcTimeFinishPoint() {
 		// The mesh builder uses immutable geometries.
 		// It is important that the start point and the finish point
@@ -57,6 +88,10 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 			geomBuilder.point(getFinishArc(), inSeconds(getFinishTime())));
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.pathfinder.VelocityPathfinder#calculateArcTimePath(java.util.Collection)
+	 */
 	@Override
 	protected List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
 		updateArcTimeStartPoint();
@@ -71,6 +106,12 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		return arcTimePath;
 	}
 
+	/**
+	 * Builds the mesh avoiding the given forbidden regions.
+	 * 
+	 * @param forbiddenRegions
+	 * @return the mesh
+	 */
 	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> buildMesh(
 		Collection<ForbiddenRegion> forbiddenRegions)
 	{
@@ -92,6 +133,12 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		return builder.getResultMesh();
 	}
 
+	/**
+	 * Calculates the shortest path through the mesh.
+	 * 
+	 * @param mesh
+	 * @return the shortest path.
+	 */
 	private List<Point> calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
