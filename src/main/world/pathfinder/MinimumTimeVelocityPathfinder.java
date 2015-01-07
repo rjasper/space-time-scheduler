@@ -67,6 +67,8 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	 * Sets the start time.
 	 * 
 	 * @param startTime
+	 * @throws NullPointerException
+	 *             if startTime is {@code null}.
 	 */
 	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = Objects.requireNonNull(startTime, "startTime");
@@ -83,6 +85,8 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	 * Sets the earliest finish time.
 	 * 
 	 * @param earliestFinishTime
+	 * @throws NullPointerException
+	 *             if earliestFinishTime is {@code null}.
 	 */
 	public void setEarliestFinishTime(LocalDateTime earliestFinishTime) {
 		this.earliestFinishTime =
@@ -100,6 +104,8 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	 * Sets the latest finish time.
 	 * 
 	 * @param latestFinishTime
+	 * @throws NullPointerException
+	 *             if latestFinishTime is {@code null}.
 	 */
 	public void setLatestFinishTime(LocalDateTime latestFinishTime) {
 		this.latestFinishTime =
@@ -124,6 +130,10 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	 * </p>
 	 * 
 	 * @param bufferDuration
+	 * @throws NullPointerException
+	 *             if bufferDuratioin is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if bufferDuration is negative.
 	 */
 	public void setBufferDuration(Duration bufferDuration) {
 		Objects.requireNonNull(bufferDuration, "bufferDuration");

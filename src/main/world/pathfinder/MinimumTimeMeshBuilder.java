@@ -84,6 +84,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * Sets the start vertex.
 	 * 
 	 * @param startPoint
+	 * @throws NullPointerException
+	 *             if startPoint is {@code null}.
 	 */
 	public void setStartPoint(Point startPoint) {
 		Objects.requireNonNull(startPoint, "startPoint");
@@ -102,6 +104,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * Sets the earliest time for finish vertices.
 	 * 
 	 * @param earliestFinishTime
+	 * @throws IllegalArgumentException
+	 *             if earliestFinishTime is not finite.
 	 */
 	public void setEarliestFinishTime(double earliestFinishTime) {
 		if (!Double.isFinite(earliestFinishTime))
@@ -121,6 +125,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * Sets the latest time for finish vertices.
 	 * 
 	 * @param latestFinishTime
+	 * @throws IllegalArgumentException
+	 *             if latestFinishTime is not finite.
 	 */
 	public void setLatestFinishTime(double latestFinishTime) {
 		if (!Double.isFinite(latestFinishTime))
@@ -149,9 +155,10 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * </p>
 	 * 
 	 * @param bufferDuration
+	 * @throws IllegalArgumentException if bufferDuration is not non-positive
 	 */
 	public void setBufferDuration(double bufferDuration) {
-		if (!Double.isFinite(bufferDuration))
+		if (!Double.isFinite(bufferDuration) || bufferDuration >= 0.0)
 			throw new IllegalArgumentException("value is not finite");
 		
 		this.bufferDuration = bufferDuration;

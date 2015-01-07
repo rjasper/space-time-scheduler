@@ -17,6 +17,8 @@ import jts.geom.factories.StaticJtsFactories;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import util.CollectionsRequire;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -108,8 +110,12 @@ public abstract class ArcTimeMeshBuilder {
 	 * Sets the forbidden regions.
 	 * 
 	 * @param forbiddenRegions
+	 * @throws NullPointerException
+	 *             if forbiddenRegions is or contains {@code null}.
 	 */
 	public void setForbiddenRegions(Collection<ForbiddenRegion> forbiddenRegions) {
+		CollectionsRequire.requireContainsNonNull(forbiddenRegions, "forbiddenRegions");
+		
 		this.forbiddenRegions = new ArrayList<>(forbiddenRegions);
 		
 		// reset the region map

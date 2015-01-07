@@ -54,6 +54,8 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 	 * Sets the start time.
 	 * 
 	 * @param startTime
+	 * @throws NullPointerException
+	 *             if startTime is {@code null}.
 	 */
 	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = Objects.requireNonNull(startTime);
@@ -70,6 +72,8 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 	 * Sets the finish time.
 	 * 
 	 * @param finishTime
+	 * @throws NullPointerException
+	 *             if finishTime is {@code null}.
 	 */
 	public void setFinishTime(LocalDateTime finishTime) {
 		this.finishTime = Objects.requireNonNull(finishTime);

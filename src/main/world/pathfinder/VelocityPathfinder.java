@@ -128,6 +128,8 @@ public abstract class VelocityPathfinder {
 	 * Sets the dynamic obstacles.
 	 * 
 	 * @param dynamicObstacles
+	 * @throws NullPointerException
+	 *             if dynamicObstacles is {@code null}.
 	 */
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
@@ -135,10 +137,22 @@ public abstract class VelocityPathfinder {
 		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
 	}
 
+	/**
+	 * @return the spatial path component of the trajectory to be calculated.
+	 */
 	protected List<Point> getSpatialPath() {
 		return spatialPath;
 	}
 
+	/**
+	 * Sets the spatial path component of the trajectory to be calculated.
+	 * 
+	 * @param spatialPath
+	 * @throws NullPointerException
+	 *             if spatialPath is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if spatialPath is empty.
+	 */
 	public void setSpatialPath(List<Point> spatialPath) {
 		Objects.requireNonNull(spatialPath);
 		
@@ -150,33 +164,65 @@ public abstract class VelocityPathfinder {
 		this.spatialPath = immutable(spatialPath);
 	}
 
+	/**
+	 * @return the maximum speed.
+	 */
 	protected double getMaxSpeed() {
 		return maxSpeed;
 	}
 
+	/**
+	 * Sets the maximum speed.
+	 * 
+	 * @param maxSpeed
+	 * @throws IllegalArgumentException
+	 *             if the maxSpeed is not positive finite.
+	 */
 	public void setMaxSpeed(double maxSpeed) {
-		if (maxSpeed <= 0.0 || !Double.isFinite(maxSpeed))
+		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0.0)
 			throw new IllegalArgumentException("invalid maximum speed value");
 		
 		this.maxSpeed = maxSpeed;
 	}
 
+	/**
+	 * @return the calculated trajectory.
+	 */
 	public DecomposedTrajectory getResultTrajectory() {
 		return resultTrajectory;
 	}
 
+	/**
+	 * Sets the calculated trajectory.
+	 * 
+	 * @param resultTrajectory
+	 */
 	private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 
+	/**
+	 * @return the evaded dynamic obstacles.
+	 */
 	public Collection<DynamicObstacle> getResultEvadedObstacles() {
 		return resultEvadedObstacles;
 	}
 
+	/**
+	 * Sets the evaded dynamic obstacles.
+	 * 
+	 * @param resultEvadedObstacles
+	 */
 	private void setResultEvadedObstacles(Collection<DynamicObstacle> resultEvadedObstacles) {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
 	
+	/**
+	 * Calculates the velocity profile and trajectory from start to finish arc
+	 * while avoiding all dynamic obstacles.
+	 * 
+	 * @return true if a trajectory could be calculated.
+	 */
 	public final boolean calculate() {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
@@ -204,6 +250,11 @@ public abstract class VelocityPathfinder {
 		return reachable;
 	}
 	
+	/**
+	 * Calculates the forbidden regions.
+	 * 
+	 * @return the forbidden regions.
+	 */
 	private Collection<ForbiddenRegion> calculateForbiddenRegions() {
 		LocalDateTime baseTime = getBaseTime();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
@@ -220,8 +271,21 @@ public abstract class VelocityPathfinder {
 		return builder.getResultForbiddenRegions();
 	}
 
+	/**
+	 * Calculates the arc-time path avoiding the forbidden regions.
+	 * 
+	 * @param forbiddenRegions
+	 * @return the arc-time path.
+	 */
 	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
 	
+	/**
+	 * Calculates the evaded dynamic obstacles.
+	 * 
+	 * @param forbiddenRegions
+	 * @param arcTimePath
+	 * @return the evaded dynamic obstacles.
+	 */
 	private Collection<DynamicObstacle> calculateEvadedObstacles(
 		Collection<ForbiddenRegion> forbiddenRegions,
 		List<Point> arcTimePath)
@@ -243,6 +307,12 @@ public abstract class VelocityPathfinder {
 			.collect(toSet());
 	}
 
+	/**
+	 * Builds the trajectory with the given velocity profile.
+	 * 
+	 * @param arcTimePath the velocity profile.
+	 * @return the trajectory.
+	 */
 	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		List<Point> spatialPath = getSpatialPath();
@@ -250,6 +320,12 @@ public abstract class VelocityPathfinder {
 		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath);
 	}
 
+	/**
+	 * Converts the given time into a double value of seconds.
+	 * 
+	 * @param time
+	 * @return the seconds.
+	 */
 	protected double inSeconds(LocalDateTime time) {
 		Duration duration = Duration.between(getBaseTime(), time);
 		

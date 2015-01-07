@@ -39,6 +39,8 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * Sets the start vertex.
 	 * 
 	 * @param startPoint
+	 * @throws NullPointerException
+	 *             if startPoint is {@code null}
 	 */
 	public void setStartPoint(Point startPoint) {
 		Objects.requireNonNull(startPoint, "startPoint");
@@ -57,6 +59,8 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * Sets the finish vertex.
 	 * 
 	 * @param finishPoint
+	 * @throws NullPointerException
+	 *             if finishPoint is {@code null}
 	 */
 	public void setFinishPoint(Point finishPoint) {
 		Objects.requireNonNull(finishPoint, "finishPoint");

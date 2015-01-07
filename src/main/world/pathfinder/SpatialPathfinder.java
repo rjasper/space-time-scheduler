@@ -59,6 +59,8 @@ public abstract class SpatialPathfinder {
 	 * Sets the static obstacles.
 	 * 
 	 * @param staticObstacles
+	 * @throws NullPointerException
+	 *             if staticObstacles is {@code null}.
 	 */
 	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
 		Objects.requireNonNull(staticObstacles, "staticObstacles");
@@ -93,6 +95,8 @@ public abstract class SpatialPathfinder {
 	 * Sets the start location.
 	 * 
 	 * @param startLocation
+	 * @throws NullPointerException
+	 *             if startLocation is {@code null}.
 	 */
 	public void setStartLocation(Point startLocation) {
 		Objects.requireNonNull(startLocation, "startLocation");
@@ -111,6 +115,8 @@ public abstract class SpatialPathfinder {
 	 * Sets the finish location.
 	 * 
 	 * @param finishLocation
+	 * @throws NullPointerException
+	 *             if finishLocation is {@code null}.
 	 */
 	public void setFinishLocation(Point finishLocation) {
 		Objects.requireNonNull(finishLocation, "finishLocation");

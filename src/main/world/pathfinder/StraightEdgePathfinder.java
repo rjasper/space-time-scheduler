@@ -137,6 +137,8 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * </p>
 	 * 
 	 * @param maxConnectionDistance
+	 * @throws IllegalArgumentException
+	 *             if maxConnectionDistance is not positive.
 	 */
 	public void setMaxConnectionDistance(double maxConnectionDistance) {
 		if (Double.isNaN(maxConnectionDistance) || maxConnectionDistance <= 0.0)
