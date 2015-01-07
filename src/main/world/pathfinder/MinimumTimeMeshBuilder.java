@@ -158,7 +158,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * @throws IllegalArgumentException if bufferDuration is not non-positive
 	 */
 	public void setBufferDuration(double bufferDuration) {
-		if (!Double.isFinite(bufferDuration) || bufferDuration >= 0.0)
+		if (!Double.isFinite(bufferDuration) || bufferDuration < 0.0)
 			throw new IllegalArgumentException("value is not finite");
 		
 		this.bufferDuration = bufferDuration;
