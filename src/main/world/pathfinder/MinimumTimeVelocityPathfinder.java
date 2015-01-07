@@ -69,7 +69,7 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	 * @param startTime
 	 */
 	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = startTime;
+		this.startTime = Objects.requireNonNull(startTime, "startTime");
 	}
 
 	/**
