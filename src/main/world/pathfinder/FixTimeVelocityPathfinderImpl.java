@@ -134,10 +134,10 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	}
 
 	/**
-	 * Calculates the shortest path through the mesh.
+	 * Calculates a path through the mesh.
 	 * 
 	 * @param mesh
-	 * @return the shortest path.
+	 * @return the path.
 	 */
 	private List<Point> calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
