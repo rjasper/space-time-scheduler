@@ -14,9 +14,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import util.CollectionsRequire;
 import util.DurationConv;
 import util.PathOperations;
 import world.DecomposedTrajectory;
@@ -128,6 +130,8 @@ public abstract class VelocityPathfinder {
 	 * @param dynamicObstacles
 	 */
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
+		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
+		
 		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
 	}
 
@@ -136,8 +140,10 @@ public abstract class VelocityPathfinder {
 	}
 
 	public void setSpatialPath(List<Point> spatialPath) {
-		if (spatialPath == null)
-			throw new NullPointerException("path cannot be null");
+		Objects.requireNonNull(spatialPath);
+		
+//		if (spatialPath == null)
+//			throw new NullPointerException("path cannot be null");
 		if (spatialPath.size() < 2)
 			throw new IllegalArgumentException("path too short");
 		

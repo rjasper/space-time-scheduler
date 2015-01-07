@@ -4,6 +4,7 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -40,6 +41,8 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * @param startPoint
 	 */
 	public void setStartPoint(Point startPoint) {
+		Objects.requireNonNull(startPoint, "startPoint");
+		
 		this.startPoint = immutable(startPoint);
 	}
 
@@ -56,6 +59,8 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * @param finishPoint
 	 */
 	public void setFinishPoint(Point finishPoint) {
+		Objects.requireNonNull(finishPoint, "finishPoint");
+		
 		this.finishPoint = immutable(finishPoint);
 	}
 

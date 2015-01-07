@@ -5,6 +5,7 @@ import static java.util.Collections.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -60,6 +61,8 @@ public abstract class SpatialPathfinder {
 	 * @param staticObstacles
 	 */
 	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
+		Objects.requireNonNull(staticObstacles, "staticObstacles");
+		
 		this.staticObstacles = unmodifiableList(immutable(staticObstacles));
 	}
 
@@ -92,6 +95,8 @@ public abstract class SpatialPathfinder {
 	 * @param startLocation
 	 */
 	public void setStartLocation(Point startLocation) {
+		Objects.requireNonNull(startLocation, "startLocation");
+		
 		this.startLocation = immutable(startLocation);
 	}
 
@@ -108,6 +113,8 @@ public abstract class SpatialPathfinder {
 	 * @param finishLocation
 	 */
 	public void setFinishLocation(Point finishLocation) {
+		Objects.requireNonNull(finishLocation, "finishLocation");
+		
 		this.finishLocation = immutable(finishLocation);
 	}
 

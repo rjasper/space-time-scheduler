@@ -15,6 +15,7 @@ import straightedge.geom.path.NodeConnector;
 import straightedge.geom.path.PathBlockingObstacle;
 import straightedge.geom.path.PathData;
 import straightedge.geom.path.PathFinder;
+import util.CollectionsRequire;
 
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -61,6 +62,8 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 */
 	@Override
 	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
+		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
+		
 		// Convertes the static obstacles to PathBlockingObstacles and
 		// configures the node connector.
 		

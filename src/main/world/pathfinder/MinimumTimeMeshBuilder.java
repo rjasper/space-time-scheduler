@@ -6,6 +6,7 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -85,6 +86,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * @param startPoint
 	 */
 	public void setStartPoint(Point startPoint) {
+		Objects.requireNonNull(startPoint, "startPoint");
+		
 		this.startPoint = immutable(startPoint);
 	}
 
