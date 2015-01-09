@@ -374,7 +374,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 */
 	private boolean check(WorkerUnit worker, IdleSlot slot) {
 		Duration d = getDuration();
-		double vInv = 1. / worker.getMaxSpeed(); // TODO repeating calculation
+		double vInv = 1. / worker.getMaxSpeed();
 		Point p = getLocation();
 		LocalDateTime earliest = getEarliestStartTime();
 		LocalDateTime latest = getLatestStartTime();
