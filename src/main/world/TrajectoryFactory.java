@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
@@ -46,15 +47,18 @@ public class TrajectoryFactory {
 	}
 
 	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t) {
-		// TODO check sizes
-		
 		int n = x.length;
 		
 		return trajectory(x, y, t, n);
 	}
 
 	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t, int n) {
-		// TODO check sizes
+		Objects.requireNonNull(x, "x");
+		Objects.requireNonNull(y, "y");
+		Objects.requireNonNull(t, "t");
+		
+		if (n < 0)
+			throw new IllegalArgumentException("n less than 0");
 		
 		List<Point> path = new ArrayList<>(n);
 		

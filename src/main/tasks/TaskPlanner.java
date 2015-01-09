@@ -459,12 +459,10 @@ public class TaskPlanner {
 		 */
 		private final Duration jobDuration;
 
-		// TODO don't cache since class is private and outside behavior is known
-
 		/**
 		 * Cached laxity value.
 		 */
-		private transient double laxity = Double.NaN;
+		private double laxity;
 
 		/**
 		 * Constructs a Job with a duration.
@@ -692,24 +690,27 @@ public class TaskPlanner {
 			segmentToTask = new MovingWorkerUnitObstacle(worker, trajToTask, task);
 			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
 
-			// TODO what if the trajFromTask's duration is 0?
-
 			if (segment instanceof MovingWorkerUnitObstacle) {
 				Task nextTask = ((MovingWorkerUnitObstacle) segment).getGoal();
-				segmentFromTask = new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
+				
+				// don't introduce trajectories without duration
+				segmentFromTask = trajFromTask.getDuration().isZero()
+					? null
+					: new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
 			} else if (segment instanceof IdlingWorkerUnitObstacle) {
 				LocalDateTime taskFinishTime = task.getFinishTime();
 				segmentFromTask = new IdlingWorkerUnitObstacle(worker, taskLocation, taskFinishTime);
 			} else {
-				// TODO reconsider error type
-				throw new ClassCastException("unexpected WorkerUnitObstacle");
+				throw new RuntimeException("unexpected WorkerUnitObstacle");
 			}
 
 			// add segments to current dynamic obstacles
 
 			addWorkerUnitObstacle(segmentToTask);
 			addWorkerUnitObstacle(segmentAtTask);
-			addWorkerUnitObstacle(segmentFromTask);
+			// there might not be a successive trajectory
+			if (segmentFromTask != null)
+				addWorkerUnitObstacle(segmentFromTask);
 
 			return true;
 		}
@@ -765,8 +766,6 @@ public class TaskPlanner {
 		 *         one could be calculated.
 		 */
 		private boolean calculateTrajectoryFromTask() {
-			// TODO IdlingWorkerUnitObstacle cannot evade other workers
-
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 
 			pf.setDynamicObstacles( dynamicObstacles        );
@@ -801,7 +800,6 @@ public class TaskPlanner {
 			for (WorkerUnitObstacle e : evadedToTask)
 				e.addEvasion(segmentToTask);
 
-			// TODO IdlingWorkerUnitObstacles should also be able to evade
 			if (segmentFromTask instanceof MovingWorkerUnitObstacle) {
 				for (WorkerUnitObstacle e : evadedFromTask)
 					e.addEvasion((MovingWorkerUnitObstacle) segmentFromTask);
@@ -812,7 +810,9 @@ public class TaskPlanner {
 			worker.removeObstacleSegment(segment);
 			worker.addObstacleSegment(segmentToTask);
 			worker.addObstacleSegment(segmentAtTask);
-			worker.addObstacleSegment(segmentFromTask);
+			// there might not be a successive trajectory
+			if (segmentFromTask != null)
+				worker.addObstacleSegment(segmentFromTask);
 			worker.addTask(task);
 		}
 

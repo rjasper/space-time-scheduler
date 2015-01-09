@@ -172,13 +172,8 @@ public class DynamicObstacle implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		// TODO default string not very helpful right now
-		
 		return NameProvider.nameForOrDefault(this, () ->
-			"DynamicObstacle ["
-			+ "shape=" + getShape() + ", "
-			+ "spatialPath=" + getSpatialPath() + ", "
-			+ "times=" + getTimes() + "]");
+			String.format("(%s, %s)", getShape(), getTrajectory()));
 	}
 
 }

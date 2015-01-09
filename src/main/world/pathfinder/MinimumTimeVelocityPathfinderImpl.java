@@ -123,7 +123,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);
-		builder.setMaxArc(maxArc);
+		builder.setFinishArc(maxArc);
 		builder.setStartPoint(startPoint);
 		builder.setEarliestFinishTime(earliest);
 		builder.setLatestFinishTime(latest);

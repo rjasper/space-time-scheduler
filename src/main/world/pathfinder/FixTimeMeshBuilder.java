@@ -4,7 +4,6 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 
 import jts.geom.util.GeometriesRequire;
 
@@ -105,14 +104,20 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 */
 	@Override
 	protected double calculateWeight(Point from, Point to) {
+		// calculates the square error of the points' velocity in respect to the
+		// average speed
+		
+		double s1 = from.getX(), s2 = to.getX();
 		double t1 = from.getY(), t2 = to.getY();
+		double v = (s2-s1) / (t2-t1);
 		
-		// TODO reconsider weight cost function
-		// for fix time pretty dumb
-		// maybe: square error to average speed
-		// (maxArc/duration - (s2-s1)/(t2-t1))^2
+		double totalLength   = finishPoint.getX() - startPoint.getX();
+		double totalDuration = finishPoint.getY() - startPoint.getY();
+		double vAvr = totalLength/totalDuration;
 		
-		return t2 - t1;
+		double error = vAvr - v;
+		
+		return error*error;
 	}
 
 }

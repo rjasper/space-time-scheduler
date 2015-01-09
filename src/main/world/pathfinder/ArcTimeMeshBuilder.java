@@ -36,9 +36,9 @@ import com.vividsolutions.jts.geom.Point;
 public abstract class ArcTimeMeshBuilder {
 	
 	/**
-	 * The minimum arc value.
+	 * The finish arc value.
 	 */
-	protected static final double MIN_ARC = 0.0;
+	protected static final double START_ARC = 0.0;
 	
 	/**
 	 * The forbidden regions.
@@ -56,9 +56,9 @@ public abstract class ArcTimeMeshBuilder {
 	private double maxSpeed = Double.NaN;
 	
 	/**
-	 * The maximum arc value.
+	 * The finish arc value.
 	 */
-	private double maxArc = Double.NaN;
+	private double finishArc = Double.NaN;
 	
 	/**
 	 * The core vertices.
@@ -96,7 +96,7 @@ public abstract class ArcTimeMeshBuilder {
 	public boolean isReady() {
 		return forbiddenRegions != null
 			&& !Double.isNaN(maxSpeed)
-			&& !Double.isNaN(maxArc);
+			&& !Double.isNaN(finishArc);
 	}
 
 	/**
@@ -176,31 +176,31 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	/**
-	 * @return the minimum arc value.
+	 * @return the start arc value.
 	 */
-	protected double getMinArc() {
-		return MIN_ARC;
+	protected double getStartArc() {
+		return START_ARC;
 	}
 
 	/**
-	 * @return the maximum arc value.
+	 * @return the finish arc value.
 	 */
-	protected double getMaxArc() {
-		return maxArc;
+	protected double getFinishArc() {
+		return finishArc;
 	}
 
 	/**
-	 * Sets the maximum arc value.
+	 * Sets the finish arc value.
 	 * 
 	 * @param maxArc
 	 * @throws IllegalArgumentException
 	 *             if the maxArc is not non-negative finite.
 	 */
-	public void setMaxArc(double maxArc) {
+	public void setFinishArc(double maxArc) {
 		if (!Double.isFinite(maxArc) || maxArc < 0.0)
 			throw new IllegalArgumentException("maxArc is not non-negative finite");
 		
-		this.maxArc = maxArc;
+		this.finishArc = maxArc;
 	}
 
 	/**
@@ -382,7 +382,7 @@ public abstract class ArcTimeMeshBuilder {
 		forbiddenRegions = null;
 		regionMap = null;
 		maxSpeed = Double.NaN;
-		maxArc = Double.NaN;
+		finishArc = Double.NaN;
 		coreVertices = null;
 		startVertices = null;
 		finishVertices = null;
@@ -543,8 +543,8 @@ public abstract class ArcTimeMeshBuilder {
 	 * @return
 	 */
 	protected boolean checkConnection(Point from, Point to) {
-		double minArc = getMinArc();
-		double maxArc = getMaxArc();
+		double minArc = getStartArc();
+		double maxArc = getFinishArc();
 		double minTime = getMinTime();
 		double maxTime = getMaxTime();
 		double maxSpeed = getMaxSpeed();

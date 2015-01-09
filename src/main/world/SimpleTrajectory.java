@@ -104,8 +104,6 @@ public class SimpleTrajectory extends CachedTrajectory {
 			if (other.spatialPath != null)
 				return false;
 		} else if (!spatialPath.equals(other.spatialPath))
-		// TODO quick check, no fix
-//		} else if (!mutable(spatialPath).equals(mutable(other.spatialPath)))
 			return false;
 		if (times == null) {
 			if (other.times != null)

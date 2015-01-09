@@ -6,7 +6,6 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -218,8 +217,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		Collection<Point> coreVertices = getCoreVertices();
 		Collection<Point> startVertices = getStartVertices();
 		
-		double minArc = getMinArc();
-		double maxArc = getMaxArc();
+		double minArc = getStartArc();
+		double maxArc = getFinishArc();
 		double earliest = getEarliestFinishTime();
 		
 		Point earliestFinishVertex = geomBuilder.point(maxArc, earliest);
@@ -261,7 +260,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		
 		double s = origin.getX(), t = origin.getY();
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getMaxArc();
+		double maxArc = getFinishArc();
 		
 		if (s == maxArc) {
 			return new VertexPair(origin, origin);

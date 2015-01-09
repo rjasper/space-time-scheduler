@@ -402,7 +402,6 @@ public class ForbiddenRegionBuilder {
 		double s0 = spatialPathSegment.getStartArc();
 		double t0 = obstacleTrajectorySegment.getStartTime();
 
-		// TODO might not be necessary to clone
 		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
 
 		transformed.apply((Coordinate c) -> {
@@ -803,7 +802,6 @@ public class ForbiddenRegionBuilder {
 		Geometry maskedMovedObstacleShape,
 		Matrix transformationMatrix)
 	{
-		// TODO might not be necessary to clone
 		Geometry region = (Geometry) maskedMovedObstacleShape.clone();
 		Vector spatialOffset = makeVector( spatialPathSegment.getStartPoint() );
 		Vector arcTimeOffset = new BasicVector(new double[] {

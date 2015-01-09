@@ -33,7 +33,10 @@ public class SpecificationFactory {
 	}
 
 	public Specification specification(double x, double y, double width, double height, long tMin, long tMax, long d) {
-		// TODO check width > 0, height > 0
+		if (!Double.isFinite(width) || width <= 0)
+			throw new IllegalArgumentException("width is not a positive finite");
+		if (!Double.isFinite(height) || height <= 0)
+			throw new IllegalArgumentException("height is not a positive finite");
 		
 		Polygon area = gBuilder.box(x, y, x + width, y + height);
 		LocalDateTime earliestStartTime = timeFact.second(tMin);

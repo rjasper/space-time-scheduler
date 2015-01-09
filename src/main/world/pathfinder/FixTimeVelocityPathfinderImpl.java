@@ -124,7 +124,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);
-		builder.setMaxArc(maxArc);
+		builder.setFinishArc(maxArc);
 		builder.setStartPoint(startPoint);
 		builder.setFinishPoint(finishPoint);
 		

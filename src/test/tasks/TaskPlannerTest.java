@@ -39,6 +39,8 @@ public class TaskPlannerTest {
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
 	private static final EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	private static final TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
+	
+	// TODO test tight plan
 
 	private static boolean planTask(
 		TaskPlanner taskPlanner,
