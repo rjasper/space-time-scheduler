@@ -11,6 +11,8 @@ import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
 
 import com.vividsolutions.jts.geom.Point;
 
+//TODO remove iterables, iterator only
+
 public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIterable.TrajectorySegment> {
 
 	private final Trajectory trajectory;
