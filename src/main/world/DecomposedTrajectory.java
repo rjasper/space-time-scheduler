@@ -94,13 +94,13 @@ public class DecomposedTrajectory extends CachedTrajectory {
 
 		if (spatialPathComponent.size() == 1 || arcTimePathComponent.size() == 1)
 			throw new IllegalArgumentException("illegal path component size");
+		if (spatialPathComponent.isEmpty() != arcTimePathComponent.isEmpty())
+			throw new IllegalArgumentException("incompatible path component size");
 
 		// TODO check components
 		// * same euclidean length (tolerating error?)
 		// * causal arc time path (time ordinates must be non-strictly increasing)
 		
-		// TODO initialize as unmodifiable
-
 		this.baseTime = baseTime;
 		this.spatialPathComponent = unmodifiableList( immutable(spatialPathComponent) );
 		this.arcTimePathComponent = unmodifiableList( immutable(arcTimePathComponent) );

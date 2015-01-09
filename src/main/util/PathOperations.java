@@ -21,6 +21,8 @@ public final class PathOperations {
 
 	private PathOperations() {}
 
+	// TODO no checks since paths will get there own class
+	
 	/**
 	 * Calculates the euclidean length of the path.
 	 *

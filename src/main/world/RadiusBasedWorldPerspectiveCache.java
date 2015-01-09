@@ -3,6 +3,7 @@ package world;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import tasks.WorkerUnit;
@@ -102,6 +103,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * 
 	 * @param world
 	 * @param spatialPathfinderClass
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public RadiusBasedWorldPerspectiveCache(
 		World world,
@@ -117,6 +119,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * 
 	 * @param world
 	 * @param spatialPathfinderClass
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public RadiusBasedWorldPerspectiveCache(
 		World world, Supplier<? extends SpatialPathfinder> spatialPathfinderSupplier)
@@ -131,6 +134,11 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * @param reference
 	 */
 	private void addRadiusReference(double radius, WorldPerspectiveReference reference) {
+		Objects.requireNonNull(reference, "reference");
+		
+		if (Double.isNaN(radius) || radius < 0)
+			throw new IllegalArgumentException("illegal radius");
+		
 		radiusReferences.put(radius, reference);
 	}
 
@@ -204,6 +212,8 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	@Override
 	public WorldPerspective getPerspectiveFor(WorkerUnit perceiver) {
+		Objects.requireNonNull(perceiver, "perceiver");
+		
 		WorldPerspectiveReference reference;
 
 		// perceiver might already be known
@@ -230,6 +240,8 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	@Override
 	public void removePerceiver(WorkerUnit perceiver) {
+		Objects.requireNonNull(perceiver, "perceiver");
+		
 		WorldPerspectiveReference reference = lookUpByPerceiver(perceiver);
 
 		if (reference == null)

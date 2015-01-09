@@ -100,6 +100,7 @@ public interface Trajectory {
 	 * 
 	 * @param baseTime
 	 * @return the arc time path.
+	 * @throws NullPointerException if {@code baseTime} is {@code null}.
 	 */
 	public abstract List<Point> calcArcTimePath(LocalDateTime baseTime);
 

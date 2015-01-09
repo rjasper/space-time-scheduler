@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
+
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -43,7 +45,7 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 *             if startPoint is {@code null}
 	 */
 	public void setStartPoint(Point startPoint) {
-		Objects.requireNonNull(startPoint, "startPoint");
+		GeometriesRequire.requireValid2DPoint(startPoint, "startPoint");
 		
 		this.startPoint = immutable(startPoint);
 	}
@@ -63,7 +65,7 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 *             if finishPoint is {@code null}
 	 */
 	public void setFinishPoint(Point finishPoint) {
-		Objects.requireNonNull(finishPoint, "finishPoint");
+		GeometriesRequire.requireValid2DPoint(finishPoint, "finishPoint");
 		
 		this.finishPoint = immutable(finishPoint);
 	}

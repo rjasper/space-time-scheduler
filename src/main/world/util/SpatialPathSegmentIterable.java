@@ -81,7 +81,7 @@ public class SpatialPathSegmentIterable implements Iterable<SpatialPathSegmentIt
 		private double accLength = 0.0;
 
 		public SpatialPathSegmentIterator(List<Point> spatialPath) {
-			this.iterator = spatialPath.iterator();
+			this.iterator = spatialPath.iterator(); // throws NPE
 
 			if (hasNext())
 				init();

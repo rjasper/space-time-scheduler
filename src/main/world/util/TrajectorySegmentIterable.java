@@ -3,6 +3,7 @@ package world.util;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.Objects;
 
 import util.DurationConv;
 import world.Trajectory;
@@ -36,7 +37,7 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 		private final double duration;
 		private final double length;
 
-		public TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration, double length) {
+		private TrajectorySegment(Point startPoint, Point finishPoint, double startTime, double duration, double length) {
 			this.startPoint = startPoint;
 			this.finishPoint = finishPoint;
 			this.duration = duration;
@@ -79,6 +80,9 @@ public class TrajectorySegmentIterable implements Iterable<TrajectorySegmentIter
 		private double accSeconds;
 
 		public TrajectorySegmentIterator(Trajectory trajectory, LocalDateTime baseTime) {
+			Objects.requireNonNull(trajectory, "trajectory");
+			Objects.requireNonNull(baseTime, "baseTime");
+			
 			this.spatialPathSegmentIterator =
 				new SpatialPathSegmentIterator(trajectory.getSpatialPath());
 			this.timeIterator = trajectory.getTimes().iterator();

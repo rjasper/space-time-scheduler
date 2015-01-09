@@ -21,7 +21,7 @@ public final class CollectionsRequire {
 	 *             if collection is {@code null} or contains a {@code null}.
 	 */
 	public static <T extends Collection<?>> T requireContainsNunNull(T collection) {
-		if (!checkContainsNonNull(collection))
+		if (!containsNonNull(collection))
 			throw new NullPointerException();
 		
 		return collection;
@@ -40,7 +40,7 @@ public final class CollectionsRequire {
 		T collection,
 		String message)
 	{
-		if (!checkContainsNonNull(collection))
+		if (!containsNonNull(collection))
 			throw new NullPointerException(message);
 		
 		return collection;
@@ -59,7 +59,7 @@ public final class CollectionsRequire {
 		T collection,
 		Supplier<String> messageSupplier)
 	{
-		if (!checkContainsNonNull(collection))
+		if (!containsNonNull(collection))
 			throw new NullPointerException(messageSupplier.get());
 		
 		return collection;
@@ -71,7 +71,7 @@ public final class CollectionsRequire {
 	 * @param collection
 	 * @return {@code true} if the collection is valid
 	 */
-	private static boolean checkContainsNonNull(Collection<?> collection) {
+	private static boolean containsNonNull(Collection<?> collection) {
 		if (collection == null)
 			return false;
 	

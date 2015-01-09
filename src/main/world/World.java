@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -107,10 +108,17 @@ public class World {
 	/**
 	 * Calculates the free space of an area of the worlds map.
 	 * 
-	 * @param mask the area of interest
+	 * @param mask
+	 *            the area of interest
 	 * @return the free space within the mask.
+	 * @throws NullPointerException
+	 *             if {@code mask} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code mask} is empty, invalid, non-simple, or not 2D.
 	 */
 	public Geometry space(Geometry mask) {
+		GeometriesRequire.requireValidSimple2DGeometry(mask, "mask");
+		
 		Geometry map = getMap();
 		Geometry space = mask.difference(map);
 
@@ -122,8 +130,12 @@ public class World {
 	 * 
 	 * @param distance of the buffer
 	 * @return the buffered world.
+	 * @throws IllegalArgumentException if {@code distance} is not finite.
 	 */
 	public World buffer(double distance) {
+		if (!Double.isFinite(distance))
+			throw new IllegalArgumentException("distance is not finite");
+		
 		Collection<Polygon> staticObstacles = getStaticObstacles().stream()
 			.map(o -> (Polygon) o.buffer(distance)) // buffer always returns a polygon
 			.collect(toList());

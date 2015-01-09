@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.util.GeometriesRequire;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -88,7 +89,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 *             if startPoint is {@code null}.
 	 */
 	public void setStartPoint(Point startPoint) {
-		Objects.requireNonNull(startPoint, "startPoint");
+		GeometriesRequire.requireValid2DPoint(startPoint, "startPoint");
 		
 		this.startPoint = immutable(startPoint);
 	}

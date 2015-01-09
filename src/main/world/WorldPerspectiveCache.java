@@ -31,6 +31,7 @@ public abstract class WorldPerspectiveCache {
 	 * 
 	 * @param world
 	 * @param spatialPathfinderSupplier
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public WorldPerspectiveCache(World world, Supplier<? extends SpatialPathfinder> spatialPathfinderSupplier) {
 		this.world = Objects.requireNonNull(world, "world");
@@ -45,6 +46,7 @@ public abstract class WorldPerspectiveCache {
 	 * 
 	 * @param world
 	 * @param spatialPathfinderClass
+	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public WorldPerspectiveCache(World world, Class<? extends SpatialPathfinder> spatialPathfinderClass) {
 		this(world, makeSpatialPathfinderSupplier(spatialPathfinderClass));
@@ -89,6 +91,7 @@ public abstract class WorldPerspectiveCache {
 	 * 
 	 * @param perceiver
 	 * @return the perspective.
+	 * @throws NullPointerException if {@code perceiver} is {@code null}.
 	 */
 	public abstract WorldPerspective getPerspectiveFor(WorkerUnit perceiver);
 
@@ -97,6 +100,7 @@ public abstract class WorldPerspectiveCache {
 	 * remove a cached world perspective.
 	 * 
 	 * @param perceiver
+	 * @throws NullPointerException if {@code perceiver} is {@code null}.
 	 */
 	public abstract void removePerceiver(WorkerUnit perceiver);
 

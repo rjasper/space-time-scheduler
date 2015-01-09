@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
 import com.vividsolutions.jts.geom.Point;
@@ -62,13 +63,11 @@ public class Task {
 	 *             </ul>
 	 */
 	private Task(Point location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
-		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(duration, "duration");
+		GeometriesRequire.requireValid2DPoint(location, "location");
 
-		if (location.isEmpty() || !location.isValid())
-			throw new IllegalArgumentException("illegal location");
 		if (startTime.compareTo(finishTime) > 0)
 			throw new IllegalArgumentException("startTime is after finishTime");
 		if (duration.isNegative())

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
 import com.vividsolutions.jts.geom.Point;
@@ -52,9 +53,8 @@ public class DynamicObstacle implements Cloneable {
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
 		Objects.requireNonNull(shape, "shape");
 		Objects.requireNonNull(trajectory, "trajectory");
+		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
 		
-		if (shape.isEmpty() || !shape.isSimple() || !shape.isValid())
-			throw new IllegalArgumentException("illegal shape");
 		if (trajectory.isEmpty())
 			throw new IllegalArgumentException("illegal trajectory");
 

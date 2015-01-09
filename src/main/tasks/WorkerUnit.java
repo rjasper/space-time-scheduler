@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
@@ -112,14 +113,11 @@ public class WorkerUnit {
 	 *             </ul>
 	 */
 	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
-		Objects.requireNonNull(shape, "shape");
 		Objects.requireNonNull(initialLocation, "initialLocation");
 		Objects.requireNonNull(initialTime, "initialTime");
+		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
+		GeometriesRequire.requireValid2DPoint(initialLocation, "initialLocation");
 
-		if (shape.isEmpty() || !shape.isSimple() || !shape.isValid())
-			throw new IllegalArgumentException("illegal shape");
-		if (initialLocation.isEmpty() || !initialLocation.isValid())
-			throw new IllegalArgumentException("illegal initialLocation");
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
 			throw new IllegalArgumentException("maximum speed is not a positive finite number");
 

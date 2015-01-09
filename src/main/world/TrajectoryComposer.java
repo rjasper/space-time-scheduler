@@ -77,8 +77,12 @@ public class TrajectoryComposer {
 	 * Sets the base time of the arc-time component.
 	 * 
 	 * @param baseTime
+	 * @throws NullPointerException
+	 *             if {@code baseTime} is {@code null}.
 	 */
 	public void setBaseTime(LocalDateTime baseTime) {
+		Objects.requireNonNull(baseTime, "baseTime");
+		
 		this.trajFact.setBaseTime(baseTime);
 	}
 

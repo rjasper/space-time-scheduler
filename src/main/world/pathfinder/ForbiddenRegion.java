@@ -4,6 +4,7 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
 import world.DynamicObstacle;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -31,17 +32,18 @@ public class ForbiddenRegion {
 	/**
 	 * Constructs a new forbidden region.
 	 * 
-	 * @param region representing the area of the forbidden region.
-	 * @param dynamicObstacle causing the forbidden region.
-	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if region is empty.
+	 * @param region
+	 *            representing the area of the forbidden region.
+	 * @param dynamicObstacle
+	 *            causing the forbidden region.
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if region is empty, invalid, non-simple or not 2D.
 	 */
 	public ForbiddenRegion(Geometry region, DynamicObstacle dynamicObstacle) {
-		Objects.requireNonNull(region, "region");
 		Objects.requireNonNull(dynamicObstacle, "dynamicObstacle");
-		
-		if (region.isEmpty())
-			throw new IllegalArgumentException("region is empty");
+		GeometriesRequire.requireValidSimple2DGeometry(region, "region");
 		
 		this.region = immutable(region);
 		this.dynamicObstacle = dynamicObstacle;

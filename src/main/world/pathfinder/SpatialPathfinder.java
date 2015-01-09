@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
+
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -99,7 +101,7 @@ public abstract class SpatialPathfinder {
 	 *             if startLocation is {@code null}.
 	 */
 	public void setStartLocation(Point startLocation) {
-		Objects.requireNonNull(startLocation, "startLocation");
+		GeometriesRequire.requireValid2DPoint(startLocation, "startLocation");
 		
 		this.startLocation = immutable(startLocation);
 	}
@@ -119,7 +121,7 @@ public abstract class SpatialPathfinder {
 	 *             if finishLocation is {@code null}.
 	 */
 	public void setFinishLocation(Point finishLocation) {
-		Objects.requireNonNull(finishLocation, "finishLocation");
+		GeometriesRequire.requireValid2DPoint(finishLocation, "finishLocation");
 		
 		this.finishLocation = immutable(finishLocation);
 	}

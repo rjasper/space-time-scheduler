@@ -18,10 +18,14 @@ public final class ArraysClone {
 	 * Creates a new array containing a clone of each element. If an element is
 	 * an array itself, then a new array is created recursively.
 	 * 
-	 * @param array to be copied
-	 * @return the copy.
+	 * @param array
+	 *            to be copied
+	 * @return the copy. {@code null} if {@code array} is {@code null}.
 	 */
 	public static <T extends Cloneable> T[] deepCloneCopy(T[] array) {
+		if (array == null)
+			return null;
+		
 		int n = array.length;
 		Class<?> clazz = array.getClass();
 		
@@ -35,10 +39,11 @@ public final class ArraysClone {
 	}
 	
 	/**
-	 * Clones the given element. If the element is an array, then a new array
-	 * is created containing clones of the original elements.
+	 * Clones the given element. If the element is an array, then a new array is
+	 * created containing clones of the original elements.
 	 * 
-	 * @param element to be cloned
+	 * @param element
+	 *            to be cloned
 	 * @return the clone.
 	 */
 	@SuppressWarnings("unchecked")

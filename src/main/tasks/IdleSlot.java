@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
+
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -70,15 +72,11 @@ public class IdleSlot {
 		LocalDateTime startTime,
 		LocalDateTime finishTime)
 	{
-		Objects.requireNonNull(startLocation, "startLocation");
-		Objects.requireNonNull(finishLocation, "finishLocation");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(finishTime, "finishTime");
-
-		if (startLocation.isEmpty() || !startLocation.isValid())
-			throw new IllegalArgumentException("illegal startLocation");
-		if (finishLocation.isEmpty() || !finishLocation.isValid())
-			throw new IllegalArgumentException("illegal finishLocation");
+		GeometriesRequire.requireValid2DPoint(startLocation, "startLocation");
+		GeometriesRequire.requireValid2DPoint(finishLocation, "finishLocation");
+		
 		if (startTime.compareTo(finishTime) >= 0)
 			throw new IllegalArgumentException("startTime is after finishTime");
 

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
 import tasks.WorkerUnit;
 
 import com.vividsolutions.jts.geom.Point;
@@ -51,9 +52,7 @@ public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 	private static Trajectory buildTrajectory(Point location, LocalDateTime startTime) {
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(startTime, "startTime");
-		
-		if (location.isEmpty() || !location.isValid())
-			throw new IllegalArgumentException("invalid location");
+		GeometriesRequire.requireValid2DPoint(location, "location");
 		
 		List<Point> spatialPath = Arrays.asList(location, location);
 		List<LocalDateTime> times = Arrays.asList(startTime, LocalDateTime.MAX);

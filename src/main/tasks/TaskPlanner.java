@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import jts.geom.util.GeometriesRequire;
+import util.CollectionsRequire;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
@@ -142,8 +144,6 @@ public class TaskPlanner {
 			&& duration          != null;
 	}
 
-	// TODO check setter args
-
 	/**
 	 * @return the current worker.
 	 */
@@ -172,14 +172,17 @@ public class TaskPlanner {
 	}
 
 	/**
-	 * Sets the worker pool. Only workers part of this pool will be regarded
-	 * as {@link DynamicObstacle dynamic obstacles}.
+	 * Sets the worker pool. Only workers part of this pool will be regarded as
+	 * {@link DynamicObstacle dynamic obstacles}.
 	 *
 	 * @param workerPool
-	 * @throws NullPointerException if workerPool is null
+	 * @throws NullPointerException
+	 *             if workerPool is null of contains {@code null}
 	 */
 	public void setWorkerPool(Collection<WorkerUnit> workerPool) {
-		this.workerPool = new ArrayList<>(workerPool); // throws NullPointException
+		CollectionsRequire.requireContainsNonNull(workerPool, "workerPool");
+		
+		this.workerPool = new ArrayList<>(workerPool);
 	}
 
 	/**
@@ -247,6 +250,8 @@ public class TaskPlanner {
 	 * @param location
 	 */
 	public void setLocation(Point location) {
+		GeometriesRequire.requireValid2DPoint(location, "location");
+		
 		this.location = immutable(location);
 	}
 
@@ -271,7 +276,7 @@ public class TaskPlanner {
 	 * @param earliestStartTime
 	 */
 	public void setEarliestStartTime(LocalDateTime earliestStartTime) {
-		this.earliestStartTime = earliestStartTime;
+		this.earliestStartTime = Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 	}
 
 	/**
@@ -287,7 +292,7 @@ public class TaskPlanner {
 	 * @param latestStartTime
 	 */
 	public void setLatestStartTime(LocalDateTime latestStartTime) {
-		this.latestStartTime = latestStartTime;
+		this.latestStartTime = Objects.requireNonNull(latestStartTime, "latestStartTime");
 	}
 
 	/**
@@ -303,7 +308,7 @@ public class TaskPlanner {
 	 * @param duration
 	 */
 	public void setDuration(Duration duration) {
-		this.duration = duration;
+		this.duration = Objects.requireNonNull(duration, "duration");
 	}
 
 	/**
@@ -345,6 +350,8 @@ public class TaskPlanner {
 	 * @return {@code true} if the task has been successfully planned.
 	 */
 	public boolean plan() {
+		// TODO check earliest <= latest
+		
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 

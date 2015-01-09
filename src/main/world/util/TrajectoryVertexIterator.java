@@ -7,6 +7,7 @@ import static jts.geom.immutable.ImmutableGeometries.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.Objects;
 
 import world.Trajectory;
 
@@ -23,6 +24,9 @@ public class TrajectoryVertexIterator implements Iterator<TrajectoryVertexIterat
 	private TrajectoryVertex previous = null;
 	
 	public TrajectoryVertexIterator(Trajectory trajectory, LocalDateTime baseTime) {
+		Objects.requireNonNull(trajectory, "trajectory");
+		Objects.requireNonNull(baseTime, "baseTime");
+		
 		this.baseTime = baseTime;
 		this.spatialPath = trajectory.getSpatialPath().iterator();
 		this.times = trajectory.getTimes().iterator();

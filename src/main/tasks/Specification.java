@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
 import com.vividsolutions.jts.geom.Polygon;
@@ -71,13 +72,11 @@ public class Specification {
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		Objects.requireNonNull(locationSpace, "locationSpace");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
+		GeometriesRequire.requireValidSimple2DPolygon(locationSpace, "locationSpace");
 
-		if (locationSpace.isEmpty() || !locationSpace.isSimple() || !locationSpace.isValid())
-			throw new IllegalArgumentException("illegal locationSpace");
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
 		if (duration.isNegative())
