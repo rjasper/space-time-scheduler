@@ -18,10 +18,13 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.GeometryCollectionMapper;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
 
-// TODO elaborate
-
 /**
- * An iterator that extracts points from a Geometry.
+ * An iterator that extracts points from a Geometry. The iterator makes use of
+ * JTS' {@link Geometry#getInteriorPoint()} method which more or less lies
+ * in the center of the geometry. To extract different points the iterator masks
+ * the geometry to change the scope of the extracted point. Those mask will
+ * get smaller and smaller to provide a sufficiently equal distribution of
+ * points while extracting.
  *
  * @author Rico Jasper
  */
