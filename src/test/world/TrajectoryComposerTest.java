@@ -30,8 +30,8 @@ public class TrajectoryComposerTest {
 		TrajectoryComposer composer = new TrajectoryComposer();
 		
 		composer.setBaseTime(baseTime);
-		composer.setSpatialPath(spatialPath);
-		composer.setArcTimePath(arcTimePath);
+		composer.setSpatialPathComponent(spatialPath);
+		composer.setArcTimePathComponent(arcTimePath);
 		
 		composer.compose();
 		

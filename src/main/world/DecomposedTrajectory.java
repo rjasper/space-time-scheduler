@@ -282,8 +282,8 @@ public class DecomposedTrajectory extends CachedTrajectory {
 
 		TrajectoryComposer builder = new TrajectoryComposer();
 
-		builder.setSpatialPath(spatialPath);
-		builder.setArcTimePath(arcTimePath);
+		builder.setSpatialPathComponent(spatialPath);
+		builder.setArcTimePathComponent(arcTimePath);
 		builder.setBaseTime(baseTime);
 
 		builder.compose();

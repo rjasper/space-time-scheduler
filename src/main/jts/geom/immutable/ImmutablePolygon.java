@@ -64,5 +64,7 @@ class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 	public ImmutablePolygon clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

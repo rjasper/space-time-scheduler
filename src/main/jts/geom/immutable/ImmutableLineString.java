@@ -57,5 +57,7 @@ class ImmutableLineString extends LineString implements ImmutableGeometry {
 	public ImmutableLineString clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

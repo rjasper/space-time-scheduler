@@ -1,7 +1,6 @@
 package world;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 

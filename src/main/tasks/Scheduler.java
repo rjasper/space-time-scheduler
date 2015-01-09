@@ -182,7 +182,7 @@ public class Scheduler {
 	private boolean checkLocationFor(Point location, WorkerUnit worker) {
 		WorldPerspectiveCache cache = getPerspectiveCache();
 		WorldPerspective perspective = cache.getPerspectiveFor(worker);
-		Geometry map = perspective.getWorld().getMap();
+		Geometry map = perspective.getView().getMap();
 
 		return !map.contains(location);
 	}

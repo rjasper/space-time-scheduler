@@ -37,10 +37,11 @@ public class TrajectoryVertexIterator implements Iterator<TrajectoryVertexIterat
 	public TrajectoryVertex next() {
 		Point location = spatialPath.next();
 		LocalDateTime time = times.next();
-		double s = previous == null ? 0.0
+		double s = previous == null
+			? 0.0
 			: previous.s + distance(previous.location, location);
 		double t = inSeconds(Duration.between(baseTime, time));
-		TrajectoryVertex vertex = new TrajectoryVertex(previous, s, t, location, time);
+		TrajectoryVertex vertex = new TrajectoryVertex(s, t, location, time);
 		
 		previous = vertex;
 		
@@ -49,29 +50,21 @@ public class TrajectoryVertexIterator implements Iterator<TrajectoryVertexIterat
 
 	public class TrajectoryVertex {
 		
-		private final TrajectoryVertex predecessor;
-		
 		private final double s;
 		private final double t;
 		private final Point location;
 		private final LocalDateTime time;
 		
 		public TrajectoryVertex(
-			TrajectoryVertex predecessor,
 			double s,
 			double t,
 			Point location,
 			LocalDateTime time)
 		{
-			this.predecessor = predecessor;
 			this.s = s;
 			this.t = t;
 			this.location = immutable(location);
 			this.time = time;
-		}
-	
-		public TrajectoryVertex getPredecessor() {
-			return predecessor;
 		}
 	
 		public double getX() {

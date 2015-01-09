@@ -59,5 +59,7 @@ class ImmutableGeometryCollection extends GeometryCollection implements Immutabl
 	public ImmutableGeometryCollection clone() {
 		return this;
 	}
+	
+	// TODO override guarded apply methods
 
 }

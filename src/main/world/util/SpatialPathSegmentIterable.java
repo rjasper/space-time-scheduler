@@ -6,6 +6,8 @@ import java.util.List;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
+// TODO remove iterables, iterator only
+
 public class SpatialPathSegmentIterable implements Iterable<SpatialPathSegmentIterable.SpatialPathSegment> {
 
 	private List<Point> spatialPath;

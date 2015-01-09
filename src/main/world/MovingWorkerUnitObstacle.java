@@ -42,9 +42,7 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 		// throws NullPointerException and IllegalArgumentException
 		super(worker, trajectory);
 		
-		Objects.requireNonNull(goal, "goal");
-		
-		this.goal = goal;
+		this.goal = Objects.requireNonNull(goal, "goal");
 		
 		if (!checkDestination())
 			throw new IllegalArgumentException("trajectory does not lead to the goal");
