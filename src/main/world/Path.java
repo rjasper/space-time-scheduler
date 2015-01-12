@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.UnmodifiableIterator;
 import com.vividsolutions.jts.geom.Point;
 
+// TODO document
 public class Path implements Iterable<ImmutablePoint> {
 	
 	private final ImmutableList<ImmutablePoint> vertices;

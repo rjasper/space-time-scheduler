@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
+// TODO document
 public class SpatialPath extends Path {
 
 	public SpatialPath(ImmutableList<ImmutablePoint> vertices) {

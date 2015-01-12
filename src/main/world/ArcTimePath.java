@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import com.vividsolutions.jts.geom.Point;
 
+// TODO document
 public class ArcTimePath extends Path {
 
 	public ArcTimePath(ImmutableList<ImmutablePoint> vertices) {
