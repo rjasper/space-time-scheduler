@@ -19,4 +19,11 @@ public class StaticObstacle {
 		return shape;
 	}
 
+	public StaticObstacle buffer(double distance) {
+		if (!Double.isFinite(distance) || distance < 0.0)
+			throw new IllegalArgumentException("invalid distance");
+		
+		return new StaticObstacle((Polygon) shape.buffer(distance));
+	}
+
 }

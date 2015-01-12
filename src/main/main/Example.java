@@ -12,6 +12,7 @@ import tasks.Specification;
 import tasks.WorkerUnit;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
+import world.StaticObstacle;
 import world.Trajectory;
 import world.World;
 
@@ -28,14 +29,17 @@ public final class Example {
 		// scheduler
 		
 		// world for scheduler
-		// for world
-		Polygon staticObstacle = geomFact.createPolygon(new Coordinate[] {
+		// static obstacle for world
+		// for static obstacle
+		Polygon staticObstacleShape = geomFact.createPolygon(new Coordinate[] {
 			new Coordinate(1.0, 5.0),
 			new Coordinate(3.0, 5.0),
 			new Coordinate(3.0, 7.0),
 			new Coordinate(1.0, 7.0),
 			new Coordinate(1.0, 5.0),
 		});
+		// static obstacle actual
+		StaticObstacle staticObstacle = new StaticObstacle(staticObstacleShape);
 		// dynamic obstacle for world
 		// for dynamic obstacle
 		Polygon dynamicObstacleShape = geomFact.createPolygon(new Coordinate[] {

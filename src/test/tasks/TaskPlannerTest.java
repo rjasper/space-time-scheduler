@@ -25,6 +25,7 @@ import org.junit.Test;
 import tasks.factories.WorkerUnitFactory;
 import world.DynamicObstacle;
 import world.RadiusBasedWorldPerspectiveCache;
+import world.StaticObstacle;
 import world.Trajectory;
 import world.TrajectoryFactory;
 import world.World;
@@ -121,7 +122,8 @@ public class TaskPlannerTest {
 	
 	@Test
 	public void testStaticObstacles() {
-		Polygon obstacle = geomBuilder.box(30., 10., 40., 40.);
+		StaticObstacle obstacle = new StaticObstacle(
+			geomBuilder.box(30., 10., 40., 40.));
 		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
 
 		setNameFor(w, "w");

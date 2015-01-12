@@ -1,16 +1,15 @@
 package world.pathfinder;
 
-import static java.util.Collections.unmodifiableList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import jts.geom.util.GeometriesRequire;
+import util.CollectionsRequire;
+import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * The {@code SpatialPathfinder} is the abstract base class for spatial path
@@ -24,7 +23,7 @@ public abstract class SpatialPathfinder {
 	/**
 	 * The static obstacles to avoid.
 	 */
-	private Collection<Polygon> staticObstacles = null;
+	private Collection<StaticObstacle> staticObstacles = null;
 
 	/**
 	 * The start location.
@@ -53,7 +52,7 @@ public abstract class SpatialPathfinder {
 	/**
 	 * @return the unmodifiable static obstacles to avoid.
 	 */
-	protected Collection<Polygon> getStaticObstacles() {
+	protected Collection<StaticObstacle> getStaticObstacles() {
 		return staticObstacles;
 	}
 
@@ -64,10 +63,10 @@ public abstract class SpatialPathfinder {
 	 * @throws NullPointerException
 	 *             if staticObstacles is {@code null}.
 	 */
-	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
-		Objects.requireNonNull(staticObstacles, "staticObstacles");
+	public void setStaticObstacles(Collection<StaticObstacle> staticObstacles) {
+		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
 		
-		this.staticObstacles = unmodifiableList(immutable(staticObstacles));
+		this.staticObstacles = unmodifiableCollection(staticObstacles);
 	}
 
 	/**

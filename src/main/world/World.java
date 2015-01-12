@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
-import common.collect.Immutables;
 
 /**
  * The {@code World} represents the physical outside world containing any
@@ -29,7 +28,7 @@ public class World {
 	/**
 	 * The stationary obstacles of this world.
 	 */
-	private final ImmutableCollection<Polygon> staticObstacles;
+	private final ImmutableCollection<StaticObstacle> staticObstacles;
 	
 	/**
 	 * The moving obstacles of this world.
@@ -56,11 +55,11 @@ public class World {
 	 * @throws NullPointerException
 	 *             if any collection is {@code null} or contains {@code null}.
 	 */
-	public World(Collection<Polygon> staticObstacles, Collection<DynamicObstacle> dynamicObstacles) {
+	public World(Collection<StaticObstacle> staticObstacles, Collection<DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
-		this.staticObstacles = Immutables.immutable( immutable(staticObstacles) );
+		this.staticObstacles = immutable(staticObstacles);
 		this.dynamicObstacles = immutable(dynamicObstacles);
 		this.map = immutable(makeMap(staticObstacles));
 	}
@@ -71,7 +70,7 @@ public class World {
 	 * @param staticObstacles
 	 * @return the map.
 	 */
-	private static Geometry makeMap(Collection<Polygon> staticObstacles) {
+	private static Geometry makeMap(Collection<StaticObstacle> staticObstacles) {
 		// for some reason the geometry combiner returns null when receiving
 		// an empty list instead of some empty geometry
 		if (staticObstacles.size() == 0) {
@@ -79,8 +78,12 @@ public class World {
 
 			return geomBuilder.polygon();
 		}
+		
+		Collection<Polygon> shapes = staticObstacles.stream()
+			.map(StaticObstacle::getShape)
+			.collect(toList());
 
-		GeometryCombiner combinder = new GeometryCombiner(staticObstacles);
+		GeometryCombiner combinder = new GeometryCombiner(shapes);
 		Geometry map = combinder.combine();
 
 		return map;
@@ -89,7 +92,7 @@ public class World {
 	/**
 	 * @return the stationary obstacles of this world.
 	 */
-	public ImmutableCollection<Polygon> getStaticObstacles() {
+	public ImmutableCollection<StaticObstacle> getStaticObstacles() {
 		return staticObstacles;
 	}
 
@@ -138,8 +141,8 @@ public class World {
 		if (!Double.isFinite(distance))
 			throw new IllegalArgumentException("distance is not finite");
 		
-		Collection<Polygon> staticObstacles = getStaticObstacles().stream()
-			.map(o -> (Polygon) o.buffer(distance)) // buffer always returns a polygon
+		Collection<StaticObstacle> staticObstacles = getStaticObstacles().stream()
+			.map(o -> o.buffer(distance)) // buffer always returns a polygon
 			.collect(toList());
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles().stream()
 			.map(o -> o.buffer(distance))

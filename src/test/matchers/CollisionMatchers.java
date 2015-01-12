@@ -4,15 +4,14 @@ import org.hamcrest.Matcher;
 
 import tasks.WorkerUnit;
 import world.DynamicObstacle;
-
-import com.vividsolutions.jts.geom.Polygon;
+import world.StaticObstacle;
 
 
 public final class CollisionMatchers {
 	
 	private CollisionMatchers() {}
 	
-	public static Matcher<WorkerUnit> collideWith(Polygon obstacle) {
+	public static Matcher<WorkerUnit> collideWith(StaticObstacle obstacle) {
 		return new WorkerUnitCollidesWithStaticObstacle(obstacle);
 	}
 	

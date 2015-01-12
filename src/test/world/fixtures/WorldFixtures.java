@@ -1,11 +1,13 @@
 package world.fixtures;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import world.StaticObstacle;
 import world.World;
 
 import com.vividsolutions.jts.geom.Polygon;
@@ -35,7 +37,11 @@ public class WorldFixtures {
 			 8., 14.,  14., 14.,  14.,  8.,   8.,  8.,
 			 8.,  6.);
 
-		Collection<Polygon> staticObstacles = Arrays.asList(wall, fence, pillar, cage);
+		Collection<StaticObstacle> staticObstacles = Arrays
+			.asList(wall, fence, pillar, cage)
+			.stream()
+			.map(StaticObstacle::new)
+			.collect(toList());
 		World world = new World(staticObstacles, emptyList());
 
 		return world;

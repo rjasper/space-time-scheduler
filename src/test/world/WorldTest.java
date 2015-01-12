@@ -12,7 +12,6 @@ import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 
 public class WorldTest {
@@ -28,14 +27,17 @@ public class WorldTest {
 
 	@Test
 	public void testSome() throws ParseException {
-		Polygon p1 = geomBuilder.polygon(10., 10., 20., 10., 20., 20., 10., 20., 10., 10.);
-		Polygon p2 = geomBuilder.polygon(20., 15., 30., 15., 30., 25., 20., 25., 20., 15.);
+		StaticObstacle o1 = new StaticObstacle(
+			geomBuilder.polygon(10., 10., 20., 10., 20., 20., 10., 20., 10., 10.));
+		StaticObstacle o2 = new StaticObstacle(
+			geomBuilder.polygon(20., 15., 30., 15., 30., 25., 20., 25., 20., 15.));
 
-		Collection<Polygon> staticObstacles = Arrays.asList(p1, p2);
+		Collection<StaticObstacle> staticObstacles = Arrays.asList(o1, o2);
 
 		World world = new World(staticObstacles, emptyList());
 
-		assertThat(world.getMap(), topologicallyEqualTo(p1.union(p2)));
+		assertThat(world.getMap(),
+			topologicallyEqualTo(o1.getShape().union(o2.getShape())));
 	}
 
 }

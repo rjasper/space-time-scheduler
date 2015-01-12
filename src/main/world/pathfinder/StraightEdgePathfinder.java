@@ -1,7 +1,5 @@
 package world.pathfinder;
 
-import static straightedge.geom.path.PathBlockingObstacleImpl.createObstacleFromInnerPolygon;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,15 +7,15 @@ import java.util.stream.Collectors;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 import straightedge.geom.KPoint;
-import straightedge.geom.KPolygon;
 import straightedge.geom.PolygonConverter;
 import straightedge.geom.path.NodeConnector;
 import straightedge.geom.path.PathBlockingObstacle;
+import straightedge.geom.path.PathBlockingObstacleImpl;
 import straightedge.geom.path.PathData;
 import straightedge.geom.path.PathFinder;
+import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * The {@code StraightEdgePathfinder} is a {@link SpatialPathfinder} which
@@ -60,7 +58,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @see world.pathfinder.SpatialPathfinder#setStaticObstacles(java.util.Collection)
 	 */
 	@Override
-	public void setStaticObstacles(Collection<Polygon> staticObstacles) {
+	public void setStaticObstacles(Collection<StaticObstacle> staticObstacles) {
 		super.setStaticObstacles(staticObstacles);
 		
 		// Convertes the static obstacles to PathBlockingObstacles and
@@ -73,13 +71,23 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 
 		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
 
-		for (Polygon o : staticObstacles) {
-			KPolygon kp = conv.makeKPolygonFromExterior(o);
-			PathBlockingObstacle pbo = createObstacleFromInnerPolygon(kp);
-
-			pathBlockingObstacles.add(pbo);
-			nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
-		}
+		staticObstacles.stream()
+			.map(StaticObstacle::getShape)
+			.map(conv::makeKPolygonFromExterior)
+			.map(PathBlockingObstacleImpl::createObstacleFromInnerPolygon)
+			.forEach(pbo -> {
+				pathBlockingObstacles.add(pbo);
+				nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
+			});
+		
+		// TODO remove
+//		for (Polygon o : staticObstacles) {
+//			KPolygon kp = conv.makeKPolygonFromExterior(o);
+//			PathBlockingObstacle pbo = createObstacleFromInnerPolygon(kp);
+//
+//			pathBlockingObstacles.add(pbo);
+//			nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
+//		}
 		
 		setNodeConnector(nc);
 		setPathBlockingObstacles(pathBlockingObstacles);

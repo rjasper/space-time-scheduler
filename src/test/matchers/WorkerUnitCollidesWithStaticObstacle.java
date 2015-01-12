@@ -3,23 +3,22 @@ package matchers;
 import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
 import static com.vividsolutions.jts.geom.Location.BOUNDARY;
 import static com.vividsolutions.jts.geom.Location.INTERIOR;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 import tasks.WorkerUnit;
+import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeDiagnosingMatcher<WorkerUnit> {
 	
-	private final Polygon obstacle;
+	private final StaticObstacle obstacle;
 	
-	public WorkerUnitCollidesWithStaticObstacle(Polygon obstacle) {
-		this.obstacle = immutable(obstacle);
+	public WorkerUnitCollidesWithStaticObstacle(StaticObstacle obstacle) {
+		this.obstacle = obstacle;
 	}
 
 	@Override
@@ -36,10 +35,11 @@ public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeDiagnosingMatc
 			.appendText(" is colliding with ")
 			.appendValue(obstacle);
 		
-		Geometry bufferedObstacle = obstacle.buffer(item.getRadius());
+		StaticObstacle bufferedObstacle = obstacle.buffer(item.getRadius());
+		Geometry shape = bufferedObstacle.getShape();
 		Geometry trace = item.calcMergedTrajectory().getTrace();
 		
-		IntersectionMatrix mat = bufferedObstacle.relate(trace);
+		IntersectionMatrix mat = shape.relate(trace);
 		
 		// true if the trace has any points with the buffered obstacle's
 		// interior in common

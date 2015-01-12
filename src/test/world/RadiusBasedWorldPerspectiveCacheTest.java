@@ -111,24 +111,26 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	@Test
 	public void testBufferPerspective() {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
-		Polygon obstacle = geomBuilder.box(10.0, 10.0, 20.0, 20.0);
+		StaticObstacle obstacle = new StaticObstacle(
+			geomBuilder.box(10.0, 10.0, 20.0, 20.0));
 		WorldPerspectiveCache cache = makeCacheFrom(singleton(obstacle));
 
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);
 
 		double radius = perceiver.getRadius();
-		Collection<Polygon> bufferedObstacles = perspective.getView().getStaticObstacles();
-		Polygon bufferedObstacle = bufferedObstacles.iterator().next();
+		Collection<StaticObstacle> bufferedObstacles = perspective.getView().getStaticObstacles();
+		StaticObstacle bufferedObstacle = bufferedObstacles.iterator().next();
+		Polygon bufferedShape = bufferedObstacle.getShape();
 
 		assertThat("did not buffer perspective correctly",
-			bufferedObstacle, is(topologicallyEqualTo(obstacle.buffer(radius))));
+			bufferedShape, is(topologicallyEqualTo(obstacle.getShape().buffer(radius))));
 	}
 
 	private WorldPerspectiveCache makeEmptyCache() {
 		return makeCacheFrom(emptyList());
 	}
 
-	private WorldPerspectiveCache makeCacheFrom(Collection<Polygon> staticObstacles) {
+	private WorldPerspectiveCache makeCacheFrom(Collection<StaticObstacle> staticObstacles) {
 		World world = new World(staticObstacles, emptyList());
 		RadiusBasedWorldPerspectiveCache cache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
