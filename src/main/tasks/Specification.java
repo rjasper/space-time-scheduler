@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
@@ -31,7 +32,7 @@ public class Specification {
 	/**
 	 * The spatial space for a valid location.
 	 */
-	private final Polygon locationSpace;
+	private final ImmutablePolygon locationSpace;
 
 	/**
 	 * The earliest possible start time.
@@ -91,7 +92,7 @@ public class Specification {
 	/**
 	 * @return the spatial space for a valid {@link Point location}.
 	 */
-	public Polygon getLocationSpace() {
+	public ImmutablePolygon getLocationSpace() {
 		return locationSpace;
 	}
 

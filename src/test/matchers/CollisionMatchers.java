@@ -2,10 +2,10 @@ package matchers;
 
 import org.hamcrest.Matcher;
 
-import com.vividsolutions.jts.geom.Polygon;
-
 import tasks.WorkerUnit;
 import world.DynamicObstacle;
+
+import com.vividsolutions.jts.geom.Polygon;
 
 
 public final class CollisionMatchers {

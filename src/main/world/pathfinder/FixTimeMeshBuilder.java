@@ -1,7 +1,5 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -46,7 +44,7 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	public void setStartPoint(Point startPoint) {
 		GeometriesRequire.requireValid2DPoint(startPoint, "startPoint");
 		
-		this.startPoint = immutable(startPoint);
+		this.startPoint = startPoint;
 	}
 
 	/**
@@ -66,7 +64,7 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	public void setFinishPoint(Point finishPoint) {
 		GeometriesRequire.requireValid2DPoint(finishPoint, "finishPoint");
 		
-		this.finishPoint = immutable(finishPoint);
+		this.finishPoint = finishPoint;
 	}
 
 	/*

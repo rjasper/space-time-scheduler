@@ -1,6 +1,7 @@
 package world;
 
 import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.time.Duration;
 
 import com.vividsolutions.jts.geom.Geometry;

@@ -2,7 +2,6 @@ package tasks;
 
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static util.Comparables.max;
 import static util.DurationConv.inSeconds;
 import static util.PathOperations.length;
@@ -252,7 +251,7 @@ public class TaskPlanner {
 	public void setLocation(Point location) {
 		GeometriesRequire.requireValid2DPoint(location, "location");
 		
-		this.location = immutable(location);
+		this.location = location;
 	}
 
 	/**

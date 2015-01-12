@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
@@ -27,7 +28,7 @@ public class Task {
 	/**
 	 * The location where the task is executed.
 	 */
-	private final Point location;
+	private final ImmutablePoint location;
 
 	/**
 	 * The time when the execution starts.
@@ -107,7 +108,7 @@ public class Task {
 	 *
 	 * @return the location where the task is executed.
 	 */
-	public Point getLocation() {
+	public ImmutablePoint getLocation() {
 		return location;
 	}
 

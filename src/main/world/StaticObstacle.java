@@ -11,12 +11,8 @@ public class StaticObstacle {
 	
 	private final ImmutablePolygon shape;
 
-	public StaticObstacle(ImmutablePolygon shape) {
-		this.shape = GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
-	}
-	
 	public StaticObstacle(Polygon shape) {
-		this(immutable(shape));
+		this.shape = immutable(GeometriesRequire.requireValidSimple2DPolygon(shape, "shape"));
 	}
 
 	public ImmutablePolygon getShape() {

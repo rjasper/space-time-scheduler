@@ -1,8 +1,8 @@
 package world.util;
 
-import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
-import static util.DurationConv.*;
-import static jts.geom.immutable.ImmutableGeometries.*;
+import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static util.DurationConv.inSeconds;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

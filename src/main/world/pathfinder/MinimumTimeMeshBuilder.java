@@ -1,7 +1,6 @@
 package world.pathfinder;
 
 import static java.util.Collections.singleton;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -90,7 +89,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	public void setStartPoint(Point startPoint) {
 		GeometriesRequire.requireValid2DPoint(startPoint, "startPoint");
 		
-		this.startPoint = immutable(startPoint);
+		this.startPoint = startPoint;
 	}
 
 	/**

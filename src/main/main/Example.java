@@ -1,16 +1,11 @@
 package main;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singleton;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 import tasks.Scheduler;
 import tasks.Specification;
@@ -19,6 +14,11 @@ import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.Trajectory;
 import world.World;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 public final class Example {
 

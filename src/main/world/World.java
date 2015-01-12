@@ -1,7 +1,7 @@
 package world;
 
-import static common.collect.Immutables.*;
-import static java.util.Collections.*;
+import static common.collect.Immutables.immutable;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
-
 import common.collect.Immutables;
 
 /**

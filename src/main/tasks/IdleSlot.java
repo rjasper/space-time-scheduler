@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 
 import com.vividsolutions.jts.geom.Point;
@@ -30,12 +31,12 @@ public class IdleSlot {
 	/**
 	 * The location before idling.
 	 */
-	private final Point startLocation;
+	private final ImmutablePoint startLocation;
 
 	/**
 	 * The location after idling.
 	 */
-	private final Point finishLocation;
+	private final ImmutablePoint finishLocation;
 
 	/**
 	 * The time before idling.
@@ -89,14 +90,14 @@ public class IdleSlot {
 	/**
 	 * @return the location before idling.
 	 */
-	public Point getStartLocation() {
+	public ImmutablePoint getStartLocation() {
 		return startLocation;
 	}
 
 	/**
 	 * @return the location after idling.
 	 */
-	public Point getFinishLocation() {
+	public ImmutablePoint getFinishLocation() {
 		return finishLocation;
 	}
 

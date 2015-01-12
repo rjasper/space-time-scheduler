@@ -3,9 +3,9 @@ package world;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.collections4.iterators.IteratorIterable;
-
 import jts.geom.immutable.ImmutablePoint;
+
+import org.apache.commons.collections4.iterators.IteratorIterable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;

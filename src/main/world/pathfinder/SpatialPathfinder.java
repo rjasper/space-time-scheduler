@@ -1,7 +1,7 @@
 package world.pathfinder;
 
+import static java.util.Collections.unmodifiableList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
-import static java.util.Collections.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -103,7 +103,7 @@ public abstract class SpatialPathfinder {
 	public void setStartLocation(Point startLocation) {
 		GeometriesRequire.requireValid2DPoint(startLocation, "startLocation");
 		
-		this.startLocation = immutable(startLocation);
+		this.startLocation = startLocation;
 	}
 
 	/**
@@ -123,7 +123,7 @@ public abstract class SpatialPathfinder {
 	public void setFinishLocation(Point finishLocation) {
 		GeometriesRequire.requireValid2DPoint(finishLocation, "finishLocation");
 		
-		this.finishLocation = immutable(finishLocation);
+		this.finishLocation = finishLocation;
 	}
 
 	/**

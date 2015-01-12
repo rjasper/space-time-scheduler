@@ -1,6 +1,6 @@
 package tasks;
 
-import static common.collect.Immutables.*;
+import static common.collect.Immutables.immutableAsList;
 import static java.util.stream.Collectors.toList;
 import static util.Comparables.max;
 import static util.Comparables.min;

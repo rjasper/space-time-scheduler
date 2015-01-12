@@ -1,9 +1,9 @@
 package world;
 
 import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.*;
-import static util.DurationConv.*;
+import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static util.DurationConv.inSeconds;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

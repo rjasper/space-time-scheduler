@@ -1,6 +1,6 @@
 package tasks;
 
-import static java.util.Collections.*;
+import static java.util.Collections.unmodifiableNavigableMap;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 import world.DynamicObstacle;
@@ -46,7 +47,7 @@ public class WorkerUnit {
 	/**
 	 * The physical shape of this worker.
 	 */
-	private final Polygon shape;
+	private final ImmutablePolygon shape;
 
 	/**
 	 * The radius of the shape.
@@ -147,7 +148,7 @@ public class WorkerUnit {
 	/**
 	 * @return the physical shape of this worker.
 	 */
-	public Polygon getShape() {
+	public ImmutablePolygon getShape() {
 		return shape;
 	}
 
