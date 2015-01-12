@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 
-class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeometry {
+public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 2982709814063389648L;
 

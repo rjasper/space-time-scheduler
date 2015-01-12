@@ -26,6 +26,62 @@ public final class ImmutableGeometries {
 		return geometry instanceof ImmutableGeometry;
 	}
 	
+	public static ImmutablePoint immutable(Point point) {
+		if (point instanceof ImmutablePoint)
+			return (ImmutablePoint) point;
+		else
+			return new ImmutablePoint(point);
+	}
+	
+	public static ImmutableLinearRing immutable(LinearRing linearRing) {
+		if (linearRing instanceof ImmutableLinearRing)
+			return (ImmutableLinearRing) linearRing;
+		else
+			return new ImmutableLinearRing(linearRing);
+	}
+	
+	public static ImmutableLineString immutable(LineString lineString) {
+		if (lineString instanceof ImmutableLineString)
+			return (ImmutableLineString) lineString;
+		else
+			return new ImmutableLineString(lineString);
+	}
+	
+	public static ImmutablePolygon immutable(Polygon polygon) {
+		if (polygon instanceof ImmutablePolygon)
+			return (ImmutablePolygon) polygon;
+		else
+			return new ImmutablePolygon(polygon);
+	}
+	
+	public static ImmutableGeometryCollection immutable(GeometryCollection multiPolygon) {
+		if (multiPolygon instanceof ImmutableGeometryCollection)
+			return (ImmutableGeometryCollection) multiPolygon;
+		else
+			return new ImmutableGeometryCollection(multiPolygon);
+	}
+	
+	public static ImmutableMultiPoint immutable(MultiPoint multiPoint) {
+		if (multiPoint instanceof ImmutableMultiPoint)
+			return (ImmutableMultiPoint) multiPoint;
+		else
+			return new ImmutableMultiPoint(multiPoint);
+	}
+	
+	public static ImmutableMultiLineString immutable(MultiLineString multiLineString) {
+		if (multiLineString instanceof ImmutableMultiLineString)
+			return (ImmutableMultiLineString) multiLineString;
+		else
+			return new ImmutableMultiLineString(multiLineString);
+	}
+	
+	public static ImmutableMultiPolygon immutable(MultiPolygon multiPolygon) {
+		if (multiPolygon instanceof ImmutableMultiPolygon)
+			return (ImmutableMultiPolygon) multiPolygon;
+		else
+			return new ImmutableMultiPolygon(multiPolygon);
+	}
+	
 	// TODO split into specialized methods like "ImmutablePoint immutable(Point)"
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T immutable(T geometry) {
@@ -53,7 +109,7 @@ public final class ImmutableGeometries {
 		
 		throw new IllegalArgumentException("unknown geometry");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T[] immutable(T[] geometries) {
 		if (geometries == null)

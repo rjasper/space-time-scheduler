@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 
-class ImmutableMultiLineString extends MultiLineString implements ImmutableGeometry {
+public class ImmutableMultiLineString extends MultiLineString implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 5998127758585768022L;
 

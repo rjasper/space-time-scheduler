@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-class ImmutablePoint extends Point implements ImmutableGeometry {
+public class ImmutablePoint extends Point implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 8473118084765349243L;
 

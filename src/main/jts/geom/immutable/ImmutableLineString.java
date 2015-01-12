@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 
-class ImmutableLineString extends LineString implements ImmutableGeometry {
+public class ImmutableLineString extends LineString implements ImmutableGeometry {
 
 	private static final long serialVersionUID = -2967661517374395217L;
 

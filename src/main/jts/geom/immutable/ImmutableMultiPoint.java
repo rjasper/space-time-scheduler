@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 
-class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry {
+public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 7632840480221183791L;
 

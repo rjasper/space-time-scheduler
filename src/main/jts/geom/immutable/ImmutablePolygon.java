@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 
-class ImmutablePolygon extends Polygon implements ImmutableGeometry {
+public class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 
 	private static final long serialVersionUID = -1394928736389998201L;
 

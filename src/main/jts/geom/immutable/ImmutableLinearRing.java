@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 
-class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {
+public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {
 
 	private static final long serialVersionUID = -1840083284048029664L;
 

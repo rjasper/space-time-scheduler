@@ -7,7 +7,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-class ImmutableGeometryCollection extends GeometryCollection implements ImmutableGeometry {
+public class ImmutableGeometryCollection extends GeometryCollection implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 6115804066466833485L;
 
