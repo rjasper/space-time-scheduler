@@ -1,5 +1,6 @@
 package tasks;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static util.Comparables.max;
@@ -8,7 +9,6 @@ import static util.PathOperations.length;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,7 +182,7 @@ public class TaskPlanner {
 	public void setWorkerPool(Collection<WorkerUnit> workerPool) {
 		CollectionsRequire.requireContainsNonNull(workerPool, "workerPool");
 		
-		this.workerPool = new ArrayList<>(workerPool);
+		this.workerPool = unmodifiableCollection( workerPool );
 	}
 
 	/**

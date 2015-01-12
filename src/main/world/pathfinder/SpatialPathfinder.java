@@ -24,7 +24,7 @@ public abstract class SpatialPathfinder {
 	/**
 	 * The static obstacles to avoid.
 	 */
-	private List<Polygon> staticObstacles = null;
+	private Collection<Polygon> staticObstacles = null;
 
 	/**
 	 * The start location.
@@ -51,9 +51,9 @@ public abstract class SpatialPathfinder {
 	}
 
 	/**
-	 * @return the static obstacles to avoid.
+	 * @return the unmodifiable static obstacles to avoid.
 	 */
-	protected List<Polygon> getStaticObstacles() {
+	protected Collection<Polygon> getStaticObstacles() {
 		return staticObstacles;
 	}
 

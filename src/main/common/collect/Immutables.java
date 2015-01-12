@@ -19,16 +19,33 @@ import com.google.common.collect.ImmutableSet;
 public final class Immutables {
 	
 	/**
+	 * Converts a collection to a immutable list.
+	 * 
+	 * @param collection
+	 * @return the immutable list.
+	 */
+	public static <E> ImmutableList<E> immutableAsList(Collection<E> collection) {
+		if (collection instanceof ImmutableList<?>)
+			return (ImmutableList<E>) collection;
+		else
+			return ImmutableList.copyOf(collection);
+	}
+	
+	public static <E> ImmutableSet<E> immutableAsSet(Collection<E> collection) {
+		if (collection instanceof ImmutableSet<?>)
+			return (ImmutableSet<E>) collection;
+		else
+			return ImmutableSet.copyOf(collection);
+	}
+
+	/**
 	 * Converts a list to a immutable list.
 	 * 
 	 * @param list
 	 * @return the immutable list.
 	 */
 	public static <E> ImmutableList<E> immutable(List<E> list) {
-		if (list instanceof ImmutableList<?>)
-			return (ImmutableList<E>) list;
-		else
-			return ImmutableList.copyOf(list);
+		return immutableAsList(list);
 	}
 
 	/**
@@ -38,10 +55,7 @@ public final class Immutables {
 	 * @return the immutable set.
 	 */
 	public static <E> ImmutableSet<E> immutable(Set<E> set) {
-		if (set instanceof ImmutableSet<?>)
-			return (ImmutableSet<E>) set;
-		else
-			return ImmutableSet.copyOf(set);
+		return immutableAsSet(set);
 	}
 
 	/**
@@ -72,10 +86,10 @@ public final class Immutables {
 	 *             if the given collection is an unsupported type.
 	 */
 	public static <E> ImmutableCollection<E> immutable(Collection<E> collection) {
-		if      (collection instanceof ImmutableList<?>)
-			return immutable((ImmutableList<E>) collection);
-		else if (collection instanceof ImmutableSet<?>)
-			return immutable((ImmutableSet<E>) collection);
+		if      (collection instanceof List<?>)
+			return immutable((List<E>) collection);
+		else if (collection instanceof Set<?>)
+			return immutable((Set<E>) collection);
 		
 		throw new IllegalArgumentException("unsupported collection");
 	}

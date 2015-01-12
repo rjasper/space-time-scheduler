@@ -1,12 +1,12 @@
 package tasks;
 
+import static common.collect.Immutables.*;
 import static java.util.stream.Collectors.toList;
 import static util.Comparables.max;
 import static util.Comparables.min;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +22,7 @@ import world.WorldPerspective;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -57,7 +58,7 @@ public class Scheduler {
 	/**
 	 * The workers managed by this scheduler.
 	 */
-	private final List<WorkerUnit> workerPool;
+	private final ImmutableList<WorkerUnit> workerPool;
 
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
@@ -78,7 +79,7 @@ public class Scheduler {
 
 		this.world = world;
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-		this.workerPool = new ArrayList<>(workerPool);
+		this.workerPool = immutableAsList(workerPool);
 	}
 
 	/**
@@ -98,7 +99,7 @@ public class Scheduler {
 	/**
 	 * @return the workers.
 	 */
-	private List<WorkerUnit> getWorkerPool() {
+	private ImmutableList<WorkerUnit> getWorkerPool() {
 		return workerPool;
 	}
 

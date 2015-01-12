@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
@@ -7,7 +8,6 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,7 +53,7 @@ public abstract class VelocityPathfinder {
 	/**
 	 * The dynamic obstacles.
 	 */
-	private List<DynamicObstacle> dynamicObstacles = Collections.emptyList();
+	private Collection<DynamicObstacle> dynamicObstacles = Collections.emptyList();
 	
 	/**
 	 * The spatial path component of the trajectory.
@@ -118,9 +118,9 @@ public abstract class VelocityPathfinder {
 	}
 
 	/**
-	 * @return the dynamic obstacles.
+	 * @return the unmodifiable dynamic obstacles.
 	 */
-	protected List<DynamicObstacle> getDynamicObstacles() {
+	protected Collection<DynamicObstacle> getDynamicObstacles() {
 		return dynamicObstacles;
 	}
 
@@ -134,7 +134,7 @@ public abstract class VelocityPathfinder {
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
-		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
+		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}
 
 	/**

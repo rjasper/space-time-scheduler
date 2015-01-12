@@ -6,7 +6,6 @@ import static java.util.Collections.unmodifiableCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,7 +42,7 @@ public abstract class ArcTimeMeshBuilder {
 	/**
 	 * The forbidden regions.
 	 */
-	private List<ForbiddenRegion> forbiddenRegions = null;
+	private Collection<ForbiddenRegion> forbiddenRegions = null;
 	
 	/**
 	 * The forbidden region union.
@@ -102,7 +101,7 @@ public abstract class ArcTimeMeshBuilder {
 	/**
 	 * @return the forbidden regions.
 	 */
-	private List<ForbiddenRegion> getForbiddenRegions() {
+	private Collection<ForbiddenRegion> getForbiddenRegions() {
 		return forbiddenRegions;
 	}
 
@@ -116,7 +115,7 @@ public abstract class ArcTimeMeshBuilder {
 	public void setForbiddenRegions(Collection<ForbiddenRegion> forbiddenRegions) {
 		CollectionsRequire.requireContainsNonNull(forbiddenRegions, "forbiddenRegions");
 		
-		this.forbiddenRegions = new ArrayList<>(forbiddenRegions);
+		this.forbiddenRegions = unmodifiableCollection( forbiddenRegions );
 		
 		// reset the region map
 		setRegionMap(null);

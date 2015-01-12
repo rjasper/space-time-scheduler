@@ -1,19 +1,22 @@
 package world;
 
+import static common.collect.Immutables.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 
+import com.google.common.collect.ImmutableCollection;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
+
+import common.collect.Immutables;
 
 /**
  * The {@code World} represents the physical outside world containing any
@@ -27,12 +30,12 @@ public class World {
 	/**
 	 * The stationary obstacles of this world.
 	 */
-	private final Collection<Polygon> staticObstacles;
+	private final ImmutableCollection<Polygon> staticObstacles;
 	
 	/**
 	 * The moving obstacles of this world.
 	 */
-	private final Collection<DynamicObstacle> dynamicObstacles;
+	private final ImmutableCollection<DynamicObstacle> dynamicObstacles;
 
 	/**
 	 * The union of all static obstacles.
@@ -58,8 +61,8 @@ public class World {
 		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
-		this.staticObstacles = unmodifiableCollection( immutable(staticObstacles) );
-		this.dynamicObstacles = unmodifiableCollection( new ArrayList<>(dynamicObstacles) );
+		this.staticObstacles = Immutables.immutable( immutable(staticObstacles) );
+		this.dynamicObstacles = immutable(dynamicObstacles);
 		this.map = immutable(makeMap(staticObstacles));
 	}
 
@@ -87,14 +90,14 @@ public class World {
 	/**
 	 * @return the stationary obstacles of this world.
 	 */
-	public Collection<Polygon> getStaticObstacles() {
+	public ImmutableCollection<Polygon> getStaticObstacles() {
 		return staticObstacles;
 	}
 
 	/**
 	 * @return the moving obstacles of this world.
 	 */
-	public Collection<DynamicObstacle> getDynamicObstacles() {
+	public ImmutableCollection<DynamicObstacle> getDynamicObstacles() {
 		return dynamicObstacles;
 	}
 

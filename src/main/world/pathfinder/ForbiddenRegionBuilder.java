@@ -1,11 +1,11 @@
 package world.pathfinder;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static jts.geom.immutable.ImmutableGeometries.mutableOrClone;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -56,7 +56,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * The dynamic obstacles.
 	 */
-	private List<DynamicObstacle> dynamicObstacles = null;
+	private Collection<DynamicObstacle> dynamicObstacles = null;
 
 	/**
 	 * The spatial path.
@@ -85,7 +85,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * @return the dynamic obstacles.
 	 */
-	private List<DynamicObstacle> getDynamicObstacles() {
+	private Collection<DynamicObstacle> getDynamicObstacles() {
 		return dynamicObstacles;
 	}
 
@@ -106,7 +106,7 @@ public class ForbiddenRegionBuilder {
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
-		this.dynamicObstacles = new ArrayList<>(dynamicObstacles);
+		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}
 
 	/**
