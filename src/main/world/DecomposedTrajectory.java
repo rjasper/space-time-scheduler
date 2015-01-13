@@ -89,9 +89,6 @@ public class DecomposedTrajectory implements Trajectory {
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 
-		// TODO check components
-		// * same euclidean length (tolerating error?)
-		
 		if (spatialPathComponent.length() != arcTimePathComponent.length())
 			throw new IllegalArgumentException("path components' lengths differ");
 		

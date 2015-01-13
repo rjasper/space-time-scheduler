@@ -77,8 +77,6 @@ public class SimpleTrajectory implements Trajectory {
 			throw new IllegalArgumentException(
 				"spatialPath and times do not have the same size");
 
-		// TODO check if times is causal (sorted)
-
 		this.spatialPath = spatialPath;
 		this.times = immutable(times);
 	}

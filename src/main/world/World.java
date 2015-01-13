@@ -61,7 +61,7 @@ public class World {
 		
 		this.staticObstacles = immutable(staticObstacles);
 		this.dynamicObstacles = immutable(dynamicObstacles);
-		this.map = immutable(makeMap(staticObstacles));
+		this.map = makeMap(staticObstacles);
 	}
 
 	/**
@@ -76,7 +76,7 @@ public class World {
 		if (staticObstacles.size() == 0) {
 			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 
-			return geomBuilder.polygon();
+			return immutable(geomBuilder.polygon());
 		}
 		
 		Collection<Polygon> shapes = staticObstacles.stream()
@@ -84,7 +84,7 @@ public class World {
 			.collect(toList());
 
 		GeometryCombiner combinder = new GeometryCombiner(shapes);
-		Geometry map = combinder.combine();
+		Geometry map = immutable(combinder.combine());
 
 		return map;
 	}

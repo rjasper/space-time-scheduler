@@ -26,6 +26,29 @@ public final class ImmutableGeometries {
 		return geometry instanceof ImmutableGeometry;
 	}
 	
+	public static Geometry immutable(Geometry geometry) {
+		if (geometry instanceof ImmutableGeometry)
+			return geometry;
+		if (geometry instanceof Point)
+			return new ImmutablePoint((Point) geometry);
+		if (geometry instanceof LinearRing)
+			return new ImmutableLinearRing((LinearRing) geometry);
+		if (geometry instanceof LineString)
+			return new ImmutableLineString((LineString) geometry);
+		if (geometry instanceof Polygon)
+			return new ImmutablePolygon((Polygon) geometry);
+		if (geometry instanceof MultiPoint)
+			return new ImmutableMultiPoint((MultiPoint) geometry);
+		if (geometry instanceof MultiLineString)
+			return new ImmutableMultiLineString((MultiLineString) geometry);
+		if (geometry instanceof MultiPolygon)
+			return new ImmutableMultiPolygon((MultiPolygon) geometry);
+		if (geometry instanceof GeometryCollection)
+			return new ImmutableGeometryCollection((GeometryCollection) geometry);
+		
+		throw new IllegalArgumentException("unknown geometry");
+	}
+	
 	public static ImmutablePoint immutable(Point point) {
 		if (point instanceof ImmutablePoint)
 			return (ImmutablePoint) point;
@@ -81,34 +104,6 @@ public final class ImmutableGeometries {
 		else
 			return new ImmutableMultiPolygon(multiPolygon);
 	}
-	
-	// TODO split into specialized methods like "ImmutablePoint immutable(Point)"
-	@SuppressWarnings("unchecked")
-	public static <T extends Geometry> T immutable(T geometry) {
-		if (geometry == null)
-			return null;
-		if (isImmutable(geometry))
-			return geometry;
-		
-		if (geometry instanceof Point)
-			return (T) new ImmutablePoint((Point) geometry);
-		if (geometry instanceof LinearRing)
-			return (T) new ImmutableLinearRing((LinearRing) geometry);
-		if (geometry instanceof LineString)
-			return (T) new ImmutableLineString((LineString) geometry);
-		if (geometry instanceof Polygon)
-			return (T) new ImmutablePolygon((Polygon) geometry);
-		if (geometry instanceof MultiPoint)
-			return (T) new ImmutableMultiPoint((MultiPoint) geometry);
-		if (geometry instanceof MultiLineString)
-			return (T) new ImmutableMultiLineString((MultiLineString) geometry);
-		if (geometry instanceof MultiPolygon)
-			return (T) new ImmutableMultiPolygon((MultiPolygon) geometry);
-		if (geometry instanceof GeometryCollection)
-			return (T) new ImmutableGeometryCollection((GeometryCollection) geometry);
-		
-		throw new IllegalArgumentException("unknown geometry");
-	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T[] immutable(T[] geometries) {
@@ -120,12 +115,6 @@ public final class ImmutableGeometries {
 		return Arrays.stream(geometries)
 			.map(ImmutableGeometries::immutable)
 			.toArray(n -> (T[]) Array.newInstance(componentType, n));
-	}
-	
-	public static <T extends Geometry> List<T> immutable(Collection<T> collection) {
-		return collection.stream()
-			.map(ImmutableGeometries::immutable)
-			.collect(toList());
 	}
 
 	@SuppressWarnings("unchecked")

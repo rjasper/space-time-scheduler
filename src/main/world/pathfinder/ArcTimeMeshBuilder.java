@@ -89,16 +89,6 @@ public abstract class ArcTimeMeshBuilder {
 	 */
 	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> resultMesh = null;
 	
-	// TODO remove
-//	/**
-//	 * @return {@code true} if all parameters are set.
-//	 */
-//	public boolean isReady() {
-//		return forbiddenRegions != null
-//			&& !Double.isNaN(maxSpeed)
-//			&& !Double.isNaN(finishArc);
-//	}
-	
 	/**
 	 * @return the forbidden regions.
 	 */
