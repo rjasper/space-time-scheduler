@@ -11,6 +11,7 @@ import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -117,6 +118,10 @@ public class Specification {
 		return duration;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		// lazy evaluation

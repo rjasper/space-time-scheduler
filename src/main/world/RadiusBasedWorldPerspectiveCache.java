@@ -210,6 +210,10 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 		return reference;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.WorldPerspectiveCache#getPerspectiveFor(tasks.WorkerUnit)
+	 */
 	@Override
 	public WorldPerspective getPerspectiveFor(WorkerUnit perceiver) {
 		Objects.requireNonNull(perceiver, "perceiver");
@@ -238,6 +242,10 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 		return reference.getPerspective();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.WorldPerspectiveCache#removePerceiver(tasks.WorkerUnit)
+	 */
 	@Override
 	public void removePerceiver(WorkerUnit perceiver) {
 		Objects.requireNonNull(perceiver, "perceiver");

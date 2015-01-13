@@ -80,7 +80,7 @@ public class DynamicObstacle implements Cloneable {
 	 * @return the spatial path of the trajectory.
 	 * @see Trajectory#getSpatialPath()
 	 */
-	public List<Point> getSpatialPath() {
+	public SpatialPath getSpatialPath() {
 		return trajectory.getSpatialPath();
 	}
 

@@ -3,10 +3,10 @@ package world.pathfinder;
 import static java.util.Collections.unmodifiableCollection;
 
 import java.util.Collection;
-import java.util.List;
 
 import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
+import world.SpatialPath;
 import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Point;
@@ -38,7 +38,7 @@ public abstract class SpatialPathfinder {
 	/**
 	 * The calculated spatial path.
 	 */
-	private List<Point> resultSpatialPath = null;
+	private SpatialPath resultSpatialPath = null;
 
 	/**
 	 * @return {@code true} if all parameters are set.
@@ -72,7 +72,7 @@ public abstract class SpatialPathfinder {
 	/**
 	 * @return the calculated spatial path.
 	 */
-	public List<Point> getResultSpatialPath() {
+	public SpatialPath getResultSpatialPath() {
 		return resultSpatialPath;
 	}
 
@@ -81,7 +81,7 @@ public abstract class SpatialPathfinder {
 	 * 
 	 * @param resultSpatialPath
 	 */
-	protected void setResultSpatialPath(List<Point> resultSpatialPath) {
+	protected void setResultSpatialPath(SpatialPath resultSpatialPath) {
 		this.resultSpatialPath = resultSpatialPath;
 	}
 
@@ -135,7 +135,7 @@ public abstract class SpatialPathfinder {
 		if (!isReady())
 			throw new IllegalStateException("not ready yet");
 
-		List<Point> spatialPath = calculateSpatialPath();
+		SpatialPath spatialPath = calculateSpatialPath();
 
 		setResultSpatialPath(spatialPath);
 
@@ -147,6 +147,6 @@ public abstract class SpatialPathfinder {
 	 * 
 	 * @return the path.
 	 */
-	protected abstract List<Point> calculateSpatialPath();
+	protected abstract SpatialPath calculateSpatialPath();
 
 }

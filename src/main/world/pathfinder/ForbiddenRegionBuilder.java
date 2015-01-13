@@ -2,7 +2,6 @@ package world.pathfinder;
 
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static jts.geom.immutable.ImmutableGeometries.mutableOrClone;
 
 import java.time.LocalDateTime;
@@ -24,10 +23,8 @@ import org.la4j.vector.dense.BasicVector;
 
 import util.CollectionsRequire;
 import world.DynamicObstacle;
-import world.util.SpatialPathSegmentIterable;
-import world.util.SpatialPathSegmentIterable.SpatialPathSegment;
-import world.util.TrajectorySegmentIterable;
-import world.util.TrajectorySegmentIterable.TrajectorySegment;
+import world.SpatialPath;
+import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -61,7 +58,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * The spatial path.
 	 */
-	private List<Point> spatialPath = null;
+	private SpatialPath spatialPath = null;
 
 	/**
 	 * The calculated forbidden regions.
@@ -112,7 +109,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * @return the spatial path.
 	 */
-	private List<Point> getSpatialPath() {
+	private SpatialPath getSpatialPath() {
 		return spatialPath;
 	}
 
@@ -131,11 +128,8 @@ public class ForbiddenRegionBuilder {
 	 * @throws NullPointerException
 	 *             if {@code spatialPath} is {@code null}.
 	 */
-	public void setSpatialPath(List<Point> spatialPath) {
-		Objects.requireNonNull(spatialPath, "spatialPath");
-		// TODO use Path type
-		
-		this.spatialPath = immutable(spatialPath);
+	public void setSpatialPath(SpatialPath spatialPath) {
+		this.spatialPath = Objects.requireNonNull(spatialPath, "spatialPath");
 	}
 
 	/**
@@ -204,25 +198,25 @@ public class ForbiddenRegionBuilder {
 
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 
-		List<Point> spatialPath = getSpatialPath();
+		SpatialPath spatialPath = getSpatialPath();
 		List<ForbiddenRegion> forbiddenRegions = new LinkedList<>();
 
-		SpatialPathSegmentIterable spatialPathSegments =
-			new SpatialPathSegmentIterable(spatialPath);
+		Iterable<SpatialPath.Segment> spatialPathSegments = () ->
+			spatialPath.segmentIterator();
 
 		// for each dynamic obstacle its forbidden region
 		for (DynamicObstacle obstacle : getDynamicObstacles()) {
-			TrajectorySegmentIterable obstacleTrajectorySegments =
-				new TrajectorySegmentIterable(obstacle.getTrajectory(), getBaseTime());
-
+			Iterable<Trajectory.Segment> obstacleTrajectorySegments = () ->
+				obstacle.getTrajectory().segmentIterator();
+			
 			Polygon obstacleShape = obstacle.getShape();
 
 			// Stores the sub regions of a forbidden region. Each trajectory
 			// segment might produce a sub region.
 			List<Geometry> subregions = new LinkedList<>();
 			// for each trajectory segment and spatial path segment pair
-			for (TrajectorySegment obstacleTrajectorySegment : obstacleTrajectorySegments) {
-				for (SpatialPathSegment spatialPathSegment : spatialPathSegments) {
+			for (Trajectory.Segment obstacleTrajectorySegment : obstacleTrajectorySegments) {
+				for (SpatialPath.Segment spatialPathSegment : spatialPathSegments) {
 					// The current spatial path segments unit vector.
 					// Also the direction and unit length of the arc dimension.
 					Vector arcUnitVector = makeUnitVector(
@@ -298,9 +292,9 @@ public class ForbiddenRegionBuilder {
 	 * @param obstacleShape
 	 * @return the subregion.
 	 */
-	private static Geometry calcStationaryCase(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment,
+	private Geometry calcStationaryCase(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Polygon obstacleShape)
 	{
 		boolean first = spatialPathSegment.isFirst();
@@ -316,7 +310,7 @@ public class ForbiddenRegionBuilder {
 
 		Polygon moved = translateGeometry(
 			obstacleShape,
-			obstacleTrajectorySegment.getStartPoint());
+			obstacleTrajectorySegment.getStartLocation());
 
 		// boundary is expected to be composed of 1-dimensional components
 		Geometry boundary = moved.getBoundary();
@@ -356,8 +350,8 @@ public class ForbiddenRegionBuilder {
 	 * @return the mask.
 	 */
 	private static LineString makePointTraceMask(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment)
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment)
 	{
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 
@@ -368,8 +362,8 @@ public class ForbiddenRegionBuilder {
 		
 		// first and last point are expected to differ
 		Vector vt = makeVector(
-			obstacleTrajectorySegment.getStartPoint(),
-			obstacleTrajectorySegment.getFinishPoint());
+			obstacleTrajectorySegment.getStartLocation(),
+			obstacleTrajectorySegment.getFinishLocation());
 
 		return geomBuilder.lineString(
 			spatialPathPoint,
@@ -385,22 +379,22 @@ public class ForbiddenRegionBuilder {
 	 * @param maskedMovedObstacleShape
 	 * @return the subregion.
 	 */
-	private static Geometry transformStationaryObstacle(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment,
+	private Geometry transformStationaryObstacle(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Geometry maskedMovedObstacleShape)
 	{
 		Point xy0 = spatialPathSegment.getStartPoint();
-		Point vt1 = obstacleTrajectorySegment.getStartPoint();
-		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
+		Point vt1 = obstacleTrajectorySegment.getStartLocation();
+		Point vt2 = obstacleTrajectorySegment.getFinishLocation();
 		// note that the start is vt2 and finish vt1
 		Matrix pointTraceUnitRowMatrix = makeUnitVector(vt2, vt1).toRowMatrix();
 
 		// origin
 		double x0 = xy0.getX();
 		double y0 = xy0.getY();
-		double s0 = spatialPathSegment.getStartArc();
-		double t0 = obstacleTrajectorySegment.getStartTime();
+		double s0 = spatialPathSegment.getStartVertex().getArc();
+		double t0 = obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime());
 
 		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
 
@@ -519,9 +513,9 @@ public class ForbiddenRegionBuilder {
 	 * @param obstacleShape
 	 * @return the subregion
 	 */
-	private static Geometry calcParallelCase(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment,
+	private Geometry calcParallelCase(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Vector arcUnitVector,
 		Polygon obstacleShape)
 	{
@@ -536,7 +530,7 @@ public class ForbiddenRegionBuilder {
 
 		Polygon movedObstacleShape = translateGeometry(
 			obstacleShape,
-			obstacleTrajectorySegment.getStartPoint());
+			obstacleTrajectorySegment.getStartLocation());
 		Geometry obstaclePathIntersection = movedObstacleShape.intersection(spatialMask);
 
 		if (obstaclePathIntersection.isEmpty())
@@ -564,8 +558,8 @@ public class ForbiddenRegionBuilder {
 	 * @return the mask.
 	 */
 	private static LineString makeSpatialLineMask(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment)
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment)
 	{
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 
@@ -573,10 +567,10 @@ public class ForbiddenRegionBuilder {
 		Vector s2 = makeVector(spatialPathSegment.getFinishPoint());
 		Vector s = s2.subtract(s1);
 		Vector vt = makeVector(
-			obstacleTrajectorySegment.getStartPoint(),
-			obstacleTrajectorySegment.getFinishPoint());
+			obstacleTrajectorySegment.getStartLocation(),
+			obstacleTrajectorySegment.getFinishLocation());
 
-		double snorm = spatialPathSegment.getLength();
+		double snorm = spatialPathSegment.length();
 
 		// calculate relative buffer size
 		// the buffer will have the size of the obstacle trajectory segment
@@ -609,17 +603,17 @@ public class ForbiddenRegionBuilder {
 	 * @param obstTrajectorySegment
 	 * @return the mask.
 	 */
-	private static Polygon makeArcRectangularMask(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstTrajectorySegment)
+	private Polygon makeArcRectangularMask(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstTrajectorySegment)
 	{
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 
 		// boundaries
-		double smin = spatialPathSegment.getStartArc();
-		double smax = smin + spatialPathSegment.getLength();
-		double tmin = obstTrajectorySegment.getStartTime();
-		double tmax = tmin + obstTrajectorySegment.getDuration();
+		double smin = spatialPathSegment.getStartVertex().getArc();
+		double smax = smin + spatialPathSegment.length();
+		double tmin = obstTrajectorySegment.getStartTimeInSeconds(getBaseTime());
+		double tmax = tmin + obstTrajectorySegment.durationInSeconds();
 
 		// also include a buffer if the segment is the first or last one.
 		if (spatialPathSegment.isFirst())
@@ -640,10 +634,10 @@ public class ForbiddenRegionBuilder {
 	 * @param obstaclePathIntersection
 	 * @return
 	 */
-	private static Geometry transformParallelObstacle(
-		SpatialPathSegment spatialPathSegment,
+	private Geometry transformParallelObstacle(
+		SpatialPath.Segment spatialPathSegment,
 		Vector arcUnitVector,
-		TrajectorySegment obstacleTrajectorySegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Geometry obstaclePathIntersection)
 	{
 		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
@@ -651,17 +645,17 @@ public class ForbiddenRegionBuilder {
 		int n = obstaclePathIntersection.getNumGeometries();
 		Matrix arcUnitRowMatrix = arcUnitVector.toRowMatrix();
 		Point xy0 = spatialPathSegment.getStartPoint();
-		Point vt1 = obstacleTrajectorySegment.getStartPoint();
-		Point vt2 = obstacleTrajectorySegment.getFinishPoint();
+		Point vt1 = obstacleTrajectorySegment.getStartLocation();
+		Point vt2 = obstacleTrajectorySegment.getFinishLocation();
 		Vector vt = makeVector(vt1, vt2);
 
 		// origin
 		double x0 = xy0.getX();
 		double y0 = xy0.getY();
-		double s0 = spatialPathSegment.getStartArc();
-		double t0 = obstacleTrajectorySegment.getStartTime();
+		double s0 = spatialPathSegment.getStartVertex().getArc();
+		double t0 = obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime());
 
-		double duration = obstacleTrajectorySegment.getDuration();
+		double duration = obstacleTrajectorySegment.durationInSeconds();
 		double displacement = arcUnitRowMatrix.multiply(vt).get(0);
 
 		Polygon[] subregions = new Polygon[n];
@@ -711,14 +705,15 @@ public class ForbiddenRegionBuilder {
 	 * @param obstacleShape
 	 * @return the subregion.
 	 */
-	private static Geometry calcRegularCase(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment,
+	private Geometry calcRegularCase(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Matrix transformationMatrix,
 		Polygon obstacleShape)
 	{
 		Polygon mask = makeParallelogramMask(spatialPathSegment, obstacleTrajectorySegment);
-		Polygon movedObstacleShape = translateGeometry(obstacleShape, obstacleTrajectorySegment.getStartPoint());
+		Polygon movedObstacleShape =
+			translateGeometry(obstacleShape, obstacleTrajectorySegment.getStartLocation());
 		Geometry maskedMovedObstacleShape = movedObstacleShape.intersection(mask);
 		Geometry region = transformRegularObstacle(
 			spatialPathSegment,
@@ -745,8 +740,8 @@ public class ForbiddenRegionBuilder {
 	 * @return
 	 */
 	private static Polygon makeParallelogramMask(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment)
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment)
 	{
 		Point s1p = spatialPathSegment.getStartPoint();
 		Point s2p = spatialPathSegment.getFinishPoint();
@@ -754,8 +749,8 @@ public class ForbiddenRegionBuilder {
 		Vector s1v = makeVector(s1p);
 		Vector s2v = makeVector(s2p);
 		Vector vtv = makeVector(
-			obstacleTrajectorySegment.getStartPoint(),
-			obstacleTrajectorySegment.getFinishPoint());
+			obstacleTrajectorySegment.getStartLocation(),
+			obstacleTrajectorySegment.getFinishLocation());
 
 		boolean first = spatialPathSegment.isFirst();
 		boolean last = spatialPathSegment.isLast();
@@ -796,17 +791,17 @@ public class ForbiddenRegionBuilder {
 	 * @param transformationMatrix
 	 * @return the subregion
 	 */
-	private static Geometry transformRegularObstacle(
-		SpatialPathSegment spatialPathSegment,
-		TrajectorySegment obstacleTrajectorySegment,
+	private Geometry transformRegularObstacle(
+		SpatialPath.Segment spatialPathSegment,
+		Trajectory.Segment obstacleTrajectorySegment,
 		Geometry maskedMovedObstacleShape,
 		Matrix transformationMatrix)
 	{
 		Geometry region = (Geometry) maskedMovedObstacleShape.clone();
 		Vector spatialOffset = makeVector( spatialPathSegment.getStartPoint() );
 		Vector arcTimeOffset = new BasicVector(new double[] {
-			spatialPathSegment.getStartArc(),
-			obstacleTrajectorySegment.getStartTime()
+			spatialPathSegment.getStartVertex().getArc(),
+			obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime())
 		});
 		
 		region.apply((Coordinate c) -> {
@@ -902,11 +897,11 @@ public class ForbiddenRegionBuilder {
 	 */
 	private static Matrix makeArcVelocityBase(
 		Vector arcUnitVector,
-		TrajectorySegment obstacleTrajectorySegment)
+		Trajectory.Segment obstacleTrajectorySegment)
 	{
-		Point obstacleStartPoint = obstacleTrajectorySegment.getStartPoint();
-		Point obstacleFinishPoint = obstacleTrajectorySegment.getFinishPoint();
-		double obstacleDuration = obstacleTrajectorySegment.getDuration();
+		Point obstacleStartPoint = obstacleTrajectorySegment.getStartLocation();
+		Point obstacleFinishPoint = obstacleTrajectorySegment.getFinishLocation();
+		double obstacleDuration = obstacleTrajectorySegment.durationInSeconds();
 
 		Vector velocityVector = makeVelocityVector(
 			obstacleStartPoint,

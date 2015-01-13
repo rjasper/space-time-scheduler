@@ -7,21 +7,20 @@ import static java.util.Collections.singleton;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
 import tasks.WorkerUnit;
-import util.PathOperations;
+import world.ArcTimePath;
 import world.DynamicObstacle;
+import world.SpatialPath;
 import world.Trajectory;
 import world.pathfinder.ForbiddenRegion;
 import world.pathfinder.ForbiddenRegionBuilder;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
-import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnitCollidesWithDynamicObstacle extends TypeSafeDiagnosingMatcher<WorkerUnit> {
 	
@@ -50,9 +49,9 @@ public class WorkerUnitCollidesWithDynamicObstacle extends TypeSafeDiagnosingMat
 		
 		LocalDateTime baseTime = item.getInitialTime();
 		Trajectory trajectory = item.calcMergedTrajectory();
-		List<Point> spatialPath = trajectory.getSpatialPath();
-		List<Point> arcTimePath = trajectory.calcArcTimePath(baseTime);
-		Geometry arcTimeTrace = PathOperations.calcTrace(arcTimePath);
+		SpatialPath spatialPath = trajectory.getSpatialPath();
+		ArcTimePath arcTimePath = trajectory.calcArcTimePath(baseTime);
+		Geometry arcTimeTrace = arcTimePath.trace();
 		
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
 		

@@ -12,10 +12,12 @@ import tasks.Specification;
 import tasks.WorkerUnit;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
+import world.SpatialPath;
 import world.StaticObstacle;
 import world.Trajectory;
 import world.World;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -51,9 +53,10 @@ public final class Example {
 		});
 		// trajectory for dynamic obstacle
 		// for trajectory
-		List<Point> dynamicObstacleTrajectorySpatialPath = Arrays.asList(
-			geomFact.createPoint(new Coordinate(7.0, 9.0)),
-			geomFact.createPoint(new Coordinate(7.0, 6.0)));
+		SpatialPath dynamicObstacleTrajectorySpatialPath =
+			new SpatialPath(ImmutableList.of(
+				geomFact.createPoint(new Coordinate(7.0, 9.0)),
+				geomFact.createPoint(new Coordinate(7.0, 6.0))));
 		// for trajectory
 		List<LocalDateTime> dynamicObstacleTrajectoryTimes = Arrays.asList(
 			LocalDateTime.of(2015, 1, 1, 0, 0,  0),  // 1/1/2015 12:00 AM

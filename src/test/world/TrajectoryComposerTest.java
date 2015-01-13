@@ -5,13 +5,10 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
-
-import com.vividsolutions.jts.geom.Point;
 
 public class TrajectoryComposerTest {
 
@@ -22,10 +19,11 @@ public class TrajectoryComposerTest {
 		LocalDateTimeFactory timeFact = new LocalDateTimeFactory(baseTime);
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		
-		List<Point> spatialPath = geomBuilder.points(
-			0., 1., 2., 1., 2., 4., 5., 4., 5., 1.);
-		List<Point> arcTimePath = geomBuilder.points(
-			0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.);
+		// TODO use immutable geom builder
+		SpatialPath spatialPath = new SpatialPath(geomBuilder.points(
+			0., 1., 2., 1., 2., 4., 5., 4., 5., 1.));
+		ArcTimePath arcTimePath = new ArcTimePath(geomBuilder.points(
+			0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.));
 		
 		TrajectoryComposer composer = new TrajectoryComposer();
 		

@@ -1,6 +1,5 @@
 package world;
 
-import java.util.List;
 import java.util.Objects;
 
 import tasks.Task;
@@ -81,7 +80,7 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * @return the spatial path component of the decomposed trajectory.
 	 * @see {@link DecomposedTrajectory#getSpatialPathComponent()}
 	 */
-	public List<Point> getSpatialPathComponent() {
+	public SpatialPath getSpatialPathComponent() {
 		return getTrajectory().getSpatialPathComponent();
 	}
 	
@@ -89,7 +88,7 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * @return the arc time path component of the decomposed trajectory.
 	 * @see {@link DecomposedTrajectory#getArcTimePathComponent()}
 	 */
-	public List<Point> getArcTimePathComponent() {
+	public ArcTimePath getArcTimePathComponent() {
 		return getTrajectory().getArcTimePathComponent();
 	}
 

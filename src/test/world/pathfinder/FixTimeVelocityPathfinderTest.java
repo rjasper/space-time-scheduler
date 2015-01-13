@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
 
@@ -16,9 +15,8 @@ import org.junit.Test;
 import world.DynamicObstacle;
 import world.LocalDateTimeFactory;
 import world.SimpleTrajectory;
+import world.SpatialPath;
 import world.TrajectoryFactory;
-
-import com.vividsolutions.jts.geom.Point;
 
 public abstract class FixTimeVelocityPathfinderTest {
 	
@@ -38,8 +36,8 @@ public abstract class FixTimeVelocityPathfinderTest {
 			new DynamicObstacle(
 				geomBuilder.box(-0.5, -0.5, 0.5, 0.5),
 				trajFact.trajectory(xObst, yObst, tObst)));
-		List<Point> spatialPath = geomBuilder.points(
-			1., 4., 4., 4., 4., 1., 1., 1.);
+		SpatialPath spatialPath = new SpatialPath(geomBuilder.points(
+			1., 4., 4., 4., 4., 1., 1., 1.));
 		LocalDateTime startTime = timeFact.seconds(0.);
 		LocalDateTime finishTime = timeFact.seconds(11.);
 		

@@ -133,6 +133,10 @@ public class Task {
 		return duration;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		// lazy evaluation

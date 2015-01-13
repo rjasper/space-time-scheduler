@@ -41,6 +41,17 @@ public class GeometriesRequire {
 		return geometry;
 	}
 	
+	/**
+	 * Checks if the given geometry is 2D. The dimension of the
+	 * coordinate sequence must be at least 2.
+	 * 
+	 * @param geometry
+	 * @param name
+	 *            of the geometry
+	 * @return the geometry
+	 * @throws IllegalArgumentException
+	 *             if the geometry is not 2D
+	 */
 	public static <G extends Geometry> G require2DGeometry(G geometry, String name) {
 		// TODO implement
 		

@@ -1,13 +1,13 @@
 package world;
 
-import static java.util.Collections.unmodifiableList;
+import static common.collect.Immutables.immutable;
+import static common.collect.ImmutablesCollectors.toImmutableList;
 import static java.util.Spliterator.IMMUTABLE;
 import static java.util.Spliterator.ORDERED;
-import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -15,80 +15,92 @@ import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
-import util.PathOperations;
-import world.util.TrajectoryVertexIterator;
-import world.util.TrajectoryVertexIterator.TrajectoryVertex;
+import jts.geom.immutable.ImmutablePoint;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>
- * A {@code SimpleTrajectory} is a immutable trajectory which stores
- * the 3-dimensional vertices directly.
+ * A {@code SimpleTrajectory} is a immutable trajectory which stores the
+ * 3-dimensional vertices directly.
  * </p>
  *
  * <p>
- * The ordinates of the vertices are split as a point list and time list.
- * The i-th element of the point list corresponds to the i-th element of the
- * time list as they represent the i-th vertex of the trajectory together.
- * Therefore, both list always have the same size.
+ * The ordinates of the vertices are split as a point list and time list. The
+ * i-th element of the point list corresponds to the i-th element of the time
+ * list as they represent the i-th vertex of the trajectory together. Therefore,
+ * both list always have the same size.
  * </p>
  *
  * @author Rico Jasper
  */
-public class SimpleTrajectory extends CachedTrajectory {
+public class SimpleTrajectory implements Trajectory {
 
 	/**
 	 * The spatial (x-y) ordinates.
 	 */
-	private final List<Point> spatialPath;
+	private final SpatialPath spatialPath;
 
 	/**
 	 * The time (t) ordinates.
 	 */
-	private final List<LocalDateTime> times;
+	private final ImmutableList<LocalDateTime> times;
+
+	/**
+	 * Caches the duration of this trajectory.
+	 */
+	private transient Duration duration = null;
 
 	/**
 	 * Constructs a new SimpleTrajectory using the provided ordinates.
 	 *
-	 * @param spatialPath the x-y-ordinates
-	 * @param times the t-ordinates.
-	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if any of the following is true:
-	 * <ul>
-	 * <li>{@code spatialPath} and {@code times} do not have the same size.</li>
-	 * <li>{@code times} is not causal (increasing in time).</li>
-	 * </ul>
+	 * @param spatialPath
+	 *            the x-y-ordinates
+	 * @param times
+	 *            the t-ordinates.
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>{@code spatialPath} and {@code times} do not have the
+	 *             same size.</li>
+	 *             <li>{@code times} is not causal (increasing in time).</li>
+	 *             </ul>
 	 */
-	public SimpleTrajectory(List<Point> spatialPath, List<LocalDateTime> times) {
+	public SimpleTrajectory(SpatialPath spatialPath, List<LocalDateTime> times) {
 		Objects.requireNonNull(spatialPath, "spatialPath");
 		Objects.requireNonNull(times, "times");
 
 		if (spatialPath.size() != times.size())
-			throw new IllegalArgumentException("spatialPath and times do not have the same size");
+			throw new IllegalArgumentException(
+				"spatialPath and times do not have the same size");
 
 		// TODO check if times is causal (sorted)
 
-		this.spatialPath = unmodifiableList( immutable(spatialPath) );
-		this.times = unmodifiableList(new ArrayList<>(times));
+		this.spatialPath = spatialPath;
+		this.times = immutable(times);
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((spatialPath == null) ? 0 : spatialPath.hashCode());
+		result = prime * result
+			+ ((spatialPath == null) ? 0 : spatialPath.hashCode());
 		result = prime * result + ((times == null) ? 0 : times.hashCode());
 		return result;
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -115,6 +127,7 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#isEmpty()
 	 */
 	@Override
@@ -124,53 +137,53 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getSpatialPath()
 	 */
 	@Override
-	public List<Point> getSpatialPath() {
+	public SpatialPath getSpatialPath() {
 		return spatialPath;
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getTimes()
 	 */
 	@Override
-	public List<LocalDateTime> getTimes() {
+	public ImmutableList<LocalDateTime> getTimes() {
 		return times;
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getStartLocation()
 	 */
 	@Override
-	public Point getStartLocation() {
+	public ImmutablePoint getStartLocation() {
 		if (isEmpty())
 			return null;
 
-		List<Point> spatialPath = getSpatialPath();
-
-		return spatialPath.get(0);
+		return getSpatialPath().get(0);
 	};
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getFinishLocation()
 	 */
 	@Override
-	public Point getFinishLocation() {
+	public ImmutablePoint getFinishLocation() {
 		if (isEmpty())
 			return null;
 
-		List<Point> spatialPath = getSpatialPath();
-		int n = spatialPath.size();
-
-		return spatialPath.get(n-1);
+		return getSpatialPath().get(size() - 1);
 	};
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getStartTime()
 	 */
 	@Override
@@ -178,13 +191,12 @@ public class SimpleTrajectory extends CachedTrajectory {
 		if (isEmpty())
 			return null;
 
-		List<LocalDateTime> times = getTimes();
-
-		return times.get(0);
+		return getTimes().get(0);
 	};
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see world.Trajectory#getFinishTime()
 	 */
 	@Override
@@ -195,38 +207,41 @@ public class SimpleTrajectory extends CachedTrajectory {
 		List<LocalDateTime> times = getTimes();
 		int n = times.size();
 
-		return times.get(n-1);
+		return times.get(n - 1);
 	};
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see world.Trajectory#getDuration()
+	 */
 	@Override
-	public List<Point> calcArcTimePath(LocalDateTime baseTime) {
-		TrajectoryVertexIterator it = new TrajectoryVertexIterator(this, baseTime);
-		Spliterator<TrajectoryVertex> spliterator =
-			Spliterators.spliterator(it, size(), IMMUTABLE | ORDERED);
-		
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
-		return StreamSupport.stream(spliterator, false)
-			.map(s -> geomBuilder.point(s.getArc(), s.getT()))
-			.collect(toList());
+	public Duration getDuration() {
+		if (duration == null) {
+			duration = isEmpty()
+				? Duration.ZERO
+				: Duration.between(getStartTime(), getFinishTime());
+		}
+
+		return duration;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.CachedTrajectory#calcLength()
+	 * @see world.Trajectory#getLength()
 	 */
 	@Override
-	protected double calcLength() {
-		return PathOperations.length( getSpatialPath() );
+	public double getLength() {
+		return spatialPath.length();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.CachedTrajectory#calcTrace()
+	 * @see world.Trajectory#getTrace()
 	 */
 	@Override
-	protected Geometry calcTrace() {
-		return PathOperations.calcTrace( getSpatialPath() );
+	public Geometry getTrace() {
+		return spatialPath.trace();
 	}
 
 	/**
@@ -238,12 +253,38 @@ public class SimpleTrajectory extends CachedTrajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
+	 */
+	@Override
+	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
+		Spliterator<Vertex> spliterator = Spliterators.spliterator(
+			vertexIterator(), size(), IMMUTABLE | ORDERED);
+
+		// TODO use immutable geom builder
+		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder
+			.getInstance();
+
+		ImmutableList<ImmutablePoint> vertices = StreamSupport
+			.stream(spliterator, false)
+			.map(v -> {
+				double arc = v.getSpatialVertex().getArc();
+				double seconds = v.getTimeInSeconds(baseTime);
+				
+				return immutable(geomBuilder.point(arc, seconds));
+			})
+			.collect(toImmutableList());
+
+		return new ArcTimePath(vertices);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return String.format("(%s, %s)",
-			getSpatialPath(), getTimes());
+		return String.format("(%s, %s)", getSpatialPath(), getTimes());
 	}
 
 }

@@ -2,10 +2,9 @@ package world;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
-import world.util.SpatialPathSegmentIterable.SpatialPathSegmentIterator;
+import jts.geom.immutable.ImmutablePoint;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -91,34 +90,21 @@ public class TrajectoryComposer {
 	 * 
 	 * @param spatialPathComponent
 	 */
-	public void setSpatialPathComponent(List<Point> spatialPathComponent) {
-		// TODO use SpatialPathVertexIterator
-
+	public void setSpatialPathComponent(SpatialPath spatialPathComponent) {
 		int nSpatial = spatialPathComponent.size();
-		
-		if (nSpatial == 1)
-			throw new IllegalArgumentException("singleton list");
-
-		double arcAcc = 0.0;
-		SpatialPathSegmentIterator segments = new SpatialPathSegmentIterator(
-			spatialPathComponent);
 
 		xSpatial = new double[nSpatial];
 		ySpatial = new double[nSpatial];
 		sSpatial = new double[nSpatial];
 
-		Iterator<Point> it = spatialPathComponent.iterator();
+		Iterator<SpatialPath.Vertex> it = spatialPathComponent.vertexIterator();
 
 		for (int i = 0; i < nSpatial; ++i) {
-			Point p = it.next();
+			SpatialPath.Vertex v = it.next();
 
-			xSpatial[i] = p.getX();
-			ySpatial[i] = p.getY();
-			sSpatial[i] = arcAcc;
-
-			// if not the last coordinate
-			if (i < nSpatial - 1)
-				arcAcc += segments.next().getLength();
+			xSpatial[i] = v.getX();
+			ySpatial[i] = v.getY();
+			sSpatial[i] = v.getArc();
 		}
 	}
 
@@ -127,15 +113,10 @@ public class TrajectoryComposer {
 	 * 
 	 * @param arcTimePathComponent
 	 */
-	public void setArcTimePathComponent(List<Point> arcTimePathComponent) {
-		// TODO use ArcTimePathVertexIterator
-
+	public void setArcTimePathComponent(ArcTimePath arcTimePathComponent) {
 		int nArcTime = arcTimePathComponent.size();
-		
-		if (nArcTime == 1)
-			throw new IllegalArgumentException("singleton list");
 
-		Iterator<Point> it = arcTimePathComponent.iterator();
+		Iterator<ImmutablePoint> it = arcTimePathComponent.iterator();
 
 		sArcTime = new double[nArcTime];
 		tArcTime = new double[nArcTime];

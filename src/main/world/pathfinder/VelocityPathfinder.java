@@ -11,20 +11,19 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.ImmutablePoint;
 import util.CollectionsRequire;
 import util.DurationConv;
-import util.PathOperations;
+import world.ArcTimePath;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
-
-import com.vividsolutions.jts.geom.Point;
+import world.SpatialPath;
 
 /**
  * The {@code VelocityPathfinder} is the abstract base class for velocity path
@@ -58,7 +57,7 @@ public abstract class VelocityPathfinder {
 	/**
 	 * The spatial path component of the trajectory.
 	 */
-	private List<Point> spatialPath = null;
+	private SpatialPath spatialPath = null;
 	
 	/**
 	 * The maximum speed.
@@ -114,7 +113,7 @@ public abstract class VelocityPathfinder {
 	 * spatial path.
 	 */
 	protected void updateFinishArc() {
-		finishArc = PathOperations.length( getSpatialPath() );
+		finishArc = getSpatialPath().length();
 	}
 
 	/**
@@ -140,7 +139,7 @@ public abstract class VelocityPathfinder {
 	/**
 	 * @return the spatial path component of the trajectory to be calculated.
 	 */
-	protected List<Point> getSpatialPath() {
+	protected SpatialPath getSpatialPath() {
 		return spatialPath;
 	}
 
@@ -153,15 +152,14 @@ public abstract class VelocityPathfinder {
 	 * @throws IllegalArgumentException
 	 *             if spatialPath is empty.
 	 */
-	public void setSpatialPath(List<Point> spatialPath) {
+	public void setSpatialPath(SpatialPath spatialPath) {
 		Objects.requireNonNull(spatialPath);
 		
-//		if (spatialPath == null)
-//			throw new NullPointerException("path cannot be null");
-		if (spatialPath.size() < 2)
-			throw new IllegalArgumentException("path too short");
+		// TODO why can it not be empty?
+		if (spatialPath.isEmpty())
+			throw new IllegalArgumentException("cannot be empty");
 		
-		this.spatialPath = immutable(spatialPath);
+		this.spatialPath = spatialPath;
 	}
 
 	/**
@@ -232,7 +230,7 @@ public abstract class VelocityPathfinder {
 		Collection<ForbiddenRegion> forbiddenRegions =
 			calculateForbiddenRegions();
 		
-		List<Point> arcTimePath = calculateArcTimePath(forbiddenRegions);
+		ArcTimePath arcTimePath = calculateArcTimePath(forbiddenRegions);
 		
 		boolean reachable = arcTimePath != null;
 		
@@ -258,7 +256,7 @@ public abstract class VelocityPathfinder {
 	private Collection<ForbiddenRegion> calculateForbiddenRegions() {
 		LocalDateTime baseTime = getBaseTime();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
-		List<Point> spatialPath = getSpatialPath();
+		SpatialPath spatialPath = getSpatialPath();
 		
 		ForbiddenRegionBuilder builder = getForbiddenRegionBuilder();
 		
@@ -277,7 +275,7 @@ public abstract class VelocityPathfinder {
 	 * @param forbiddenRegions
 	 * @return the arc-time path.
 	 */
-	protected abstract List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
+	protected abstract ArcTimePath calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
 	
 	/**
 	 * Calculates the evaded dynamic obstacles.
@@ -288,21 +286,21 @@ public abstract class VelocityPathfinder {
 	 */
 	private Collection<DynamicObstacle> calculateEvadedObstacles(
 		Collection<ForbiddenRegion> forbiddenRegions,
-		List<Point> arcTimePath)
+		ArcTimePath arcTimePath)
 	{
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 		
 		// create lookup table to map points to an obstacle
-		Map<Point, DynamicObstacle> lookup = forbiddenRegions.stream()
+		Map<ImmutablePoint, DynamicObstacle> lookup = forbiddenRegions.stream()
 			// TODO remove cast as soon as ECJ is able to infer type (Stream<SimpleEntry<Point, DynamicObstacle>>)
 			// for each coordinate of each region
-			.flatMap(r -> (Stream<SimpleEntry<Point, DynamicObstacle>>) Arrays.stream(r.getRegion().getCoordinates())
-				.map(c -> builder.point(c.x, c.y))                        // map to a point
+			.flatMap(r -> (Stream<SimpleEntry<ImmutablePoint, DynamicObstacle>>) Arrays.stream(r.getRegion().getCoordinates())
+				.map(c -> immutable(builder.point(c.x, c.y)))             // map to a point
 				.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle())))  // map to an entry
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
 		
 		// return a list of each obstacle met by a point in the path
-		return arcTimePath.stream()
+		return arcTimePath.getVertices().stream()
 			.map(lookup::get)
 			.collect(toSet());
 	}
@@ -313,9 +311,9 @@ public abstract class VelocityPathfinder {
 	 * @param arcTimePath the velocity profile.
 	 * @return the trajectory.
 	 */
-	private DecomposedTrajectory buildTrajectory(List<Point> arcTimePath) {
+	private DecomposedTrajectory buildTrajectory(ArcTimePath arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
-		List<Point> spatialPath = getSpatialPath();
+		SpatialPath spatialPath = getSpatialPath();
 		
 		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath);
 	}

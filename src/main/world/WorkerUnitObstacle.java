@@ -39,6 +39,9 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 */
 	private final Set<MovingWorkerUnitObstacle> evasions = new HashSet<>();
 	
+	/**
+	 * Stores an unmodifiable view on {@link #evasions}.
+	 */
 	private final Set<MovingWorkerUnitObstacle> unmodifiableEvations = unmodifiableSet(evasions);
 
 	/**

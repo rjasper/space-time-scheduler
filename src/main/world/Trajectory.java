@@ -3,9 +3,14 @@ package world;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.immutable.ImmutablePoint;
+import util.DurationConv;
+
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -40,6 +45,197 @@ import com.vividsolutions.jts.geom.Point;
  */
 public interface Trajectory {
 
+	// TODO document
+	
+	public static class Vertex {
+		
+		private final SpatialPath.Vertex spatialVertex;
+		private final LocalDateTime time;
+		
+		Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
+			this.spatialVertex = spatialVertex;
+			this.time = time;
+		}
+	
+		public boolean isFirst() {
+			return spatialVertex.isFirst();
+		}
+	
+		public boolean isLast() {
+			return spatialVertex.isLast();
+		}
+	
+		public SpatialPath.Vertex getSpatialVertex() {
+			return spatialVertex;
+		}
+	
+		public ImmutablePoint getLocation() {
+			return spatialVertex.getPoint();
+		}
+	
+		public double getX() {
+			return spatialVertex.getX();
+		}
+	
+		public double getY() {
+			return spatialVertex.getY();
+		}
+	
+		public double getArc() {
+			return spatialVertex.getArc();
+		}
+		
+		public double getTimeInSeconds(LocalDateTime baseTime) {
+			return DurationConv.inSeconds(Duration.between(baseTime, time));
+		}
+	
+		public LocalDateTime getTime() {
+			return time;
+		}
+		
+	}
+	
+	public static class VertexIterator implements Iterator<Vertex> {
+
+		private final Iterator<SpatialPath.Vertex> spatialIterator;
+		private final Iterator<LocalDateTime> timeIterator;
+		
+		private VertexIterator(Trajectory trajectory) {
+			this.spatialIterator = trajectory.getSpatialPath().vertexIterator();
+			this.timeIterator = trajectory.getTimes().iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			// equivalent to timeIterator.hasNext()
+			return spatialIterator.hasNext();
+		}
+
+		@Override
+		public Vertex next() {
+			return new Vertex(spatialIterator.next(), timeIterator.next());
+		}
+
+	}
+
+	public static class Segment {
+		
+		private final Vertex start;
+		private final Vertex finish;
+		private final SpatialPath.Segment spatialSegment;
+		
+		private transient Duration duration = null;
+		private transient double seconds = Double.NaN;
+		
+		Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
+			this.start = start;
+			this.finish = finish;
+			this.spatialSegment = spatialSegment;
+		}
+		
+		public boolean isStationary() {
+			return getStartLocation().equals(getFinishLocation());
+		}
+	
+		public Vertex getStartVertex() {
+			return start;
+		}
+	
+		public Vertex getFinishVertex() {
+			return finish;
+		}
+		
+		public ImmutablePoint getStartLocation() {
+			return start.getLocation();
+		}
+		
+		public ImmutablePoint getFinishLocation() {
+			return finish.getLocation();
+		}
+		
+		public LocalDateTime getStartTime() {
+			return start.getTime();
+		}
+		
+		public LocalDateTime getFinishTime() {
+			return finish.getTime();
+		}
+		
+		public double getStartTimeInSeconds(LocalDateTime seconds) {
+			return start.getTimeInSeconds(seconds);
+		}
+		
+		public double getFinishTimeInSeconds(LocalDateTime seconds) {
+			return finish.getTimeInSeconds(seconds);
+		}
+	
+		public SpatialPath.Segment getSpatialSegment() {
+			return spatialSegment;
+		}
+	
+		public boolean isFirst() {
+			return spatialSegment.isFirst();
+		}
+	
+		public boolean isLast() {
+			return spatialSegment.isLast();
+		}
+	
+		public double length() {
+			return spatialSegment.length();
+		}
+		
+		public double durationInSeconds() {
+			if (Double.isNaN(seconds))
+				seconds = DurationConv.inSeconds(duration());
+			
+			return seconds;
+		}
+		
+		public Duration duration() {
+			if (duration == null)
+				duration = Duration.between(start.getTime(), finish.getTime());
+			
+			return duration;
+		}
+		
+	}
+	
+	public static class SegmentIterator implements Iterator<Segment> {
+		
+		private final Iterator<Trajectory.Vertex> vertexIterator;
+		private final Iterator<SpatialPath.Segment> spatialSegmentIterator;
+		
+		private Trajectory.Vertex lastVertex = null;
+		
+		SegmentIterator(Trajectory trajectory) {
+			this.vertexIterator = new VertexIterator(trajectory);
+			this.spatialSegmentIterator = trajectory.getSpatialPath().segmentIterator();
+			
+			if (vertexIterator.hasNext())
+				lastVertex = vertexIterator.next();
+		}
+
+		@Override
+		public boolean hasNext() {
+			// equivalent to spatialSegmentIterator.hasNext()
+			return vertexIterator.hasNext();
+		}
+
+		@Override
+		public Segment next() {
+			Vertex start = lastVertex;
+			Vertex finish = vertexIterator.next();
+			SpatialPath.Segment spatialSegment = spatialSegmentIterator.next();
+			
+			Segment segment = new Segment(start, finish, spatialSegment);
+			lastVertex = finish;
+			
+			return segment;
+		}
+		
+	}
+	
 	/**
 	 * @return {@code true} iff trajectory has no vertices.
 	 */
@@ -48,24 +244,24 @@ public interface Trajectory {
 	/**
 	 * @return the spatial ordinates (x-y).
 	 */
-	public abstract List<Point> getSpatialPath();
+	public abstract SpatialPath getSpatialPath();
 
 	/**
 	 * @return the temporal ordinates (t).
 	 */
-	public abstract List<LocalDateTime> getTimes();
+	public abstract ImmutableList<LocalDateTime> getTimes();
 
 	/**
 	 * @return the location of the first vertex. {@code null} if trajectory is
 	 *         empty.
 	 */
-	public abstract Point getStartLocation();
+	public abstract ImmutablePoint getStartLocation();
 
 	/**
 	 * @return the location of the last vertex. {@code null} if trajectory is
 	 *         empty.
 	 */
-	public abstract Point getFinishLocation();
+	public abstract ImmutablePoint getFinishLocation();
 
 	/**
 	 * @return the time of the first vertex. {@code null} if trajectory is
@@ -102,7 +298,7 @@ public interface Trajectory {
 	 * @return the arc time path.
 	 * @throws NullPointerException if {@code baseTime} is {@code null}.
 	 */
-	public abstract List<Point> calcArcTimePath(LocalDateTime baseTime);
+	public abstract ArcTimePath calcArcTimePath(LocalDateTime baseTime);
 
 	/**
 	 * Calculates the merge of two trajectories. This trajectory serves as
@@ -121,23 +317,30 @@ public interface Trajectory {
 		if (getFinishTime().compareTo(other.getStartTime()) > 0)
 			throw new IllegalArgumentException("other is before this one");
 		
-		List<Point> lhsSpatialPath = getSpatialPath();
-		List<Point> rhsSpatialPath = other.getSpatialPath();
+		SpatialPath lhsSpatialPath = getSpatialPath();
+		SpatialPath rhsSpatialPath = other.getSpatialPath();
 		List<LocalDateTime> lhsTimes = getTimes();
 		List<LocalDateTime> rhsTimes = other.getTimes();
 
 		int n = lhsSpatialPath.size() + rhsSpatialPath.size();
 
-		List<Point> spatialPath = new ArrayList<>(n);
+		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
 		List<LocalDateTime> times = new ArrayList<>(n);
-
-		spatialPath.addAll(lhsSpatialPath);
-		spatialPath.addAll(rhsSpatialPath);
 
 		times.addAll(lhsTimes);
 		times.addAll(rhsTimes);
 
 		return new SimpleTrajectory(spatialPath, times);
+	}
+	
+	// TODO document
+	
+	public default Iterator<Vertex> vertexIterator() {
+		return new VertexIterator(this);
+	}
+	
+	public default Iterator<Segment> segmentIterator() {
+		return new SegmentIterator(this);
 	}
 
 }

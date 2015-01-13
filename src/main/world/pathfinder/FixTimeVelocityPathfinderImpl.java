@@ -1,19 +1,23 @@
 package world.pathfinder;
 
+import static common.collect.ImmutablesCollectors.toImmutableList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.ImmutableGeometries;
+import jts.geom.immutable.ImmutablePoint;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import world.ArcTimePath;
+
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -93,14 +97,14 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	 * @see world.pathfinder.VelocityPathfinder#calculateArcTimePath(java.util.Collection)
 	 */
 	@Override
-	protected List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
+	protected ArcTimePath calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
 		updateArcTimeStartPoint();
 		updateArcTimeFinishPoint();
 	
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh =
 			buildMesh(forbiddenRegions);
 		
-		List<Point> arcTimePath =
+		ArcTimePath arcTimePath =
 			calculateShortestPath(mesh);
 		
 		return arcTimePath;
@@ -139,7 +143,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	 * @param mesh
 	 * @return the path.
 	 */
-	private List<Point> calculateShortestPath(
+	private ArcTimePath calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
 		Point startPoint = getArcTimeStartPoint();
@@ -153,16 +157,17 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		
 		// if the finish point is unreachable
 		if (graphPath == null) {
-			return null;
+			return new ArcTimePath();
 		} else {
 			Stream<Point> sourcePoints = graphPath.getEdgeList().stream()
 				.map(mesh::getEdgeSource);
 			Stream<Point> endPoint = Stream.of(graphPath.getEndVertex());
 			
-			List<Point> points = Stream.concat(sourcePoints, endPoint)
-				.collect(Collectors.toList());
+			ImmutableList<ImmutablePoint> points = Stream.concat(sourcePoints, endPoint)
+				.map(ImmutableGeometries::immutable)
+				.collect(toImmutableList());
 			
-			return points;
+			return new ArcTimePath(points);
 		}
 	}
 

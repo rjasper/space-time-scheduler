@@ -1,22 +1,19 @@
 package world;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
+import static common.collect.ImmutablesCollectors.toImmutableList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
 import static util.DurationConv.inSeconds;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
-import util.PathOperations;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>
@@ -46,7 +43,7 @@ import com.vividsolutions.jts.geom.Point;
  *
  * @author Rico Jasper
  */
-public class DecomposedTrajectory extends CachedTrajectory {
+public class DecomposedTrajectory implements Trajectory {
 
 	/**
 	 * The base time.
@@ -56,12 +53,12 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	/**
 	 * The spatial path component.
 	 */
-	private final List<Point> spatialPathComponent;
+	private final SpatialPath spatialPathComponent;
 
 	/**
 	 * The arc time component.
 	 */
-	private final List<Point> arcTimePathComponent;
+	private final ArcTimePath arcTimePathComponent;
 
 	/**
 	 * The cached composed trajectory.
@@ -85,25 +82,22 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	 */
 	public DecomposedTrajectory(
 		LocalDateTime baseTime,
-		List<Point> spatialPathComponent,
-		List<Point> arcTimePathComponent)
+		SpatialPath spatialPathComponent,
+		ArcTimePath arcTimePathComponent)
 	{
 		Objects.requireNonNull(baseTime, "baseTime");
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 
-		if (spatialPathComponent.size() == 1 || arcTimePathComponent.size() == 1)
-			throw new IllegalArgumentException("illegal path component size");
-		if (spatialPathComponent.isEmpty() != arcTimePathComponent.isEmpty())
-			throw new IllegalArgumentException("incompatible path component size");
-
 		// TODO check components
 		// * same euclidean length (tolerating error?)
-		// * causal arc time path (time ordinates must be non-strictly increasing)
+		
+		if (spatialPathComponent.length() != arcTimePathComponent.length())
+			throw new IllegalArgumentException("path components' lengths differ");
 		
 		this.baseTime = baseTime;
-		this.spatialPathComponent = unmodifiableList( immutable(spatialPathComponent) );
-		this.arcTimePathComponent = unmodifiableList( immutable(arcTimePathComponent) );
+		this.spatialPathComponent = spatialPathComponent;
+		this.arcTimePathComponent = arcTimePathComponent;
 	}
 
 	@Override
@@ -128,14 +122,14 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	/**
 	 * @return the spatial component (x-y).
 	 */
-	public List<Point> getSpatialPathComponent() {
+	public SpatialPath getSpatialPathComponent() {
 		return spatialPathComponent;
 	}
 
 	/**
 	 * @return the arc time component (s-t).
 	 */
-	public List<Point> getArcTimePathComponent() {
+	public ArcTimePath getArcTimePathComponent() {
 		return arcTimePathComponent;
 	}
 
@@ -144,7 +138,7 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	 * @see world.Trajectory#getSpatialPath()
 	 */
 	@Override
-	public List<Point> getSpatialPath() {
+	public SpatialPath getSpatialPath() {
 		return getComposedTrajectory().getSpatialPath();
 	}
 
@@ -153,7 +147,7 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	 * @see world.Trajectory#getTimes()
 	 */
 	@Override
-	public List<LocalDateTime> getTimes() {
+	public ImmutableList<LocalDateTime> getTimes() {
 		return getComposedTrajectory().getTimes();
 	}
 
@@ -162,7 +156,7 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	 * @see world.Trajectory#getStartLocation()
 	 */
 	@Override
-	public Point getStartLocation() {
+	public ImmutablePoint getStartLocation() {
 		if (isEmpty())
 			return null;
 
@@ -174,11 +168,11 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	 * @see world.Trajectory#getFinishLocation()
 	 */
 	@Override
-	public Point getFinishLocation() {
+	public ImmutablePoint getFinishLocation() {
 		if (isEmpty())
 			return null;
 
-		List<Point> spatialPathComponent = getSpatialPathComponent();
+		SpatialPath spatialPathComponent = getSpatialPathComponent();
 		int n = spatialPathComponent.size();
 
 		return spatialPathComponent.get(n-1);
@@ -195,7 +189,7 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		if (isComposed())
 			return getComposedTrajectory().getStartTime();
 
-		List<Point> arcTimePath = getArcTimePathComponent();
+		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 
 		double t = arcTimePath.get(0).getY();
@@ -215,7 +209,7 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		if (isComposed())
 			return getComposedTrajectory().getFinishTime();
 
-		List<Point> arcTimePath = getArcTimePathComponent();
+		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 
 		int n = arcTimePath.size();
@@ -226,20 +220,38 @@ public class DecomposedTrajectory extends CachedTrajectory {
 	}
 
 	@Override
-	public List<Point> calcArcTimePath(LocalDateTime baseTime) {
+	public Duration getDuration() {
+		return getArcTimePathComponent().duration();
+	}
+
+	@Override
+	public double getLength() {
+		return getArcTimePathComponent().length();
+	}
+
+	@Override
+	public Geometry getTrace() {
+		return getSpatialPathComponent().trace();
+	}
+
+	@Override
+	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
 		LocalDateTime ownBaseTime = getBaseTime();
-		List<Point> arcTimePathComponent = getArcTimePathComponent();
+		ArcTimePath arcTimePathComponent = getArcTimePathComponent();
 		
 		if (baseTime.equals(ownBaseTime))
-			return new ArrayList<>();
+			return arcTimePathComponent;
 		
 		double offset = inSeconds( Duration.between(baseTime, ownBaseTime) );
 		
 		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		
-		return arcTimePathComponent.stream()
-			.map(p -> geomBuilder.point(p.getX(), p.getY() + offset))
-			.collect(toList());
+		// TODO use immutable geom builder
+		ImmutableList<ImmutablePoint> vertices = arcTimePathComponent.getVertices().stream()
+			.map(p -> immutable(geomBuilder.point(p.getX(), p.getY() + offset)))
+			.collect(toImmutableList());
+		
+		return new ArcTimePath(vertices);
 	}
 
 	/**
@@ -252,32 +264,14 @@ public class DecomposedTrajectory extends CachedTrajectory {
 		return composedTrajectory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see world.CachedTrajectory#calcLength()
-	 */
-	@Override
-	protected double calcLength() {
-		return PathOperations.length( getSpatialPathComponent() );
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.CachedTrajectory#calcTrace()
-	 */
-	@Override
-	protected Geometry calcTrace() {
-		return PathOperations.calcTrace( getSpatialPathComponent() );
-	}
-
 	/**
 	 * Calculates the composed trajectory.
 	 *
 	 * @return the composed trajectory.
 	 */
 	private SimpleTrajectory compose() {
-		List<Point> spatialPath = getSpatialPathComponent();
-		List<Point> arcTimePath = getArcTimePathComponent();
+		SpatialPath spatialPath = getSpatialPathComponent();
+		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 
 		TrajectoryComposer builder = new TrajectoryComposer();

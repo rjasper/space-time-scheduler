@@ -8,6 +8,7 @@ import java.util.Objects;
 import tasks.Task;
 import tasks.WorkerUnit;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -53,7 +54,7 @@ public class OccupiedWorkerUnitObstacle extends WorkerUnitObstacle {
 		Point location = occupation.getLocation();
 		LocalDateTime startTime = occupation.getStartTime();
 		LocalDateTime finishTime = occupation.getFinishTime();
-		List<Point> spatialPath = Arrays.asList(location, location);
+		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(location, location));
 		List<LocalDateTime> times = Arrays.asList(startTime, finishTime);
 	
 		return new SimpleTrajectory(spatialPath, times);

@@ -31,6 +31,12 @@ public final class Immutables {
 			return ImmutableList.copyOf(collection);
 	}
 	
+	/**
+	 * Converts a collection to a immutable set.
+	 * 
+	 * @param collection
+	 * @return the immutable set.
+	 */
 	public static <E> ImmutableSet<E> immutableAsSet(Collection<E> collection) {
 		if (collection instanceof ImmutableSet<?>)
 			return (ImmutableSet<E>) collection;

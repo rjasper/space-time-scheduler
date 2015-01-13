@@ -10,6 +10,7 @@ import java.util.Objects;
 import jts.geom.util.GeometriesRequire;
 import tasks.WorkerUnit;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -54,7 +55,7 @@ public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 		Objects.requireNonNull(startTime, "startTime");
 		GeometriesRequire.requireValid2DPoint(location, "location");
 		
-		List<Point> spatialPath = Arrays.asList(location, location);
+		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(location, location));
 		List<LocalDateTime> times = Arrays.asList(startTime, LocalDateTime.MAX);
 
 		return new SimpleTrajectory(spatialPath, times);

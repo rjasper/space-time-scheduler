@@ -5,9 +5,9 @@ import static jts.geom.immutable.ImmutableGeometries.immutable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.ImmutablePoint;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
@@ -15,6 +15,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.ClosestFirstIterator;
 
 import util.DurationConv;
+import world.ArcTimePath;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -91,13 +92,13 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	 * @see world.pathfinder.VelocityPathfinder#calculateArcTimePath(java.util.Collection)
 	 */
 	@Override
-	protected List<Point> calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
+	protected ArcTimePath calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions) {
 		updateArcTimeStartPoint();
 		
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh =
 			buildMesh(forbiddenRegions);
 		
-		List<Point> arcTimePath =
+		ArcTimePath arcTimePath =
 			calculateShortestPath(mesh);
 		
 		return arcTimePath;
@@ -145,7 +146,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	 * @param mesh
 	 * @return the fastest path
 	 */
-	private List<Point> calculateShortestPath(
+	private ArcTimePath calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
 		Point startVertex = getArcTimeStartPoint();
@@ -175,17 +176,17 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 	 * @param finishVertex
 	 * @return the path
 	 */
-	private List<Point> buildPath(
+	private ArcTimePath buildPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh,
 		ClosestFirstIterator<Point, DefaultWeightedEdge> iterator,
 		Point finishVertex)
 	{
-		LinkedList<Point> path = new LinkedList<>();
+		LinkedList<ImmutablePoint> vertices = new LinkedList<>();
 		
 		// collects the vertices along the path from finish to start
 		Point cur = finishVertex;
 		while (true) {
-			path.addFirst(cur);
+			vertices.addFirst(immutable(cur));
 			DefaultWeightedEdge edge = iterator.getSpanningTreeEdge(cur);
 			
 			if (edge == null)
@@ -194,7 +195,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 			cur = Graphs.getOppositeVertex(mesh, edge, cur);
 		}
 		
-		return path;
+		return new ArcTimePath(vertices);
 	}
 
 }

@@ -1,11 +1,14 @@
 package world.pathfinder;
 
+import static common.collect.ImmutablesCollectors.toImmutableList;
+import static jts.geom.immutable.ImmutableGeometries.immutable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.ImmutablePoint;
 import straightedge.geom.KPoint;
 import straightedge.geom.PolygonConverter;
 import straightedge.geom.path.NodeConnector;
@@ -13,8 +16,10 @@ import straightedge.geom.path.PathBlockingObstacle;
 import straightedge.geom.path.PathBlockingObstacleImpl;
 import straightedge.geom.path.PathData;
 import straightedge.geom.path.PathFinder;
+import world.SpatialPath;
 import world.StaticObstacle;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -79,15 +84,6 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 				pathBlockingObstacles.add(pbo);
 				nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
 			});
-		
-		// TODO remove
-//		for (Polygon o : staticObstacles) {
-//			KPolygon kp = conv.makeKPolygonFromExterior(o);
-//			PathBlockingObstacle pbo = createObstacleFromInnerPolygon(kp);
-//
-//			pathBlockingObstacles.add(pbo);
-//			nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
-//		}
 		
 		setNodeConnector(nc);
 		setPathBlockingObstacles(pathBlockingObstacles);
@@ -158,7 +154,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @see world.pathfinder.SpatialPathfinder#calculateSpatialPath()
 	 */
 	@Override
-	protected List<Point> calculateSpatialPath() {
+	protected SpatialPath calculateSpatialPath() {
 		PathFinder pf = getPathFinder();
 		NodeConnector<PathBlockingObstacle> nodeConnector = getNodeConnector();
 		KPoint startPoint = makeKPoint( getStartLocation() );
@@ -168,18 +164,12 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 
 		PathData pathData = pf.calc(startPoint, finishPoint, maxDistance, nodeConnector, obstacles);
 
-		// TODO don't use nulls
-		
 		if (pathData.isError())
-			return null;
+			return new SpatialPath();
 
-		List<Point> path = makeSpatialPath(pathData);
-
-		// if valid Path
-		if (path.size() >= 2)
-			return path;
-		else
-			return null;
+		SpatialPath path = makeSpatialPath(pathData);
+		
+		return path;
 	}
 
 	/**
@@ -198,10 +188,11 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @param point the KPoint
 	 * @return the JTS Point
 	 */
-	private static Point makeJtsPoint(KPoint point) {
+	private static ImmutablePoint makeJtsPoint(KPoint point) {
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 
-		return builder.point(point.getX(), point.getY());
+		// TODO use immutable geom builder
+		return immutable(builder.point(point.getX(), point.getY()));
 	}
 
 	/**
@@ -210,13 +201,13 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @param path
 	 * @return the converted path
 	 */
-	private List<Point> makeSpatialPath(PathData path) {
+	private SpatialPath makeSpatialPath(PathData path) {
 		List<KPoint> points = path.getPoints();
-		List<Point> jtsPoints = points.stream()
+		ImmutableList<ImmutablePoint> jtsPoints = points.stream()
 			.map((p) -> makeJtsPoint(p))
-			.collect(Collectors.toList());
-
-		return jtsPoints;
+			.collect(toImmutableList());
+		
+		return new SpatialPath(jtsPoints);
 	}
 
 }

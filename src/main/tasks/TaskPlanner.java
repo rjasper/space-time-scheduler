@@ -4,7 +4,6 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 import static util.Comparables.max;
 import static util.DurationConv.inSeconds;
-import static util.PathOperations.length;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,6 +20,7 @@ import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
 import world.OccupiedWorkerUnitObstacle;
+import world.SpatialPath;
 import world.WorkerUnitObstacle;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
@@ -387,11 +387,11 @@ public class TaskPlanner {
 			: segment.getFinishLocation();
 
 		// calculate the path to the new task
-		List<Point> toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
+		SpatialPath toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
 		if (toTask == null)
 			return false;
 		// calculate the path from the new task
-		List<Point> fromTask = calculateSpatialPath(taskLocation, segmentFinishLocation);
+		SpatialPath fromTask = calculateSpatialPath(taskLocation, segmentFinishLocation);
 		if (fromTask == null)
 			return false;
 
@@ -432,7 +432,7 @@ public class TaskPlanner {
 	 * @param finishLocation
 	 * @return {@code true} if a path connecting both locations was found.
 	 */
-	private List<Point> calculateSpatialPath(Point startLocation, Point finishLocation) {
+	private SpatialPath calculateSpatialPath(Point startLocation, Point finishLocation) {
 		SpatialPathfinder pf = getSpatialPathfinder();
 
 		pf.setStartLocation(startLocation);
@@ -543,12 +543,12 @@ public class TaskPlanner {
 		/**
 		 * The spatial path to the new task.
 		 */
-		private final List<Point> toTask;
+		private final SpatialPath toTask;
 
 		/**
 		 * The spatial path from the new task to the next one.
 		 */
-		private final List<Point> fromTask;
+		private final SpatialPath fromTask;
 
 		/**
 		 * The path segment to be replaced.
@@ -625,7 +625,7 @@ public class TaskPlanner {
 		 * @param fromTask
 		 * @param segment
 		 */
-		public CreateJob(List<Point> toTask, List<Point> fromTask, WorkerUnitObstacle segment) {
+		public CreateJob(SpatialPath toTask, SpatialPath fromTask, WorkerUnitObstacle segment) {
 			// doesn't check inputs since class is private
 
 			super(segment.getDuration());
@@ -647,7 +647,7 @@ public class TaskPlanner {
 		public double calcLaxity() {
 			WorkerUnit worker = getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
-			double length = length( toTask ) + length( fromTask );
+			double length = toTask.length() + fromTask.length();
 			double taskDuration = inSeconds( getDuration() );
 			double maxDuration = inSeconds( getJobDuration() );
 
@@ -850,7 +850,6 @@ public class TaskPlanner {
 		public UpdateJob(MovingWorkerUnitObstacle segment) {
 			// doesn't check inputs since class is private
 
-//			super(calcMaxDuration(segment));
 			super(Duration.between(segment.getStartTime(), segment.getFinishTime()));
 
 			this.segment = segment;
