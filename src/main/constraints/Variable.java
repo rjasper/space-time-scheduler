@@ -17,7 +17,7 @@ import util.NameProvider;
 
 public class Variable {
 	
-	private final String name;
+//	private final String name;
 	
 	private final List<RealSet> constraints = new LinkedList<RealSet>();
 	
@@ -26,12 +26,12 @@ public class Variable {
 	private boolean ready = false;
 	
 	public Variable() {
-		this.name = NameProvider.nameFor(Variable.class);
+//		this.name = NameProvider.nameFor(this);
 	}
 	
-	public Variable(String name) {
-		this.name = name;
-	}
+//	public Variable(String name) {
+//		this.name = name;
+//	}
 	
 	public boolean isReady() {
 		return ready;
@@ -50,7 +50,7 @@ public class Variable {
 	}
 
 	public String getName() {
-		return name;
+		return NameProvider.nameFor(this);
 	}
 
 	public List<RealSet> getConstraints() {

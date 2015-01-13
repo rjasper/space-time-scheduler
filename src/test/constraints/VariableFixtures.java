@@ -1,11 +1,15 @@
 package constraints;
 
+import util.NameProvider;
+
 
 public final class VariableFixtures {
 	
 	public static Variable[] mutualDependentVariables() {
-		Variable a = new Variable("A");
-		Variable b = new Variable("B");
+		Variable a = new Variable();
+		Variable b = new Variable();
+		NameProvider.setNameFor(a, "A");
+		NameProvider.setNameFor(b, "B");
 		
 		a.constrain(
 			new Interval(0., 10.),

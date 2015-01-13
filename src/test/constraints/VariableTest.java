@@ -13,6 +13,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import util.NameProvider;
+
 public class VariableTest {
 	
 	@Test
@@ -82,9 +84,12 @@ public class VariableTest {
 	
 	@Test
 	public void testMutualDependencyTriple() {
-		Variable a = new Variable("A");
-		Variable b = new Variable("B");
-		Variable c = new Variable("C");
+		Variable a = new Variable();
+		Variable b = new Variable();
+		Variable c = new Variable();
+		NameProvider.setNameFor(a, "A");
+		NameProvider.setNameFor(b, "B");
+		NameProvider.setNameFor(c, "C");
 		
 		a.constrain(
 				new Interval(0., 5.),
@@ -109,8 +114,10 @@ public class VariableTest {
 	
 	@Test
 	public void testMutualDependenyInterval() {
-		Variable a = new Variable("A");
-		Variable b = new Variable("B");
+		Variable a = new Variable();
+		Variable b = new Variable();
+		NameProvider.setNameFor(a, "A");
+		NameProvider.setNameFor(b, "B");
 		
 		a.constrain(
 				new Interval(0., 10.),
