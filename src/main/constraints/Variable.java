@@ -115,10 +115,10 @@ public class Variable {
 			
 			// check if the variable can be fully evaluated (i.e., no relations
 			// with other variables)
-			boolean evaluatable = relations.stream()
+			boolean evaluable = relations.stream()
 					.allMatch((r) -> r.getReference() == this);
 			
-			if (evaluatable) {
+			if (evaluable) {
 				// merge all constraints together but ignore relations since 
 				// they are equal to the intersection of the remaining constraints
 				RealSet evaluation = all.stream()
