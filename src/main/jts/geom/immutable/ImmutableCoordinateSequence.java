@@ -9,7 +9,10 @@ import com.vividsolutions.jts.geom.Envelope;
 class ImmutableCoordinateSequence implements CoordinateSequence {
 	
 	public ImmutableCoordinateSequence(CoordinateSequence coordinateSequence) {
-		this.internal = (CoordinateSequence) coordinateSequence.clone();
+		if (coordinateSequence instanceof ImmutableCoordinateSequence)
+			this.internal = coordinateSequence;
+		else
+			this.internal = (CoordinateSequence) coordinateSequence.clone();
 	}
 
 	private final CoordinateSequence internal;
