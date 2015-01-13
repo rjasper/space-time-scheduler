@@ -38,14 +38,14 @@ public class Variable {
 	}
 
 	public boolean isEvaluated() {
-		return _getEvaluation() != null;
+		return getEvaluation() != null;
 	}
 
-	private void _setEvaluation(RealSet set) {
+	private void setEvaluation(RealSet set) {
 		evaluation = set;
 	}
 
-	private RealSet _getEvaluation() {
+	private RealSet getEvaluation() {
 		return evaluation;
 	}
 
@@ -80,19 +80,19 @@ public class Variable {
 		if (!isReady())
 			throw new IllegalStateException("variable not ready");
 		if (!isEvaluated())
-			_evaluate(list()); // sets #evaluation
+			evaluateImpl(list()); // sets #evaluation
 		
-		return _getEvaluation();
+		return getEvaluation();
 	}
 
-	private List<RealSet> _evaluate(fj.data.List<Variable> trace) {
+	private List<RealSet> evaluateImpl(fj.data.List<Variable> trace) {
 		if (isEvaluated()) {
-			return singletonList(_getEvaluation());
+			return singletonList(getEvaluation());
 		} else {
 			// collect all constraints including those from relation references
 			List<RealSet> all = new LinkedList<>();
 			for (RealSet c : _getConstraints())
-				all.addAll(_evaluateHelper(trace, c));
+				all.addAll(evaluateImplHelper(trace, c));
 			
 			// filter relations
 			List<Relation> relations = all.stream()
@@ -108,7 +108,7 @@ public class Variable {
 				.allMatch((r) -> r.getOffset().contains(0.));
 			
 			if (!satisfiable) {
-				_setEvaluation(emptyRealSet());
+				setEvaluation(emptyRealSet());
 				
 				return singletonList(emptyRealSet());
 			}
@@ -127,7 +127,7 @@ public class Variable {
 					.orElse(fullRealSet())
 					.normalize();
 				
-				_setEvaluation(evaluation);
+				setEvaluation(evaluation);
 				
 				return singletonList(evaluation);
 			} else {
@@ -142,7 +142,7 @@ public class Variable {
 		}
 	}
 	
-	private List<RealSet> _evaluateHelper(fj.data.List<Variable> trace, RealSet constraint) {
+	private List<RealSet> evaluateImplHelper(fj.data.List<Variable> trace, RealSet constraint) {
 		if (constraint instanceof Relation) {
 			Relation relation = (Relation) constraint;
 			Variable reference = relation.getReference();
@@ -159,7 +159,7 @@ public class Variable {
 				if (trace.exists((v) -> v == reference))
 					return singletonList(relation);
 				else
-					return reference._evaluate(trace.cons(this)).stream()
+					return reference.evaluateImpl(trace.cons(this)).stream()
 						.map((c) -> c.add(offset))
 						.collect(toList());
 			}
@@ -171,7 +171,7 @@ public class Variable {
 	@Override
 	public String toString() {
 		if (isEvaluated()) {
-			return String.format("%s = %s", getName(), _getEvaluation().toString());
+			return String.format("%s = %s", getName(), getEvaluation().toString());
 		} else {
 			List<RealSet> constraints = _getConstraints();
 			
