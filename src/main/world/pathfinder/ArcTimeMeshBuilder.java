@@ -89,15 +89,16 @@ public abstract class ArcTimeMeshBuilder {
 	 */
 	private DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> resultMesh = null;
 	
-	/**
-	 * @return {@code true} if all parameters are set.
-	 */
-	public boolean isReady() {
-		return forbiddenRegions != null
-			&& !Double.isNaN(maxSpeed)
-			&& !Double.isNaN(finishArc);
-	}
-
+	// TODO remove
+//	/**
+//	 * @return {@code true} if all parameters are set.
+//	 */
+//	public boolean isReady() {
+//		return forbiddenRegions != null
+//			&& !Double.isNaN(maxSpeed)
+//			&& !Double.isNaN(finishArc);
+//	}
+	
 	/**
 	 * @return the forbidden regions.
 	 */
@@ -389,15 +390,28 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	protected void checkParameters() {
+		if (forbiddenRegions == null ||
+			Double.isNaN(maxSpeed)   ||
+			Double.isNaN(finishArc))
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+	}
+
+	/**
 	 * Builds the arc-time mesh.
 	 * 
 	 * @throws IllegalStateException
 	 *             if not all parameters are set.
-	 * @see #isReady()
 	 */
 	public void build() {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
+		checkParameters();
 		
 		if (getRegionMap() == null)
 			updateRegionMap();

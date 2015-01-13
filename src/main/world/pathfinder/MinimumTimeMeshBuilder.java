@@ -67,18 +67,6 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 */
 	private Point earliestFinishVertex;
 	
-	/*
-	 * (non-Javadoc)
-	 * @see world.pathfinder.ArcTimeMeshBuilder#isReady()
-	 */
-	@Override
-	public boolean isReady() {
-		return super.isReady()
-			&& startPoint != null
-			&& !Double.isNaN(earliestFinishTime)
-			&& !Double.isNaN(latestFinishTime);
-	}
-
 	/**
 	 * Sets the start vertex.
 	 * 
@@ -195,8 +183,26 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		this.earliestFinishVertex = earliestFinishVertex;
 	}
 
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	@Override
+	protected void checkParameters() {
+		super.checkParameters();
+		
+		if (startPoint == null               ||
+			Double.isNaN(earliestFinishTime) ||
+			Double.isNaN(latestFinishTime))
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+	}
+
 	// TODO build methods are not symmetric
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.pathfinder.ArcTimeMeshBuilder#buildStartVertices()

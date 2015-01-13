@@ -41,15 +41,6 @@ public abstract class SpatialPathfinder {
 	private SpatialPath resultSpatialPath = null;
 
 	/**
-	 * @return {@code true} if all parameters are set.
-	 */
-	public boolean isReady() {
-		return staticObstacles != null
-			&& startLocation != null
-			&& finishLocation != null;
-	}
-
-	/**
 	 * @return the unmodifiable static obstacles to avoid.
 	 */
 	protected Collection<StaticObstacle> getStaticObstacles() {
@@ -124,6 +115,21 @@ public abstract class SpatialPathfinder {
 		
 		this.finishLocation = finishLocation;
 	}
+	
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	protected void checkParameters() {
+		if (staticObstacles == null ||
+			startLocation   == null ||
+			finishLocation  == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+	}
 
 	/**
 	 * Calculates the path between the start and finish location. Avoids the
@@ -132,11 +138,8 @@ public abstract class SpatialPathfinder {
 	 * @return {@code true} if a path connecting both locations could be found.
 	 */
 	public final boolean calculate() {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
-
+		checkParameters();
 		SpatialPath spatialPath = calculateSpatialPath();
-
 		setResultSpatialPath(spatialPath);
 
 		return spatialPath != null;

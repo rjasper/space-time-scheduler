@@ -71,15 +71,6 @@ public class ForbiddenRegionBuilder {
 	private LocalDateTime baseTime = null;
 
 	/**
-	 * @return {@code true} if all parameters are set.
-	 */
-	public boolean isReady() {
-		return dynamicObstacles != null
-			&& spatialPath != null
-			&& baseTime != null;
-	}
-
-	/**
 	 * @return the dynamic obstacles.
 	 */
 	private Collection<DynamicObstacle> getDynamicObstacles() {
@@ -180,6 +171,21 @@ public class ForbiddenRegionBuilder {
 	public void setBaseTime(LocalDateTime baseTime) {
 		this.baseTime = baseTime;
 	}
+	
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	private void checkParameters() {
+		if (dynamicObstacles == null ||
+			spatialPath      == null ||
+			baseTime         == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+	}
 
 	/**
 	 * <p>
@@ -193,8 +199,7 @@ public class ForbiddenRegionBuilder {
 	 * </p>
 	 */
 	public void calculate() {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
+		checkParameters();
 
 		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
 

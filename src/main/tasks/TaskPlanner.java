@@ -117,33 +117,6 @@ public class TaskPlanner {
 	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
 
 	/**
-	 * <p>Returns {@code true} if all necessary parameters are set.</p>
-	 *
-	 * <p>The following parameters are to be set by their respective setters:
-	 * <ul>
-	 * <li>workerUnit</li>
-	 * <li>workerPool</li>
-	 * <li>perspectiveCache</li>
-	 * <li>location</li>
-	 * <li>earliestStartTime</li>
-	 * <li>latestStartTime</li>
-	 * <li>duration</li>
-	 * </ul>
-	 * </p>
-	 *
-	 * @return {@code true} if all necessary parameters are set.
-	 */
-	public boolean isReady() {
-		return workerUnit        != null
-			&& workerPool        != null
-			&& perspectiveCache  != null
-			&& location          != null
-			&& earliestStartTime != null
-			&& latestStartTime   != null
-			&& duration          != null;
-	}
-
-	/**
 	 * @return the current worker.
 	 */
 	private WorkerUnit getWorkerUnit() {
@@ -337,6 +310,44 @@ public class TaskPlanner {
 	}
 
 	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * <p>
+	 * The following parameters are to be set by their respective setters:
+	 * <ul>
+	 * <li>workerUnit</li>
+	 * <li>workerPool</li>
+	 * <li>perspectiveCache</li>
+	 * <li>location</li>
+	 * <li>earliestStartTime</li>
+	 * <li>latestStartTime</li>
+	 * <li>duration</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set or if {@code earliestStartTime}
+	 *             is after {@code latestStartTime}.
+	 */
+	private void checkParameters() {
+		// assert all parameters set
+		if (workerUnit        == null ||
+			workerPool        == null ||
+			perspectiveCache  == null ||
+			location          == null ||
+			earliestStartTime == null ||
+			latestStartTime   == null ||
+			duration          == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+		
+		// assert earliest <= latest 
+		if (earliestStartTime.compareTo(latestStartTime) > 0)
+			throw new IllegalStateException("earliestStartTime is after latestStartTime");
+	}
+
+	/**
 	 * <p>Plans new path segments of the current worker to the new task and
 	 * the following one. The old segment is replaced by the new ones.</p>
 	 *
@@ -349,13 +360,8 @@ public class TaskPlanner {
 	 * @return {@code true} if the task has been successfully planned.
 	 */
 	public boolean plan() {
-		// TODO check earliest <= latest
-		
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
-
+		checkParameters();
 		boolean status = planImpl();
-
 		clearCurrentDynamicObstacles();
 
 		return status;

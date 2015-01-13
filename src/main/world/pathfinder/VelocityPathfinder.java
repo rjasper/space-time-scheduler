@@ -75,14 +75,6 @@ public abstract class VelocityPathfinder {
 	private Collection<DynamicObstacle> resultEvadedObstacles = null;
 
 	/**
-	 * @return {@code true} if all parameters are set.
-	 */
-	public boolean isReady() {
-		return spatialPath != null
-			&& maxSpeed > 0.0;
-	}
-	
-	/**
 	 * @return the base time for the arc-time component.
 	 */
 	protected abstract LocalDateTime getBaseTime();
@@ -216,14 +208,27 @@ public abstract class VelocityPathfinder {
 	}
 	
 	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	protected void checkParameters() {
+		if (spatialPath == null ||
+			maxSpeed <= 0.0)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+	}
+
+	/**
 	 * Calculates the velocity profile and trajectory from start to finish arc
 	 * while avoiding all dynamic obstacles.
 	 * 
 	 * @return true if a trajectory could be calculated.
 	 */
 	public final boolean calculate() {
-		if (!isReady())
-			throw new IllegalStateException("not ready yet");
+		checkParameters();
 		
 		updateFinishArc();
 		

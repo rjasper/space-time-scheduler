@@ -35,20 +35,6 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 	
 	/*
 	 * (non-Javadoc)
-	 * @see world.pathfinder.VelocityPathfinder#isReady()
-	 */
-	@Override
-	public boolean isReady() {
-		return super.isReady()
-			&& startTime != null
-			&& earliestFinishTime != null
-			&& latestFinishTime != null
-			&& earliestFinishTime.compareTo(latestFinishTime) <= 0
-			&& bufferDuration != null;
-	}
-	
-	/*
-	 * (non-Javadoc)
 	 * @see world.pathfinder.VelocityPathfinder#getBaseTime()
 	 */
 	@Override
@@ -142,6 +128,29 @@ public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
 			throw new IllegalArgumentException("bufferDuration cannot be negative");
 		
 		this.bufferDuration = bufferDuration;
+	}
+	
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set or {@code earliestFinishTime} is
+	 *             after latest {@code latestFinishTime}.
+	 */
+	@Override
+	protected void checkParameters() {
+		super.checkParameters();
+		
+		if (startTime          == null ||
+			earliestFinishTime == null ||
+			latestFinishTime   == null ||
+			bufferDuration     == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
+		
+		if (earliestFinishTime.compareTo(latestFinishTime) > 0)
+			throw new IllegalStateException("earliestFinishTime is after latestFinishTime");
 	}
 
 }

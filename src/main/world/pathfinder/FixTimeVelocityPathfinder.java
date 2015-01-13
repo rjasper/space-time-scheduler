@@ -23,19 +23,6 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.pathfinder.VelocityPathfinder#isReady()
-	 */
-	@Override
-	public boolean isReady() {
-		// TODO check start < finish
-		
-		return super.isReady()
-			&& startTime != null
-			&& finishTime != null;
-	}
-	
-	/*
-	 * (non-Javadoc)
 	 * @see world.pathfinder.VelocityPathfinder#getBaseTime()
 	 */
 	@Override
@@ -77,6 +64,23 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 	 */
 	public void setFinishTime(LocalDateTime finishTime) {
 		this.finishTime = Objects.requireNonNull(finishTime);
+	}
+	
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
+	 */
+	@Override
+	protected void checkParameters() {
+		super.checkParameters();
+		
+		if (startTime  == null ||
+			finishTime == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
 	}
 
 }

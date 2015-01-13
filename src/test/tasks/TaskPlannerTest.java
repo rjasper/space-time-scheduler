@@ -180,8 +180,6 @@ public class TaskPlannerTest {
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
 			w, not(collideWith(obstacle)));
-		
-		System.out.println(w.calcMergedTrajectory().getTrace());
 	}
 
 }

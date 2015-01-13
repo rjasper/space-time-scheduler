@@ -66,16 +66,22 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 		
 		this.finishPoint = finishPoint;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.pathfinder.ArcTimeMeshBuilder#isReady()
+	
+	/**
+	 * Checks if all parameters are properly set. Throws an exception otherwise.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any parameter is not set.
 	 */
 	@Override
-	public boolean isReady() {
-		return super.isReady()
-			&& startPoint != null
-			&& finishPoint != null;
+	protected void checkParameters() {
+		super.checkParameters();
+		
+		if (startPoint  == null ||
+			finishPoint == null)
+		{
+			throw new IllegalStateException("some parameters are not set");
+		}
 	}
 
 	/*

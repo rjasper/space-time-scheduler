@@ -49,24 +49,6 @@ public class TrajectoryComposer {
 	 */
 	private SimpleTrajectory resultTrajectory = null;
 
-	/**
-	 * Checks if parameters are validly set.
-	 * 
-	 * @throws NullPointerException
-	 *             if any parameter is {@code null}.
-	 * @throws IllegalStateException
-	 *             if one component is empty while the other is not.
-	 */
-	public void checkParameters() {
-		// TODO check base time
-		
-		Objects.requireNonNull(xSpatial, "xSpatial");
-		Objects.requireNonNull(sArcTime, "sArcTime");
-		
-		if ((getSpatialPathSize() == 0) ^ (getArcTimePathSize() == 0))
-			throw new IllegalStateException("inconsistent array lengths");
-	}
-
 	// TODO remove
 	private TrajectoryFactory getTrajectoryFactory() {
 		return trajFact;
@@ -159,6 +141,24 @@ public class TrajectoryComposer {
 	 */
 	private void setResultTrajectory(SimpleTrajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
+	}
+
+	/**
+	 * Checks if parameters are validly set.
+	 * 
+	 * @throws NullPointerException
+	 *             if any parameter is {@code null}.
+	 * @throws IllegalStateException
+	 *             if one component is empty while the other is not.
+	 */
+	private void checkParameters() {
+		// TODO check base time
+		
+		Objects.requireNonNull(xSpatial, "xSpatial");
+		Objects.requireNonNull(sArcTime, "sArcTime");
+		
+		if ((getSpatialPathSize() == 0) ^ (getArcTimePathSize() == 0))
+			throw new IllegalStateException("inconsistent array lengths");
 	}
 
 	/**
