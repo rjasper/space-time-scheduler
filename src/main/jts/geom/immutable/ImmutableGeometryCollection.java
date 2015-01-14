@@ -7,18 +7,25 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+// note that ImmutableGeometryCollection is not the super type of
+// ImmutableMultiPoint, ImmutableMultiLineString, and ImmutableMultiPolygon
 public class ImmutableGeometryCollection extends GeometryCollection implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 6115804066466833485L;
 
-	protected ImmutableGeometryCollection(Geometry[] geometries, GeometryFactory factory) {
-		super(immutable(geometries), factory);
-	}
-
-	protected ImmutableGeometryCollection(GeometryCollection geometry) {
+	public ImmutableGeometryCollection(GeometryCollection geometry) {
 		this(retrieveGeometries(geometry), geometry.getFactory());
 	}
+
+	public ImmutableGeometryCollection(Geometry[] geometries, GeometryFactory factory) {
+		super(immutable(geometries), factory);
+	}
 	
+//	ImmutableGeometryCollection(Geometry[] geometries, GeometryFactory factory, boolean shared) {
+//		super(geometries, factory);
+//		assert shared;
+//	}
+
 	private static Geometry[] retrieveGeometries(GeometryCollection geometryCollection) {
 		int n = geometryCollection.getNumGeometries();
 		

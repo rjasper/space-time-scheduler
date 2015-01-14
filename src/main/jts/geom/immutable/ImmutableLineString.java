@@ -1,6 +1,6 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.immutableNonNull;
 import static jts.geom.immutable.ImmutableGeometries.mutable;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
@@ -13,12 +13,12 @@ public class ImmutableLineString extends LineString implements ImmutableGeometry
 
 	private static final long serialVersionUID = -2967661517374395217L;
 
-	protected ImmutableLineString(CoordinateSequence points, GeometryFactory factory) {
-		super(immutable(points), factory);
+	public ImmutableLineString(LineString lineString) {
+		this(lineString.getCoordinateSequence(), lineString.getFactory());
 	}
 
-	protected ImmutableLineString(LineString lineString) {
-		this(lineString.getCoordinateSequence(), lineString.getFactory());
+	public ImmutableLineString(CoordinateSequence points, GeometryFactory factory) {
+		super(immutableNonNull(points), factory);
 	}
 
 	@Override

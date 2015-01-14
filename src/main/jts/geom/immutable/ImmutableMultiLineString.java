@@ -12,13 +12,18 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 
 	private static final long serialVersionUID = 5998127758585768022L;
 
-	protected ImmutableMultiLineString(LineString[] lineStrings, GeometryFactory factory) {
+	public ImmutableMultiLineString(MultiLineString multiLineString) {
+		this(retrieveLineStrings(multiLineString), multiLineString.getFactory());
+	}
+
+	public ImmutableMultiLineString(LineString[] lineStrings, GeometryFactory factory) {
 		super(immutable(lineStrings), factory);
 	}
 
-	protected ImmutableMultiLineString(MultiLineString multiLineString) {
-		this(retrieveLineStrings(multiLineString), multiLineString.getFactory());
-	}
+//	ImmutableMultiLineString(ImmutableLineString[] lineStrings, ImmutableGeometryFactory factory, boolean shared) {
+//		super(lineStrings, factory);
+//		assert shared;
+//	}
 
 	private static LineString[] retrieveLineStrings(MultiLineString multiLineString) {
 		int n = multiLineString.getNumGeometries();

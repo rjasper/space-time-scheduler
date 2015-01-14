@@ -12,13 +12,18 @@ public class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 
 	private static final long serialVersionUID = -1394928736389998201L;
 
-	protected ImmutablePolygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
-		super(immutable(shell), immutable(holes), factory);
-	}
-	
-	protected ImmutablePolygon(Polygon polygon) {
+	public ImmutablePolygon(Polygon polygon) {
 		this(retrieveShell(polygon), retrieveHoles(polygon), polygon.getFactory());
 	}
+
+	public ImmutablePolygon(LinearRing shell, LinearRing[] holes, GeometryFactory factory) {
+		super(immutable(shell), immutable(holes), factory);
+	}
+
+//	ImmutablePolygon(ImmutableLinearRing shell, ImmutableLinearRing[] holes, ImmutableGeometryFactory factory, boolean shared) {
+//		super(shell, holes, factory);
+//		assert shared;
+//	}
 	
 	private static LinearRing retrieveShell(Polygon polygon) {
 		return (LinearRing) polygon.getExteriorRing();

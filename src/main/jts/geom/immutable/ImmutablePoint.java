@@ -1,6 +1,6 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.immutableNonNull;
 import static jts.geom.immutable.ImmutableGeometries.mutable;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
@@ -12,12 +12,12 @@ public class ImmutablePoint extends Point implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 8473118084765349243L;
 
-	protected ImmutablePoint(CoordinateSequence coordinates, GeometryFactory factory) {
-		super(immutable(coordinates), factory);
+	public ImmutablePoint(Point point) {
+		this(point.getCoordinateSequence(), point.getFactory());
 	}
 
-	protected ImmutablePoint(Point point) {
-		this(point.getCoordinateSequence(), point.getFactory());
+	public ImmutablePoint(CoordinateSequence coordinates, GeometryFactory factory) {
+		super(immutableNonNull(coordinates), factory);
 	}
 
 	@Override

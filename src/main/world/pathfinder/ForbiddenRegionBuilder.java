@@ -264,10 +264,10 @@ public class ForbiddenRegionBuilder {
 			}
 
 			Geometry region = builder.geometryCollection(subregions).union();
-			region.normalize();
+//			region.normalize();
 
 			if (!region.isEmpty())
-				forbiddenRegions.add(new ForbiddenRegion(region, obstacle));
+				forbiddenRegions.add(new ForbiddenRegion(region.norm(), obstacle));
 		}
 
 		setResultForbiddenRegions(forbiddenRegions);

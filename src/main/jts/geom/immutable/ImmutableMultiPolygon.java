@@ -12,14 +12,19 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 
 	private static final long serialVersionUID = 2982709814063389648L;
 
-	protected ImmutableMultiPolygon(Polygon[] polygons, GeometryFactory factory) {
+	public ImmutableMultiPolygon(MultiPolygon multiPolygon) {
+		this(retrievePolygons(multiPolygon), multiPolygon.getFactory());
+	}
+
+	public ImmutableMultiPolygon(Polygon[] polygons, GeometryFactory factory) {
 		super(immutable(polygons), factory);
 	}
 
-	protected ImmutableMultiPolygon(MultiPolygon multiPolygon) {
-		this(retrievePolygons(multiPolygon), multiPolygon.getFactory());
-	}
-	
+//	ImmutableMultiPolygon(ImmutablePolygon[] polygons, ImmutableGeometryFactory factory, boolean shared) {
+//		super(polygons, factory);
+//		assert shared;
+//	}
+
 	private static Polygon[] retrievePolygons(MultiPolygon multiPolygon) {
 		int n = multiPolygon.getNumGeometries();
 		

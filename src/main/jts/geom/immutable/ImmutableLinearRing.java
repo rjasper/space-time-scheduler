@@ -13,12 +13,12 @@ public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry
 
 	private static final long serialVersionUID = -1840083284048029664L;
 
-	protected ImmutableLinearRing(CoordinateSequence points, GeometryFactory factory) {
-		super(immutable(points), factory);
+	public ImmutableLinearRing(LinearRing linearRing) {
+		this(linearRing.getCoordinateSequence(), linearRing.getFactory());
 	}
 
-	protected ImmutableLinearRing(LinearRing linearRing) {
-		this(linearRing.getCoordinateSequence(), linearRing.getFactory());
+	public ImmutableLinearRing(CoordinateSequence points, GeometryFactory factory) {
+		super(immutable(points), factory);
 	}
 
 	@Override

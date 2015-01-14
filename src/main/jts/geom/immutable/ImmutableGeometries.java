@@ -27,7 +27,7 @@ public final class ImmutableGeometries {
 	}
 	
 	public static Geometry immutable(Geometry geometry) {
-		if (geometry instanceof ImmutableGeometry)
+		if (geometry == null || geometry instanceof ImmutableGeometry)
 			return geometry;
 		if (geometry instanceof Point)
 			return new ImmutablePoint((Point) geometry);
@@ -50,56 +50,56 @@ public final class ImmutableGeometries {
 	}
 	
 	public static ImmutablePoint immutable(Point point) {
-		if (point instanceof ImmutablePoint)
+		if (point == null || point instanceof ImmutablePoint)
 			return (ImmutablePoint) point;
 		else
 			return new ImmutablePoint(point);
 	}
 	
 	public static ImmutableLinearRing immutable(LinearRing linearRing) {
-		if (linearRing instanceof ImmutableLinearRing)
+		if (linearRing == null || linearRing instanceof ImmutableLinearRing)
 			return (ImmutableLinearRing) linearRing;
 		else
 			return new ImmutableLinearRing(linearRing);
 	}
 	
 	public static ImmutableLineString immutable(LineString lineString) {
-		if (lineString instanceof ImmutableLineString)
+		if (lineString == null || lineString instanceof ImmutableLineString)
 			return (ImmutableLineString) lineString;
 		else
 			return new ImmutableLineString(lineString);
 	}
 	
 	public static ImmutablePolygon immutable(Polygon polygon) {
-		if (polygon instanceof ImmutablePolygon)
+		if (polygon == null || polygon instanceof ImmutablePolygon)
 			return (ImmutablePolygon) polygon;
 		else
 			return new ImmutablePolygon(polygon);
 	}
 	
 	public static ImmutableGeometryCollection immutable(GeometryCollection multiPolygon) {
-		if (multiPolygon instanceof ImmutableGeometryCollection)
+		if (multiPolygon == null || multiPolygon instanceof ImmutableGeometryCollection)
 			return (ImmutableGeometryCollection) multiPolygon;
 		else
 			return new ImmutableGeometryCollection(multiPolygon);
 	}
 	
 	public static ImmutableMultiPoint immutable(MultiPoint multiPoint) {
-		if (multiPoint instanceof ImmutableMultiPoint)
+		if (multiPoint == null || multiPoint instanceof ImmutableMultiPoint)
 			return (ImmutableMultiPoint) multiPoint;
 		else
 			return new ImmutableMultiPoint(multiPoint);
 	}
 	
 	public static ImmutableMultiLineString immutable(MultiLineString multiLineString) {
-		if (multiLineString instanceof ImmutableMultiLineString)
+		if (multiLineString == null || multiLineString instanceof ImmutableMultiLineString)
 			return (ImmutableMultiLineString) multiLineString;
 		else
 			return new ImmutableMultiLineString(multiLineString);
 	}
 	
 	public static ImmutableMultiPolygon immutable(MultiPolygon multiPolygon) {
-		if (multiPolygon instanceof ImmutableMultiPolygon)
+		if (multiPolygon == null || multiPolygon instanceof ImmutableMultiPolygon)
 			return (ImmutableMultiPolygon) multiPolygon;
 		else
 			return new ImmutableMultiPolygon(multiPolygon);
@@ -116,7 +116,33 @@ public final class ImmutableGeometries {
 			.map(ImmutableGeometries::immutable)
 			.toArray(n -> (T[]) Array.newInstance(componentType, n));
 	}
+	
+//	public static MutableImmutableGeometryFactory immutable(GeometryFactory factory) {
+//		// TODO cache factories
+//		
+//		if (factory == null || factory instanceof MutableImmutableGeometryFactory)
+//			return (MutableImmutableGeometryFactory) factory;
+//		else
+//			return new MutableImmutableGeometryFactory(
+//				factory.getPrecisionModel(),
+//				factory.getSRID(),
+//				factory.getCoordinateSequenceFactory());
+//	}
 
+	public static ImmutableCoordinateSequence immutable(CoordinateSequence coords) {
+		if (coords == null || coords instanceof ImmutableCoordinateSequence)
+			return (ImmutableCoordinateSequence) coords;
+		else
+			return new ImmutableCoordinateSequence(coords);
+	}
+	
+	public static CoordinateSequence immutableNonNull(CoordinateSequence sequence) {
+		if (sequence == null)
+			return new ImmutableCoordinateSequence();
+		else
+			return immutable(sequence);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T mutable(T geometry) {
 		if (geometry instanceof ImmutableGeometry) {
@@ -146,16 +172,9 @@ public final class ImmutableGeometries {
 			.collect(toList());
 	}
 	
-	public static CoordinateSequence immutable(CoordinateSequence coords) {
-		if (coords instanceof ImmutableCoordinateSequence)
-			return coords;
-		else
-			return new ImmutableCoordinateSequence(coords);
-	}
-	
 	@SuppressWarnings("unchecked")
 	public static <T extends Geometry> T mutableOrClone(T geometry) {
-		if (geometry instanceof ImmutableGeometry)
+		if (geometry == null || geometry instanceof ImmutableGeometry)
 			return mutable(geometry);
 		else
 			return (T) geometry.clone();

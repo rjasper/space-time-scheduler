@@ -12,14 +12,19 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 
 	private static final long serialVersionUID = 7632840480221183791L;
 
-	protected ImmutableMultiPoint(Point[] points, GeometryFactory factory) {
+	public ImmutableMultiPoint(MultiPoint multiPoint) {
+		this(retrievePoints(multiPoint), multiPoint.getFactory());
+	}
+
+	public ImmutableMultiPoint(Point[] points, GeometryFactory factory) {
 		super(immutable(points), factory);
 	}
 
-	protected ImmutableMultiPoint(MultiPoint multiPoint) {
-		this(retrievePoints(multiPoint), multiPoint.getFactory());
-	}
-	
+//	ImmutableMultiPoint(ImmutablePoint[] points, ImmutableGeometryFactory factory, boolean shared) {
+//		super(points, factory);
+//		assert shared;
+//	}
+
 	private static Point[] retrievePoints(MultiPoint multiPoint) {
 		int n = multiPoint.getNumGeometries();
 		

@@ -5,25 +5,45 @@ import util.ArraysClone;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
 class ImmutableCoordinateSequence implements CoordinateSequence {
 	
+	private static final CoordinateSequence EMPTY_INTERNAL =
+		new CoordinateArraySequence(0);
+	
+	private final CoordinateSequence internal;
+	
+	public ImmutableCoordinateSequence() {
+		this.internal = EMPTY_INTERNAL;
+	}
+
 	public ImmutableCoordinateSequence(CoordinateSequence coordinateSequence) {
-		if (coordinateSequence instanceof ImmutableCoordinateSequence)
+		if (coordinateSequence == null)
+			this.internal = EMPTY_INTERNAL;
+		else if (coordinateSequence instanceof ImmutableCoordinateSequence)
 			this.internal = coordinateSequence;
 		else
 			this.internal = (CoordinateSequence) coordinateSequence.clone();
 	}
-
-	private final CoordinateSequence internal;
+	
+	ImmutableCoordinateSequence(CoordinateSequence coordinateSequence, boolean shared) {
+		assert shared;
+		this.internal = coordinateSequence;
+	}
 
 	@Override
 	public int getDimension() {
 		return internal.getDimension();
 	}
+	
+	Coordinate getCoordinateActual(int i) {
+		return internal.getCoordinate(i);
+	}
 
 	@Override
 	public Coordinate getCoordinate(int i) {
+		// note that a copy is returned
 		return internal.getCoordinateCopy(i);
 	}
 
