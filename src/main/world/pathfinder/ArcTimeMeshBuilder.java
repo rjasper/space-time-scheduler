@@ -1,11 +1,9 @@
 package world.pathfinder;
 
-import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
-import static com.vividsolutions.jts.geom.Location.INTERIOR;
-import static java.util.Collections.unmodifiableCollection;
-import static jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
-import static jts.geom.immutable.StaticGeometryBuilder.lineString;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
+import static com.vividsolutions.jts.geom.Location.*;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

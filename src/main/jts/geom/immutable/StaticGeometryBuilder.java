@@ -1,7 +1,7 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.immutableNoCopy;
-import static jts.geom.util.GeometrySequencer.sequence;
+import static jts.geom.immutable.ImmutableGeometries.*;
+import static jts.geom.util.GeometrySequencer.*;
 
 import java.util.Collection;
 

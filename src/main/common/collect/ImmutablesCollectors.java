@@ -1,6 +1,6 @@
 package common.collect;
 
-import static java.util.stream.Collector.Characteristics.UNORDERED;
+import static java.util.stream.Collector.Characteristics.*;
 
 import java.util.stream.Collector;
 

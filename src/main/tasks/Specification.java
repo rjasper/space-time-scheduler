@@ -1,6 +1,6 @@
 package tasks;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

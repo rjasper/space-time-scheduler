@@ -1,6 +1,6 @@
 package world.pathfinder;
 
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.*;
 
 import java.util.Collection;
 

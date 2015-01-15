@@ -2,7 +2,7 @@ package world;
 
 // TODO move to tests or replace by SimpleTimeFactory
 
-import static java.time.Month.JANUARY;
+import static java.time.Month.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

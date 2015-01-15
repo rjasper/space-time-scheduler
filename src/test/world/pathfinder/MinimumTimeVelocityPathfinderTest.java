@@ -1,9 +1,7 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.junit.Assert.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

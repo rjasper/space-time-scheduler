@@ -1,8 +1,8 @@
 package world.fixtures;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.StaticGeometryBuilder.polygon;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Arrays;
 import java.util.Collection;

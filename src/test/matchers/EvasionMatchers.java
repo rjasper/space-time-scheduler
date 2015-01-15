@@ -1,6 +1,6 @@
 package matchers;
 
-import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.time.LocalDateTime;
 

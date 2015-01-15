@@ -1,15 +1,9 @@
 package constraints;
 
-import static constraints.RealSets.emptyRealSet;
-import static constraints.RealSets.fullRealSet;
-import static constraints.VariableFactory.customVariable;
-import static constraints.VariableFactory.emptyVariable;
-import static constraints.VariableFactory.intervalVariable;
-import static constraints.VariableFactory.realVariable;
-import static constraints.VariableFactory.relativeVariable;
-import static constraints.VariableFactory.singletonVariable;
-import static constraints.VariableFixtures.mutualDependentVariables;
-import static org.junit.Assert.assertEquals;
+import static constraints.RealSets.*;
+import static constraints.VariableFactory.*;
+import static constraints.VariableFixtures.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

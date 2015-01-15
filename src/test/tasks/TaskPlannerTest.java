@@ -1,19 +1,14 @@
 package tasks;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static matchers.CollisionMatchers.collideWith;
-import static matchers.EvasionMatchers.areEvadedBy;
-import static matchers.EvasionMatchers.evadedByNumTimes;
-import static matchers.EvasionMatchers.isEvadedBy;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-import static util.DurationConv.ofSeconds;
-import static util.NameProvider.setNameFor;
-import static util.SimpleTimeFactory.atSecond;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static matchers.CollisionMatchers.*;
+import static matchers.EvasionMatchers.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static util.DurationConv.*;
+import static util.NameProvider.*;
+import static util.SimpleTimeFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

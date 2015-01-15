@@ -1,10 +1,9 @@
 package world;
 
-import static java.util.Collections.emptyList;
-import static jts.geom.immutable.StaticGeometryBuilder.polygon;
-import static matchers.GeometryMatchers.isEmpty;
-import static matchers.GeometryMatchers.topologicallyEqualTo;
-import static org.junit.Assert.assertThat;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static matchers.GeometryMatchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;

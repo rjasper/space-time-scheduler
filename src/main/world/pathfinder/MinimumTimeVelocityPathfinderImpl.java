@@ -1,7 +1,7 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static jts.geom.immutable.ImmutableGeometries.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Collection;
 import java.util.HashSet;

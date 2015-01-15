@@ -1,11 +1,8 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.ImmutableGeometries.mutable;
-import static jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static jts.geom.immutable.StaticGeometryBuilder.polygon;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static jts.geom.immutable.ImmutableGeometries.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

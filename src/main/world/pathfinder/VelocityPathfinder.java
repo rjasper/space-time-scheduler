@@ -1,9 +1,8 @@
 package world.pathfinder;
 
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

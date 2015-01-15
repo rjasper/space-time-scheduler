@@ -1,7 +1,7 @@
 package world.pathfinder;
 
-import static java.util.Collections.singleton;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Collection;
 import java.util.Collections;

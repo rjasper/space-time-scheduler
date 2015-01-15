@@ -1,9 +1,7 @@
 package constraints;
 
-import static constraints.VariableFactory.intervalVariable;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static constraints.VariableFactory.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

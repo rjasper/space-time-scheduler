@@ -7,9 +7,7 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.CoordinateSequences;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.GeometryFilter;
 import com.vividsolutions.jts.geom.LinearRing;
 
 public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {

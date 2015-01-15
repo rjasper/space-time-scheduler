@@ -1,6 +1,6 @@
 package world;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 

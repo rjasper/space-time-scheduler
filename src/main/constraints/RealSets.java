@@ -1,7 +1,6 @@
 package constraints;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 
 public final class RealSets {
 	

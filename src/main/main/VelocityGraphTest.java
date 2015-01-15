@@ -1,7 +1,6 @@
 package main;
 
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Arrays;
 import java.util.List;

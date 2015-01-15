@@ -1,8 +1,7 @@
 package tasks.factories;
 
-import static java.util.Collections.emptyList;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static jts.geom.immutable.StaticGeometryBuilder.polygon;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

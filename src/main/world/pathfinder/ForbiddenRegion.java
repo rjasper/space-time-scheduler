@@ -1,6 +1,6 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import java.util.Objects;
 

@@ -1,6 +1,6 @@
 package tasks.factories;
 
-import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.LocalDateTime;
 

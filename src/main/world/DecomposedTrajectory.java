@@ -1,8 +1,8 @@
 package world;
 
-import static common.collect.ImmutablesCollectors.toImmutableList;
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
-import static util.DurationConv.inSeconds;
+import static common.collect.ImmutablesCollectors.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

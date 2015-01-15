@@ -1,7 +1,7 @@
 package pickers;
 
-import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
-import static util.DurationConv.ofSeconds;
+import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
+import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

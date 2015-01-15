@@ -1,9 +1,9 @@
 package world;
 
-import static java.time.Month.JANUARY;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static java.time.Month.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 

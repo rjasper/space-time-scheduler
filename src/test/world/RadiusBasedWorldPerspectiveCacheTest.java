@@ -1,14 +1,10 @@
 package world;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static matchers.GeometryMatchers.topologicallyEqualTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static java.util.Collections.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static matchers.GeometryMatchers.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.function.Supplier;

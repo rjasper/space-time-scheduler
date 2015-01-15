@@ -1,7 +1,6 @@
 package jts.geom.util;
 
-import static java.util.Spliterator.NONNULL;
-import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.*;
 
 import java.util.Iterator;
 import java.util.Spliterator;

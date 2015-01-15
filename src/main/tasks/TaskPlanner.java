@@ -1,9 +1,9 @@
 package tasks;
 
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.stream.Collectors.toList;
-import static util.Comparables.max;
-import static util.DurationConv.inSeconds;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static util.Comparables.*;
+import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

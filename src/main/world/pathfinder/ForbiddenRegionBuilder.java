@@ -1,15 +1,9 @@
 package world.pathfinder;
 
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.ImmutableGeometries.mutableOrClone;
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static jts.geom.immutable.StaticGeometryBuilder.geometry;
-import static jts.geom.immutable.StaticGeometryBuilder.lineString;
-import static jts.geom.immutable.StaticGeometryBuilder.linearRing;
-import static jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static jts.geom.immutable.StaticGeometryBuilder.polygon;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.ImmutableGeometries.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

@@ -1,10 +1,8 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

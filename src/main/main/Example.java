@@ -1,6 +1,6 @@
 package main;
 
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

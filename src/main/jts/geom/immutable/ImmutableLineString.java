@@ -1,9 +1,6 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.alwaysTrue;
-import static jts.geom.immutable.ImmutableGeometries.guard;
-import static jts.geom.immutable.ImmutableGeometries.immutableNonNull;
-import static jts.geom.immutable.ImmutableGeometries.mutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequence;

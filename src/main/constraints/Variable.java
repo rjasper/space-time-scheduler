@@ -1,10 +1,9 @@
 package constraints;
 
-import static constraints.RealSets.emptyRealSet;
-import static constraints.RealSets.fullRealSet;
-import static fj.data.List.list;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
+import static constraints.RealSets.*;
+import static fj.data.List.*;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
 
 import java.util.Arrays;
 import java.util.Collection;

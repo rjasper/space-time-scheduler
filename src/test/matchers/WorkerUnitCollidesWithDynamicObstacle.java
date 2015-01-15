@@ -1,9 +1,8 @@
 package matchers;
 
-import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
-import static com.vividsolutions.jts.geom.Location.BOUNDARY;
-import static com.vividsolutions.jts.geom.Location.INTERIOR;
-import static java.util.Collections.singleton;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
+import static com.vividsolutions.jts.geom.Location.*;
+import static java.util.Collections.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

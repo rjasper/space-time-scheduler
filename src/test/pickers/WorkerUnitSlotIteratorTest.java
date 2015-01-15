@@ -1,8 +1,8 @@
 package pickers;
 
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

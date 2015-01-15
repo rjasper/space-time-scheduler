@@ -1,6 +1,6 @@
 package jts.geom.immutable;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

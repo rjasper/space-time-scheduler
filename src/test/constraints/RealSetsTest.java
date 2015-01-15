@@ -1,11 +1,8 @@
 package constraints;
 
-import static constraints.RealSets.add;
-import static constraints.RealSets.emptyRealSet;
-import static constraints.RealSets.intersect;
-import static constraints.VariableFactory.intervalVariable;
-import static constraints.VariableFactory.singletonVariable;
-import static org.junit.Assert.assertEquals;
+import static constraints.RealSets.*;
+import static constraints.VariableFactory.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

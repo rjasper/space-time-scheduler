@@ -8,14 +8,23 @@ import java.util.Stack;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.Polygon;
 
 // TODO implement test
 public class GeometryIterator implements Iterator<Geometry> {
 	
 	private final Stack<Iterator<Geometry>> stack = new Stack<>();
 	
+	private final boolean overComponents;
+	
 	public GeometryIterator(Geometry geometry) {
+		this(geometry, false);
+	}
+	
+	public GeometryIterator(Geometry geometry, boolean overComponents) {
 		Objects.requireNonNull(geometry, "geometry");
+		
+		this.overComponents = overComponents;
 		
 		stack.push(makeIterator(geometry));
 	}
@@ -47,6 +56,10 @@ public class GeometryIterator implements Iterator<Geometry> {
 			// found
 			if (geometry instanceof GeometryCollection) {
 				stack.push(makeIterator(geometry));
+			} else if (overComponents && geometry instanceof Polygon) {
+				Polygon polygon = (Polygon) geometry;
+				
+				stack.push(new PolygonComponentIterator(polygon));
 			} else {
 				return geometry;
 			}
@@ -54,16 +67,15 @@ public class GeometryIterator implements Iterator<Geometry> {
 	}
 	
 	private static Iterator<Geometry> makeIterator(Geometry geometry) {
-		return new HelperIterator(geometry);
+		return new SubGeometryIterator(geometry);
 	}
 	
-	private static class HelperIterator implements Iterator<Geometry> {
-		
+	private static class SubGeometryIterator implements Iterator<Geometry> {
 		private final Geometry geometry;
 		
 		private int i = 0;
 
-		public HelperIterator(Geometry geometry) {
+		public SubGeometryIterator(Geometry geometry) {
 			this.geometry = geometry;
 		}
 
@@ -75,6 +87,42 @@ public class GeometryIterator implements Iterator<Geometry> {
 		@Override
 		public Geometry next() {
 			return geometry.getGeometryN(i++);
+		}
+	}
+	
+	private static class PolygonComponentIterator implements Iterator<Geometry> {
+		
+		private final Polygon polygon;
+		
+		/**
+		 * Indicates if the exterior ring still has to be iterated over.
+		 */
+		private boolean exterior = false;
+		
+		private int interior = 0;
+
+		public PolygonComponentIterator(Polygon polygon) {
+			this.polygon = polygon;
+			this.exterior = !polygon.isEmpty();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return exterior || interior < polygon.getNumInteriorRing();
+		}
+
+		@Override
+		public Geometry next() {
+			if (exterior) {
+				exterior = false;
+				return polygon.getExteriorRing();
+			} else {
+				try {
+					return polygon.getInteriorRingN(interior++);
+				} catch (ArrayIndexOutOfBoundsException e) {
+					throw new NoSuchElementException();
+				}
+			}
 		}
 		
 	}

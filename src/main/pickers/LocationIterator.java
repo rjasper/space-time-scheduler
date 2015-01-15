@@ -1,6 +1,6 @@
 package pickers;
 
-import static jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Comparator;
 import java.util.Iterator;

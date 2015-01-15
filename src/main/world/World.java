@@ -1,10 +1,10 @@
 package world;
 
-import static common.collect.Immutables.immutable;
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
+import static common.collect.Immutables.*;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.ImmutableGeometries.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Collection;
 

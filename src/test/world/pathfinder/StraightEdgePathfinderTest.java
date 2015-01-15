@@ -1,7 +1,7 @@
 package world.pathfinder;
 
-import static jts.geom.immutable.StaticGeometryBuilder.point;
-import static org.junit.Assert.assertTrue;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.junit.Assert.*;
 
 import java.util.Collection;
 

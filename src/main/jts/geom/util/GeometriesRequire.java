@@ -2,7 +2,10 @@ package jts.geom.util;
 
 import java.util.Objects;
 
+import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -53,7 +56,27 @@ public class GeometriesRequire {
 	 *             if the geometry is not 2D
 	 */
 	public static <G extends Geometry> G require2DGeometry(G geometry, String name) {
-		// TODO implement
+		GeometrySplitter<CoordinateSequence> splitter = new GeometrySplitter<CoordinateSequence>() {
+			@Override
+			protected CoordinateSequence take(Point point) {
+				return point.getCoordinateSequence();
+			}
+			@Override
+			protected CoordinateSequence take(LineString lineString) {
+				return lineString.getCoordinateSequence();
+			}
+		};
+		
+		geometry.apply(new GeometryComponentFilter() {
+			@Override
+			public void filter(Geometry g) {
+				// only the geometry's components are of interest
+				if (g instanceof Polygon || g instanceof GeometryCollection)
+					return;
+				if (splitter.give(g).getDimension() < 2)
+					throw new IllegalArgumentException(name + " is not 2D");
+			}
+		});
 		
 		return geometry;
 	}

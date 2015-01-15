@@ -1,8 +1,7 @@
 package matchers;
 
-import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
-import static com.vividsolutions.jts.geom.Location.BOUNDARY;
-import static com.vividsolutions.jts.geom.Location.INTERIOR;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
+import static com.vividsolutions.jts.geom.Location.*;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;

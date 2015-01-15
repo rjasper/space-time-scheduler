@@ -1,7 +1,7 @@
 package tasks;
 
-import static jts.geom.immutable.StaticGeometryBuilder.box;
-import static org.junit.Assert.assertTrue;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;

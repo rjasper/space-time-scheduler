@@ -1,7 +1,7 @@
 package world;
 
-import static jts.geom.immutable.StaticGeometryBuilder.immutableLineString;
-import static jts.geom.util.GeometrySequencer.sequence;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static jts.geom.util.GeometrySequencer.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;

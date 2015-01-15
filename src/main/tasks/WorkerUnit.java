@@ -1,8 +1,8 @@
 package tasks;
 
-import static java.util.Collections.unmodifiableNavigableMap;
-import static java.util.stream.Collectors.toList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static java.util.Collections.*;
+import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

@@ -1,7 +1,6 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
-import static jts.geom.immutable.ImmutableGeometries.mutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;

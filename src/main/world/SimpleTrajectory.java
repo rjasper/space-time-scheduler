@@ -1,10 +1,9 @@
 package world;
 
-import static common.collect.Immutables.immutable;
-import static common.collect.ImmutablesCollectors.toImmutableList;
-import static java.util.Spliterator.IMMUTABLE;
-import static java.util.Spliterator.ORDERED;
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static common.collect.Immutables.*;
+import static common.collect.ImmutablesCollectors.*;
+import static java.util.Spliterator.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

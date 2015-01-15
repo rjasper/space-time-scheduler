@@ -2,7 +2,7 @@ package world;
 
 // TODO move to tests
 
-import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
