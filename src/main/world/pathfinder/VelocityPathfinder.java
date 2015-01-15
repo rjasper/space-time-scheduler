@@ -3,7 +3,7 @@ package world.pathfinder;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 import util.CollectionsRequire;
 import util.DurationConv;
@@ -293,14 +292,12 @@ public abstract class VelocityPathfinder {
 		Collection<ForbiddenRegion> forbiddenRegions,
 		ArcTimePath arcTimePath)
 	{
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-		
 		// create lookup table to map points to an obstacle
 		Map<ImmutablePoint, DynamicObstacle> lookup = forbiddenRegions.stream()
 			// TODO remove cast as soon as ECJ is able to infer type (Stream<SimpleEntry<Point, DynamicObstacle>>)
 			// for each coordinate of each region
 			.flatMap(r -> (Stream<SimpleEntry<ImmutablePoint, DynamicObstacle>>) Arrays.stream(r.getRegion().getCoordinates())
-				.map(c -> immutable(builder.point(c.x, c.y)))             // map to a point
+				.map(c -> immutablePoint(c.x, c.y))             // map to a point
 				.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle())))  // map to an entry
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
 		

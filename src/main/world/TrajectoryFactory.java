@@ -2,7 +2,7 @@ package world;
 
 // TODO move to tests
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
@@ -19,21 +18,21 @@ public class TrajectoryFactory {
 	
 	private static TrajectoryFactory instance = null;
 	
-	private EnhancedGeometryBuilder geomBuilder;
+//	private EnhancedGeometryBuilder geomBuilder;
 	
 	private LocalDateTimeFactory timeFact;
 	
 	public TrajectoryFactory() {
 		this(
-			EnhancedGeometryBuilder.getInstance(),
+//			EnhancedGeometryBuilder.getBuilderInstance(),
 			LocalDateTimeFactory.getInstance());
 	}
 	
 	public TrajectoryFactory(
-		EnhancedGeometryBuilder geomBuilder,
+//		EnhancedGeometryBuilder geomBuilder,
 		LocalDateTimeFactory timeFact)
 	{
-		this.geomBuilder = geomBuilder;
+//		this.geomBuilder = geomBuilder;
 		this.timeFact = timeFact;
 	}
 	
@@ -66,7 +65,7 @@ public class TrajectoryFactory {
 		
 		// TODO use immutable geom builder
 		for (int i = 0; i < n; ++i)
-			builder.add(immutable(geomBuilder.point(x[i], y[i])));
+			builder.add(immutablePoint(x[i], y[i]));
 		
 		SpatialPath path = new SpatialPath(builder.build());
 		

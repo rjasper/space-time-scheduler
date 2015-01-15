@@ -1,19 +1,21 @@
 package world;
 
+import static jts.geom.immutable.StaticGeometryBuilder.immutableLineString;
+import static jts.geom.util.GeometrySequencer.sequence;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutableGeometries;
+import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.UnmodifiableIterator;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 // TODO document
@@ -21,7 +23,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	
 	private final ImmutableList<ImmutablePoint> vertices;
 	
-	private transient LineString trace = null;
+	private transient ImmutableLineString trace = null;
 	
 	public Path() {
 		this.vertices = ImmutableList.of();
@@ -111,7 +113,7 @@ public class Path implements Iterable<ImmutablePoint> {
 		return true;
 	}
 
-	public LineString trace() {
+	public ImmutableLineString trace() {
 		if (trace == null) {
 			List<Point> points = new LinkedList<>(getVertices());
 			Iterator<Point> it = points.iterator();
@@ -129,9 +131,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	
 			// construct LineString
 	
-			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-	
-			trace = geomBuilder.lineString(points);
+			trace = immutableLineString(sequence(points));
 		}
 		
 		return trace;

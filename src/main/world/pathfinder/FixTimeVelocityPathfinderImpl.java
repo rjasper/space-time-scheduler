@@ -1,12 +1,11 @@
 package world.pathfinder;
 
 import static common.collect.ImmutablesCollectors.toImmutableList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutableGeometries;
 import jts.geom.immutable.ImmutablePoint;
 
@@ -30,8 +29,6 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 
-	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-	
 	/**
 	 * The mesh builder.
 	 */
@@ -69,8 +66,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		// It is important that the start point and the finish point
 		// are structurally the same to the ones used in the mesh. Therefore,
 		// the points are already converted immutable here.
-		arcTimeStartPoint = immutable(
-			geomBuilder.point(getStartArc(), inSeconds(getStartTime())));
+		arcTimeStartPoint = immutablePoint(
+			getStartArc(), inSeconds(getStartTime()));
 	}
 
 	/**
@@ -88,8 +85,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		// It is important that the start point and the finish point
 		// are structurally the same to the ones used in the mesh. Therefore,
 		// the points are already converted immutable here.
-		arcTimeFinishPoint = immutable(
-			geomBuilder.point(getFinishArc(), inSeconds(getFinishTime())));
+		arcTimeFinishPoint =  immutablePoint(
+			getFinishArc(), inSeconds(getFinishTime()));
 	}
 
 	/*

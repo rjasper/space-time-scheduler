@@ -1,14 +1,15 @@
 package jts.geom.immutable;
 
-import java.util.Collection;
+import static jts.geom.immutable.ImmutableGeometries.immutableNoCopy;
+import static jts.geom.util.GeometrySequencer.sequence;
 
-import org.geotools.geometry.jts.GeometryBuilder;
+import java.util.Collection;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -18,397 +19,404 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 public final class StaticGeometryBuilder {
+
+	private static final MutableImmutableGeometryFactory FACTORY =
+		new MutableImmutableGeometryFactory();
+
+	private static final MutableImmutableGeometryBuilder BUILDER =
+		new MutableImmutableGeometryBuilder(FACTORY);
+
+	private StaticGeometryBuilder() {}
 	
-	private static final GeometryFactory MUTABLE_FACTORY = new GeometryFactory();
-	
-	private static final GeometryBuilder MUTABLE_BUILDER = new GeometryBuilder(MUTABLE_FACTORY);
-
-	private static final ImmutableGeometryFactory IMMUTABLE_FACTORY = new ImmutableGeometryFactory(MUTABLE_FACTORY);
-	
-	private static final ImmutableGeometryBuilder IMMUTABLE_BUILDER = new ImmutableGeometryBuilder(IMMUTABLE_FACTORY);
-
-	public static Geometry buildGeometry(Collection<Geometry> geomList) {
-		return MUTABLE_FACTORY.buildGeometry(geomList);
+	public static MutableImmutableGeometryBuilder getBuilderInstance() {
+		return BUILDER;
 	}
 
-	public static Point createPoint(Coordinate coordinate) {
-		return MUTABLE_FACTORY.createPoint(coordinate);
+	public static MutableImmutableGeometryFactory getFactoryInstance() {
+		return FACTORY;
 	}
 
-	public static Point createPoint(CoordinateSequence coordinates) {
-		return MUTABLE_FACTORY.createPoint(coordinates);
+	public static Geometry geometry(Envelope envelope) {
+		return FACTORY.toGeometry(envelope);
 	}
 
-	public static MultiLineString createMultiLineString(LineString[] lineStrings) {
-		return MUTABLE_FACTORY.createMultiLineString(lineStrings);
+	public static Geometry geometry(Geometry g) {
+		return FACTORY.createGeometry(g);
 	}
 
-	public static GeometryCollection createGeometryCollection(Geometry[] geometries) {
-		return MUTABLE_FACTORY.createGeometryCollection(geometries);
-	}
-
-	public static MultiPolygon createMultiPolygon(Polygon[] polygons) {
-		return MUTABLE_FACTORY.createMultiPolygon(polygons);
-	}
-
-	public static LinearRing createLinearRing(Coordinate[] coordinates) {
-		return MUTABLE_FACTORY.createLinearRing(coordinates);
-	}
-
-	public static LinearRing createLinearRing(CoordinateSequence coordinates) {
-		return MUTABLE_FACTORY.createLinearRing(coordinates);
-	}
-
-	public static MultiPoint createMultiPoint(Point[] point) {
-		return MUTABLE_FACTORY.createMultiPoint(point);
-	}
-
-	public static MultiPoint createMultiPoint(Coordinate[] coordinates) {
-		return MUTABLE_FACTORY.createMultiPoint(coordinates);
-	}
-
-	public static MultiPoint createMultiPoint(CoordinateSequence coordinates) {
-		return MUTABLE_FACTORY.createMultiPoint(coordinates);
-	}
-
-	public static Polygon createPolygon(LinearRing shell, LinearRing[] holes) {
-		return MUTABLE_FACTORY.createPolygon(shell, holes);
-	}
-
-	public static Polygon createPolygon(CoordinateSequence coordinates) {
-		return MUTABLE_FACTORY.createPolygon(coordinates);
-	}
-
-	public static Polygon createPolygon(Coordinate[] coordinates) {
-		return MUTABLE_FACTORY.createPolygon(coordinates);
-	}
-
-	public static Polygon createPolygon(LinearRing shell) {
-		return MUTABLE_FACTORY.createPolygon(shell);
-	}
-
-	public static LineString createLineString(Coordinate[] coordinates) {
-		return MUTABLE_FACTORY.createLineString(coordinates);
-	}
-
-	public static LineString createLineString(CoordinateSequence coordinates) {
-		return MUTABLE_FACTORY.createLineString(coordinates);
-	}
-
-	public static Geometry createGeometry(Geometry g) {
-		return MUTABLE_FACTORY.createGeometry(g);
-	}
-
-	public static Geometry buildImmutableGeometry(Collection<Geometry> geomList) {
-		return IMMUTABLE_FACTORY.buildGeometry(geomList);
-	}
-
-	public static Geometry createImmutableImmutableGeometry(Geometry g) {
-		return IMMUTABLE_FACTORY.createGeometry(g);
-	}
-
-	public static ImmutablePoint createImmutablePoint(CoordinateSequence coordinates) {
-		return IMMUTABLE_FACTORY.createPoint(coordinates);
-	}
-
-	public static ImmutablePoint createImmutablePoint(Coordinate coordinate) {
-		return IMMUTABLE_FACTORY.createPoint(coordinate);
-	}
-
-	public static ImmutableLineString createImmutableLineString(Coordinate[] coordinates) {
-		return IMMUTABLE_FACTORY.createLineString(coordinates);
-	}
-
-	public static ImmutableLineString createImmutableLineString(CoordinateSequence coordinates) {
-		return IMMUTABLE_FACTORY.createLineString(coordinates);
-	}
-
-	public static ImmutableLinearRing createImmutableLinearRing(Coordinate[] coordinates) {
-		return IMMUTABLE_FACTORY.createLinearRing(coordinates);
-	}
-
-	public static ImmutableLinearRing createImmutableLinearRing(CoordinateSequence coordinates) {
-		return IMMUTABLE_FACTORY.createLinearRing(coordinates);
-	}
-
-	public static ImmutablePolygon createImmutablePolygon(Coordinate[] coordinates) {
-		return IMMUTABLE_FACTORY.createPolygon(coordinates);
-	}
-
-	public static ImmutablePolygon createImmutablePolygon(CoordinateSequence coordinates) {
-		return IMMUTABLE_FACTORY.createPolygon(coordinates);
-	}
-
-	public static ImmutablePolygon createImmutablePolygon(LinearRing shell) {
-		return IMMUTABLE_FACTORY.createPolygon(shell);
-	}
-
-	public static ImmutablePolygon createImmutablePolygon(LinearRing shell, LinearRing[] holes) {
-		return IMMUTABLE_FACTORY.createPolygon(shell, holes);
-	}
-
-	public static ImmutableGeometryCollection createImmutableGeometryCollection(
-		Geometry[] geometries) {
-		return IMMUTABLE_FACTORY.createGeometryCollection(geometries);
-	}
-
-	public static ImmutableMultiPoint createImmutableMultiPoint(Coordinate[] coordinates) {
-		return IMMUTABLE_FACTORY.createMultiPoint(coordinates);
-	}
-
-	public static ImmutableMultiPoint createImmutableMultiPoint(CoordinateSequence coordinates) {
-		return IMMUTABLE_FACTORY.createMultiPoint(coordinates);
-	}
-
-	public static ImmutableMultiPoint createImmutableMultiPoint(Point[] points) {
-		return IMMUTABLE_FACTORY.createMultiPoint(points);
-	}
-
-	public static ImmutableMultiLineString createImmutableMultiLineString(
-		LineString[] lineStrings) {
-		return IMMUTABLE_FACTORY.createMultiLineString(lineStrings);
-	}
-
-	public static ImmutableMultiPolygon createImmutableMultiPolygon(Polygon[] polygons) {
-		return IMMUTABLE_FACTORY.createMultiPolygon(polygons);
+	public static Geometry geometry(Collection<? extends Geometry> geomList) {
+		return FACTORY.buildGeometry(geomList);
 	}
 
 	public static Point point() {
-		return MUTABLE_BUILDER.point();
+		return BUILDER.point();
 	}
 
-	public static Point pointZ() {
-		return MUTABLE_BUILDER.pointZ();
+	public static Point point(Coordinate coordinate) {
+		return FACTORY.createPoint(coordinate);
+	}
+
+	public static Point point(CoordinateSequence coordinates) {
+		return FACTORY.createPoint(coordinates);
 	}
 
 	public static Point point(double x) {
-		return MUTABLE_BUILDER.point(x);
+		return BUILDER.point(x);
 	}
 
 	public static Point point(double x, double y) {
-		return MUTABLE_BUILDER.point(x, y);
+		return BUILDER.point(x, y);
+	}
+
+	public static Point pointZ() {
+		return BUILDER.pointZ();
 	}
 
 	public static Point pointZ(double x, double y, double z) {
-		return MUTABLE_BUILDER.pointZ(x, y, z);
+		return BUILDER.pointZ(x, y, z);
 	}
 
 	public static LineString lineString() {
-		return MUTABLE_BUILDER.lineString();
+		return BUILDER.lineString();
 	}
 
-	public static LineString lineStringZ() {
-		return MUTABLE_BUILDER.lineStringZ();
+	public static LineString lineString(Coordinate... coordinates) {
+		return FACTORY.createLineString(coordinates);
+	}
+
+	public static LineString lineString(CoordinateSequence coordinates) {
+		return FACTORY.createLineString(coordinates);
+	}
+	
+	public static LineString lineString(Geometry... geometries) {
+		return lineString(sequence(geometries));
 	}
 
 	public static LineString lineString(double... ord) {
-		return MUTABLE_BUILDER.lineString(ord);
+		return BUILDER.lineString(ord);
+	}
+
+	public static LineString lineStringZ() {
+		return BUILDER.lineStringZ();
 	}
 
 	public static LineString lineStringZ(double... ord) {
-		return MUTABLE_BUILDER.lineStringZ(ord);
+		return BUILDER.lineStringZ(ord);
 	}
 
 	public static LinearRing linearRing() {
-		return MUTABLE_BUILDER.linearRing();
+		return BUILDER.linearRing();
 	}
 
-	public static LinearRing linearRingZ() {
-		return MUTABLE_BUILDER.linearRingZ();
+	public static LinearRing linearRing(Coordinate... coordinates) {
+		return FACTORY.createLinearRing(coordinates);
+	}
+
+	public static LinearRing linearRing(CoordinateSequence coordinates) {
+		return FACTORY.createLinearRing(coordinates);
+	}
+	
+	public static LinearRing linearRing(Geometry... geometries) {
+		return linearRing(sequence(geometries));
 	}
 
 	public static LinearRing linearRing(double... ord) {
-		return MUTABLE_BUILDER.linearRing(ord);
+		return BUILDER.linearRing(ord);
+	}
+
+	public static LinearRing linearRingZ() {
+		return BUILDER.linearRingZ();
 	}
 
 	public static LinearRing linearRingZ(double... ord) {
-		return MUTABLE_BUILDER.linearRingZ(ord);
+		return BUILDER.linearRingZ(ord);
 	}
 
 	public static Polygon polygon() {
-		return MUTABLE_BUILDER.polygon();
+		return BUILDER.polygon();
 	}
 
-	public static Polygon polygonZ() {
-		return MUTABLE_BUILDER.polygonZ();
+	public static Polygon polygon(Coordinate... coordinates) {
+		return FACTORY.createPolygon(coordinates);
+	}
+
+	public static Polygon polygon(CoordinateSequence coordinates) {
+		return FACTORY.createPolygon(coordinates);
+	}
+	
+	public static Polygon polygon(Geometry... geometries) {
+		return polygon(sequence(geometries));
 	}
 
 	public static Polygon polygon(double... ord) {
-		return MUTABLE_BUILDER.polygon(ord);
-	}
-
-	public static Polygon polygonZ(double... ord) {
-		return MUTABLE_BUILDER.polygonZ(ord);
+		return BUILDER.polygon(ord);
 	}
 
 	public static Polygon polygon(LinearRing shell) {
-		return MUTABLE_BUILDER.polygon(shell);
+		return FACTORY.createPolygon(shell);
 	}
 
-	public static Polygon polygon(LinearRing shell, LinearRing hole) {
-		return MUTABLE_BUILDER.polygon(shell, hole);
+	public static Polygon polygon(LinearRing shell, LinearRing... holes) {
+		return FACTORY.createPolygon(shell, holes);
 	}
 
 	public static Polygon polygon(Polygon shell, Polygon hole) {
-		return MUTABLE_BUILDER.polygon(shell, hole);
+		return BUILDER.polygon(shell, hole);
+	}
+
+	public static Polygon polygonZ() {
+		return BUILDER.polygonZ();
+	}
+
+	public static Polygon polygonZ(double... ord) {
+		return BUILDER.polygonZ(ord);
 	}
 
 	public static Polygon box(double x1, double y1, double x2, double y2) {
-		return MUTABLE_BUILDER.box(x1, y1, x2, y2);
+		return BUILDER.box(x1, y1, x2, y2);
 	}
-
+	
 	public static Polygon boxZ(double x1, double y1, double x2, double y2, double z) {
-		return MUTABLE_BUILDER.boxZ(x1, y1, x2, y2, z);
-	}
-
-	public static Polygon ellipse(double x1, double y1, double x2, double y2,
-		int nsides) {
-		return MUTABLE_BUILDER.ellipse(x1, y1, x2, y2, nsides);
+		return BUILDER.boxZ(x1, y1, x2, y2, z);
 	}
 
 	public static Polygon circle(double x, double y, double radius, int nsides) {
-		return MUTABLE_BUILDER.circle(x, y, radius, nsides);
+		return BUILDER.circle(x, y, radius, nsides);
+	}
+
+	public static Polygon ellipse(
+		double x1, double y1, double x2, double y2, int nsides)
+	{
+		return BUILDER.ellipse(x1, y1, x2, y2, nsides);
+	}
+
+	public static GeometryCollection geometryCollection(Geometry... geometries) {
+		return FACTORY.createGeometryCollection(geometries);
+	}
+
+	public static MultiPoint multiPoint(Coordinate... coordinates) {
+		return FACTORY.createMultiPoint(coordinates);
+	}
+
+	public static MultiPoint multiPoint(CoordinateSequence coordinates) {
+		return FACTORY.createMultiPoint(coordinates);
 	}
 
 	public static MultiPoint multiPoint(double x1, double y1, double x2, double y2) {
-		return MUTABLE_BUILDER.multiPoint(x1, y1, x2, y2);
+		return BUILDER.multiPoint(x1, y1, x2, y2);
+	}
+
+	public static MultiPoint multiPoint(Point... point) {
+		return FACTORY.createMultiPoint(point);
 	}
 
 	public static MultiPoint multiPointZ(double x1, double y1, double z1, double x2,
 		double y2, double z2) {
-		return MUTABLE_BUILDER.multiPointZ(x1, y1, z1, x2, y2, z2);
+		return BUILDER.multiPointZ(x1, y1, z1, x2, y2, z2);
 	}
 
-	public static MultiLineString multiLineString(LineString... lines) {
-		return MUTABLE_BUILDER.multiLineString(lines);
+	public static MultiLineString multiLineString(LineString... lineStrings) {
+		return FACTORY.createMultiLineString(lineStrings);
 	}
 
-	public static MultiPolygon multiPolygon(Polygon... polys) {
-		return MUTABLE_BUILDER.multiPolygon(polys);
+	public static MultiPolygon multiPolygon(Polygon... polygons) {
+		return FACTORY.createMultiPolygon(polygons);
 	}
 
-	public static GeometryCollection geometryCollection(Geometry... geoms) {
-		return MUTABLE_BUILDER.geometryCollection(geoms);
+	public static Geometry immutableGeometry(Collection<? extends Geometry> geomList) {
+		return FACTORY.buildImmutableGeometry(geomList);
+	}
+
+	public static Geometry immutableGeometry(Envelope envelope) {
+		return FACTORY.toImmutableGeometry(envelope);
+	}
+
+	public static Geometry immutableGeometry(Geometry g) {
+		return FACTORY.createImmutableGeometry(g);
 	}
 
 	public static ImmutablePoint immutablePoint() {
-		return IMMUTABLE_BUILDER.point();
+		return BUILDER.immutablePoint();
 	}
 
-	public static ImmutablePoint immutablePointZ() {
-		return IMMUTABLE_BUILDER.pointZ();
+	public static ImmutablePoint immutablePoint(Coordinate coordinate) {
+		return FACTORY.createImmutablePoint(coordinate);
+	}
+
+	public static ImmutablePoint immutablePoint(CoordinateSequence coordinates) {
+		return FACTORY.createImmutablePoint(coordinates);
 	}
 
 	public static ImmutablePoint immutablePoint(double x) {
-		return IMMUTABLE_BUILDER.point(x);
+		return BUILDER.immutablePoint(x);
 	}
 
 	public static ImmutablePoint immutablePoint(double x, double y) {
-		return IMMUTABLE_BUILDER.point(x, y);
+		return BUILDER.immutablePoint(x, y);
+	}
+
+	public static ImmutablePoint immutablePointZ() {
+		return BUILDER.immutablePointZ();
 	}
 
 	public static ImmutablePoint immutablePointZ(double x, double y, double z) {
-		return IMMUTABLE_BUILDER.pointZ(x, y, z);
+		return BUILDER.immutablePointZ(x, y, z);
 	}
 
 	public static ImmutableLineString immutableLineString() {
-		return IMMUTABLE_BUILDER.lineString();
+		return BUILDER.immutableLineString();
 	}
 
-	public static ImmutableLineString immutableLineStringZ() {
-		return IMMUTABLE_BUILDER.lineStringZ();
+	public static ImmutableLineString immutableLineString(Coordinate... coordinates) {
+		return FACTORY.createImmutableLineString(coordinates);
+	}
+
+	public static ImmutableLineString immutableLineString(CoordinateSequence coordinates) {
+		return FACTORY.createImmutableLineString(coordinates);
+	}
+	
+	public static ImmutableLineString immutableLineString(Geometry... geometries) {
+		return immutableLineString(immutableNoCopy(sequence(geometries)));
 	}
 
 	public static ImmutableLineString immutableLineString(double... ord) {
-		return IMMUTABLE_BUILDER.lineString(ord);
+		return BUILDER.immutableLineString(ord);
+	}
+
+	public static ImmutableLineString immutableLineStringZ() {
+		return BUILDER.immutableLineStringZ();
 	}
 
 	public static ImmutableLineString immutableLineStringZ(double... ord) {
-		return IMMUTABLE_BUILDER.lineStringZ(ord);
+		return BUILDER.immutableLineStringZ(ord);
 	}
 
 	public static ImmutableLinearRing immutableLinearRing() {
-		return IMMUTABLE_BUILDER.linearRing();
+		return BUILDER.immutableLinearRing();
 	}
 
-	public static ImmutableLinearRing immutableLinearRingZ() {
-		return IMMUTABLE_BUILDER.linearRingZ();
+	public static ImmutableLinearRing immutableLinearRing(Coordinate... coordinates) {
+		return FACTORY.createImmutableLinearRing(coordinates);
+	}
+
+	public static ImmutableLinearRing immutableLinearRing(CoordinateSequence coordinates) {
+		return FACTORY.createImmutableLinearRing(coordinates);
+	}
+	
+	public static ImmutableLinearRing immutableLinearRing(Geometry... geometries) {
+		return immutableLinearRing(immutableNoCopy(sequence(geometries)));
 	}
 
 	public static ImmutableLinearRing immutableLinearRing(double... ord) {
-		return IMMUTABLE_BUILDER.linearRing(ord);
+		return BUILDER.immutableLinearRing(ord);
+	}
+
+	public static ImmutableLinearRing immutableLinearRingZ() {
+		return BUILDER.immutableLinearRingZ();
 	}
 
 	public static ImmutableLinearRing immutableLinearRingZ(double... ord) {
-		return IMMUTABLE_BUILDER.linearRingZ(ord);
+		return BUILDER.immutableLinearRingZ(ord);
 	}
 
 	public static ImmutablePolygon immutablePolygon() {
-		return IMMUTABLE_BUILDER.polygon();
+		return BUILDER.immutablePolygon();
 	}
 
-	public static ImmutablePolygon immutablePolygonZ() {
-		return IMMUTABLE_BUILDER.polygonZ();
+	public static ImmutablePolygon immutablePolygon(Coordinate... coordinates) {
+		return FACTORY.createImmutablePolygon(coordinates);
+	}
+
+	public static ImmutablePolygon immutablePolygon(CoordinateSequence coordinates) {
+		return FACTORY.createImmutablePolygon(coordinates);
+	}
+	
+	public static ImmutablePolygon immutablePolygon(Geometry... geometries) {
+		return immutablePolygon(immutableNoCopy(sequence(geometries)));
 	}
 
 	public static ImmutablePolygon immutablePolygon(double... ord) {
-		return IMMUTABLE_BUILDER.polygon(ord);
-	}
-
-	public static ImmutablePolygon immutablePolygonZ(double... ord) {
-		return IMMUTABLE_BUILDER.polygonZ(ord);
+		return BUILDER.immutablePolygon(ord);
 	}
 
 	public static ImmutablePolygon immutablePolygon(LinearRing shell) {
-		return IMMUTABLE_BUILDER.polygon(shell);
+		return FACTORY.createImmutablePolygon(shell);
 	}
 
-	public static ImmutablePolygon immutablePolygon(LinearRing shell, LinearRing hole) {
-		return IMMUTABLE_BUILDER.polygon(shell, hole);
+	public static ImmutablePolygon immutablePolygon(LinearRing shell, LinearRing... holes) {
+		return FACTORY.createImmutablePolygon(shell, holes);
 	}
 
 	public static ImmutablePolygon immutablePolygon(Polygon shell, Polygon hole) {
-		return IMMUTABLE_BUILDER.polygon(shell, hole);
+		return BUILDER.immutablePolygon(shell, hole);
 	}
 
-	public static ImmutablePolygon immutableBox(double x1, double y1, double x2, double y2) {
-		return IMMUTABLE_BUILDER.box(x1, y1, x2, y2);
+	public static ImmutablePolygon immutablePolygonZ() {
+		return BUILDER.immutablePolygonZ();
 	}
 
-	public static ImmutablePolygon immutableBoxZ(double x1, double y1, double x2, double y2,
-		double z) {
-		return IMMUTABLE_BUILDER.boxZ(x1, y1, x2, y2, z);
+	public static ImmutablePolygon immutablePolygonZ(double... ord) {
+		return BUILDER.immutablePolygonZ(ord);
 	}
 
-	public static ImmutablePolygon immutableEllipse(double x1, double y1, double x2, double y2,
-		int nsides) {
-		return IMMUTABLE_BUILDER.ellipse(x1, y1, x2, y2, nsides);
+	public static ImmutablePolygon immutableBox(
+		double x1, double y1, double x2, double y2)
+	{
+		return BUILDER.immutableBox(x1, y1, x2, y2);
 	}
 
-	public static ImmutablePolygon immutableCircle(double x, double y, double radius, int nsides) {
-		return IMMUTABLE_BUILDER.circle(x, y, radius, nsides);
+	public static ImmutablePolygon immutableBoxZ(
+		double x1, double y1, double x2, double y2, double z)
+	{
+		return BUILDER.immutableBoxZ(x1, y1, x2, y2, z);
 	}
 
-	public static ImmutableMultiPoint immutableMultiPoint(double x1, double y1, double x2,
-		double y2) {
-		return IMMUTABLE_BUILDER.multiPoint(x1, y1, x2, y2);
+	public static ImmutablePolygon immutableCircle(
+		double x, double y, double radius, int nsides)
+	{
+		return BUILDER.immutableCircle(x, y, radius, nsides);
 	}
 
-	public static ImmutableMultiPoint immutableMultiPointZ(double x1, double y1, double z1,
-		double x2, double y2, double z2) {
-		return IMMUTABLE_BUILDER.multiPointZ(x1, y1, z1, x2, y2, z2);
+	public static ImmutablePolygon immutableEllipse(
+		double x1, double y1, double x2, double y2, int nsides)
+	{
+		return BUILDER.immutableEllipse(x1, y1, x2, y2, nsides);
 	}
 
-	public static ImmutableMultiLineString immutableMultiLineString(LineString... lines) {
-		return IMMUTABLE_BUILDER.multiLineString(lines);
+	public static ImmutableGeometryCollection immutableGeometryCollection(Geometry... geometries) {
+		return FACTORY.createImmutableGeometryCollection(geometries);
 	}
 
-	public static ImmutableMultiPolygon immutableMultiPolygon(Polygon... polys) {
-		return IMMUTABLE_BUILDER.multiPolygon(polys);
+	public static ImmutableMultiPoint immutableMultiPoint(Coordinate... coordinates) {
+		return FACTORY.createImmutableMultiPoint(coordinates);
 	}
 
-	public static ImmutableGeometryCollection immutableGeometryCollection(Geometry... geoms) {
-		return IMMUTABLE_BUILDER.geometryCollection(geoms);
+	public static ImmutableMultiPoint immutableMultiPoint(CoordinateSequence coordinates) {
+		return FACTORY.createImmutableMultiPoint(coordinates);
 	}
 
+	public static ImmutableMultiPoint immutableMultiPoint(
+		double x1, double y1, double x2, double y2)
+	{
+		return BUILDER.immutableMultiPoint(x1, y1, x2, y2);
+	}
+
+	public static ImmutableMultiPoint immutableMultiPoint(Point... points) {
+		return FACTORY.createImmutableMultiPoint(points);
+	}
+
+	public static ImmutableMultiPoint immutableMultiPointZ(
+		double x1, double y1, double z1, double x2, double y2, double z2)
+	{
+		return BUILDER.immutableMultiPointZ(x1, y1, z1, x2, y2, z2);
+	}
+
+	public static ImmutableMultiLineString immutableMultiLineString(LineString... lineStrings) {
+		return FACTORY.createImmutableMultiLineString(lineStrings);
+	}
+
+	public static ImmutableMultiPolygon immutableMultiPolygon(Polygon... polygons) {
+		return FACTORY.createImmutableMultiPolygon(polygons);
+	}
+	
 }

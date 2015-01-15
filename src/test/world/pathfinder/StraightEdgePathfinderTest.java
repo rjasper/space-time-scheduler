@@ -1,10 +1,9 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.StaticGeometryBuilder.point;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
@@ -20,13 +19,11 @@ public class StraightEdgePathfinderTest {
 
 	@Test
 	public void test() {
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-		
 		World world = WorldFixtures.twoRooms();
 		Collection<StaticObstacle> obstacles = world.getStaticObstacles();
 		
-		Point startPoint = builder.point(23.0, 29.0);
-		Point finishPoint = builder.point(11.0, 11.0);
+		Point startPoint = point(23.0, 29.0);
+		Point finishPoint = point(11.0, 11.0);
 		
 		StraightEdgePathfinder pf = new StraightEdgePathfinder();
 		

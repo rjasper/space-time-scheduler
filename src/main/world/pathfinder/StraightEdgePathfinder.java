@@ -1,13 +1,12 @@
 package world.pathfinder;
 
 import static common.collect.ImmutablesCollectors.toImmutableList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 import straightedge.geom.KPoint;
 import straightedge.geom.PolygonConverter;
@@ -189,10 +188,8 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @return the JTS Point
 	 */
 	private static ImmutablePoint makeJtsPoint(KPoint point) {
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-
 		// TODO use immutable geom builder
-		return immutable(builder.point(point.getX(), point.getY()));
+		return immutablePoint(point.getX(), point.getY());
 	}
 
 	/**

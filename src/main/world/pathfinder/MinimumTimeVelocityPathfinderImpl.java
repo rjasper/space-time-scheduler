@@ -1,12 +1,12 @@
 package world.pathfinder;
 
 import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 
 import org.jgrapht.Graphs;
@@ -27,8 +27,6 @@ import com.vividsolutions.jts.geom.Point;
  * @author Rico
  */
 public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfinder {
-	
-	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	
 	/**
 	 * The mesh builder.
@@ -67,8 +65,8 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		// It is important that the start point and the finish point
 		// are structurally the same to the ones used in the mesh. Therefore,
 		// the points are already converted immutable here.
-		arcTimeStartPoint = immutable(
-			geomBuilder.point(getStartArc(), inSeconds(getStartTime())));
+		arcTimeStartPoint = immutablePoint(
+			getStartArc(), inSeconds(getStartTime()));
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package pickers;
 
-import static jts.geom.factories.StaticJtsFactories.geomFactory;
+import static jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
+import jts.geom.immutable.StaticGeometryBuilder;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -60,7 +60,8 @@ public class LocationIterator implements Iterator<Point> {
 	 */
 	private Point nextPoint;
 
-	private GeometricShapeFactory shapeFactory = new GeometricShapeFactory(geomFactory());
+	private GeometricShapeFactory shapeFactory =
+		new GeometricShapeFactory(StaticGeometryBuilder.getFactoryInstance());
 
 	/**
 	 * Compares to Envelops by their area size.
@@ -369,10 +370,8 @@ public class LocationIterator implements Iterator<Point> {
 
 		// only use geometries of the highest dimension
 		if (subSpace instanceof GeometryCollection) {
-			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
 			int dim = subSpace.getDimension();
-			Geometry empty = geomBuilder.geometryCollection();
+			Geometry empty = geometryCollection();
 
 			subSpace = GeometryCollectionMapper.map(
 				(GeometryCollection) subSpace,

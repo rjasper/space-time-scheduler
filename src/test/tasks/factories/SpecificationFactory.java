@@ -1,9 +1,10 @@
 package tasks.factories;
 
+import static jts.geom.immutable.StaticGeometryBuilder.box;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import tasks.Specification;
 import world.LocalDateTimeFactory;
 
@@ -13,15 +14,13 @@ public class SpecificationFactory {
 	
 	private static SpecificationFactory instance = null;
 	
-	private EnhancedGeometryBuilder gBuilder;
 	private LocalDateTimeFactory timeFact;
 	
 	public SpecificationFactory() {
-		this(EnhancedGeometryBuilder.getInstance(), LocalDateTimeFactory.getInstance());
+		this(LocalDateTimeFactory.getInstance());
 	}
 	
-	public SpecificationFactory(EnhancedGeometryBuilder gBuilder, LocalDateTimeFactory timeFact) {
-		this.gBuilder = gBuilder;
+	public SpecificationFactory(LocalDateTimeFactory timeFact) {
 		this.timeFact = timeFact;
 	}
 	
@@ -38,7 +37,7 @@ public class SpecificationFactory {
 		if (!Double.isFinite(height) || height <= 0)
 			throw new IllegalArgumentException("height is not a positive finite");
 		
-		Polygon area = gBuilder.box(x, y, x + width, y + height);
+		Polygon area = box(x, y, x + width, y + height);
 		LocalDateTime earliestStartTime = timeFact.second(tMin);
 		LocalDateTime latestStartTime = timeFact.second(tMax);
 		Duration duration = Duration.ofSeconds(d);

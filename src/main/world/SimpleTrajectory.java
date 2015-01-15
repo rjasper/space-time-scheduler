@@ -4,7 +4,7 @@ import static common.collect.Immutables.immutable;
 import static common.collect.ImmutablesCollectors.toImmutableList;
 import static java.util.Spliterator.IMMUTABLE;
 import static java.util.Spliterator.ORDERED;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -14,7 +14,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
@@ -258,17 +257,13 @@ public class SimpleTrajectory implements Trajectory {
 		Spliterator<Vertex> spliterator = Spliterators.spliterator(
 			vertexIterator(), size(), IMMUTABLE | ORDERED);
 
-		// TODO use immutable geom builder
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder
-			.getInstance();
-
 		ImmutableList<ImmutablePoint> vertices = StreamSupport
 			.stream(spliterator, false)
 			.map(v -> {
 				double arc = v.getSpatialVertex().getArc();
 				double seconds = v.getTimeInSeconds(baseTime);
 				
-				return immutable(geomBuilder.point(arc, seconds));
+				return immutablePoint(arc, seconds);
 			})
 			.collect(toImmutableList());
 

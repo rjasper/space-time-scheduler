@@ -1,11 +1,12 @@
 package tasks.factories;
 
 import static java.util.Collections.emptyList;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static jts.geom.immutable.StaticGeometryBuilder.polygon;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import tasks.TaskPlanner;
 import tasks.WorkerUnit;
 import world.LocalDateTimeFactory;
@@ -19,11 +20,10 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnitFactory {
 
-	private static final Polygon DEFAULT_SHAPE =
-		createDefaultShape(EnhancedGeometryBuilder.getInstance());
+	private static final Polygon DEFAULT_SHAPE = createDefaultShape();
 
-	private static Polygon createDefaultShape(EnhancedGeometryBuilder builder) {
-		return builder.polygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
+	private static Polygon createDefaultShape() {
+		return polygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
 	}
 
 	private static final double DEFAULT_MAX_SPEED = 1.0;
@@ -31,8 +31,6 @@ public class WorkerUnitFactory {
 	private static final long DEFAULT_INITIAL_SECONDS = 0L;
 
 	private static WorkerUnitFactory instance = null;
-
-	private EnhancedGeometryBuilder geometryBuilder;
 
 	private LocalDateTimeFactory timeFactory;
 
@@ -46,7 +44,6 @@ public class WorkerUnitFactory {
 
 	public WorkerUnitFactory() {
 		this(
-			EnhancedGeometryBuilder.getInstance(),
 			LocalDateTimeFactory.getInstance(),
 			DEFAULT_SHAPE,
 			DEFAULT_MAX_SPEED,
@@ -54,8 +51,7 @@ public class WorkerUnitFactory {
 		);
 	}
 
-	public WorkerUnitFactory(EnhancedGeometryBuilder geomBuilder, LocalDateTimeFactory timeFact, Polygon shape, double maxSpeed, long initialSeconds) {
-		this.geometryBuilder = geomBuilder;
+	public WorkerUnitFactory(LocalDateTimeFactory timeFact, Polygon shape, double maxSpeed, long initialSeconds) {
 		this.timeFactory = timeFact;
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
@@ -74,14 +70,6 @@ public class WorkerUnitFactory {
 			instance = new WorkerUnitFactory();
 
 		return instance;
-	}
-
-	private EnhancedGeometryBuilder getGeometryBuilder() {
-		return geometryBuilder;
-	}
-
-	public void setGeometryBuilder(EnhancedGeometryBuilder geomBuilder) {
-		this.geometryBuilder = geomBuilder;
 	}
 
 	private Polygon getShape() {
@@ -125,10 +113,9 @@ public class WorkerUnitFactory {
 	}
 
 	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, double t) {
-		EnhancedGeometryBuilder geomFact = getGeometryBuilder();
 		LocalDateTimeFactory timeFact = getTimeFactory();
 
-		Point initialLocation = geomFact.point(x, y);
+		Point initialLocation = point(x, y);
 		LocalDateTime initialTime = timeFact.seconds(t);
 
 		return new WorkerUnit(shape, maxSpeed, initialLocation, initialTime);
@@ -139,11 +126,10 @@ public class WorkerUnitFactory {
 	}
 
 	public boolean addTaskWithDuration(WorkerUnit worker, double x, double y, long t, long d) {
-		EnhancedGeometryBuilder geomFact = getGeometryBuilder();
 		LocalDateTimeFactory timeFactory = getTimeFactory();
 		TaskPlanner tp = getTaskPlanner();
 
-		Point location = geomFact.point(x, y);
+		Point location = point(x, y);
 		LocalDateTime time = timeFactory.second(t);
 		Duration duration = Duration.ofSeconds(d);
 

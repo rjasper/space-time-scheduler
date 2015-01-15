@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -14,17 +15,12 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
 
-class MutableImmutableGeometryFactory extends GeometryFactory {
+public class MutableImmutableGeometryFactory extends GeometryFactory {
 	
 	private static final long serialVersionUID = 7603376747306617405L;
 	
 	private final ImmutableGeometryFactory immutableGeomFact;
 
-	@Override
-	public ImmutablePoint createPoint(Coordinate coordinate) {
-		return (ImmutablePoint) super.createPoint(coordinate);
-	}
-	
 	public MutableImmutableGeometryFactory() {
 		this(new PrecisionModel());
 	}
@@ -58,8 +54,17 @@ class MutableImmutableGeometryFactory extends GeometryFactory {
 		return immutableGeomFact;
 	}
 
+	@SuppressWarnings("rawtypes") // cannot override otherwise
+	public Geometry buildImmutableGeometry(Collection geomList) {
+		return immutableGeomFact.buildGeometry(geomList);
+	}
+
 	public Geometry createImmutableGeometry(Geometry g) {
 		return immutableGeomFact.createGeometry(g);
+	}
+
+	public ImmutablePoint createImmutablePoint(Coordinate coordinate) {
+		return (ImmutablePoint) super.createPoint(coordinate);
 	}
 
 	public ImmutablePoint createImmutablePoint(CoordinateSequence coordinates) {
@@ -124,9 +129,8 @@ class MutableImmutableGeometryFactory extends GeometryFactory {
 		return immutableGeomFact.createMultiPolygon(polygons);
 	}
 
-	@SuppressWarnings("rawtypes") // cannot override otherwise
-	public Geometry buildImmutableGeometry(Collection geomList) {
-		return immutableGeomFact.buildGeometry(geomList);
+	public Geometry toImmutableGeometry(Envelope envelope) {
+		return immutableGeomFact.toGeometry(envelope);
 	}
 
 }

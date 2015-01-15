@@ -3,15 +3,15 @@ package world.pathfinder;
 import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
 import static com.vividsolutions.jts.geom.Location.INTERIOR;
 import static java.util.Collections.unmodifiableCollection;
+import static jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
+import static jts.geom.immutable.StaticGeometryBuilder.lineString;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
-import jts.geom.factories.StaticJtsFactories;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -20,7 +20,6 @@ import util.CollectionsRequire;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
@@ -133,13 +132,11 @@ public abstract class ArcTimeMeshBuilder {
 	 * regions.
 	 */
 	private void updateRegionMap() {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
 		Geometry[] regions = getForbiddenRegions().stream()
 			.map(ForbiddenRegion::getRegion)
 			.toArray(Geometry[]::new);
 		
-		Geometry regionMap = geomBuilder.geometryCollection(regions).union();
+		Geometry regionMap = geometryCollection(regions).union();
 		
 		setRegionMap(regionMap);
 	}
@@ -273,13 +270,12 @@ public abstract class ArcTimeMeshBuilder {
 	 * @return the core vertices.
 	 */
 	private Collection<Point> buildCoreVertices() {
-		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
 		Geometry map = getRegionMap();
 		int n = map.getNumPoints();
 		
 		Collection<Point> vertices = new ArrayList<>(n);
 		
-		map.apply((Coordinate c) -> vertices.add(geomFact.createPoint(c)));
+		map.apply((Coordinate c) -> vertices.add(point(c)));
 		
 		return vertices;
 	}
@@ -582,8 +578,6 @@ public abstract class ArcTimeMeshBuilder {
 	 * @return {@code true} if no forbidden region blocks the view
 	 */
 	protected boolean checkVisibility(Point from, Point to) {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
 		Geometry regionMap = getRegionMap();
 		
 		// Relate can't handle GeometryCollections.
@@ -594,7 +588,7 @@ public abstract class ArcTimeMeshBuilder {
 		
 		// TODO is regionMap never a pure (Immutable)GeometryCollection?
 		
-		LineString line = geomBuilder.lineString(from, to);
+		LineString line = lineString(from, to);
 		IntersectionMatrix matrix = line.relate(regionMap);
 		
 		return !isTrue(matrix.get(INTERIOR, INTERIOR));

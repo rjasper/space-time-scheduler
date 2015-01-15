@@ -1,14 +1,15 @@
 package world.pathfinder;
 
 import static jts.geom.immutable.ImmutableGeometries.mutable;
+import static jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static jts.geom.immutable.StaticGeometryBuilder.polygon;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
@@ -18,12 +19,12 @@ import world.SpatialPath;
 import world.Trajectory;
 import world.TrajectoryFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class ForbiddenRegionBuilderTest {
 
-	private static EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	private static TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 	private static LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
 	private static LocalDateTime baseTime = timeFact.second(0);
@@ -32,11 +33,13 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testRegularCase() {
-		SpatialPath path = new SpatialPath(geomBuilder.points(2., 2., 8., 8.));
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+//			points(2., 2., 8., 8.));
+			point(2., 2.), point(8., 8.)));
 
 		double[] x = {3., 7.}, y = {7., 3.}, t = {0., 4.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
-		Polygon shape = geomBuilder.polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
+		Polygon shape = polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -53,7 +56,7 @@ public class ForbiddenRegionBuilderTest {
 		ForbiddenRegion region = regions.iterator().next();
 
 		double sqrt2 = Math.sqrt(2.);
-		Geometry expected = geomBuilder.polygon(
+		Geometry expected = polygon(
 			3.*sqrt2, 1.,
 			2.*sqrt2, 2.,
 			3.*sqrt2, 3.,
@@ -65,11 +68,13 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testParallelCase() {
-		SpatialPath path = new SpatialPath(geomBuilder.points(0., 4., 10., 4.));
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+//			points(0., 4., 10., 4.));
+			point(0., 4.), point(10., 4.)));
 
 		double[] x = {6., 6.}, y = {4., 4.}, t = {0., 1.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
-		Polygon shape = geomBuilder.polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
+		Polygon shape = polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -85,7 +90,7 @@ public class ForbiddenRegionBuilderTest {
 
 		ForbiddenRegion region = regions.iterator().next();
 
-		Geometry expected = geomBuilder.polygon(
+		Geometry expected = polygon(
 			4., 0.,
 			4., 1.,
 			8., 1.,
@@ -97,12 +102,13 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testPathSplit() {
-		SpatialPath path =
-			new SpatialPath(geomBuilder.points(2., 4., 6., 8., 10., 4.));
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+//			points(2., 4., 6., 8., 10., 4.));
+			point(2., 4.), point(6., 8.), point(10., 4.)));
 
 		double[] x = {6., 6.}, y = {12., 2.}, t = {0., 5.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
-		Polygon shape = geomBuilder.polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
+		Polygon shape = polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -119,7 +125,7 @@ public class ForbiddenRegionBuilderTest {
 		ForbiddenRegion region = regions.iterator().next();
 
 		double sqrt2 = Math.sqrt(2.);
-		Geometry expected = geomBuilder.polygon(
+		Geometry expected = polygon(
 			2.*sqrt2, 2.,
 			2.*sqrt2, 4.,
 			4.*sqrt2, 3.,
@@ -133,11 +139,13 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testTrajectorySplit() {
-		SpatialPath path = new SpatialPath(geomBuilder.points(2., 6., 12., 6.));
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+//			points(2., 6., 12., 6.));
+			point(2., 6.), point(12., 6.)));
 
 		double[] x = {3., 9., 9.}, y = {3., 9., 3.}, t = {0., 3., 6.};
 		Trajectory trajectory = trajFact.trajectory(x, y, t);
-		Polygon shape = geomBuilder.polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
+		Polygon shape = polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -153,14 +161,14 @@ public class ForbiddenRegionBuilderTest {
 
 		ForbiddenRegion region = regions.iterator().next();
 
-		Geometry expected = geomBuilder.multiPolygon(
-			geomBuilder.polygon(
+		Geometry expected = multiPolygon(
+			polygon(
 				2., 1.,
 				4., 2.,
 				6., 2.,
 				4., 1.,
 				2., 1.),
-			geomBuilder.polygon(
+			polygon(
 				6., 4.,
 				6., 5.,
 				8., 5.,

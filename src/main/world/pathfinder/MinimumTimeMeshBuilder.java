@@ -1,6 +1,7 @@
 package world.pathfinder;
 
 import static java.util.Collections.singleton;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.util.GeometriesRequire;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
@@ -34,8 +34,6 @@ import com.vividsolutions.jts.geom.Point;
  * @author Rico
  */
 public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
-	
-	private EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	
 	/**
 	 * The start vertex.
@@ -226,7 +224,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		double maxArc = getFinishArc();
 		double earliest = getEarliestFinishTime();
 		
-		Point earliestFinishVertex = geomBuilder.point(maxArc, earliest);
+		Point earliestFinishVertex = point(maxArc, earliest);
 		
 		List<VertexPair> finishVertexPairs = Stream.concat(coreVertices.stream(), startVertices.stream())
 			.filter((v) -> v.getX() >= minArc && v.getX() <= maxArc) // only within bounds
@@ -270,7 +268,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		if (s == maxArc) {
 			return new VertexPair(origin, origin);
 		} else { // s < maxArc
-			Point finishPoint = geomBuilder.point(maxArc, (maxArc - s) / maxSpeed + t);
+			Point finishPoint = point(maxArc, (maxArc - s) / maxSpeed + t);
 			
 			return new VertexPair(origin, finishPoint);
 		}
@@ -310,13 +308,11 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 * @return {@code true} if the vertex is collision free.
 	 */
 	private boolean checkBuffer(Point vertex) {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
 		double s = vertex.getX(), t = vertex.getY();
 		double buffer = getBufferDuration();
 		
 		Point p1 = vertex;
-		Point p2 = geomBuilder.point(s, t + buffer);
+		Point p2 = point(s, t + buffer);
 		
 		return checkVisibility(p1, p2);
 	}

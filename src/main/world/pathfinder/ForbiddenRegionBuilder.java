@@ -3,6 +3,13 @@ package world.pathfinder;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.mutableOrClone;
+import static jts.geom.immutable.StaticGeometryBuilder.box;
+import static jts.geom.immutable.StaticGeometryBuilder.geometry;
+import static jts.geom.immutable.StaticGeometryBuilder.lineString;
+import static jts.geom.immutable.StaticGeometryBuilder.linearRing;
+import static jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
+import static jts.geom.immutable.StaticGeometryBuilder.polygon;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -10,9 +17,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
-import jts.geom.factories.StaticJtsFactories;
 
 import org.la4j.LinearAlgebra;
 import org.la4j.matrix.Matrix;
@@ -28,7 +32,6 @@ import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
@@ -201,8 +204,6 @@ public class ForbiddenRegionBuilder {
 	public void calculate() {
 		checkParameters();
 
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-
 		SpatialPath spatialPath = getSpatialPath();
 		List<ForbiddenRegion> forbiddenRegions = new LinkedList<>();
 
@@ -263,7 +264,7 @@ public class ForbiddenRegionBuilder {
 				}
 			}
 
-			Geometry region = builder.geometryCollection(subregions).union();
+			Geometry region = geometry(subregions).union();
 //			region.normalize();
 
 			if (!region.isEmpty())
@@ -307,7 +308,7 @@ public class ForbiddenRegionBuilder {
 
 		// if there is no buffer necessary then return an empty polygon
 		if (obstacleTrajectorySegment.isStationary() || (!first && !last))
-			return EnhancedGeometryBuilder.getInstance().polygon();
+			return polygon();
 
 		LineString mask = makePointTraceMask(
 			spatialPathSegment,
@@ -358,8 +359,6 @@ public class ForbiddenRegionBuilder {
 		SpatialPath.Segment spatialPathSegment,
 		Trajectory.Segment obstacleTrajectorySegment)
 	{
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
 		// first and last point are expected to be the same
 		// equal to getFinishPoint()
 		Point spatialPathPoint = spatialPathSegment.getStartPoint();
@@ -370,7 +369,7 @@ public class ForbiddenRegionBuilder {
 			obstacleTrajectorySegment.getStartLocation(),
 			obstacleTrajectorySegment.getFinishLocation());
 
-		return geomBuilder.lineString(
+		return lineString(
 			spatialPathPoint,
 			makePoint( s.subtract(vt) ));
 	}
@@ -429,8 +428,6 @@ public class ForbiddenRegionBuilder {
 	private static Geometry bufferLineStrings(Geometry geometry, boolean left, boolean right) {
 		// left and right are not expected to be both unset
 		
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
 		@SuppressWarnings("unchecked") // getLines returns raw List
 		Collection<LineString> lines = LineStringExtracter.getLines(geometry);
 
@@ -438,7 +435,7 @@ public class ForbiddenRegionBuilder {
 			.map(l -> bufferLineString(l, left, right))
 			.collect(toList());
 
-		return geomBuilder.geometryCollection(buffered);
+		return geometry(buffered);
 	}
 
 	/**
@@ -459,7 +456,7 @@ public class ForbiddenRegionBuilder {
 		// However, if they might be in the future, this is guarded since the
 		// method would break otherwise.
 		if (!left && !right)
-			return EnhancedGeometryBuilder.getInstance().polygon();
+			return polygon();
 
 		int n = lineString.getNumPoints(); // line string points
 		int m = 2*n + 1;                   // buffered number of points
@@ -503,9 +500,7 @@ public class ForbiddenRegionBuilder {
 
 		// construct polygon
 
-		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
-
-		return geomFact.createPolygon(bufferedCoords);
+		return polygon(bufferedCoords);
 	}
 
 	/**
@@ -524,8 +519,6 @@ public class ForbiddenRegionBuilder {
 		Vector arcUnitVector,
 		Polygon obstacleShape)
 	{
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
 		LineString spatialMask = makeSpatialLineMask(
 			spatialPathSegment,
 			obstacleTrajectorySegment);
@@ -539,7 +532,7 @@ public class ForbiddenRegionBuilder {
 		Geometry obstaclePathIntersection = movedObstacleShape.intersection(spatialMask);
 
 		if (obstaclePathIntersection.isEmpty())
-			return geomBuilder.polygon(); // empty
+			return polygon(); // empty
 
 		Geometry transformedObstacleShape = transformParallelObstacle(
 			spatialPathSegment,
@@ -566,8 +559,6 @@ public class ForbiddenRegionBuilder {
 		SpatialPath.Segment spatialPathSegment,
 		Trajectory.Segment obstacleTrajectorySegment)
 	{
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-
 		Vector s1 = makeVector(spatialPathSegment.getStartPoint());
 		Vector s2 = makeVector(spatialPathSegment.getFinishPoint());
 		Vector s = s2.subtract(s1);
@@ -591,7 +582,7 @@ public class ForbiddenRegionBuilder {
 		// extract mask ordinates
 		double x1 = p1.get(0), y1 = p1.get(1), x2 = p2.get(0), y2 = p2.get(1);
 
-		return builder.lineString(x1, y1, x2, y2);
+		return lineString(x1, y1, x2, y2);
 	}
 
 	/**
@@ -612,8 +603,6 @@ public class ForbiddenRegionBuilder {
 		SpatialPath.Segment spatialPathSegment,
 		Trajectory.Segment obstTrajectorySegment)
 	{
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
-
 		// boundaries
 		double smin = spatialPathSegment.getStartVertex().getArc();
 		double smax = smin + spatialPathSegment.length();
@@ -626,7 +615,7 @@ public class ForbiddenRegionBuilder {
 		if (spatialPathSegment.isLast())
 			smax = rightBuffer(smax);
 
-		return builder.box(smin, tmin, smax, tmax);
+		return box(smin, tmin, smax, tmax);
 	}
 
 	/**
@@ -645,8 +634,6 @@ public class ForbiddenRegionBuilder {
 		Trajectory.Segment obstacleTrajectorySegment,
 		Geometry obstaclePathIntersection)
 	{
-		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
-
 		int n = obstaclePathIntersection.getNumGeometries();
 		Matrix arcUnitRowMatrix = arcUnitVector.toRowMatrix();
 		Point xy0 = spatialPathSegment.getStartPoint();
@@ -693,10 +680,10 @@ public class ForbiddenRegionBuilder {
 			// first and last coordinate have to be equal
 			regionCoords[regionCoords.length-1] = (Coordinate) regionCoords[0].clone();
 
-			subregions[i] = geomFact.createPolygon(regionCoords);
+			subregions[i] = polygon(regionCoords);
 		}
 
-		return geomFact.createMultiPolygon(subregions);
+		return multiPolygon(subregions);
 	}
 
 	/**
@@ -779,11 +766,9 @@ public class ForbiddenRegionBuilder {
 
 		// make polygon
 
-		EnhancedGeometryBuilder builder = EnhancedGeometryBuilder.getInstance();
+		LinearRing shell = linearRing(p1, p2, p3, p4, p1);
 
-		LinearRing shell = builder.linearRing(p1, p2, p3, p4, p1);
-
-		return builder.polygon(shell);
+		return polygon(shell);
 	}
 
 	/**
@@ -830,9 +815,7 @@ public class ForbiddenRegionBuilder {
 	 * @return the point.
 	 */
 	private static Point makePoint(Vector vector) {
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
-		return geomBuilder.point(vector.get(0), vector.get(1));
+		return point(vector.get(0), vector.get(1));
 	}
 
 	/**
@@ -993,14 +976,13 @@ public class ForbiddenRegionBuilder {
 	 * @see LineMerger
 	 */
 	private static Geometry onlyLines(Geometry geometry) {
-		GeometryFactory geomFact = StaticJtsFactories.geomFactory();
-
 		LineMerger merger = new LineMerger();
 
 		merger.add(geometry);
-		Collection<?> lines = merger.getMergedLineStrings();
+		@SuppressWarnings("unchecked") // returns raw type
+		Collection<Geometry> lines = merger.getMergedLineStrings();
 
-		return geomFact.buildGeometry(lines);
+		return geometry(lines);
 	}
 
 }

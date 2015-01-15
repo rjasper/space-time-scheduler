@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static jts.geom.immutable.StaticGeometryBuilder.box;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -7,8 +9,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
@@ -18,6 +18,8 @@ import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.TrajectoryFactory;
 
+import com.google.common.collect.ImmutableList;
+
 public abstract class FixTimeVelocityPathfinderTest {
 	
 	protected abstract FixTimeVelocityPathfinder createPathfinder();
@@ -25,7 +27,6 @@ public abstract class FixTimeVelocityPathfinderTest {
 	@Test
 	public void test() {
 		LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 		TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 		
 		double maxSpeed = 1.0;
@@ -34,10 +35,14 @@ public abstract class FixTimeVelocityPathfinderTest {
 		double[] tObst = {0., 3., 7., 10.};
 		Collection<DynamicObstacle> dynamicObstacles = Collections.singleton(
 			new DynamicObstacle(
-				geomBuilder.box(-0.5, -0.5, 0.5, 0.5),
+				box(-0.5, -0.5, 0.5, 0.5),
 				trajFact.trajectory(xObst, yObst, tObst)));
-		SpatialPath spatialPath = new SpatialPath(geomBuilder.points(
-			1., 4., 4., 4., 4., 1., 1., 1.));
+		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
+//			points(1., 4., 4., 4., 4., 1., 1., 1.));
+			point(1., 4.),
+			point(4., 4.),
+			point(4., 1.),
+			point(1., 1.)));
 		LocalDateTime startTime = timeFact.seconds(0.);
 		LocalDateTime finishTime = timeFact.seconds(11.);
 		

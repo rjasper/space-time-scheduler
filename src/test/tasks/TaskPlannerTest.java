@@ -2,6 +2,8 @@ package tasks;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static jts.geom.immutable.StaticGeometryBuilder.box;
+import static jts.geom.immutable.StaticGeometryBuilder.point;
 import static matchers.CollisionMatchers.collideWith;
 import static matchers.EvasionMatchers.areEvadedBy;
 import static matchers.EvasionMatchers.evadedByNumTimes;
@@ -17,8 +19,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
@@ -38,7 +38,6 @@ import com.vividsolutions.jts.geom.Polygon;
 public class TaskPlannerTest {
 
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
-	private static final EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 	private static final TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 	
 	// TODO test tight plan
@@ -61,7 +60,7 @@ public class TaskPlannerTest {
 
 	@Test
 	public void testObsoleteEvasions() {
-		Polygon shape = geomBuilder.box(-0.25, -0.25, 0.25, 0.25);
+		Polygon shape = box(-0.25, -0.25, 0.25, 0.25);
 		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
 		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
 
@@ -82,7 +81,7 @@ public class TaskPlannerTest {
 
 		// w = w1, P = (3, 1), t = 10, d = 2
 		status = planTask(tp, w1,
-			geomBuilder.point(3.0, 1.0),
+			point(3.0, 1.0),
 			atSecond(10.0),
 			ofSeconds(2.0));
 
@@ -93,7 +92,7 @@ public class TaskPlannerTest {
 
 		// w = w2, P = (5, 3), t = 10, d = 2
 		status = planTask(tp, w2,
-			geomBuilder.point(5.0, 3.0),
+			point(5.0, 3.0),
 			atSecond(10.0),
 			ofSeconds(2.0));
 
@@ -108,7 +107,7 @@ public class TaskPlannerTest {
 
 		// w = w1, P = (1, 3), t = 4, d = 2
 		status = planTask(tp, w1,
-			geomBuilder.point(1.0, 3.0),
+			point(1.0, 3.0),
 			atSecond(4.0),
 			ofSeconds(2.0));
 
@@ -123,7 +122,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
-			geomBuilder.box(30., 10., 40., 40.));
+			box(30., 10., 40., 40.));
 		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
 
 		setNameFor(w, "w");
@@ -139,7 +138,7 @@ public class TaskPlannerTest {
 		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planTask(tp, w,
-			geomBuilder.point(60., 20.),
+			point(60., 20.),
 			atSecond(120.),
 			ofSeconds(30.));
 		
@@ -151,7 +150,7 @@ public class TaskPlannerTest {
 	
 	@Test
 	public void testDynamicObstacles() {
-		Polygon obstacleShape = geomBuilder.box(-5., -5., 5., 5.);
+		Polygon obstacleShape = box(-5., -5., 5., 5.);
 		Trajectory obstacleTrajectory = trajFact.trajectory(
 			new double[] {30., 30.},
 			new double[] {40.,  0.},
@@ -172,7 +171,7 @@ public class TaskPlannerTest {
 		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planTask(tp, w,
-			geomBuilder.point(50., 20.),
+			point(50., 20.),
 			atSecond(60.),
 			ofSeconds(30.));
 		

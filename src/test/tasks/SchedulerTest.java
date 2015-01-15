@@ -1,11 +1,10 @@
 package tasks;
 
+import static jts.geom.immutable.StaticGeometryBuilder.box;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,13 +16,12 @@ import world.fixtures.WorldFixtures;
 
 public class SchedulerTest {
 
-	private static EnhancedGeometryBuilder gBuilder = EnhancedGeometryBuilder.getInstance();
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
 	private static SpecificationFactory sFact = SpecificationFactory.getInstance();
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		wFact.setShape(gBuilder.box(-0.5, -0.5, 0.5, 0.5));
+		wFact.setShape(box(-0.5, -0.5, 0.5, 0.5));
 	}
 
 	@Test

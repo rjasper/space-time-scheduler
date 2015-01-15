@@ -1,7 +1,5 @@
 package jts.geom.factories;
 
-import static jts.geom.factories.StaticJtsFactories.geomFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,7 +43,7 @@ public class EnhancedGeometryBuilder extends org.geotools.geometry.jts.GeometryB
 	 * {@link GeometryFactory}.
 	 */
 	public EnhancedGeometryBuilder() {
-		super(geomFactory());
+		super(new GeometryFactory());
 	}
 
 	/**

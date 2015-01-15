@@ -136,6 +136,13 @@ public final class ImmutableGeometries {
 			return new ImmutableCoordinateSequence(coords);
 	}
 	
+	public static ImmutableCoordinateSequence immutableNoCopy(CoordinateSequence coords) {
+		if (coords == null || coords instanceof ImmutableCoordinateSequence)
+			return (ImmutableCoordinateSequence) coords;
+		else
+			return new ImmutableCoordinateSequence(coords, true);
+	}
+	
 	public static CoordinateSequence immutableNonNull(CoordinateSequence sequence) {
 		if (sequence == null)
 			return new ImmutableCoordinateSequence();

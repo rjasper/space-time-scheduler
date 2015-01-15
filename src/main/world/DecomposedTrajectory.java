@@ -1,14 +1,13 @@
 package world;
 
 import static common.collect.ImmutablesCollectors.toImmutableList;
-import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 import static util.DurationConv.inSeconds;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
 
@@ -241,11 +240,8 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		double offset = inSeconds( Duration.between(baseTime, ownBaseTime) );
 		
-		EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-		
-		// TODO use immutable geom builder
 		ImmutableList<ImmutablePoint> vertices = arcTimePathComponent.getVertices().stream()
-			.map(p -> immutable(geomBuilder.point(p.getX(), p.getY() + offset)))
+			.map(p -> immutablePoint(p.getX(), p.getY() + offset))
 			.collect(toImmutableList());
 		
 		return new ArcTimePath(vertices);

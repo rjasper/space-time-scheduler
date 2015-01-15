@@ -2,6 +2,7 @@ package world;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static jts.geom.immutable.StaticGeometryBuilder.box;
 import static matchers.GeometryMatchers.topologicallyEqualTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -11,8 +12,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 import java.util.function.Supplier;
-
-import jts.geom.factories.EnhancedGeometryBuilder;
 
 import org.junit.Test;
 
@@ -26,7 +25,6 @@ import com.vividsolutions.jts.geom.Polygon;
 public class RadiusBasedWorldPerspectiveCacheTest {
 
 	private static final WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
-	private static final EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
 
 	@Test(expected = NullPointerException.class)
 	public void testNullWorldInitialization() {
@@ -82,8 +80,8 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test
 	public void testUsesDifferentPerspectives() {
-		Polygon shape1 = geomBuilder.box(-1.0, -1.0, 1.0, 1.0);
-		Polygon shape2 = geomBuilder.box(-2.0, -2.0, 2.0, 2.0);
+		Polygon shape1 = box(-1.0, -1.0, 1.0, 1.0);
+		Polygon shape2 = box(-2.0, -2.0, 2.0, 2.0);
 		WorkerUnit perceiver1 = wFact.createWorkerUnit(shape1, 1.0,  0.0,  0.0, 0.0);
 		WorkerUnit perceiver2 = wFact.createWorkerUnit(shape2, 1.0, 50.0, 50.0, 0.0);
 		WorldPerspectiveCache cache = makeEmptyCache();
@@ -112,7 +110,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	public void testBufferPerspective() {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
 		StaticObstacle obstacle = new StaticObstacle(
-			geomBuilder.box(10.0, 10.0, 20.0, 20.0));
+			box(10.0, 10.0, 20.0, 20.0));
 		WorldPerspectiveCache cache = makeCacheFrom(singleton(obstacle));
 
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);

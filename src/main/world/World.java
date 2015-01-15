@@ -4,10 +4,10 @@ import static common.collect.Immutables.immutable;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static jts.geom.immutable.ImmutableGeometries.immutable;
+import static jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
 
 import java.util.Collection;
 
-import jts.geom.factories.EnhancedGeometryBuilder;
 import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 
@@ -73,11 +73,8 @@ public class World {
 	private static Geometry makeMap(Collection<StaticObstacle> staticObstacles) {
 		// for some reason the geometry combiner returns null when receiving
 		// an empty list instead of some empty geometry
-		if (staticObstacles.size() == 0) {
-			EnhancedGeometryBuilder geomBuilder = EnhancedGeometryBuilder.getInstance();
-
-			return immutable(geomBuilder.polygon());
-		}
+		if (staticObstacles.size() == 0)
+			return immutablePolygon();
 		
 		Collection<Polygon> shapes = staticObstacles.stream()
 			.map(StaticObstacle::getShape)

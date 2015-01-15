@@ -1,18 +1,11 @@
 package tasks.fixtures;
 
-import jts.geom.factories.StaticJtsFactories;
 import tasks.WorkerUnit;
 import tasks.factories.WorkerUnitFactory;
-
-import com.vividsolutions.jts.io.WKTReader;
 
 public final class WorkerUnitFixtures {
 
 	private static WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
-
-	public static WKTReader wkt() {
-		return StaticJtsFactories.wktReader();
-	}
 
 	public static WorkerUnit withTwoTasks1() {
 		WorkerUnit worker = wFact.createWorkerUnit(0., 0.);
