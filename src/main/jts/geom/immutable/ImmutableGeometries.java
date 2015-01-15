@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
@@ -192,6 +194,18 @@ public final class ImmutableGeometries {
 			return ((ImmutableCoordinateSequence) coords).getMutable();
 		else
 			return coords;
+	}
+	
+	static boolean alwaysTrue(Object anything) {
+		return true;
+	}
+	
+	static CoordinateFilter guard(CoordinateFilter filter) {
+		return new ImmutableCoordinateFilter(filter);
+	}
+	
+	static CoordinateSequenceFilter guard(CoordinateSequenceFilter filter) {
+		return new ImmutableCoordinateSequenceFilter(filter);
 	}
 
 }

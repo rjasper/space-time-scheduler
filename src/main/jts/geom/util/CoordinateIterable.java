@@ -15,8 +15,6 @@ public class CoordinateIterable implements Iterable<Coordinate> {
 	private final CoordinateSequence sequence;
 	
 	private final boolean useCopy;
-	
-	private int i = 0;
 
 	public CoordinateIterable(CoordinateSequence sequence) {
 		this(sequence, false);
@@ -30,10 +28,12 @@ public class CoordinateIterable implements Iterable<Coordinate> {
 	@Override
 	public Iterator<Coordinate> iterator() {
 		return new Iterator<Coordinate>() {
+			
+			private int i = 0;
 
 			@Override
 			public boolean hasNext() {
-				return i == sequence.size();
+				return i < sequence.size();
 			}
 
 			@Override

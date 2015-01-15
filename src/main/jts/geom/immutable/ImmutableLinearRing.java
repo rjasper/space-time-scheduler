@@ -1,12 +1,15 @@
 package jts.geom.immutable;
 
-import static jts.geom.immutable.ImmutableGeometries.immutable;
-import static jts.geom.immutable.ImmutableGeometries.mutable;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.CoordinateSequences;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.GeometryFilter;
 import com.vividsolutions.jts.geom.LinearRing;
 
 public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {
@@ -54,7 +57,17 @@ public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry
 	public ImmutableLinearRing clone() {
 		return this;
 	}
-	
-	// TODO override guarded apply methods
+
+	@Override
+	public void apply(CoordinateFilter filter) {
+		assert alwaysTrue(filter = guard(filter));
+		super.apply(filter);
+	}
+
+	@Override
+	public void apply(CoordinateSequenceFilter filter) {
+		assert alwaysTrue(filter = guard(filter));
+		super.apply(filter);
+	}
 
 }
