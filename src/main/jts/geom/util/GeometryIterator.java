@@ -97,7 +97,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 		/**
 		 * Indicates if the exterior ring still has to be iterated over.
 		 */
-		private boolean exterior = false;
+		private boolean exterior;
 		
 		private int interior = 0;
 

@@ -19,16 +19,13 @@ public class TrajectoryComposerTest {
 		LocalDateTime baseTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0);
 		LocalDateTimeFactory timeFact = new LocalDateTimeFactory(baseTime);
 		
-		// TODO use immutable geom builder
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-//			points(0., 1., 2., 1., 2., 4., 5., 4., 5., 1.)
 			point(0., 1.),
 			point(2., 1.),
 			point(2., 4.),
 			point(5., 4.),
 			point(5., 1.)));
 		ArcTimePath arcTimePath = new ArcTimePath(ImmutableList.of(
-//			points(0., 0., 1., 2., 4., 5., 6., 6., 7., 7., 8., 9., 8., 10., 11., 13.));
 			point(0., 0.),
 			point(1., 2.),
 			point(4., 5.),

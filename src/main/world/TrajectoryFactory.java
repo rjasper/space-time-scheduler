@@ -63,7 +63,6 @@ public class TrajectoryFactory {
 		
 		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
 		
-		// TODO use immutable geom builder
 		for (int i = 0; i < n; ++i)
 			builder.add(immutablePoint(x[i], y[i]));
 		

@@ -188,7 +188,6 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @return the JTS Point
 	 */
 	private static ImmutablePoint makeJtsPoint(KPoint point) {
-		// TODO use immutable geom builder
 		return immutablePoint(point.getX(), point.getY());
 	}
 
