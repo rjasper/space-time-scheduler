@@ -11,11 +11,28 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-
+/**
+ * A immutable version of the {@code GeometryFactory}. Builds only immutable
+ * geometries. Uses a mutable factory to be assigned to the build geometries
+ * to avoid unexpected appearances of immutable geometries.
+ * 
+ * @author Rico
+ */
 public class ImmutableGeometryFactory extends GeometryFactory {
 	
+	private static final long serialVersionUID = -7251529169493979058L;
+	
+	/**
+	 * The mutable factory to be assigned to the build immutable geometries.
+	 */
 	private final GeometryFactory mutableFactory;
 
+	/**
+	 * Constructs a new {@code ImmutableGeometryFactory}. The given mutable
+	 * factory will be assigned to the immutable geometries.
+	 * 
+	 * @param mutableFactory
+	 */
 	public ImmutableGeometryFactory(GeometryFactory mutableFactory) {
 		super(
 			mutableFactory.getPrecisionModel(),
@@ -24,8 +41,6 @@ public class ImmutableGeometryFactory extends GeometryFactory {
 		
 		this.mutableFactory = mutableFactory;
 	}
-
-	private static final long serialVersionUID = -7251529169493979058L;
 
 	@Override
 	public Geometry createGeometry(Geometry g) {

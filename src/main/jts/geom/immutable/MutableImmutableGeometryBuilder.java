@@ -8,19 +8,38 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * Extends the {@code GeometryBuilder} by new methods to build immutable
+ * geometries also.
+ * 
+ * @author Rico
+ */
 public class MutableImmutableGeometryBuilder extends GeometryBuilder {
 	
+	/**
+	 * The immutable builder used to build immutable geometries.
+	 */
 	private final ImmutableGeometryBuilder immutableBuilder;
 
+	/**
+	 * Constructs a new {@code ImmutableGeometryBuilder} using a default
+	 * {@link GeometryFactory} to assemble the geometries.
+	 */
 	public MutableImmutableGeometryBuilder() {
 		this(new GeometryFactory());
 	}
 
+	/**
+	 * Constructs a new {@code ImmutableGeometryBuilder} using the given
+	 * {@link GeometryFactory} to assemble the geometries.
+	 * 
+	 * @param geomFact
+	 */
 	public MutableImmutableGeometryBuilder(GeometryFactory geomFact) {
 		super(geomFact);
 		this.immutableBuilder = new ImmutableGeometryBuilder(geomFact);
 	}
-
+	
 	public ImmutablePoint immutablePoint() {
 		return immutableBuilder.point();
 	}

@@ -18,20 +18,37 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * Provides static methods to construct geometries.
+ * 
+ * @author Rico
+ */
 public final class StaticGeometryBuilder {
 
+	/**
+	 * The geometry factory used to provide JTS-like geometry construction.
+	 */
 	private static final MutableImmutableGeometryFactory FACTORY =
 		new MutableImmutableGeometryFactory();
 
+	/**
+	 * The geometry builder used to provide Geotools-like geometry construciton.
+	 */
 	private static final MutableImmutableGeometryBuilder BUILDER =
 		new MutableImmutableGeometryBuilder(FACTORY);
 
 	private StaticGeometryBuilder() {}
 	
+	/**
+	 * @return the geometry factory instance.
+	 */
 	public static MutableImmutableGeometryBuilder getBuilderInstance() {
 		return BUILDER;
 	}
 
+	/**
+	 * @return the geometry builder instance.
+	 */
 	public static MutableImmutableGeometryFactory getFactoryInstance() {
 		return FACTORY;
 	}

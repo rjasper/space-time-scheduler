@@ -46,6 +46,11 @@ public class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 	}
 
 	@Override
+	public void geometryChanged() {
+		throw new UnsupportedOperationException("Polygon immutable");
+	}
+
+	@Override
 	public void normalize() {
 		throw new UnsupportedOperationException("Polygon immutable");
 	}
@@ -67,18 +72,17 @@ public class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 	}
 
 	@Override
-	public ImmutablePolygon clone() {
-		return this;
-	}
-
-	@Override
 	public void apply(CoordinateFilter filter) {
+		// since the guard has a performance impact, only apply it when
+		// assertions are enabled
 		assert alwaysTrue(filter = guard(filter));
 		super.apply(filter);
 	}
 
 	@Override
 	public void apply(CoordinateSequenceFilter filter) {
+		// since the guard has a performance impact, only apply it when
+		// assertions are enabled
 		assert alwaysTrue(filter = guard(filter));
 		super.apply(filter);
 	}
