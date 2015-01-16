@@ -247,7 +247,97 @@ public final class ImmutableGeometries {
 			return geometry;
 		}
 	}
+	
+	/**
+	 * Returns an mutable version of the given array of geometries.
+	 * 
+	 * @param points
+	 * @return the mutable points.
+	 */
+	public static Geometry[] mutable(Geometry[] geometries) {
+		return mutable(geometries, Geometry.class);
+	}
 
+	/**
+	 * Returns an mutable version of the given array of points.
+	 * 
+	 * @param points
+	 * @return the mutable points.
+	 */
+	public static Point[] mutable(Point[] points) {
+		return mutable(points, Point.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of line strings.
+	 * 
+	 * @param lineStrings
+	 * @return the mutable line strings.
+	 */
+	public static LineString[] mutable(LineString[] lineStrings) {
+		return mutable(lineStrings, LineString.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of linear rings.
+	 * 
+	 * @param linearRings
+	 * @return the mutable linear rings.
+	 */
+	public static LinearRing[] mutable(LinearRing[] linearRings) {
+		return mutable(linearRings, LinearRing.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of polygons.
+	 * 
+	 * @param polygons
+	 * @return the mutable polygons.
+	 */
+	public static Polygon[] mutable(Polygon[] polygons) {
+		return mutable(polygons, Polygon.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of geometry collections.
+	 * 
+	 * @param geometryCollections
+	 * @return the mutable geometry collections.
+	 */
+	public static GeometryCollection[] mutable(GeometryCollection[] geometryCollections) {
+		return mutable(geometryCollections, GeometryCollection.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of multi line strings.
+	 * 
+	 * @param multiLineStrings
+	 * @return the mutable multi line strings.
+	 */
+	public static MultiLineString[] mutable(MultiLineString[] multiLineStrings) {
+		return mutable(multiLineStrings, MultiLineString.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of multi points.
+	 * 
+	 * @param multiPoints
+	 * @return the mutable multi points.
+	 */
+	public static MultiPoint[] mutable(MultiPoint[] multiPoints) {
+		return mutable(multiPoints, MultiPoint.class);
+	}
+
+	/**
+	 * Returns an mutable version of the given array of multi polygons.
+	 * 
+	 * @param multiPolygons
+	 * @return the mutable multi polygons.
+	 */
+	public static MultiPolygon[] mutable(MultiPolygon[] multiPolygons) {
+		return mutable(multiPolygons, MultiPolygon.class);
+	}
+	
 	/**
 	 * Returns an mutable version of the given array of geometries.
 	 * 
@@ -255,18 +345,18 @@ public final class ImmutableGeometries {
 	 * @return the mutable geometries.
 	 */
 	@SuppressWarnings("unchecked") // cast to (T[])
-	public static <T extends Geometry> T[] mutable(T[] geometries) {
+	private static <T extends Geometry> T[] mutable(
+		T[] geometries,
+		Class<? extends Geometry> componentType)
+	{
 		if (geometries == null)
 			return null;
-		
-		// FIXME component type might be from a immutable geometry
-		Class<?> componentType = geometries.getClass().getComponentType();
 		
 		return Arrays.stream(geometries)
 			.map(ImmutableGeometries::mutable)
 			.toArray(n -> (T[]) Array.newInstance(componentType, n));
 	}
-	
+
 	/**
 	 * Returns a new mutable version of the given array of geometries.
 	 * 
