@@ -2,7 +2,9 @@ package util;
 
 import java.util.Arrays;
 
-// TODO document
+/**
+ * Provides static array sorting methods.
+ */
 public final class ArraysSort {
 	
 	/**
