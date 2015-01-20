@@ -19,11 +19,8 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnitFactory {
 
-	private static final Polygon DEFAULT_SHAPE = createDefaultShape();
-
-	private static Polygon createDefaultShape() {
-		return polygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
-	}
+	private static final Polygon DEFAULT_SHAPE =
+		polygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
 
 	private static final double DEFAULT_MAX_SPEED = 1.0;
 
