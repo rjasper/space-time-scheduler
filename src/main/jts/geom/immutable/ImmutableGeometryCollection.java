@@ -122,17 +122,6 @@ public class ImmutableGeometryCollection extends GeometryCollection implements I
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.vividsolutions.jts.geom.GeometryCollection#reverse()
-	 */
-	@Override
-	public Geometry reverse() {
-		// TODO not efficient
-		// reverse creates a copy of getMutable()
-		return getMutable().reverse();
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see com.vividsolutions.jts.geom.GeometryCollection#apply(com.vividsolutions.jts.geom.CoordinateFilter)
 	 */
 	@Override

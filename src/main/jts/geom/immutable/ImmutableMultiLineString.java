@@ -4,7 +4,6 @@ import static jts.geom.immutable.ImmutableGeometries.*;
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -120,17 +119,6 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 		mutable.normalize();
 		
 		return mutable;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.vividsolutions.jts.geom.MultiLineString#reverse()
-	 */
-	@Override
-	public Geometry reverse() {
-		// TODO not efficient
-		// reverse creates a copy of getMutable()
-		return getMutable().reverse();
 	}
 
 	/*

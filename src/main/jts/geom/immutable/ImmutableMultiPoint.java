@@ -4,7 +4,6 @@ import static jts.geom.immutable.ImmutableGeometries.*;
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
@@ -84,10 +83,10 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 	 * @see jts.geom.immutable.ImmutableGeometry#getMutable()
 	 */
 	@Override
-	public ImmutableMultiPoint getMutable() {
+	public MultiPoint getMutable() {
 		Point[] points = (Point[]) geometries;
 		
-		return new ImmutableMultiPoint(mutable(points), factory);
+		return new MultiPoint(mutable(points), factory);
 	}
 
 	/*
@@ -119,17 +118,6 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 		mutable.normalize();
 		
 		return mutable;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.vividsolutions.jts.geom.GeometryCollection#reverse()
-	 */
-	@Override
-	public Geometry reverse() {
-		// TODO not efficient
-		// reverse creates a copy of getMutable()
-		return getMutable().reverse();
 	}
 
 	/*
