@@ -16,24 +16,60 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
+/**
+ * Creates a {@link CoordinateSequence} from the coordinates of several
+ * geometries while retaining their order.
+ * 
+ * @author Rico
+ */
 public class GeometrySequencer {
 	
+	/**
+	 * Creates a {@link CoordinateSequence} from all coordinates of the given
+	 * geometries.
+	 * 
+	 * @param geometries
+	 * @return the coordinate sequence.
+	 */
 	public static CoordinateSequence sequence(Geometry... geometries) {
 		return sequence(Arrays.asList(geometries));
 	}
 	
+	/**
+	 * Creates a {@link CoordinateSequence} from all coordinates of the given
+	 * geometries.
+	 * 
+	 * @param geometries
+	 * @return the coordinate sequence.
+	 */
 	public static CoordinateSequence sequence(Iterable<? extends Geometry> geometries) {
 		GeometrySequencer sequencer = new GeometrySequencer(geometries);
 		
 		return sequencer.build();
 	}
 	
+	/**
+	 * The geometries to extract the coordinates from.
+	 */
 	private final Iterable<? extends Geometry> geometries;
 	
+	/**
+	 * Constructs a new {@code GeometrySequencer} which builds
+	 * {@code CoordinateSequence}s using the coordinates of the given
+	 * geometries.
+	 * 
+	 * @param geometries
+	 */
 	public GeometrySequencer(Iterable<? extends Geometry> geometries) {
 		this.geometries = Objects.requireNonNull(geometries, "geometries");
 	}
 	
+	/**
+	 * Builds a new {@code CoordinateSequence} consisting of all coordinates
+	 * of the geometries.
+	 * 
+	 * @return the coordinate sequence.
+	 */
 	public CoordinateSequence build() {
 		Coordinate[] coordinates = makeStream(geometries)
 			.map(g -> new GeometryIterator(g, true))
@@ -46,17 +82,33 @@ public class GeometrySequencer {
 		return new CoordinateArraySequence(coordinates);
 	}
 	
+	/**
+	 * Makes a stream of the given {@code Iterable}.
+	 * 
+	 * @param iterable
+	 * @return the stream.
+	 */
 	private static <T> Stream<T> makeStream(Iterable<T> iterable) {
 		return StreamSupport.stream(iterable.spliterator(), false);
 	}
 	
-	private static <T> Stream<T> makeStream(Iterator<T> iterable) {
+	/**
+	 * Makes a stream of the given {@code Iterator}.
+	 * 
+	 * @param iterator
+	 * @return
+	 */
+	private static <T> Stream<T> makeStream(Iterator<T> iterator) {
 		return StreamSupport.stream(
 			Spliterators.spliteratorUnknownSize(
-				iterable, NONNULL | IMMUTABLE | ORDERED),
+				iterator, NONNULL | IMMUTABLE | ORDERED),
 			false);
 	}
 	
+	/**
+	 * Takes the {@code CoordinateSequence}s of {@code Point}s and
+	 * {@code LineString}s.
+	 */
 	private static final GeometrySplitter<CoordinateSequence> GEOMETRY_SPLITTER =
 		new GeometrySplitter<CoordinateSequence>() {
 			@Override
