@@ -45,197 +45,6 @@ import com.vividsolutions.jts.geom.Point;
  */
 public interface Trajectory {
 
-	// TODO document
-	
-	public static class Vertex {
-		
-		private final SpatialPath.Vertex spatialVertex;
-		private final LocalDateTime time;
-		
-		Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
-			this.spatialVertex = spatialVertex;
-			this.time = time;
-		}
-	
-		public boolean isFirst() {
-			return spatialVertex.isFirst();
-		}
-	
-		public boolean isLast() {
-			return spatialVertex.isLast();
-		}
-	
-		public SpatialPath.Vertex getSpatialVertex() {
-			return spatialVertex;
-		}
-	
-		public ImmutablePoint getLocation() {
-			return spatialVertex.getPoint();
-		}
-	
-		public double getX() {
-			return spatialVertex.getX();
-		}
-	
-		public double getY() {
-			return spatialVertex.getY();
-		}
-	
-		public double getArc() {
-			return spatialVertex.getArc();
-		}
-		
-		public double getTimeInSeconds(LocalDateTime baseTime) {
-			return DurationConv.inSeconds(Duration.between(baseTime, time));
-		}
-	
-		public LocalDateTime getTime() {
-			return time;
-		}
-		
-	}
-	
-	public static class VertexIterator implements Iterator<Vertex> {
-
-		private final Iterator<SpatialPath.Vertex> spatialIterator;
-		private final Iterator<LocalDateTime> timeIterator;
-		
-		private VertexIterator(Trajectory trajectory) {
-			this.spatialIterator = trajectory.getSpatialPath().vertexIterator();
-			this.timeIterator = trajectory.getTimes().iterator();
-		}
-
-		@Override
-		public boolean hasNext() {
-			// equivalent to timeIterator.hasNext()
-			return spatialIterator.hasNext();
-		}
-
-		@Override
-		public Vertex next() {
-			return new Vertex(spatialIterator.next(), timeIterator.next());
-		}
-
-	}
-
-	public static class Segment {
-		
-		private final Vertex start;
-		private final Vertex finish;
-		private final SpatialPath.Segment spatialSegment;
-		
-		private transient Duration duration = null;
-		private transient double seconds = Double.NaN;
-		
-		Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
-			this.start = start;
-			this.finish = finish;
-			this.spatialSegment = spatialSegment;
-		}
-		
-		public boolean isStationary() {
-			return getStartLocation().equals(getFinishLocation());
-		}
-	
-		public Vertex getStartVertex() {
-			return start;
-		}
-	
-		public Vertex getFinishVertex() {
-			return finish;
-		}
-		
-		public ImmutablePoint getStartLocation() {
-			return start.getLocation();
-		}
-		
-		public ImmutablePoint getFinishLocation() {
-			return finish.getLocation();
-		}
-		
-		public LocalDateTime getStartTime() {
-			return start.getTime();
-		}
-		
-		public LocalDateTime getFinishTime() {
-			return finish.getTime();
-		}
-		
-		public double getStartTimeInSeconds(LocalDateTime seconds) {
-			return start.getTimeInSeconds(seconds);
-		}
-		
-		public double getFinishTimeInSeconds(LocalDateTime seconds) {
-			return finish.getTimeInSeconds(seconds);
-		}
-	
-		public SpatialPath.Segment getSpatialSegment() {
-			return spatialSegment;
-		}
-	
-		public boolean isFirst() {
-			return spatialSegment.isFirst();
-		}
-	
-		public boolean isLast() {
-			return spatialSegment.isLast();
-		}
-	
-		public double length() {
-			return spatialSegment.length();
-		}
-		
-		public double durationInSeconds() {
-			if (Double.isNaN(seconds))
-				seconds = DurationConv.inSeconds(duration());
-			
-			return seconds;
-		}
-		
-		public Duration duration() {
-			if (duration == null)
-				duration = Duration.between(start.getTime(), finish.getTime());
-			
-			return duration;
-		}
-		
-	}
-	
-	public static class SegmentIterator implements Iterator<Segment> {
-		
-		private final Iterator<Trajectory.Vertex> vertexIterator;
-		private final Iterator<SpatialPath.Segment> spatialSegmentIterator;
-		
-		private Trajectory.Vertex lastVertex = null;
-		
-		SegmentIterator(Trajectory trajectory) {
-			this.vertexIterator = new VertexIterator(trajectory);
-			this.spatialSegmentIterator = trajectory.getSpatialPath().segmentIterator();
-			
-			if (vertexIterator.hasNext())
-				lastVertex = vertexIterator.next();
-		}
-
-		@Override
-		public boolean hasNext() {
-			// equivalent to spatialSegmentIterator.hasNext()
-			return vertexIterator.hasNext();
-		}
-
-		@Override
-		public Segment next() {
-			Vertex start = lastVertex;
-			Vertex finish = vertexIterator.next();
-			SpatialPath.Segment spatialSegment = spatialSegmentIterator.next();
-			
-			Segment segment = new Segment(start, finish, spatialSegment);
-			lastVertex = finish;
-			
-			return segment;
-		}
-		
-	}
-	
 	/**
 	 * @return {@code true} iff trajectory has no vertices.
 	 */
@@ -333,14 +142,383 @@ public interface Trajectory {
 		return new SimpleTrajectory(spatialPath, times);
 	}
 	
-	// TODO document
-	
+	/**
+	 * @return a {@code VertexIterator}
+	 */
 	public default Iterator<Vertex> vertexIterator() {
 		return new VertexIterator(this);
 	}
+
+	/**
+	 * The vertex of a {@code Trajectory}. Stores additional information about
+	 * the vertex in context to the path.
+	 */
+	public static class Vertex {
+		
+		/**
+		 * The spatial vertex.
+		 */
+		private final SpatialPath.Vertex spatialVertex;
+		
+		/**
+		 * The time ordinate.
+		 */
+		private final LocalDateTime time;
+		
+		/**
+		 * Constructs a new {@code Vertex} of the given spatial vertex and time.
+		 * 
+		 * @param spatialVertex
+		 * @param time
+		 */
+		private Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
+			this.spatialVertex = spatialVertex;
+			this.time = time;
+		}
 	
+		/**
+		 * @return whether this vertex the first one.
+		 */
+		public boolean isFirst() {
+			return spatialVertex.isFirst();
+		}
+	
+		/**
+		 * @return whether this vertex the first one.
+		 */
+		public boolean isLast() {
+			return spatialVertex.isLast();
+		}
+	
+		/**
+		 * @return the spatial vertex.
+		 */
+		public SpatialPath.Vertex getSpatialVertex() {
+			return spatialVertex;
+		}
+	
+		/**
+		 * @return the location.
+		 */
+		public ImmutablePoint getLocation() {
+			return spatialVertex.getPoint();
+		}
+	
+		/**
+		 * @return the x-ordinate.
+		 */
+		public double getX() {
+			return spatialVertex.getX();
+		}
+	
+		/**
+		 * @return the y-ordinate.
+		 */
+		public double getY() {
+			return spatialVertex.getY();
+		}
+	
+		/**
+		 * @return the arc value.
+		 */
+		public double getArc() {
+			return spatialVertex.getArc();
+		}
+		
+		/**
+		 * @return the time ordinate.
+		 */
+		public LocalDateTime getTime() {
+			return time;
+		}
+	
+		/**
+		 * @param baseTime
+		 *            the base time to relate to.
+		 * @return the time in seconds.
+		 */
+		public double getTimeInSeconds(LocalDateTime baseTime) {
+			return DurationConv.inSeconds(Duration.between(baseTime, time));
+		}
+		
+	}
+
+	/**
+	 * The {@code VertexIterator} of a {@code Trajectory}.
+	 */
+	public static class VertexIterator implements Iterator<Vertex> {
+	
+		/**
+		 * The spatial vertex iterator.
+		 */
+		private final Iterator<SpatialPath.Vertex> spatialIterator;
+		
+		/**
+		 * The time iterator.
+		 */
+		private final Iterator<LocalDateTime> timeIterator;
+	
+		/**
+		 * Constructs a new {@code VertexIterator} for the given trajectory.
+		 * 
+		 * @param trajectory
+		 */
+		private VertexIterator(Trajectory trajectory) {
+			this.spatialIterator = trajectory.getSpatialPath().vertexIterator();
+			this.timeIterator = trajectory.getTimes().iterator();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			// equivalent to timeIterator.hasNext()
+			return spatialIterator.hasNext();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public Vertex next() {
+			return new Vertex(spatialIterator.next(), timeIterator.next());
+		}
+	
+	}
+
+	/**
+	 * @return a {@code SegmentIterator}.
+	 */
 	public default Iterator<Segment> segmentIterator() {
 		return new SegmentIterator(this);
+	}
+
+	/**
+	 * The segment of a {@code Trajectory}. Stores additional information about
+	 * the segment in context to the path.
+	 */
+	public static class Segment {
+		
+		/**
+		 * The start vertex.
+		 */
+		private final Vertex start;
+		
+		/**
+		 * The finish vertex.
+		 */
+		private final Vertex finish;
+		
+		/**
+		 * The spatial segment.
+		 */
+		private final SpatialPath.Segment spatialSegment;
+		
+		/**
+		 * Caches the duration.
+		 */
+		private transient Duration duration = null;
+		
+		/**
+		 * Caches the duration in seconds.
+		 */
+		private transient double seconds = Double.NaN;
+		
+		/**
+		 * Constructs a new {@code Segment} connecting the given vertices.
+		 * 
+		 * @param start
+		 *            start vertex
+		 * @param finish
+		 *            finish vertex
+		 * @param spatialSegment
+		 */
+		private Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
+			this.start = start;
+			this.finish = finish;
+			this.spatialSegment = spatialSegment;
+		}
+		
+		/**
+		 * @return whether this segment is the first one.
+		 */
+		public boolean isFirst() {
+			return spatialSegment.isFirst();
+		}
+	
+		/**
+		 * @return whether this segment is the last one.
+		 */
+		public boolean isLast() {
+			return spatialSegment.isLast();
+		}
+	
+		/**
+		 * @return whether the segment is stationary (i.e., does not change the
+		 *         location).
+		 */
+		public boolean isStationary() {
+			return getStartLocation().equals(getFinishLocation());
+		}
+	
+		/**
+		 * @return the start vertex.
+		 */
+		public Vertex getStartVertex() {
+			return start;
+		}
+	
+		/**
+		 * @return the finish vertex.
+		 */
+		public Vertex getFinishVertex() {
+			return finish;
+		}
+		
+		/**
+		 * @return the start location.
+		 */
+		public ImmutablePoint getStartLocation() {
+			return start.getLocation();
+		}
+		
+		/**
+		 * @return the finish location.
+		 */
+		public ImmutablePoint getFinishLocation() {
+			return finish.getLocation();
+		}
+		
+		/**
+		 * @return the start time.
+		 */
+		public LocalDateTime getStartTime() {
+			return start.getTime();
+		}
+		
+		/**
+		 * @return the finish time.
+		 */
+		public LocalDateTime getFinishTime() {
+			return finish.getTime();
+		}
+		
+		/**
+		 * @param baseTime
+		 *            the base time to relate to.
+		 * @return the start time in seconds.
+		 */
+		public double getStartTimeInSeconds(LocalDateTime baseTime) {
+			return start.getTimeInSeconds(baseTime);
+		}
+	
+		/**
+		 * @param baseTime
+		 *            the base time to relate to.
+		 * @return the finish time in seconds.
+		 */
+		public double getFinishTimeInSeconds(LocalDateTime baseTime) {
+			return finish.getTimeInSeconds(baseTime);
+		}
+	
+		/**
+		 * @return the spatial segment.
+		 */
+		public SpatialPath.Segment getSpatialSegment() {
+			return spatialSegment;
+		}
+	
+		/**
+		 * @return the length of this segment.
+		 */
+		public double length() {
+			return spatialSegment.length();
+		}
+		
+		/**
+		 * @return the duration.
+		 */
+		public Duration duration() {
+			if (duration == null)
+				duration = Duration.between(start.getTime(), finish.getTime());
+			
+			return duration;
+		}
+	
+		/**
+		 * @return the duration in seconds.
+		 */
+		public double durationInSeconds() {
+			if (Double.isNaN(seconds))
+				seconds = DurationConv.inSeconds(duration());
+			
+			return seconds;
+		}
+		
+	}
+
+	/**
+	 * The {@code SegmentIterator} of a {@code Trajectory}.
+	 */
+	public static class SegmentIterator implements Iterator<Segment> {
+		
+		/**
+		 * The vertex iterator.
+		 */
+		private final Iterator<Trajectory.Vertex> vertexIterator;
+		
+		/**
+		 * The spatial segment iterator.
+		 */
+		private final Iterator<SpatialPath.Segment> spatialSegmentIterator;
+		
+		/**
+		 * The last yielded vertex.
+		 */
+		private Trajectory.Vertex lastVertex = null;
+		
+		/**
+		 * Constructs a new {@code SegmentIterator} for the given trajectory.
+		 * 
+		 * @param trajectory
+		 */
+		private SegmentIterator(Trajectory trajectory) {
+			this.vertexIterator = new VertexIterator(trajectory);
+			this.spatialSegmentIterator = trajectory.getSpatialPath().segmentIterator();
+			
+			if (vertexIterator.hasNext())
+				lastVertex = vertexIterator.next();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		@Override
+		public boolean hasNext() {
+			// equivalent to spatialSegmentIterator.hasNext()
+			return vertexIterator.hasNext();
+		}
+	
+		/*
+		 * (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		@Override
+		public Segment next() {
+			Vertex start = lastVertex;
+			Vertex finish = vertexIterator.next();
+			SpatialPath.Segment spatialSegment = spatialSegmentIterator.next();
+			
+			Segment segment = new Segment(start, finish, spatialSegment);
+			lastVertex = finish;
+			
+			return segment;
+		}
+		
 	}
 
 }

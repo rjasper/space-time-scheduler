@@ -192,7 +192,7 @@ public class SpatialPath extends Path {
 		}
 		
 		/**
-		 * @return the length of the segment.
+		 * @return the length of this segment.
 		 */
 		public double length() {
 			return getFinishVertex().getArc() - getStartVertex().getArc();
