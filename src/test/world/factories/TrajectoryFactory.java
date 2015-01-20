@@ -1,6 +1,4 @@
-package world;
-
-// TODO move to tests
+package world.factories;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
@@ -10,6 +8,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import world.LocalDateTimeFactory;
+import world.SimpleTrajectory;
+import world.SpatialPath;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
@@ -18,21 +19,13 @@ public class TrajectoryFactory {
 	
 	private static TrajectoryFactory instance = null;
 	
-//	private EnhancedGeometryBuilder geomBuilder;
-	
 	private LocalDateTimeFactory timeFact;
 	
 	public TrajectoryFactory() {
-		this(
-//			EnhancedGeometryBuilder.getBuilderInstance(),
-			LocalDateTimeFactory.getInstance());
+		this(LocalDateTimeFactory.getInstance());
 	}
 	
-	public TrajectoryFactory(
-//		EnhancedGeometryBuilder geomBuilder,
-		LocalDateTimeFactory timeFact)
-	{
-//		this.geomBuilder = geomBuilder;
+	public TrajectoryFactory(LocalDateTimeFactory timeFact) {
 		this.timeFact = timeFact;
 	}
 	

@@ -1,11 +1,17 @@
 package world;
 
+import static common.collect.ImmutablesCollectors.*;
+import static jts.geom.immutable.StaticGeometryBuilder.*;
+
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
+import util.DurationConv;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -16,8 +22,10 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class TrajectoryComposer {
 
-	// TODO remove
-	private TrajectoryFactory trajFact = new TrajectoryFactory();
+	/**
+	 * The base time.
+	 */
+	private LocalDateTime baseTime = null;
 
 	/**
 	 * The spatial x-ordinates.
@@ -49,11 +57,6 @@ public class TrajectoryComposer {
 	 */
 	private SimpleTrajectory resultTrajectory = null;
 
-	// TODO remove
-	private TrajectoryFactory getTrajectoryFactory() {
-		return trajFact;
-	}
-
 	/**
 	 * Sets the base time of the arc-time component.
 	 * 
@@ -62,9 +65,7 @@ public class TrajectoryComposer {
 	 *             if {@code baseTime} is {@code null}.
 	 */
 	public void setBaseTime(LocalDateTime baseTime) {
-		Objects.requireNonNull(baseTime, "baseTime");
-		
-		this.trajFact.setBaseTime(baseTime);
+		this.baseTime = Objects.requireNonNull(baseTime, "baseTime");
 	}
 
 	/**
@@ -152,8 +153,7 @@ public class TrajectoryComposer {
 	 *             if one component is empty while the other is not.
 	 */
 	private void checkParameters() {
-		// TODO check base time
-		
+		Objects.requireNonNull(baseTime, "baseTime");
 		Objects.requireNonNull(xSpatial, "xSpatial");
 		Objects.requireNonNull(sArcTime, "sArcTime");
 		
@@ -192,12 +192,20 @@ public class TrajectoryComposer {
 		int n = mergePaths(tSpatial, xArcTime, yArcTime, x, y, t);
 
 		// build trajectory
-		TrajectoryFactory trajFact = getTrajectoryFactory();
 
-		// TODO don't use factory
-		SimpleTrajectory trajectory = trajFact.trajectory(x, y, t, n);
-
-		setResultTrajectory(trajectory);
+		// build path
+		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
+		for (int i = 0; i < n; ++i)
+			builder.add(immutablePoint(x[i], y[i]));		
+		SpatialPath path = new SpatialPath(builder.build());
+		
+		// build times
+		ImmutableList<LocalDateTime> times = Arrays.stream(t, 0, n)
+			.mapToObj(DurationConv::ofSeconds)
+			.map(baseTime::plus)
+			.collect(toImmutableList());
+		
+		setResultTrajectory(new SimpleTrajectory(path, times));
 	}
 
 	/**

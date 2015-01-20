@@ -14,7 +14,7 @@ import world.DynamicObstacle;
 import world.LocalDateTimeFactory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
-import world.TrajectoryFactory;
+import world.factories.TrajectoryFactory;
 
 import com.google.common.collect.ImmutableList;
 

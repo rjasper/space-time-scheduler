@@ -22,9 +22,9 @@ import world.DynamicObstacle;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.StaticObstacle;
 import world.Trajectory;
-import world.TrajectoryFactory;
 import world.World;
 import world.WorldPerspectiveCache;
+import world.factories.TrajectoryFactory;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;

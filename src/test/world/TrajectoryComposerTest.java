@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 
 import org.junit.Test;
 
+import world.factories.TrajectoryFactory;
+
 import com.google.common.collect.ImmutableList;
 
 public class TrajectoryComposerTest {
