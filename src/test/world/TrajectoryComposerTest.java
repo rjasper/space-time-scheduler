@@ -1,16 +1,13 @@
 package world;
 
-import static java.time.Month.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-
-import java.time.LocalDateTime;
+import static world.factories.TrajectoryFactory.*;
 
 import org.junit.Test;
 
-import util.LocalDateTimeFactory;
-import world.factories.TrajectoryFactory;
+import util.TimeFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -18,10 +15,6 @@ public class TrajectoryComposerTest {
 
 	@Test
 	public void test() {
-
-		LocalDateTime baseTime = LocalDateTime.of(2000, JANUARY, 1, 0, 0);
-		LocalDateTimeFactory timeFact = new LocalDateTimeFactory(baseTime);
-		
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
 			point(0., 1.),
 			point(2., 1.),
@@ -40,7 +33,7 @@ public class TrajectoryComposerTest {
 		
 		TrajectoryComposer composer = new TrajectoryComposer();
 		
-		composer.setBaseTime(baseTime);
+		composer.setBaseTime(TimeFactory.BASE_TIME);
 		composer.setSpatialPathComponent(spatialPath);
 		composer.setArcTimePathComponent(arcTimePath);
 		
@@ -48,13 +41,10 @@ public class TrajectoryComposerTest {
 		
 		SimpleTrajectory trajectory = composer.getResultTrajectory();
 		
-		TrajectoryFactory trajFact = new TrajectoryFactory(timeFact);
-		
-		double[] x = {0., 1., 2., 2., 2. , 3., 4., 5.,  5.,  5.};
-		double[] y = {1., 1., 1., 3., 4. , 4., 4., 4.,  4.,  1.};
-		double[] t = {0., 2., 3., 5., 5.5, 6., 7., 9., 10., 13.};
-		
-		SimpleTrajectory expected = trajFact.trajectory(x, y, t);
+		SimpleTrajectory expected = trajectory(
+			0, 1, 2, 2, 2  , 3, 4, 5,  5,  5,
+			1, 1, 1, 3, 4  , 4, 4, 4,  4,  1,
+			0, 2, 3, 5, 5.5, 6, 7, 9, 10, 13);
 		
 		assertThat(trajectory, equalTo(expected));
 	}

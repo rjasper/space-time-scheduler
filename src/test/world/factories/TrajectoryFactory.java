@@ -1,69 +1,45 @@
 package world.factories;
 
+import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import util.LocalDateTimeFactory;
+import jts.geom.immutable.ImmutablePoint;
+import util.DurationConv;
+import util.TimeFactory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
-import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
 
 public class TrajectoryFactory {
-	
-	private static TrajectoryFactory instance = null;
-	
-	private LocalDateTimeFactory timeFact;
-	
-	public TrajectoryFactory() {
-		this(LocalDateTimeFactory.getInstance());
-	}
-	
-	public TrajectoryFactory(LocalDateTimeFactory timeFact) {
-		this.timeFact = timeFact;
-	}
-	
-	public static TrajectoryFactory getInstance() {
-		if (instance == null)
-			instance = new TrajectoryFactory();
-		
-		return instance;
-	}
-	
-	public void setBaseTime(LocalDateTime baseTime) {
-		this.timeFact = new LocalDateTimeFactory(baseTime);
-	}
 
-	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t) {
-		int n = x.length;
+	public static SimpleTrajectory trajectory(double... ordinates) {
+		Objects.requireNonNull(ordinates, "ordinates");
 		
-		return trajectory(x, y, t, n);
-	}
+		if (ordinates.length % 3 != 0)
+			throw new IllegalArgumentException("ordinates not a multiple of 3");
+		
+		int n = ordinates.length / 3;
+		// xOffset = 0
+		int yOffset = n;
+		int tOffset = 2*n;
 
-	public SimpleTrajectory trajectory(double[] x, double[] y, double[] t, int n) {
-		Objects.requireNonNull(x, "x");
-		Objects.requireNonNull(y, "y");
-		Objects.requireNonNull(t, "t");
-		
-		if (n < 0)
-			throw new IllegalArgumentException("n less than 0");
-		
 		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
 		
 		for (int i = 0; i < n; ++i)
-			builder.add(immutablePoint(x[i], y[i]));
+			builder.add(immutablePoint(ordinates[i], ordinates[yOffset + i]));
 		
 		SpatialPath path = new SpatialPath(builder.build());
 		
-		List<LocalDateTime> times = Arrays.stream(t, 0, n)
-			.mapToObj(timeFact::seconds)
-			.collect(Collectors.toList());
+		List<LocalDateTime> times = Arrays.stream(ordinates, tOffset, ordinates.length)
+			.mapToObj(DurationConv::ofSeconds)
+			.map(TimeFactory.BASE_TIME::plus)
+			.collect(toImmutableList());
 		
 		return new SimpleTrajectory(path, times);
 	}

@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static util.TimeFactory.*;
+import static world.factories.TrajectoryFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.junit.Assert.*;
 
@@ -10,11 +12,9 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import util.LocalDateTimeFactory;
 import world.DynamicObstacle;
 import world.SpatialPath;
 import world.Trajectory;
-import world.factories.TrajectoryFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Polygon;
@@ -27,23 +27,20 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	public void test() {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
-		TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
-		LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
-
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-//			points(0., 2., 3., 2.));
 			point(0., 2.), point(3., 2.)));
-		
 		Polygon obstacleShape = box(-0.5, -0.5, 0.5, 0.5);
-		double[] xObst = {1.5, 1.5}, yObst = {3.5, 0.5}, tObst = {0., 3.};
-		Trajectory obstacleTrajectory = trajFact.trajectory(xObst, yObst, tObst);
+		Trajectory obstacleTrajectory = trajectory(
+			1.5, 1.5,
+			3.5, 0.5,
+			0.0, 3.0);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
 		Collection<DynamicObstacle> dynamicObstacles = Collections.singleton(obstacle);
 		
 		double maxSpeed = 1.0;
-		LocalDateTime startTime = timeFact.seconds(0.);
-		LocalDateTime earliestFinishTime = timeFact.seconds(3.);
-		LocalDateTime latestFinishTime = timeFact.seconds(5.0);
+		LocalDateTime startTime = atSecond(0.);
+		LocalDateTime earliestFinishTime = atSecond(3.);
+		LocalDateTime latestFinishTime = atSecond(5.0);
 		Duration bufferDuration = Duration.ofSeconds(0L);
 		
 		pf.setSpatialPath(spatialPath);
@@ -60,8 +57,10 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		
 		Trajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
 		
-		double[] x = {0., 1., 3.}, y = {2., 2., 2.}, t = {0., 2., 4.};
-		Trajectory expected = trajFact.trajectory(x, y, t);
+		Trajectory expected = trajectory(
+			0, 1, 3,
+			2, 2, 2,
+			0, 2, 4);
 		
 		assertEquals(expected, trajectory);
 	}

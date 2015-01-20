@@ -1,5 +1,7 @@
 package tasks;
 
+import static util.TimeFactory.*;
+import static util.DurationConv.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.junit.Assert.*;
 
@@ -9,7 +11,6 @@ import java.util.Collection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import tasks.factories.SpecificationFactory;
 import tasks.factories.WorkerUnitFactory;
 import world.World;
 import world.fixtures.WorldFixtures;
@@ -17,7 +18,6 @@ import world.fixtures.WorldFixtures;
 public class SchedulerTest {
 
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
-	private static SpecificationFactory sFact = SpecificationFactory.getInstance();
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -34,10 +34,15 @@ public class SchedulerTest {
 		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
 
 		// TODO use other specifications
-//		Specification s1 = sFact.specification( 9., 29., 4., 4., 0, 60, 60);
-		Specification s2 = sFact.specification(21., 27., 6., 6., 0, 60, 60);
-		Specification s3 = sFact.specification( 9.,  7., 6., 6., 0, 60, 60);
-//		Specification s4 = sFact.specification(23.,  9., 4., 4., 0, 60, 60);
+		
+//		Specification s1 = new Specification(
+//			box( 9, 29, 13, 33), atSecond(0), atSecond(60), ofSeconds(60));
+		Specification s2 = new Specification(
+			box(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(60));
+		Specification s3 = new Specification(
+			box( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(60));
+//		Specification s4 = new Specification(
+//			box(23,  9, 27, 13), atSecond(0), atSecond(60), ofSeconds(60));
 
 		Scheduler sc = new Scheduler(world, workers);
 

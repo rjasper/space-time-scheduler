@@ -8,7 +8,8 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.NameProvider.*;
-import static util.SimpleTimeFactory.*;
+import static util.TimeFactory.*;
+import static world.factories.TrajectoryFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,7 +25,6 @@ import world.StaticObstacle;
 import world.Trajectory;
 import world.World;
 import world.WorldPerspectiveCache;
-import world.factories.TrajectoryFactory;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
@@ -33,7 +33,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class TaskPlannerTest {
 
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
-	private static final TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
+//	private static final TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 	
 	// TODO test tight plan
 
@@ -146,10 +146,10 @@ public class TaskPlannerTest {
 	@Test
 	public void testDynamicObstacles() {
 		Polygon obstacleShape = box(-5., -5., 5., 5.);
-		Trajectory obstacleTrajectory = trajFact.trajectory(
-			new double[] {30., 30.},
-			new double[] {40.,  0.},
-			new double[] { 0., 40.});
+		Trajectory obstacleTrajectory = trajectory(
+			30, 30,
+			40,  0,
+			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
 		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
 

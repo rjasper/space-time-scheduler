@@ -1,5 +1,6 @@
 package tasks.factories;
 
+import static util.TimeFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
@@ -8,7 +9,6 @@ import java.time.LocalDateTime;
 
 import tasks.TaskPlanner;
 import tasks.WorkerUnit;
-import util.LocalDateTimeFactory;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
 import world.WorldPerspectiveCache;
@@ -31,8 +31,6 @@ public class WorkerUnitFactory {
 
 	private static WorkerUnitFactory instance = null;
 
-	private LocalDateTimeFactory timeFactory;
-
 	private TaskPlanner taskPlanner = new TaskPlanner();
 
 	private Polygon shape;
@@ -43,15 +41,13 @@ public class WorkerUnitFactory {
 
 	public WorkerUnitFactory() {
 		this(
-			LocalDateTimeFactory.getInstance(),
 			DEFAULT_SHAPE,
 			DEFAULT_MAX_SPEED,
 			DEFAULT_INITIAL_SECONDS
 		);
 	}
 
-	public WorkerUnitFactory(LocalDateTimeFactory timeFact, Polygon shape, double maxSpeed, long initialSeconds) {
-		this.timeFactory = timeFact;
+	public WorkerUnitFactory(Polygon shape, double maxSpeed, long initialSeconds) {
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
@@ -73,14 +69,6 @@ public class WorkerUnitFactory {
 
 	private Polygon getShape() {
 		return shape;
-	}
-
-	private LocalDateTimeFactory getTimeFactory() {
-		return timeFactory;
-	}
-
-	public void setTimeFactory(LocalDateTimeFactory timeFact) {
-		this.timeFactory = timeFact;
 	}
 
 	private TaskPlanner getTaskPlanner() {
@@ -112,10 +100,8 @@ public class WorkerUnitFactory {
 	}
 
 	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, double t) {
-		LocalDateTimeFactory timeFact = getTimeFactory();
-
 		Point initialLocation = point(x, y);
-		LocalDateTime initialTime = timeFact.seconds(t);
+		LocalDateTime initialTime = atSecond(t);
 
 		return new WorkerUnit(shape, maxSpeed, initialLocation, initialTime);
 	}
@@ -125,11 +111,10 @@ public class WorkerUnitFactory {
 	}
 
 	public boolean addTaskWithDuration(WorkerUnit worker, double x, double y, long t, long d) {
-		LocalDateTimeFactory timeFactory = getTimeFactory();
 		TaskPlanner tp = getTaskPlanner();
 
 		Point location = point(x, y);
-		LocalDateTime time = timeFactory.second(t);
+		LocalDateTime time = atSecond(t);
 		Duration duration = Duration.ofSeconds(d);
 
 		tp.setWorkerUnit(worker);

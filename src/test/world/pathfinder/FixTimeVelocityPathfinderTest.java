@@ -1,5 +1,7 @@
 package world.pathfinder;
 
+import static util.TimeFactory.*;
+import static world.factories.TrajectoryFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -10,11 +12,9 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import util.LocalDateTimeFactory;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
-import world.factories.TrajectoryFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -24,25 +24,21 @@ public abstract class FixTimeVelocityPathfinderTest {
 	
 	@Test
 	public void test() {
-		LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
-		TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
-		
 		double maxSpeed = 1.0;
-		double[] xObst = {2.5, 2.5, 2.5, 2.5};
-		double[] yObst = {5.5, 2.5, 2.5, -0.5};
-		double[] tObst = {0., 3., 7., 10.};
 		Collection<DynamicObstacle> dynamicObstacles = Collections.singleton(
 			new DynamicObstacle(
 				box(-0.5, -0.5, 0.5, 0.5),
-				trajFact.trajectory(xObst, yObst, tObst)));
+				trajectory(
+					2.5, 2.5, 2.5,  2.5,
+					5.5, 2.5, 2.5, -0.5,
+					0.0, 3.0, 7.0, 10.0)));
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-//			points(1., 4., 4., 4., 4., 1., 1., 1.));
 			point(1., 4.),
 			point(4., 4.),
 			point(4., 1.),
 			point(1., 1.)));
-		LocalDateTime startTime = timeFact.seconds(0.);
-		LocalDateTime finishTime = timeFact.seconds(11.);
+		LocalDateTime startTime = atSecond(0);
+		LocalDateTime finishTime = atSecond(11);
 		
 		FixTimeVelocityPathfinder pf = createPathfinder();
 
@@ -58,10 +54,10 @@ public abstract class FixTimeVelocityPathfinderTest {
 		
 		SimpleTrajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
 		
-		double[] x = {1., 2., 4., 4., 3., 1.};
-		double[] y = {4., 4., 4., 1., 1., 1.};
-		double[] t = {0., 2., 13./3., 47./6., 9., 11.};
-		SimpleTrajectory expected = trajFact.trajectory(x, y, t);
+		SimpleTrajectory expected = trajectory(
+			1, 2,      4,      4, 3,  1,
+			4, 4,      4,      1, 1,  1,
+			0, 2, 13./3., 47./6., 9, 11);
 		
 		assertThat(trajectory, equalTo(expected));
 	}

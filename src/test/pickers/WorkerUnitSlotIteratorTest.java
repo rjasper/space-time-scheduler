@@ -1,5 +1,6 @@
 package pickers;
 
+import static util.TimeFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -14,14 +15,11 @@ import org.junit.Test;
 
 import tasks.WorkerUnit;
 import tasks.fixtures.WorkerUnitFixtures;
-import util.LocalDateTimeFactory;
 
 import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnitSlotIteratorTest {
 
-	private static LocalDateTimeFactory timeFact = LocalDateTimeFactory.getInstance();
-	
 	@Test
 	public void test() {
 		WorkerUnit w1 = WorkerUnitFixtures.withTwoTasks1();
@@ -30,8 +28,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.hours(3L);
-		LocalDateTime latest = timeFact.hours(8L);
+		LocalDateTime earliest = atHour(3.0);
+		LocalDateTime latest = atHour(8.0);
 		Duration duration = Duration.ofHours(3L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -48,8 +46,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.hours(3L);
-		LocalDateTime latest = timeFact.time(6L, 30L);
+		LocalDateTime earliest = atHour(3.0);
+		LocalDateTime latest = atHour(6.5);
 		Duration duration = Duration.ofHours(1L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -65,8 +63,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.hours(3L);
-		LocalDateTime latest = timeFact.time(5L, 30L);
+		LocalDateTime earliest = atHour(3.0);
+		LocalDateTime latest = atHour(5.5);
 		Duration duration = Duration.ofHours(1L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -81,8 +79,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.time(6L, 30L);
-		LocalDateTime latest = timeFact.hours(11L);
+		LocalDateTime earliest = atHour(6.5);
+		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -98,8 +96,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.time(7L, 30L);
-		LocalDateTime latest = timeFact.hours(11L);
+		LocalDateTime earliest = atHour(7.5);
+		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -114,8 +112,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.hours(3L);
-		LocalDateTime latest = timeFact.hours(11L);
+		LocalDateTime earliest = atHour(3.0);
+		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
@@ -131,8 +129,8 @@ public class WorkerUnitSlotIteratorTest {
 		Collection<WorkerUnit> workers = Collections.singleton(w);
 
 		Point location = point(0., 0.);
-		LocalDateTime earliest = timeFact.hours(3L);
-		LocalDateTime latest = timeFact.hours(11L);
+		LocalDateTime earliest = atHour(3.0);
+		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(3L);
 		
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
