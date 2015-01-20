@@ -19,8 +19,24 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * Utility class to easily distinguish the different kinds of geometries. This
+ * removes the need of manually distinguishing the type a geometry.
+ * 
+ * @author Rico
+ *
+ * @param <T>
+ *            the return type of {@link #give(Geometry)} and
+ *            {@link #take(Geometry)}.
+ */
 public abstract class GeometrySplitter<T> {
 	
+	/**
+	 * Gives an arbitrary geometry to the most appropriate take method.
+	 * 
+	 * @param geometry
+	 * @return the object returned by the chosen take method.
+	 */
 	public final T give(Geometry geometry) {
 		if (geometry instanceof Point) {
 			if (geometry instanceof ImmutablePoint)
@@ -69,70 +85,172 @@ public abstract class GeometrySplitter<T> {
 		}
 	}
 	
+	/**
+	 * Takes an arbitrary {@code Geometry}.
+	 * 
+	 * @param geometry
+	 * @return an object.
+	 */
 	protected T take(Geometry geometry) {
 		throw new UnsupportedOperationException("undefined operation");
 	}
-	
+
+	/**
+	 * Takes a {@code Point}.
+	 * 
+	 * @param point
+	 * @return an object.
+	 */
 	protected T take(Point point) {
 		return take((Geometry) point);
 	}
-	
+
+	/**
+	 * Takes a {@code LineString}.
+	 * 
+	 * @param lineString
+	 * @return an object.
+	 */
 	protected T take(LineString lineString) {
 		return take((Geometry) lineString);
 	}
-	
+
+	/**
+	 * Takes a {@code LinearRing}.
+	 * 
+	 * @param linearRing
+	 * @return an object.
+	 */
 	protected T take(LinearRing linearRing) {
 		return take((LineString) linearRing);
 	}
-	
+
+	/**
+	 * Takes a {@code Polygon}.
+	 * 
+	 * @param polygon
+	 * @return an object.
+	 */
 	protected T take(Polygon polygon) {
 		return take((Geometry) polygon);
 	}
-	
+
+	/**
+	 * Takes a {@code GeometryCollection}.
+	 * 
+	 * @param geometryCollection
+	 * @return an object.
+	 */
 	protected T take(GeometryCollection geometryCollection) {
 		return take((Geometry) geometryCollection);
 	}
-	
+
+	/**
+	 * Takes a {@code MultiPoint}.
+	 * 
+	 * @param multiPoint
+	 * @return an object.
+	 */
 	protected T take(MultiPoint multiPoint) {
 		return take((GeometryCollection) multiPoint);
 	}
-	
+
+	/**
+	 * Takes a {@code MultiLineString}.
+	 * 
+	 * @param multiLineString
+	 * @return an object.
+	 */
 	protected T take(MultiLineString multiLineString) {
 		return take((GeometryCollection) multiLineString);
 	}
-	
+
+	/**
+	 * Takes a {@code MultiPolygon}.
+	 * 
+	 * @param multiPolygon
+	 * @return an object.
+	 */
 	protected T take(MultiPolygon multiPolygon) {
 		return take((GeometryCollection) multiPolygon);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutablePoint}.
+	 * 
+	 * @param point
+	 * @return an object.
+	 */
 	protected T take(ImmutablePoint point) {
 		return take((Point) point);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableLineString}.
+	 * 
+	 * @param lineString
+	 * @return an object.
+	 */
 	protected T take(ImmutableLineString lineString) {
 		return take((LineString) lineString);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableLinearRing}.
+	 * 
+	 * @param linearRing
+	 * @return an object.
+	 */
 	protected T take(ImmutableLinearRing linearRing) {
 		return take((LinearRing) linearRing);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutablePolygon}.
+	 * 
+	 * @param polygon
+	 * @return an object.
+	 */
 	protected T take(ImmutablePolygon polygon) {
 		return take((Polygon) polygon);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableGeometryCollection}.
+	 * 
+	 * @param geometryCollection
+	 * @return an object.
+	 */
 	protected T take(ImmutableGeometryCollection geometryCollection) {
 		return take((GeometryCollection) geometryCollection);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableMultiPoint}.
+	 * 
+	 * @param multiPoint
+	 * @return an object.
+	 */
 	protected T take(ImmutableMultiPoint multiPoint) {
 		return take((MultiPoint) multiPoint);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableMultiLineString}.
+	 * 
+	 * @param multiLineString
+	 * @return an object.
+	 */
 	protected T take(ImmutableMultiLineString multiLineString) {
 		return take((MultiLineString) multiLineString);
 	}
-	
+
+	/**
+	 * Takes an {@code ImmutableMultiPolygon}.
+	 * 
+	 * @param multiPolygon
+	 * @return an object.
+	 */
 	protected T take(ImmutableMultiPolygon multiPolygon) {
 		return take((MultiPolygon) multiPolygon);
 	}
