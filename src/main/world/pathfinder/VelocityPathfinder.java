@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import static world.Trajectories.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
@@ -143,13 +144,7 @@ public abstract class VelocityPathfinder {
 	 *             if spatialPath is empty.
 	 */
 	public void setSpatialPath(SpatialPath spatialPath) {
-		Objects.requireNonNull(spatialPath);
-		
-		// TODO why can it not be empty?
-		if (spatialPath.isEmpty())
-			throw new IllegalArgumentException("cannot be empty");
-		
-		this.spatialPath = spatialPath;
+		this.spatialPath = Objects.requireNonNull(spatialPath);
 	}
 
 	/**
@@ -228,25 +223,34 @@ public abstract class VelocityPathfinder {
 	public final boolean calculate() {
 		checkParameters();
 		
-		updateFinishArc();
+		Collection<ForbiddenRegion> forbiddenRegions;
+		ArcTimePath arcTimePath;
+		boolean reachable;
 		
-		Collection<ForbiddenRegion> forbiddenRegions =
-			calculateForbiddenRegions();
-		
-		ArcTimePath arcTimePath = calculateArcTimePath(forbiddenRegions);
-		
-		boolean reachable = arcTimePath != null;
-		
-		DecomposedTrajectory trajectory = reachable
-			? buildTrajectory(arcTimePath)
-			: null;
+		if (getSpatialPath().isEmpty()) {
+			// null since never used in this case
+			forbiddenRegions = null;
+			arcTimePath = null;
 			
-		Collection<DynamicObstacle> evasions = reachable
-			? calculateEvadedObstacles(forbiddenRegions, arcTimePath)
-			: null;
+			reachable = false;
+		} else {
+			updateFinishArc();
+			forbiddenRegions = calculateForbiddenRegions();
+			arcTimePath = calculateArcTimePath(forbiddenRegions);
+			reachable = !arcTimePath.isEmpty();
+		}
 		
-		setResultTrajectory(trajectory);
-		setResultEvadedObstacles(evasions);
+		if (reachable) {
+			setResultTrajectory(
+				buildTrajectory(arcTimePath));
+			setResultEvadedObstacles(
+				calculateEvadedObstacles(forbiddenRegions, arcTimePath));
+		} else {
+			setResultTrajectory(
+				emptyDecomposedTrajectory());
+			setResultEvadedObstacles(
+				emptyList());
+		}
 		
 		return reachable;
 	}

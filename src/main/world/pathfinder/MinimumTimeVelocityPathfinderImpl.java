@@ -132,7 +132,6 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		
 		Collection<Point> finishVertices = builder.getFinishVertices();
 		
-		// TODO ugly side-effect
 		setArcTimeFinishPoints(finishVertices);
 		
 		return builder.getResultMesh();
@@ -163,7 +162,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 				return buildPath(mesh, it, cur);
 		}
 		
-		return null;
+		return new ArcTimePath();
 	}
 
 	/**

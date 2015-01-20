@@ -236,7 +236,6 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		
 		finishVertices.add(earliestFinishVertex);
 		
-		// TODO ugly side-effects
 		setEarliestFinishVertex(earliestFinishVertex);
 		setFinishVertexPairs(finishVertexPairs);
 		
