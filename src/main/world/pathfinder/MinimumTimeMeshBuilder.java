@@ -199,8 +199,6 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		}
 	}
 
-	// TODO build methods are not symmetric
-
 	/*
 	 * (non-Javadoc)
 	 * @see world.pathfinder.ArcTimeMeshBuilder#buildStartVertices()
@@ -317,45 +315,31 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		return checkVisibility(p1, p2);
 	}
 	
-	// TODO connect methods are not symmetric
-	
 	/*
 	 * (non-Javadoc)
-	 * @see world.pathfinder.ArcTimeMeshBuilder#connectStartVertices(org.jgrapht.graph.DefaultDirectedWeightedGraph)
+	 * @see world.pathfinder.ArcTimeMeshBuilder#connectVertices(org.jgrapht.graph.DefaultDirectedWeightedGraph)
 	 */
 	@Override
-	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> startVertices = getStartVertices();
-		Collection<Point> coreVertices = getCoreVertices();
+	protected void connectVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> start = getStartVertices();
+		Collection<Point> core = getCoreVertices();
+		Collection<Point> earliestFinish = singleton( getEarliestFinishVertex() );
+		Collection<VertexPair> finishPairs = getFinishVertexPairs();
 		
-		connect(graph, startVertices, coreVertices);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.pathfinder.ArcTimeMeshBuilder#connectFinishVertices(org.jgrapht.graph.DefaultDirectedWeightedGraph)
-	 */
-	@Override
-	protected void connectFinishVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<VertexPair> pairs = getFinishVertexPairs();
+		connect(graph, start, core);
+		connect(graph, start, earliestFinish);
+		connect(graph, core, core);
+		connect(graph, core, earliestFinish);
 		
-		for (VertexPair p : pairs) {
+		for (VertexPair p : finishPairs) {
 			Point origin = p.getFirst();
 			Point finish = p.getSecond();
 			
 			if (finish.equals(origin))
 				continue;
 			
-			// connect from origin to finishVertex
 			connectWithoutCheck(graph, origin, finish);
 		}
-		
-		Collection<Point> core = getCoreVertices();
-		Collection<Point> start = getStartVertices();
-		Collection<Point> finish = singleton( getEarliestFinishVertex() );
-		
-		connect(graph, core, finish);
-		connect(graph, start, finish);
 	}
 
 	/*

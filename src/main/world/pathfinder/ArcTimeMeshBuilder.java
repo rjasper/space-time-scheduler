@@ -430,14 +430,10 @@ public abstract class ArcTimeMeshBuilder {
 			.flatMap(Collection::stream)
 			.collect(Collectors.toSet());
 		
-		// add vertices to graph
 		for (Point v : vertices)
 			graph.addVertex(v);
 		
-		// connect vertices
-		connectCoreVertices(graph);
-		connectStartVertices(graph);
-		connectFinishVertices(graph);
+		connectVertices(graph);
 		
 		return graph;
 	}
@@ -484,43 +480,12 @@ public abstract class ArcTimeMeshBuilder {
 			graph.setEdgeWeight(edge, calculateWeight(from, to));
 	}
 	
-	// TODO connect*Vertices methods are not symmetric
-	
 	/**
-	 * Connects the core vertices with each other.
-	 * @param graph
-	 */
-	private void connectCoreVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> vertices = getCoreVertices();
-
-		connect(graph, vertices, vertices);
-	}
-
-	/**
-	 * Connects the start vertices with the core and the finish vertices.
+	 * Connects the vertices with each other.
 	 * 
 	 * @param graph
 	 */
-	protected void connectStartVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> startVertices = getStartVertices();
-		Collection<Point> finishVertices = getFinishVertices();
-		Collection<Point> coreVertices = getCoreVertices();
-		
-		connect(graph, startVertices, finishVertices);
-		connect(graph, startVertices, coreVertices);
-	}
-
-	/**
-	 * Connects the core vertices with the finish vertices.
-	 * 
-	 * @param graph
-	 */
-	protected void connectFinishVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
-		Collection<Point> finishVertices = getFinishVertices();
-		Collection<Point> coreVertices = getCoreVertices();
-		
-		connect(graph, coreVertices, finishVertices);
-	}
+	protected abstract void connectVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph);
 	
 	/**
 	 * <p>

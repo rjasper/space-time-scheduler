@@ -3,6 +3,9 @@ package world.pathfinder;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 import jts.geom.util.GeometriesRequire;
 
 import com.vividsolutions.jts.geom.Point;
@@ -122,6 +125,22 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 		double error = vAvr - v;
 		
 		return error*error;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.pathfinder.ArcTimeMeshBuilder#connectVertices(org.jgrapht.graph.DefaultDirectedWeightedGraph)
+	 */
+	@Override
+	protected void connectVertices(DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> graph) {
+		Collection<Point> start = getStartVertices();
+		Collection<Point> core = getCoreVertices();
+		Collection<Point> finish = getFinishVertices();
+		
+		connect(graph, start, core);
+		connect(graph, start, finish);
+		connect(graph, core, core);
+		connect(graph, core, finish);
 	}
 
 }
