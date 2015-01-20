@@ -1,4 +1,4 @@
-package world;
+package util;
 
 // TODO move to tests or replace by SimpleTimeFactory
 

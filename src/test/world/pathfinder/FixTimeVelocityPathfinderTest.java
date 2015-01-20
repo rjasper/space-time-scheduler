@@ -10,8 +10,8 @@ import java.util.Collections;
 
 import org.junit.Test;
 
+import util.LocalDateTimeFactory;
 import world.DynamicObstacle;
-import world.LocalDateTimeFactory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.factories.TrajectoryFactory;
