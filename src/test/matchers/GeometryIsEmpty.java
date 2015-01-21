@@ -9,6 +9,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeometryIsEmpty extends BaseMatcher<Geometry> {
 
+	@Factory
+	public static Matcher<Geometry> isEmpty() {
+		return new GeometryIsEmpty();
+	}
+
 	public GeometryIsEmpty() {}
 
 	@Override
@@ -25,11 +30,6 @@ public class GeometryIsEmpty extends BaseMatcher<Geometry> {
 	@Override
 	public void describeTo(Description description) {
 		description.appendText("an empty geometry");
-	}
-	
-	@Factory
-	public static Matcher<Geometry> isEmpty() {
-		return new GeometryIsEmpty();
 	}
 
 }

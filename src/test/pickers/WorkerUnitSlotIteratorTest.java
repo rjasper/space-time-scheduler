@@ -1,9 +1,9 @@
 package pickers;
 
-import static util.TimeFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static util.TimeFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

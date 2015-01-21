@@ -1,9 +1,9 @@
 package world.pathfinder;
 
-import static world.Trajectories.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static world.Trajectories.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

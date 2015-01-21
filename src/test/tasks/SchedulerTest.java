@@ -1,9 +1,9 @@
 package tasks;
 
-import static util.TimeFactory.*;
-import static util.DurationConv.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.junit.Assert.*;
+import static util.DurationConv.*;
+import static util.TimeFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;

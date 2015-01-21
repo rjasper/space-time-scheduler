@@ -1,5 +1,6 @@
 package world.pathfinder;
 
+import static java.lang.Math.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.ImmutableGeometries.*;
@@ -41,11 +42,6 @@ import com.vividsolutions.jts.operation.linemerge.LineMerger;
  * @author Rico
  */
 public class ForbiddenRegionBuilder {
-
-	/**
-	 * used to buffer masks along the spatial path
-	 */
-	private static final double BUFFER_FACTOR = 0.1;
 
 	/**
 	 * The dynamic obstacles.
@@ -741,14 +737,14 @@ public class ForbiddenRegionBuilder {
 		boolean first = spatialPathSegment.isFirst();
 		boolean last = spatialPathSegment.isLast();
 
-		// used to buffer along s direction if needed
-		Vector buffer = first || last ?
-			// BUFFER_FACTOR * (s2 - s1)
-			s2v.subtract(s1v).multiply(BUFFER_FACTOR) : null;
+//		// used to buffer along s direction if needed
+//		Vector buffer = first || last ?
+//			// BUFFER_FACTOR * (s2 - s1)
+//			s2v.subtract(s1v).multiply(BUFFER_FACTOR) : null;
 
 		// calculate point vectors
-		Vector v1 = first ? s1v.subtract(buffer) : s1v;
-		Vector v2 = last  ? s2v.add     (buffer) : s2v;
+		Vector v1 = first ? leftBuffer (s1v) : s1v;
+		Vector v2 = last  ? rightBuffer(s2v) : s2v;
 		Vector v3 = v2.subtract(vtv);
 		Vector v4 = v1.subtract(vtv);
 
@@ -949,7 +945,19 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered left side.
 	 */
 	private static double leftBuffer(double s) {
-		return (1.0-BUFFER_FACTOR) * s;
+		return s - ulp(s);
+	}
+
+	/**
+	 * Calculates the left buffer vector of the given one.
+	 * 
+	 * @param v the vector
+	 * @return the buffered left vector.
+	 */
+	private static Vector leftBuffer(Vector v) {
+		double s = v.get(0), t = v.get(1);
+		
+		return new BasicVector(new double[] {leftBuffer(s), t});
 	}
 
 	/**
@@ -959,7 +967,19 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered right side.
 	 */
 	private static double rightBuffer(double s) {
-		return (1.0+BUFFER_FACTOR) * s;
+		return s + ulp(s);
+	}
+
+	/**
+	 * Calculates the right buffer vector of the given one.
+	 * 
+	 * @param v the vector
+	 * @return the buffered right vector.
+	 */
+	private static Vector rightBuffer(Vector v) {
+		double s = v.get(0), t = v.get(1);
+		
+		return new BasicVector(new double[] {rightBuffer(s), t});
 	}
 
 	/**

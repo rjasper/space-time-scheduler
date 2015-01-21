@@ -1,9 +1,9 @@
 package tasks;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static util.TimeFactory.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static util.TimeFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;

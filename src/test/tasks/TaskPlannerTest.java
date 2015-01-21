@@ -33,7 +33,6 @@ import com.vividsolutions.jts.geom.Polygon;
 public class TaskPlannerTest {
 
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
-//	private static final TrajectoryFactory trajFact = TrajectoryFactory.getInstance();
 	
 	// TODO test tight plan
 

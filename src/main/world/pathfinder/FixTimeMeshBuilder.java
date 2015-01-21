@@ -3,10 +3,10 @@ package world.pathfinder;
 import java.util.Collection;
 import java.util.Collections;
 
+import jts.geom.util.GeometriesRequire;
+
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
-
-import jts.geom.util.GeometriesRequire;
 
 import com.vividsolutions.jts.geom.Point;
 

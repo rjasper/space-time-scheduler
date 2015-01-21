@@ -9,6 +9,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeometryIsEqual extends BaseMatcher<Geometry> {
 	
+	@Factory
+	public static Matcher<Geometry> isEqual(Geometry operand) {
+		return new GeometryIsEqual(operand);
+	}
+
 	private Geometry expected;
 	
 	public GeometryIsEqual(Geometry expected) {
@@ -29,11 +34,6 @@ public class GeometryIsEqual extends BaseMatcher<Geometry> {
 	@Override
 	public void describeTo(Description description) {
 		description.appendValue(expected);
-	}
-	
-	@Factory
-	public static Matcher<Geometry> isEqual(Geometry operand) {
-		return new GeometryIsEqual(operand);
 	}
 
 }

@@ -1,10 +1,10 @@
 package world.pathfinder;
 
-import static util.TimeFactory.*;
-import static world.factories.TrajectoryFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static util.TimeFactory.*;
+import static world.factories.TrajectoryFactory.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

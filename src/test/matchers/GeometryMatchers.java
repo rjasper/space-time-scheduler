@@ -13,5 +13,9 @@ public class GeometryMatchers {
 	public static Matcher<Geometry> isEmpty() {
 		return GeometryIsEmpty.isEmpty();
 	}
+	
+	public static Matcher<Geometry> contains(Geometry operand) {
+		return GeometryContains.contains(operand);
+	}
 
 }

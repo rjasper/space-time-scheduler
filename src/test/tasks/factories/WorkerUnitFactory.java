@@ -1,8 +1,8 @@
 package tasks.factories;
 
-import static util.TimeFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static util.TimeFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
