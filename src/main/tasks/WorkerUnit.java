@@ -2,7 +2,7 @@ package tasks;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
-import static jts.geom.immutable.ImmutableGeometries.*;
+import static world.Trajectories.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -14,8 +14,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
-import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
@@ -62,7 +62,7 @@ public class WorkerUnit {
 	/**
 	 * The initial location of the worker where it begins to 'exist'.
 	 */
-	private final Point initialLocation;
+	private final ImmutablePoint initialLocation;
 
 	/**
 	 * The initial time of the worker when it begins to 'exist'.
@@ -88,44 +88,21 @@ public class WorkerUnit {
 	/**
 	 * An unmodifiable view on {@link #obstacleSegments}.
 	 */
-	private NavigableMap<LocalDateTime, WorkerUnitObstacle> unmodifiableObstacleSegments
-		= unmodifiableNavigableMap(obstacleSegments);
+	private NavigableMap<LocalDateTime, WorkerUnitObstacle> unmodifiableObstacleSegments =
+		unmodifiableNavigableMap(obstacleSegments);
 
 	/**
 	 * Constructs a worker defining its shape, maximum velocity, initial
 	 * location and initial time.
-	 *
-	 * @param shape
-	 *            the physical shape
-	 * @param maxSpeed
-	 *            the maximum velocity
-	 * @param initialLocation
-	 *            the initial location where the worker begins to 'exist'
-	 * @param initialTime
-	 *            this initial time when the worker begins to 'exist'
-	 * @throws NullPointerException
-	 *             if any object argument is null
-	 * @throws IllegalArgumentException
-	 *             if any of the following is true:
-	 *             <ul>
-	 *             <li>the shape is empty, non-simple, or invalid</li>
-	 *             <li>the initial location is empty or invalid</li>
-	 *             <li>the maximum speed is non-finite or non-positive</li>
-	 *             </ul>
+	 * 
+	 * @param spec
+	 *            the specification used to define configure the worker.
 	 */
-	public WorkerUnit(Polygon shape, double maxSpeed, Point initialLocation, LocalDateTime initialTime) {
-		Objects.requireNonNull(initialLocation, "initialLocation");
-		Objects.requireNonNull(initialTime, "initialTime");
-		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
-		GeometriesRequire.requireValid2DPoint(initialLocation, "initialLocation");
-
-		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
-			throw new IllegalArgumentException("maximum speed is not a positive finite number");
-
-		this.shape = immutable(shape);
-		this.maxSpeed = maxSpeed;
-		this.initialLocation = immutable(initialLocation);
-		this.initialTime = initialTime;
+	public WorkerUnit(WorkerUnitSpecification spec) {
+		this.shape = spec.getShape();
+		this.maxSpeed = spec.getMaxSpeed();
+		this.initialLocation = spec.getInitialLocation();
+		this.initialTime = spec.getInitialTime();
 		this.radius = calcRadius(shape);
 
 		putInitialObstacleSegment();
@@ -187,7 +164,7 @@ public class WorkerUnit {
 	/**
 	 * @return the initial location of the worker where it begins to 'exist'.
 	 */
-	public Point getInitialLocation() {
+	public ImmutablePoint getInitialLocation() {
 		return initialLocation;
 	}
 
@@ -337,14 +314,13 @@ public class WorkerUnit {
 	/**
 	 * Calculates a trajectory from all obstacle segments merged together.
 	 *
-	 * @return the merged trajectory
+	 * @return the merged trajectory.
 	 */
 	public Trajectory calcMergedTrajectory() {
 		return obstacleSegments.values().stream()
-			.filter(o -> !(o instanceof IdlingWorkerUnitObstacle))
 			.map(DynamicObstacle::getTrajectory)
 			.reduce((u, v) -> u.merge(v))
-			.get();
+			.orElse(emptyTrajectory());
 	}
 
 	/*

@@ -1,6 +1,6 @@
 package tasks;
 
-import static common.collect.Immutables.*;
+import static common.collect.ImmutablesCollectors.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
 
@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * <p>The Scheduler manages the distribution of task to a set of
  * {@link WorkerUnit}s. A new task can be scheduled by providing a
- * {@link Specification}. The {@link #schedule(Specification)} method tries
+ * {@link TaskSpecification}. The {@link #schedule(TaskSpecification)} method tries
  * to find a realizable configuration which satisfies the specification. In
  * the successful case a task will be created and assigned to an appropriate
  * worker.</p>
@@ -58,6 +58,12 @@ public class Scheduler {
 	 * The workers managed by this scheduler.
 	 */
 	private final ImmutableList<WorkerUnit> workerPool;
+	
+	/**
+	 * The references to the workers.
+	 * @see #workerReferences
+	 */
+	private final ImmutableList<WorkerUnitReference> workerReferences;
 
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
@@ -67,18 +73,23 @@ public class Scheduler {
 	 * @param workerPool
 	 * @throws NullPointerException if world or workers is null
 	 */
-	public Scheduler(World world, Collection<WorkerUnit> workerPool) {
+	public Scheduler(World world, Collection<WorkerUnitSpecification> workerSpecs) {
 		// TODO reduce visibility to restrict access to worker units
 
 		Objects.requireNonNull(world, "world");
-		Objects.requireNonNull(workerPool, "workerPool");
+		Objects.requireNonNull(workerSpecs, "workerSpecs");
 
 		// TODO check validity of world and workerPool
 		//      (e.g. no overlapping of obstacles)
-
+		
 		this.world = world;
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-		this.workerPool = immutableAsList(workerPool);
+		this.workerPool = workerSpecs.stream()
+			.map(WorkerUnit::new)
+			.collect(toImmutableList());
+		this.workerReferences = workerPool.stream()
+			.map(WorkerUnitReference::new)
+			.collect(toImmutableList());
 	}
 
 	/**
@@ -101,6 +112,13 @@ public class Scheduler {
 	private ImmutableList<WorkerUnit> getWorkerPool() {
 		return workerPool;
 	}
+	
+	/**
+	 * @return the references to the workers.
+	 */
+	public ImmutableList<WorkerUnitReference> getWorkerReferences() {
+		return workerReferences;
+	}
 
 	/**
 	 * Tries to schedule a new task satisfying the given specification.
@@ -109,7 +127,7 @@ public class Scheduler {
 	 * @return {@code true} iff a task was scheduled. {@code false} iff no task
 	 *         could be scheduled satisfying the specification.
 	 */
-	public boolean schedule(Specification specification) {
+	public boolean schedule(TaskSpecification specification) {
 		Objects.requireNonNull(specification, "specification");
 
 		// get necessary information

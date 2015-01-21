@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 import tasks.TaskPlanner;
 import tasks.WorkerUnit;
+import tasks.WorkerUnitSpecification;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
 import world.WorldPerspectiveCache;
@@ -97,10 +98,18 @@ public class WorkerUnitFactory {
 	}
 
 	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, double t) {
+		return new WorkerUnit(createWorkerUnitSpecification(shape, maxSpeed, x, y, t));
+	}
+
+	public WorkerUnitSpecification createWorkerUnitSpecification(double x, double y) {
+		return createWorkerUnitSpecification(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
+	}
+
+	public WorkerUnitSpecification createWorkerUnitSpecification(Polygon shape, double maxSpeed, double x, double y, double t) {
 		Point initialLocation = point(x, y);
 		LocalDateTime initialTime = atSecond(t);
 
-		return new WorkerUnit(shape, maxSpeed, initialLocation, initialTime);
+		return new WorkerUnitSpecification(shape, maxSpeed, initialLocation, initialTime);
 	}
 
 	public boolean addTask(WorkerUnit worker, double x, double y, long tStart, long tEnd) {

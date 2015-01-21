@@ -8,8 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import tasks.Scheduler;
-import tasks.Specification;
-import tasks.WorkerUnit;
+import tasks.TaskSpecification;
+import tasks.WorkerUnitReference;
+import tasks.WorkerUnitSpecification;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -86,9 +87,12 @@ public final class Example {
 		// for worker
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 0, 0); // 1/1/2015 12:00 AM
 		// worker actual
-		WorkerUnit worker = new WorkerUnit(workerShape, maxSpeed, initialLocation, initialTime);
+		WorkerUnitSpecification workerSpec =
+			new WorkerUnitSpecification(workerShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
-		Scheduler scheduler = new Scheduler(world, singleton(worker));
+		Scheduler scheduler = new Scheduler(world, singleton(workerSpec));
+		
+		WorkerUnitReference workerRef = scheduler.getWorkerReferences().get(0);
 		
 		// specification
 		// for specification
@@ -103,12 +107,12 @@ public final class Example {
 		LocalDateTime latestStartTime   = LocalDateTime.of(2015, 1, 1, 0, 4, 0);
 		Duration duration = Duration.ofSeconds(2L * 60L); // 2 minutes
 		// specification actual
-		Specification spec = new Specification(locationSpace, earliestStartTime, latestStartTime, duration);
+		TaskSpecification spec = new TaskSpecification(locationSpace, earliestStartTime, latestStartTime, duration);
 		
 		boolean status = scheduler.schedule(spec);
 		
 		System.out.println(status);
-		System.out.println(worker.calcMergedTrajectory());
+		System.out.println(workerRef.calcMergedTrajectory());
 	}
 
 }

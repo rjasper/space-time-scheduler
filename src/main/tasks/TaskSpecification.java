@@ -28,7 +28,7 @@ import com.vividsolutions.jts.geom.Polygon;
  *
  * @author Rico Jasper
  */
-public class Specification {
+public class TaskSpecification {
 
 	/**
 	 * The spatial space for a valid location.
@@ -68,7 +68,7 @@ public class Specification {
 	 *             <li>the duration is negative</li>
 	 *             </ul>
 	 */
-	public Specification(
+	public TaskSpecification(
 		Polygon locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,

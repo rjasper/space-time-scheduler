@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.hamcrest.Matcher;
 
 import tasks.WorkerUnit;
+import tasks.WorkerUnitReference;
 import world.DynamicObstacle;
 import world.StaticObstacle;
 
@@ -29,6 +30,10 @@ public final class CollisionMatchers {
 	
 	public static Matcher<WorkerUnit> workerCollidesWith(WorkerUnit worker) {
 		return WorkerUnitCollidesWithWorkerUnit.workerCollidesWith(worker);
+	}
+	
+	public static Matcher<WorkerUnitReference> workerCollidesWith(WorkerUnitReference worker) {
+		return WorkerRefCollidesWithWorkerRef.workerCollidesWith(worker);
 	}
 
 	public static Matcher<DynamicObstacle> obstaclesCollideWith(DynamicObstacle obstacle) {

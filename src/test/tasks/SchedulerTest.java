@@ -9,6 +9,7 @@ import static util.TimeFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,25 +31,28 @@ public class SchedulerTest {
 	public void test() {
 		World world = WorldFixtures.twoRooms();
 
-		WorkerUnit w1 = wFact.createWorkerUnit(11., 31.);
-		WorkerUnit w2 = wFact.createWorkerUnit(25., 11.);
+		WorkerUnitSpecification ws1 = wFact.createWorkerUnitSpecification(11., 31.);
+		WorkerUnitSpecification ws2 = wFact.createWorkerUnitSpecification(25., 11.);
 
-		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
+		Collection<WorkerUnitSpecification> workerSpecs = Arrays.asList(ws1, ws2);
 
 		// top right
-		Specification s1 = new Specification(
+		TaskSpecification s1 = new TaskSpecification(
 			box(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom left
-		Specification s2 = new Specification(
+		TaskSpecification s2 = new TaskSpecification(
 			box( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom right
-		Specification s3 = new Specification(
+		TaskSpecification s3 = new TaskSpecification(
 			box(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
 		// top left
-		Specification s4 = new Specification(
+		TaskSpecification s4 = new TaskSpecification(
 			box( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
 
-		Scheduler sc = new Scheduler(world, workers);
+		Scheduler sc = new Scheduler(world, workerSpecs);
+		
+		List<WorkerUnitReference> refs = sc.getWorkerReferences();
+		WorkerUnitReference w1 = refs.get(0), w2 = refs.get(1);
 		
 		boolean status;
 
