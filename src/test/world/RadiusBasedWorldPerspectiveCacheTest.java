@@ -1,11 +1,11 @@
 package world;
 
-import static world.factories.PerspectiveCacheFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.GeometryMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static world.factories.PerspectiveCacheFactory.*;
 
 import java.util.Collection;
 import java.util.function.Supplier;

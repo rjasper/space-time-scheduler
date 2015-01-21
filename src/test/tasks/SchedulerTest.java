@@ -1,8 +1,8 @@
 package tasks;
 
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
-import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.TimeFactory.*;

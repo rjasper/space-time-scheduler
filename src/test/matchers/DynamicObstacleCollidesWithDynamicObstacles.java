@@ -12,15 +12,15 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.IntersectionMatrix;
-
 import world.ArcTimePath;
 import world.DynamicObstacle;
 import world.SpatialPath;
 import world.Trajectory;
 import world.pathfinder.ForbiddenRegion;
 import world.pathfinder.ForbiddenRegionBuilder;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.IntersectionMatrix;
 
 public class DynamicObstacleCollidesWithDynamicObstacles extends TypeSafeMatcher<DynamicObstacle> {
 	

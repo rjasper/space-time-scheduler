@@ -1,7 +1,7 @@
 package jts.geom.util;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
 import static java.util.Spliterator.*;
+import static jts.geom.immutable.ImmutableGeometries.*;
 
 import java.util.Iterator;
 import java.util.Objects;
