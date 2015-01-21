@@ -74,8 +74,6 @@ public class Scheduler {
 	 * @throws NullPointerException if world or workers is null
 	 */
 	public Scheduler(World world, Collection<WorkerUnitSpecification> workerSpecs) {
-		// TODO reduce visibility to restrict access to worker units
-
 		Objects.requireNonNull(world, "world");
 		Objects.requireNonNull(workerSpecs, "workerSpecs");
 

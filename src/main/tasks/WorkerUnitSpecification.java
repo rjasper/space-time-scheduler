@@ -12,8 +12,6 @@ import jts.geom.util.GeometriesRequire;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-// TODO move to tasks.internal
-
 /**
  * Specifies the representation of a physical worker unit in the real world.
  * This class abstracts the physical abilities of the real worker, such as its
