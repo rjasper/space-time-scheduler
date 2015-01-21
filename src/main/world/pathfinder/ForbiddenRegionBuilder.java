@@ -939,7 +939,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	/**
-	 * Calculates the left buffer value of the given arc.
+	 * Calculates the left buffered value of the given arc.
 	 * 
 	 * @param s the arc value
 	 * @return the buffered left side.
@@ -949,7 +949,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	/**
-	 * Calculates the left buffer vector of the given one.
+	 * Calculates the left buffered vector of the given one.
 	 * 
 	 * @param v the vector
 	 * @return the buffered left vector.
@@ -961,7 +961,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	/**
-	 * Calculates the right buffer value of the given arc.
+	 * Calculates the right buffered value of the given arc.
 	 * 
 	 * @param s the arc value
 	 * @return the buffered right side.
@@ -971,7 +971,7 @@ public class ForbiddenRegionBuilder {
 	}
 
 	/**
-	 * Calculates the right buffer vector of the given one.
+	 * Calculates the right buffered vector of the given one.
 	 * 
 	 * @param v the vector
 	 * @return the buffered right vector.

@@ -1,5 +1,6 @@
 package world;
 
+import static world.factories.PerspectiveCacheFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.GeometryMatchers.*;
@@ -40,7 +41,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	@Test
 	public void testCreatePerspective() {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
-		WorldPerspectiveCache cache = makeEmptyCache();
+		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);
 
@@ -51,7 +52,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	@Test
 	public void testRecallPerspective() {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
-		WorldPerspectiveCache cache = makeEmptyCache();
+		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver);
 		WorldPerspective perspective2 = cache.getPerspectiveFor(perceiver);
@@ -65,7 +66,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 		// Both perceivers have the same shape and therefore the same perspective.
 		WorkerUnit perceiver1 = wFact.createWorkerUnit( 0.0,  0.0);
 		WorkerUnit perceiver2 = wFact.createWorkerUnit(50.0, 50.0);
-		WorldPerspectiveCache cache = makeEmptyCache();
+		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver1);
 		WorldPerspective perspective2 = cache.getPerspectiveFor(perceiver2);
@@ -80,7 +81,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 		Polygon shape2 = box(-2.0, -2.0, 2.0, 2.0);
 		WorkerUnit perceiver1 = wFact.createWorkerUnit(shape1, 1.0,  0.0,  0.0, 0.0);
 		WorkerUnit perceiver2 = wFact.createWorkerUnit(shape2, 1.0, 50.0, 50.0, 0.0);
-		WorldPerspectiveCache cache = makeEmptyCache();
+		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver1);
 		WorldPerspective perspective2 = cache.getPerspectiveFor(perceiver2);
@@ -92,7 +93,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	@Test
 	public void testRemovePerspective() {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
-		WorldPerspectiveCache cache = makeEmptyCache();
+		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver);
 		cache.removePerceiver(perceiver);
@@ -107,7 +108,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
 		StaticObstacle obstacle = new StaticObstacle(
 			box(10.0, 10.0, 20.0, 20.0));
-		WorldPerspectiveCache cache = makeCacheFrom(singleton(obstacle));
+		WorldPerspectiveCache cache = perspectiveCache(singleton(obstacle));
 
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);
 
@@ -118,18 +119,6 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 		assertThat("did not buffer perspective correctly",
 			bufferedShape, is(topologicallyEqualTo(obstacle.getShape().buffer(radius))));
-	}
-
-	private WorldPerspectiveCache makeEmptyCache() {
-		return makeCacheFrom(emptyList());
-	}
-
-	private WorldPerspectiveCache makeCacheFrom(Collection<StaticObstacle> staticObstacles) {
-		World world = new World(staticObstacles, emptyList());
-		RadiusBasedWorldPerspectiveCache cache =
-			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-
-		return cache;
 	}
 
 }

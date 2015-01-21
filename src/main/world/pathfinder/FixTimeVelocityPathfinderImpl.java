@@ -143,11 +143,11 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	private ArcTimePath calculateShortestPath(
 		DefaultDirectedWeightedGraph<Point, DefaultWeightedEdge> mesh)
 	{
-		Point startPoint = getArcTimeStartPoint();
-		Point finishPoint = getArcTimeFinishPoint();
+		Point startVertex = getArcTimeStartPoint();
+		Point finishVertex = getArcTimeFinishPoint();
 		
 		DijkstraShortestPath<Point, DefaultWeightedEdge> dijkstra =
-			new DijkstraShortestPath<>(mesh, startPoint, finishPoint);
+			new DijkstraShortestPath<>(mesh, startVertex, finishVertex);
 		
 		GraphPath<Point, DefaultWeightedEdge> graphPath =
 			dijkstra.getPath();
@@ -156,15 +156,20 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		if (graphPath == null) {
 			return new ArcTimePath();
 		} else {
-			Stream<Point> sourcePoints = graphPath.getEdgeList().stream()
+			Stream<Point> sourceVertices = graphPath.getEdgeList().stream()
 				.map(mesh::getEdgeSource);
-			Stream<Point> endPoint = Stream.of(graphPath.getEndVertex());
+			Stream<Point> endVertex = Stream.of(graphPath.getEndVertex());
 			
-			ImmutableList<ImmutablePoint> points = Stream.concat(sourcePoints, endPoint)
+			ImmutableList<ImmutablePoint> vertices = Stream.concat(sourceVertices, endVertex)
 				.map(ImmutableGeometries::immutable)
 				.collect(toImmutableList());
 			
-			return new ArcTimePath(points);
+			if (vertices.size() == 1) {
+				ImmutablePoint vertex = vertices.get(0);
+				return new ArcTimePath(ImmutableList.of(vertex, vertex));
+			} else {
+				return new ArcTimePath(vertices);
+			}
 		}
 	}
 

@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.NameProvider.*;
 import static util.TimeFactory.*;
+import static world.factories.PerspectiveCacheFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.Duration;
@@ -34,7 +35,7 @@ public class TaskPlannerTest {
 
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
 	
-	// TODO test tight plan
+	// TODO test impossible tasks
 
 	private static boolean planTask(
 		TaskPlanner taskPlanner,
@@ -52,67 +53,6 @@ public class TaskPlannerTest {
 		return taskPlanner.plan();
 	}
 
-	@Test
-	public void testObsoleteEvasions() {
-		Polygon shape = box(-0.25, -0.25, 0.25, 0.25);
-		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
-		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
-
-		setNameFor(w1, "w1");
-		setNameFor(w2, "w2");
-
-		World world = new World();
-		WorldPerspectiveCache perspectiveCache =
-			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
-
-		TaskPlanner tp = new TaskPlanner();
-
-		tp.setWorkerPool(workers);
-		tp.setPerspectiveCache(perspectiveCache);
-
-		boolean status;
-
-		// w = w1, P = (3, 1), t = 10, d = 2
-		status = planTask(tp, w1,
-			point(3.0, 1.0),
-			atSecond(10.0),
-			ofSeconds(2.0));
-
-		assertThat("unable to plan task",
-			status, equalTo(true));
-		assertThat("w1 evaded someone when it shouldn't have",
-			workers, not(areEvadedBy(w1)));
-
-		// w = w2, P = (5, 3), t = 10, d = 2
-		status = planTask(tp, w2,
-			point(5.0, 3.0),
-			atSecond(10.0),
-			ofSeconds(2.0));
-
-		assertThat("unable to plan task",
-			status, equalTo(true));
-		assertThat("w1 evaded someone when it shouldn't have",
-			workers, not(areEvadedBy(w1)));
-		assertThat("w2 didn't evade w1",
-			w1, isEvadedBy(w2, atSecond(5.0)));
-		assertThat("w2 evaded someone it wasn't supposed to",
-			workers, evadedByNumTimes(w2, 1));
-
-		// w = w1, P = (1, 3), t = 4, d = 2
-		status = planTask(tp, w1,
-			point(1.0, 3.0),
-			atSecond(4.0),
-			ofSeconds(2.0));
-
-		assertThat("unable to plan task",
-			status, equalTo(true));
-		assertThat("w1 evaded someone when it shouldn't have",
-			workers, not(areEvadedBy(w1)));
-		assertThat("w2 evaded someone when it shouldn't have",
-			workers, not(areEvadedBy(w2)));
-	}
-	
 	@Test
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
@@ -173,6 +113,131 @@ public class TaskPlannerTest {
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
 			w, not(collideWith(obstacle)));
+	}
+
+	@Test
+	public void testObsoleteEvasions() {
+		Polygon shape = box(-0.25, -0.25, 0.25, 0.25);
+		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
+		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
+	
+		setNameFor(w1, "w1");
+		setNameFor(w2, "w2");
+	
+		World world = new World();
+		WorldPerspectiveCache perspectiveCache =
+			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
+		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
+	
+		TaskPlanner tp = new TaskPlanner();
+	
+		tp.setWorkerPool(workers);
+		tp.setPerspectiveCache(perspectiveCache);
+	
+		boolean status;
+	
+		// w = w1, P = (3, 1), t = 10, d = 2
+		status = planTask(tp, w1,
+			point(3.0, 1.0),
+			atSecond(10.0),
+			ofSeconds(2.0));
+	
+		assertThat("unable to plan task",
+			status, equalTo(true));
+		assertThat("w1 evaded someone when it shouldn't have",
+			workers, not(areEvadedBy(w1)));
+	
+		// w = w2, P = (5, 3), t = 10, d = 2
+		status = planTask(tp, w2,
+			point(5.0, 3.0),
+			atSecond(10.0),
+			ofSeconds(2.0));
+	
+		assertThat("unable to plan task",
+			status, equalTo(true));
+		assertThat("w1 evaded someone when it shouldn't have",
+			workers, not(areEvadedBy(w1)));
+		assertThat("w2 didn't evade w1",
+			w1, isEvadedBy(w2, atSecond(5.0)));
+		assertThat("w2 evaded someone it wasn't supposed to",
+			workers, evadedByNumTimes(w2, 1));
+	
+		// w = w1, P = (1, 3), t = 4, d = 2
+		status = planTask(tp, w1,
+			point(1.0, 3.0),
+			atSecond(4.0),
+			ofSeconds(2.0));
+	
+		assertThat("unable to plan task",
+			status, equalTo(true));
+		assertThat("w1 evaded someone when it shouldn't have",
+			workers, not(areEvadedBy(w1)));
+		assertThat("w2 evaded someone when it shouldn't have",
+			workers, not(areEvadedBy(w2)));
+	}
+	
+	@Test
+	public void testTightPlan1() {
+		WorkerUnit w = wuFact.createWorkerUnit(
+			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+		setNameFor(w, "w");
+		
+		TaskPlanner tp = new TaskPlanner();
+	
+		tp.setWorkerPool(singleton(w));
+		tp.setPerspectiveCache(emptyPerspectiveCache());
+		
+		boolean status;
+
+		// P = (3, 1), t = 2, d = 1
+		status = planTask(tp, w,
+			point(3, 1),
+			atSecond(2),
+			ofSeconds(1));
+
+		assertThat("unable to plan task",
+			status, equalTo(true));
+
+		// P = (3, 1), t = 3, d = 1
+		status = planTask(tp, w,
+			point(3, 1),
+			atSecond(3),
+			ofSeconds(1));
+
+		assertThat("unable to plan task",
+			status, equalTo(true));
+	}
+	
+	@Test
+	public void testTightPlan2() {
+		WorkerUnit w = wuFact.createWorkerUnit(
+			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+		setNameFor(w, "w");
+		
+		TaskPlanner tp = new TaskPlanner();
+	
+		tp.setWorkerPool(singleton(w));
+		tp.setPerspectiveCache(emptyPerspectiveCache());
+		
+		boolean status;
+
+		// P = (3, 1), t = 3, d = 1
+		status = planTask(tp, w,
+			point(3, 1),
+			atSecond(3),
+			ofSeconds(1));
+
+		assertThat("unable to plan task",
+			status, equalTo(true));
+
+		// P = (3, 1), t = 2, d = 1
+		status = planTask(tp, w,
+			point(3, 1),
+			atSecond(2),
+			ofSeconds(1));
+
+		assertThat("unable to plan task",
+			status, equalTo(true));
 	}
 
 }

@@ -17,6 +17,7 @@ import org.jgrapht.traverse.ClosestFirstIterator;
 import util.DurationConv;
 import world.ArcTimePath;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -192,7 +193,12 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 			cur = Graphs.getOppositeVertex(mesh, edge, cur);
 		}
 		
-		return new ArcTimePath(vertices);
+		if (vertices.size() == 1) {
+			ImmutablePoint vertex = vertices.getFirst();
+			return new ArcTimePath(ImmutableList.of(vertex, vertex));
+		} else {
+			return new ArcTimePath(vertices);
+		}
 	}
 
 }
