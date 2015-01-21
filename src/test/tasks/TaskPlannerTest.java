@@ -79,7 +79,7 @@ public class TaskPlannerTest {
 		assertThat("unable to plan task",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
-			w, not(collideWith(obstacle)));
+			w, not(workerCollidesWith(obstacle)));
 	}
 	
 	@Test
@@ -112,7 +112,7 @@ public class TaskPlannerTest {
 		assertThat("unable to plan task",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
-			w, not(collideWith(obstacle)));
+			w, not(workerCollidesWith(obstacle)));
 	}
 
 	@Test

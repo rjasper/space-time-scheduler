@@ -8,6 +8,8 @@ import jts.geom.util.GeometriesRequire;
 import world.DynamicObstacle;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Represents a forbidden region in the arc-time plane. A {@link Geometry}
@@ -39,11 +41,15 @@ public class ForbiddenRegion {
 	 * @throws NullPointerException
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if region is empty, invalid, non-simple or not 2D.
+	 *             if region is empty, invalid, non-simple, not 2D or neither
+	 *             a polygon nor a multi polygon.
 	 */
 	public ForbiddenRegion(Geometry region, DynamicObstacle dynamicObstacle) {
 		Objects.requireNonNull(dynamicObstacle, "dynamicObstacle");
 		GeometriesRequire.requireValidSimple2DGeometry(region, "region");
+		
+		if (!(region instanceof Polygon || region instanceof MultiPolygon))
+			throw new IllegalArgumentException("illegal region");
 		
 		this.region = immutable(region);
 		this.dynamicObstacle = dynamicObstacle;

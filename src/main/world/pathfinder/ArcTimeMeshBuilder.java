@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jts.geom.util.GeometryIterable;
+import jts.geom.util.GeometrySplitter;
+
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -21,6 +24,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * An {@link ArcTimeMeshBuilder} builds a directed weighted graph. The edges of
@@ -542,19 +546,27 @@ public abstract class ArcTimeMeshBuilder {
 	 */
 	protected boolean checkVisibility(Point from, Point to) {
 		Geometry regionMap = getRegionMap();
-		
-		// Relate can't handle GeometryCollections.
-		// Since regionMap could be an empty GeometryCollection this needs
-		// to be caught here.
-		if (regionMap.isEmpty())
-			return true;
-		
-		// TODO is regionMap never a pure (Immutable)GeometryCollection?
-		
 		LineString line = lineString(from, to);
-		IntersectionMatrix matrix = line.relate(regionMap);
 		
-		return !isTrue(matrix.get(INTERIOR, INTERIOR));
+		return new GeometryIterable(regionMap, true, false, false).stream()
+			.allMatch(new GeometrySplitter<Boolean>() {
+				// just to be sure, handle all primitives
+				// only polygons block the line of sight
+				@Override
+				protected Boolean take(Point point) {
+					return true;
+				}
+				@Override
+				protected Boolean take(LineString lineString) {
+					return true;
+				}
+				@Override
+				protected Boolean take(Polygon polygon) {
+					IntersectionMatrix matrix = line.relate(polygon);
+					
+					return !isTrue(matrix.get(INTERIOR, INTERIOR));
+				}
+			}::give);
 	}
 	
  	/**

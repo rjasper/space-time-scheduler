@@ -72,7 +72,7 @@ public class GeometrySequencer {
 	 */
 	public CoordinateSequence build() {
 		Coordinate[] coordinates = makeStream(geometries)
-			.map(g -> new GeometryIterator(g, true))
+			.map(g -> new GeometryIterator(g, true, true, true))
 			.flatMap(GeometrySequencer::makeStream)
 			.map(GEOMETRY_SPLITTER::give)
 			.map(s -> new CoordinateIterable(s, true))

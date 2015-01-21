@@ -1,5 +1,7 @@
 package tasks;
 
+import static matchers.CollisionMatchers.*;
+import static org.hamcrest.CoreMatchers.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.junit.Assert.*;
 import static util.DurationConv.*;
@@ -33,24 +35,50 @@ public class SchedulerTest {
 
 		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
 
-		// TODO use other specifications
-		
-//		Specification s1 = new Specification(
-//			box( 9, 29, 13, 33), atSecond(0), atSecond(60), ofSeconds(60));
+		// top right
+		Specification s1 = new Specification(
+			box(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
+		// bottom left
 		Specification s2 = new Specification(
-			box(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(60));
+			box( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
+		// bottom right
 		Specification s3 = new Specification(
-			box( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(60));
-//		Specification s4 = new Specification(
-//			box(23,  9, 27, 13), atSecond(0), atSecond(60), ofSeconds(60));
+			box(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
+		// top left
+		Specification s4 = new Specification(
+			box( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
 
 		Scheduler sc = new Scheduler(world, workers);
+		
+		boolean status;
 
-		boolean st1 = sc.schedule(s2);
-		boolean st2 = sc.schedule(s3);
-
-		assertTrue(st1);
-		assertTrue(st2);
+		status = sc.schedule(s1);
+		
+		assertThat("unable to schedule s1",
+			status, equalTo(true));
+		assertThat("collision detected",
+			w1, not(workerCollidesWith(w2)));
+		
+		status = sc.schedule(s2);
+		
+		assertThat("unable to schedule s2",
+			status, equalTo(true));
+		assertThat("collision detected",
+			w1, not(workerCollidesWith(w2)));
+		
+		status = sc.schedule(s3);
+		
+		assertThat("unable to schedule s3",
+			status, equalTo(true));
+		assertThat("collision detected",
+			w1, not(workerCollidesWith(w2)));
+		
+		status = sc.schedule(s4);
+		
+		assertThat("unable to schedule s4",
+			status, equalTo(true));
+		assertThat("collision detected",
+			w1, not(workerCollidesWith(w2)));
 	}
 
 }

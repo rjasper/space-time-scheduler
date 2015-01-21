@@ -47,7 +47,7 @@ public class DynamicObstacle implements Cloneable {
 	 *             if any of the following is true:
 	 *             <ul>
 	 *             <li>The shape is empty, non-simple, or invalid.</li>
-	 *             <li>The trajectory is empty.</li>
+	 *             <li>The trajectory is empty or instantaneous.</li>
 	 *             </ul>
 	 */
 	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
@@ -55,7 +55,7 @@ public class DynamicObstacle implements Cloneable {
 		Objects.requireNonNull(trajectory, "trajectory");
 		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
 		
-		if (trajectory.isEmpty())
+		if (trajectory.isEmpty() || trajectory.getDuration().isZero())
 			throw new IllegalArgumentException("illegal trajectory");
 
 		this.shape = immutable(shape);

@@ -194,8 +194,8 @@ public class Path implements Iterable<ImmutablePoint> {
 	 */
 	public ImmutableLineString trace() {
 		if (trace == null) {
-			List<Point> points = new LinkedList<>(getVertices());
-			Iterator<Point> it = points.iterator();
+			List<ImmutablePoint> points = new LinkedList<>(getVertices());
+			Iterator<ImmutablePoint> it = points.iterator();
 	
 			// removes points which are identical to their predecessor
 			Point last = null;
@@ -209,8 +209,15 @@ public class Path implements Iterable<ImmutablePoint> {
 			}
 	
 			// construct LineString
+			
+			if (points.size() == 1) {
+				ImmutablePoint point = points.get(0);
+				
+				trace = immutableLineString(sequence(point, point));
+			} else {
+				trace = immutableLineString(sequence(points));
+			}
 	
-			trace = immutableLineString(sequence(points));
 		}
 		
 		return trace;

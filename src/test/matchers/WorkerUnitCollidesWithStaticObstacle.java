@@ -4,7 +4,9 @@ import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
 import static com.vividsolutions.jts.geom.Location.*;
 
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 
 import tasks.WorkerUnit;
 import world.StaticObstacle;
@@ -12,7 +14,12 @@ import world.StaticObstacle;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
 
-public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeDiagnosingMatcher<WorkerUnit> {
+public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeMatcher<WorkerUnit> {
+	
+	@Factory
+	public static Matcher<WorkerUnit> workerCollideWith(StaticObstacle obstacle) {
+		return new WorkerUnitCollidesWithStaticObstacle(obstacle);
+	}
 	
 	private final StaticObstacle obstacle;
 	
@@ -28,12 +35,15 @@ public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeDiagnosingMatc
 	}
 
 	@Override
-	protected boolean matchesSafely(WorkerUnit item, Description mismatchDescription) {
+	protected void describeMismatchSafely(WorkerUnit item, Description mismatchDescription) {
 		mismatchDescription
 			.appendValue(item)
-			.appendText(" is colliding with ")
+			.appendText(" is not colliding with ")
 			.appendValue(obstacle);
-		
+	}
+
+	@Override
+	protected boolean matchesSafely(WorkerUnit item) {
 		StaticObstacle bufferedObstacle = obstacle.buffer(item.getRadius());
 		Geometry shape = bufferedObstacle.getShape();
 		Geometry trace = item.calcMergedTrajectory().getTrace();

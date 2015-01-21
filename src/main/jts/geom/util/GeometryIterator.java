@@ -24,10 +24,21 @@ public class GeometryIterator implements Iterator<Geometry> {
 	private final Stack<Iterator<Geometry>> stack = new Stack<>();
 	
 	/**
+	 * Whether to iterate over {@code GeometryCollection}s itself or only
+	 * primitive geometries.
+	 */
+	private final boolean onlyPrimitives;
+
+	/**
 	 * Whether to iterate over the components of a {@link Polygon} rather than
 	 * the {@code Polygon} itself.
 	 */
-	private final boolean overComponents;
+	private final boolean overPolygonComponents;
+	
+	/**
+	 * Whether to skip polygons. Useful if only polygon components are desired.
+	 */
+	private final boolean skipPolygons;
 	
 	/**
 	 * Constructs a new {@code GeometryIterator} for the given {@code Geometry}.
@@ -37,21 +48,29 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 * @param geometry
 	 */
 	public GeometryIterator(Geometry geometry) {
-		this(geometry, false);
+		this(geometry, false, false, false);
 	}
-
+	
 	/**
 	 * Constructs a new {@code GeometryIterator} for the given {@code Geometry}.
 	 * 
 	 * @param geometry
-	 * @param overComponents
+	 * @param onlyPrimitives
+	 *            whether to iterate over {@code GeometryCollection}s itself or
+	 *            only primitive geometries.
+	 * @param overPolygonComponents
 	 *            whether to iterate over the components of a {@link Polygon}
 	 *            rather than the {@code Polygon} itself
+	 * @param skipPolygons
+	 *            whether to skip polygons. Useful if only polygon components
+	 *            are desired.
 	 */
-	public GeometryIterator(Geometry geometry, boolean overComponents) {
+	public GeometryIterator(Geometry geometry, boolean onlyPrimitives, boolean overPolygonComponents, boolean skipPolygons) {
 		Objects.requireNonNull(geometry, "geometry");
-		
-		this.overComponents = overComponents;
+
+		this.onlyPrimitives = onlyPrimitives;
+		this.overPolygonComponents = overPolygonComponents;
+		this.skipPolygons = skipPolygons;
 		
 		stack.push(makeIterator(geometry));
 	}
@@ -62,7 +81,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 */
 	@Override
 	public boolean hasNext() {
-		return !stack.isEmpty();
+		return !stack.isEmpty() && stack.peek().hasNext();
 	}
 
 	/*
@@ -81,20 +100,26 @@ public class GeometryIterator implements Iterator<Geometry> {
 				throw new NoSuchElementException();
 			}
 			
-			Geometry geometry = it.next();
-			
 			// remove finished iterators
-			if (!it.hasNext())
+			if (!it.hasNext()) {
 				stack.pop();
+				continue;
+			}
+			
+			Geometry geometry = it.next();
 	
-			// if collection then go in "recursion" until non-collection was
-			// found
 			if (geometry instanceof GeometryCollection) {
 				stack.push(makeIterator(geometry));
-			} else if (overComponents && geometry instanceof Polygon) {
+				
+				if (!onlyPrimitives)
+					return geometry;
+			} else if (geometry instanceof Polygon) {
 				Polygon polygon = (Polygon) geometry;
 				
-				stack.push(new PolygonComponentIterator(polygon));
+				if (overPolygonComponents)
+					stack.push(makeIterator(polygon));
+				if (!skipPolygons)
+					return geometry;
 			} else {
 				return geometry;
 			}
@@ -109,6 +134,16 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 */
 	private static Iterator<Geometry> makeIterator(Geometry geometry) {
 		return new SubGeometryIterator(geometry);
+	}
+
+	/**
+	 * Makes a {@code Iterator} for a polygon iterating over its components.
+	 * 
+	 * @param polygon
+	 * @return the iterator.
+	 */
+	private static Iterator<Geometry> makeIterator(Polygon polygon) {
+		return new PolygonComponentIterator(polygon);
 	}
 	
 	/**
@@ -156,6 +191,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 		public Geometry next() {
 			return geometry.getGeometryN(i++);
 		}
+		
 	}
 	
 	/**
@@ -173,7 +209,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 		/**
 		 * Indicates if the exterior ring still has to be iterated over.
 		 */
-		private boolean exterior;
+		private boolean exterior = true;
 		
 		/**
 		 * The position of the current interior component to be iterated over.
@@ -188,7 +224,6 @@ public class GeometryIterator implements Iterator<Geometry> {
 		 */
 		public PolygonComponentIterator(Polygon polygon) {
 			this.polygon = polygon;
-			this.exterior = !polygon.isEmpty();
 		}
 
 		/*

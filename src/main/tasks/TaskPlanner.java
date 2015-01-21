@@ -692,7 +692,9 @@ public class TaskPlanner {
 
 			// create segments
 
-			segmentToTask = new MovingWorkerUnitObstacle(worker, trajToTask, task);
+			segmentToTask = trajToTask.getDuration().isZero()
+				? null
+				: new MovingWorkerUnitObstacle(worker, trajToTask, task);
 			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
 
 			if (segment instanceof MovingWorkerUnitObstacle) {
@@ -711,7 +713,9 @@ public class TaskPlanner {
 
 			// add segments to current dynamic obstacles
 
-			addWorkerUnitObstacle(segmentToTask);
+			// there might not be a preceding trajectory
+			if (segmentToTask != null)
+				addWorkerUnitObstacle(segmentToTask);
 			addWorkerUnitObstacle(segmentAtTask);
 			// there might not be a successive trajectory
 			if (segmentFromTask != null)
@@ -802,8 +806,10 @@ public class TaskPlanner {
 		@Override
 		public void commit() {
 			// register evasions
-			for (WorkerUnitObstacle e : evadedToTask)
-				e.addEvasion(segmentToTask);
+			if (segmentToTask != null) {
+				for (WorkerUnitObstacle e : evadedToTask)
+					e.addEvasion(segmentToTask);
+			}
 
 			if (segmentFromTask instanceof MovingWorkerUnitObstacle) {
 				for (WorkerUnitObstacle e : evadedFromTask)
@@ -813,7 +819,9 @@ public class TaskPlanner {
 			// add obstacle segments and task
 			WorkerUnit worker = getWorkerUnit();
 			worker.removeObstacleSegment(segment);
-			worker.addObstacleSegment(segmentToTask);
+			// there might not be a preceding trajectory
+			if (segmentToTask != null)
+				worker.addObstacleSegment(segmentToTask);
 			worker.addObstacleSegment(segmentAtTask);
 			// there might not be a successive trajectory
 			if (segmentFromTask != null)
@@ -982,6 +990,7 @@ public class TaskPlanner {
 	{
 		Collection<WorkerUnit> pool = getWorkerPool();
 
+		// TODO only use relevant segments
 		return pool.stream()
 			.flatMap(w -> w.getObstacleSegments().stream())
 			.filter(o -> !exclusions.contains(o) && !o.equals(obsoleteSegment))

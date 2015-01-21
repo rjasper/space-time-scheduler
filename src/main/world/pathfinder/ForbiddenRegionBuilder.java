@@ -84,7 +84,7 @@ public class ForbiddenRegionBuilder {
 	 *             if {@code dynamicObstacles} is {@code null} or contains
 	 *             {@code null}.
 	 */
-	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
+	public void setDynamicObstacles(Collection<? extends DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
 		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
@@ -234,7 +234,7 @@ public class ForbiddenRegionBuilder {
 
 						// if arcVelocityBase is not invertible
 						// e.g. velocity vector is parallel to arc vector or zero
-						if (transformationMatrix == null) {
+						if (transformationMatrix == null || isParallel(arcVelocityBase)) {
 							region = calcParallelCase(
 								spatialPathSegment,
 								obstacleTrajectorySegment,
@@ -255,13 +255,40 @@ public class ForbiddenRegionBuilder {
 			}
 
 			Geometry region = geometry(subregions).union();
-//			region.normalize();
 
 			if (!region.isEmpty())
 				forbiddenRegions.add(new ForbiddenRegion(region.norm(), obstacle));
 		}
 
 		setResultForbiddenRegions(forbiddenRegions);
+	}
+	
+	/**
+	 * The threshold used by {@link #isParallel(Matrix)}.
+	 */
+	private static double PARALLEL_THRESHOLD = 1e-10;
+	
+	/**
+	 * Determines whether both spanning vectors of the given base are considered
+	 * parallel. This function calculates tan(alpha) where alpha is the angle
+	 * between both vectors. {@code true} is returned if tan(alpha) is equal or
+	 * below {@link #PARALLEL_THRESHOLD}.
+	 * 
+	 * @param base
+	 * @return whether the spanning vectors are parallel.
+	 */
+	private static boolean isParallel(Matrix base) {
+		double xArc = base.get(0, 0), yArc = base.get(0, 1);
+		double xVelocity = base.get(1, 0), yVelocity = base.get(1, 1);
+		
+		double numerator = xArc * yVelocity - yArc * xVelocity;
+		
+		if (numerator == 0.0)
+			return true;
+		
+		double denominator = xArc * xVelocity + yArc * yVelocity;
+		
+		return abs(numerator / denominator) <= PARALLEL_THRESHOLD;
 	}
 
 	/**
