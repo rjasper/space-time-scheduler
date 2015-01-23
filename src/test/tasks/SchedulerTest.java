@@ -1,5 +1,6 @@
 package tasks;
 
+import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -15,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import tasks.factories.WorkerUnitFactory;
+import world.StaticObstacle;
 import world.World;
 import world.fixtures.WorldFixtures;
 
@@ -84,5 +86,28 @@ public class SchedulerTest {
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 	}
+
+	@Test
+	public void testNoLocation() {
+		StaticObstacle obstacle = new StaticObstacle(box(10, 10, 20, 20));
+		World world = new World(singletonList(obstacle), emptyList());
+		WorkerUnitSpecification ws =
+			wFact.createWorkerUnitSpecification(box(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		
+		Scheduler sc = new Scheduler(world, singleton(ws));
+		
+		TaskSpecification spec = new TaskSpecification(
+			box(12, 12, 18, 18),
+			atSecond(0),
+			atSecond(60),
+			ofSeconds(10));
+		
+		boolean status = sc.schedule(spec);
+		
+		assertThat("scheduled task when it shouldn't have",
+			status, equalTo(false));
+	}
+	
+	// TODO all busy
 
 }

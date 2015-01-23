@@ -1,8 +1,12 @@
 package world.pathfinder;
 
+import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static util.DurationConv.*;
 import static util.TimeFactory.*;
+import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.Duration;
@@ -63,6 +67,74 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			0, 2, 4);
 		
 		assertEquals(expected, trajectory);
+	}
+	
+	@Test
+	public void testInsufficientTime() {
+		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		
+		pf.setSpatialPath       ( spatialPath(0, 0, 10, 0) );
+		pf.setDynamicObstacles  ( emptyList()              );
+		pf.setMaxSpeed          ( 1.0                      );
+		pf.setStartTime         ( atSecond(0)              );
+		pf.setEarliestFinishTime( atSecond(5)              );
+		pf.setLatestFinishTime  ( atSecond(6)              );
+		pf.setBufferDuration    ( ofSeconds(0)             );
+		
+		boolean status = pf.calculate();
+
+		assertThat("path found when it shouldn't",
+			status, equalTo(false));
+	}
+	
+	@Test
+	public void testViolateBufferDuration() {
+		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		
+		DynamicObstacle obstacle = new DynamicObstacle(
+			box(-1, -1, 1, 1),
+			trajectory(
+				 5,  5,
+				-2,  2,
+				10, 15));
+		
+		pf.setSpatialPath       ( spatialPath(0, 0, 5, 0) );
+		pf.setDynamicObstacles  ( singletonList(obstacle) );
+		pf.setMaxSpeed          ( 1.0                     );
+		pf.setStartTime         ( atSecond(0)             );
+		pf.setEarliestFinishTime( atSecond(10)            );
+		pf.setLatestFinishTime  ( atSecond(10)            );
+		pf.setBufferDuration    ( ofSeconds(10)           );
+		
+		boolean status = pf.calculate();
+
+		assertThat("path found when it shouldn't",
+			status, equalTo(false));
+	}
+	
+	@Test
+	public void testTightBufferDuration() {
+		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		
+		DynamicObstacle obstacle = new DynamicObstacle(
+			box(-1, -1, 1, 1),
+			trajectory(
+				 5,  5,
+				-2,  2,
+				10, 15));
+		
+		pf.setSpatialPath       ( spatialPath(0, 0, 5, 0) );
+		pf.setDynamicObstacles  ( singletonList(obstacle) );
+		pf.setMaxSpeed          ( 1.0                     );
+		pf.setStartTime         ( atSecond(0)             );
+		pf.setEarliestFinishTime( atSecond(10)            );
+		pf.setLatestFinishTime  ( atSecond(10)            );
+		pf.setBufferDuration    ( ofSeconds(1.25)         );
+		
+		boolean status = pf.calculate();
+
+		assertThat("no path found",
+			status, equalTo(true));
 	}
 
 }

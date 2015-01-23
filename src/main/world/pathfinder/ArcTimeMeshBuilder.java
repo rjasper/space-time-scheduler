@@ -223,9 +223,6 @@ public abstract class ArcTimeMeshBuilder {
 	 *             if minTime is not finite.
 	 */
 	private void setMinTime(double minTime) {
-		if (!Double.isFinite(minTime))
-			throw new IllegalArgumentException("minTime is not finite");
-		
 		this.minTime = minTime;
 	}
 
@@ -243,9 +240,6 @@ public abstract class ArcTimeMeshBuilder {
 	 * @throws IllegalArgumentException if maxTime is not finite
 	 */
 	private void setMaxTime(double maxTime) {
-		if (!Double.isFinite(maxTime))
-			throw new IllegalArgumentException("maxTime is not finite");
-		
 		this.maxTime = maxTime;
 	}
 

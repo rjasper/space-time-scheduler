@@ -57,6 +57,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		return pathFinder;
 	}
 
+	// TODO cannot handle polygon with holes
 	/*
 	 * (non-Javadoc)
 	 * @see world.pathfinder.SpatialPathfinder#setStaticObstacles(java.util.Collection)
@@ -163,6 +164,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 
 		PathData pathData = pf.calc(startPoint, finishPoint, maxDistance, nodeConnector, obstacles);
 
+		// if path finder couldn't find a path
 		if (pathData.isError())
 			return new SpatialPath();
 

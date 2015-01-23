@@ -148,6 +148,9 @@ public class Scheduler {
 
 		// iterate over possible locations
 
+		// TODO check if location space is not empty
+		// TODO prefilter the workers who have time without considering their location
+
 		Iterable<Point> locations = new IteratorIterable<>(
 			new LocationIterator(locationSpace, MAX_LOCATION_PICKS));
 

@@ -234,7 +234,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 			.map(VertexPair::getSecond)
 			.collect(Collectors.toList());
 		
-		finishVertices.add(earliestFinishVertex);
+		if (checkBuffer(earliestFinishVertex))
+			finishVertices.add(earliestFinishVertex);
 		
 		setEarliestFinishVertex(earliestFinishVertex);
 		setFinishVertexPairs(finishVertexPairs);

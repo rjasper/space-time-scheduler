@@ -1,9 +1,11 @@
 package world.pathfinder;
 
+import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.TimeFactory.*;
+import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.LocalDateTime;
@@ -62,5 +64,20 @@ public abstract class FixTimeVelocityPathfinderTest {
 		assertThat(trajectory, equalTo(expected));
 	}
 	
+	@Test
+	public void testInsufficientTime() {
+		FixTimeVelocityPathfinder pf = createPathfinder();
+		
+		pf.setSpatialPath     ( spatialPath(0, 0, 10, 0) );
+		pf.setDynamicObstacles( emptyList()              );
+		pf.setMaxSpeed        ( 1.0                      );
+		pf.setStartTime       ( atSecond(0)              );
+		pf.setFinishTime      ( atSecond(5)              );
+		
+		boolean status = pf.calculate();
+
+		assertThat("path found when it shouldn't",
+			status, equalTo(false));
+	}
 
 }

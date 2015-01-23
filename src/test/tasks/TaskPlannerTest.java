@@ -35,8 +35,6 @@ public class TaskPlannerTest {
 
 	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
 	
-	// TODO test impossible tasks
-
 	private static boolean planTask(
 		TaskPlanner taskPlanner,
 		WorkerUnit worker,

@@ -304,6 +304,9 @@ public class LocationIterator implements Iterator<Point> {
 		}
 
 		Envelope envelope = queue.poll();
+		
+		if (envelope.isNull())
+			return null;
 
 		return envelope;
 	}
