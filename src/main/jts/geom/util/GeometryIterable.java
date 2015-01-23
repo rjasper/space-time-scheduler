@@ -15,7 +15,6 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFilter;
 import com.vividsolutions.jts.geom.Polygon;
 
-// TODO implement test
 /**
  * Provides a {@link GeometryIterator} and {@link Spliterator} for the
  * encapsulated {@link Geometry}.
@@ -137,9 +136,10 @@ public class GeometryIterable implements Iterable<Geometry> {
 		 * @see com.vividsolutions.jts.geom.GeometryFilter#filter(com.vividsolutions.jts.geom.Geometry)
 		 */
 		@Override
-		public void filter(Geometry geom) {
-			if (geometry instanceof GeometryCollection && !onlyPrimitives) {
-				++counter;
+		public void filter(Geometry geometry) {
+			if (geometry instanceof GeometryCollection) {
+				if (!onlyPrimitives)
+					++counter;
 			} else if (geometry instanceof Polygon) {
 				Polygon polygon = (Polygon) geometry;
 				

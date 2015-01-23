@@ -1,6 +1,6 @@
 package pickers;
 
-import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ import com.vividsolutions.jts.util.GeometricShapeFactory;
  * An iterator that extracts points from a Geometry. The iterator makes use of
  * JTS' {@link Geometry#getInteriorPoint()} method which more or less lies
  * in the center of the geometry. To extract different points the iterator masks
- * the geometry to change the scope of the extracted point. Those mask will
+ * the geometry to change the scope of the extracted point. Those masks will
  * get smaller and smaller to provide a sufficiently equal distribution of
  * points while extracting.
  *
@@ -60,6 +60,9 @@ public class LocationIterator implements Iterator<Point> {
 	 */
 	private Point nextPoint;
 
+	/**
+	 * Used to make polygons from envelopes.
+	 */
 	private GeometricShapeFactory shapeFactory =
 		new GeometricShapeFactory(StaticGeometryBuilder.getFactoryInstance());
 
@@ -69,7 +72,14 @@ public class LocationIterator implements Iterator<Point> {
 	private static final Comparator<Envelope> envelopePriorityComparator =
 		(o1, o2) -> Double.compare(o1.getArea(), o2.getArea());
 
+	/**
+	 * Maximum number of envelopes allowed in the recycling queue.
+	 */
 	private static final int MAX_TRASH = 30;
+	
+	/**
+	 * Number of elements in recycling after dumping.
+	 */
 	private static final int TRASH_AFTER_DUMP = 20;
 
 	/**
@@ -316,7 +326,6 @@ public class LocationIterator implements Iterator<Point> {
 	 * using this envelope mask will determine the split location.
 	 */
 	private void recycle() {
-		Queue<Envelope> queue = getQueue();
 		Queue<PointEnvelopePair> recycling = getRecycling();
 
 		if (recycling.isEmpty())
@@ -326,33 +335,51 @@ public class LocationIterator implements Iterator<Point> {
 		Envelope envelope = pair.getEnvelope();
 		Point point = pair.getPoint();
 
-		Envelope[] sections = devideEnvelope(envelope, point);
-
-		for (Envelope s : sections)
-			queue.add(s);
+		devideEnvelope(envelope, point);
 	}
 
 	/**
-	 * Creates four new envelops by splitting the old one vertically and
+	 * Creates four new envelopes by splitting the old one vertically and
 	 * horizontally where the given point lies at the crossing of both cuts.
+	 * Adds the new envelopes to the queue.
 	 *
 	 * @param envelope the envelope to be devided
 	 * @param point
 	 *
 	 * @return an array of four new envelopes
 	 */
-	private Envelope[] devideEnvelope(Envelope envelope, Point point) {
+	private void devideEnvelope(Envelope envelope, Point point) {
 		double x1 = envelope.getMinX();
 		double x2 = point.getX();
 		double x3 = envelope.getMaxX();
 		double y1 = envelope.getMinY();
 		double y2 = point.getY();
 		double y3 = envelope.getMaxY();
+		
+		double ulpX = Math.ulp(x2);
+		double ulpY = Math.ulp(y2);
+		
+		// displace cuts slightly to not include the point (x2, y2)
+		
+		addEnvelope(x1     , x2-ulpX, y1     , y2+ulpY);
+		addEnvelope(x2-ulpX, x3     , y1     , y2-ulpY);
+		addEnvelope(x1     , x2+ulpX, y2+ulpY, y3     );
+		addEnvelope(x2+ulpX, x3     , y2-ulpY, y3     );
 
-		return new Envelope[] {
-			new Envelope(x1, x2, y1, y2), new Envelope(x2, x3, y1, y2),
-			new Envelope(x1, x2, y2, y3), new Envelope(x2, x3, y2, y3)
-		};
+	}
+	
+	/**
+	 * Adds the envelope to the queue if the given limits produce a non-null
+	 * envelope.
+	 * 
+	 * @param minX
+	 * @param maxX
+	 * @param minY
+	 * @param maxY
+	 */
+	private void addEnvelope(double minX, double maxX, double minY, double maxY) {
+		if (minX <= maxX && minY <= maxY)
+			getQueue().add(new Envelope(minX, maxX, minY, maxY));
 	}
 
 	/**
@@ -389,10 +416,12 @@ public class LocationIterator implements Iterator<Point> {
 	 * The point is the one extracted from the sub space masked by the envelope.
 	 */
 	private static class PointEnvelopePair implements Comparable<PointEnvelopePair> {
+		
 		/**
 		 * The point extracted from the sub space.
 		 */
 		private Point point;
+		
 		/**
 		 * The envelope used to mask the sub space.
 		 */
@@ -431,6 +460,10 @@ public class LocationIterator implements Iterator<Point> {
 			return "[point=" + point + ", envelope=" + envelope + "]";
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Comparable#compareTo(java.lang.Object)
+		 */
 		@Override
 		public int compareTo(PointEnvelopePair o) {
 			return envelopePriorityComparator.compare(envelope, o.envelope);

@@ -33,7 +33,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class TaskPlannerTest {
 
-	private static final WorkerUnitFactory wuFact = WorkerUnitFactory.getInstance();
+	private static final WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
 	
 	private static boolean planTask(
 		TaskPlanner taskPlanner,
@@ -55,7 +55,7 @@ public class TaskPlannerTest {
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
 			box(30., 10., 40., 40.));
-		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -88,7 +88,7 @@ public class TaskPlannerTest {
 			40,  0,
 			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
-		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -116,8 +116,8 @@ public class TaskPlannerTest {
 	@Test
 	public void testObsoleteEvasions() {
 		Polygon shape = box(-0.25, -0.25, 0.25, 0.25);
-		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
-		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
+		WorkerUnit w1 = wFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
+		WorkerUnit w2 = wFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
 	
 		setNameFor(w1, "w1");
 		setNameFor(w2, "w2");
@@ -175,8 +175,27 @@ public class TaskPlannerTest {
 	}
 	
 	@Test
-	public void testTightPlan1() {
-		WorkerUnit w = wuFact.createWorkerUnit(
+	public void testTightTask1() {
+		WorkerUnit w = wFact.createWorkerUnit(
+			box(-1, -1, 1, 1), 1.0, 0, 0, 0);
+	
+		TaskPlanner tp = new TaskPlanner();
+	
+		tp.setWorkerPool(singleton(w));
+		tp.setPerspectiveCache(emptyPerspectiveCache());
+		
+		boolean status = planTask(tp, w,
+			point(0, 0),
+			atSecond(0),
+			ofSeconds(10));
+		
+		assertThat("unable to schedule tight task",
+			status, equalTo(true));
+	}
+
+	@Test
+	public void testTightPlan2() {
+		WorkerUnit w = wFact.createWorkerUnit(
 			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		setNameFor(w, "w");
 		
@@ -207,8 +226,8 @@ public class TaskPlannerTest {
 	}
 	
 	@Test
-	public void testTightPlan2() {
-		WorkerUnit w = wuFact.createWorkerUnit(
+	public void testTightPlan3() {
+		WorkerUnit w = wFact.createWorkerUnit(
 			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		setNameFor(w, "w");
 		

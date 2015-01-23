@@ -289,7 +289,8 @@ public class WorkerUnit {
 			throw new IllegalArgumentException("from is after to");
 
 		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = obstacleSegments.lowerEntry(from);
-		Collection<WorkerUnitObstacle> segmentsSubSet = obstacleSegments.subMap(from, to).values();
+		Collection<WorkerUnitObstacle> segmentsSubSet =
+			obstacleSegments.subMap(from, true, to, true).values();
 
 		// first segment might not exist
 		Stream<WorkerUnitObstacle> first =
