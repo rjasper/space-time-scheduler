@@ -28,7 +28,7 @@ public class WorkerRefCollidesWithWorkerRef
 	}
 	
 	private static DynamicObstacle makeObstacle(WorkerUnitReference workerRef) {
-		return new DynamicObstacle(workerRef.getShape(), workerRef.calcMergedTrajectory());
+		return new DynamicObstacle(workerRef.getShape(), workerRef.calcTrajectory());
 	}
 
 	@Override

@@ -112,7 +112,7 @@ public final class Example {
 		boolean status = scheduler.schedule(spec);
 		
 		System.out.println(status);
-		System.out.println(workerRef.calcMergedTrajectory());
+		System.out.println(workerRef.calcTrajectory());
 	}
 
 }
