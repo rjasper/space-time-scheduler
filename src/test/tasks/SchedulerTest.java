@@ -12,7 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.BeforeClass;
+import jts.geom.immutable.ImmutablePolygon;
+
 import org.junit.Test;
 
 import tasks.factories.WorkerUnitFactory;
@@ -26,20 +27,72 @@ public class SchedulerTest {
 
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
 
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		wFact.setShape(immutableBox(-0.5, -0.5, 0.5, 0.5));
+	@Test
+	public void testNoLocation() {
+		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
+		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
+		WorkerUnitSpecification ws =
+			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		
+		Scheduler sc = new Scheduler(world, singleton(ws));
+		
+		TaskSpecification spec = new TaskSpecification(
+			immutableBox(12, 12, 18, 18),
+			atSecond(0),
+			atSecond(60),
+			ofSeconds(10));
+		
+		boolean status = sc.schedule(spec);
+		
+		assertThat("scheduled task when it shouldn't have",
+			status, equalTo(false));
+	}
+	
+	@Test
+	public void testAllBusy() {
+		WorkerUnitSpecification ws =
+			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		
+		Scheduler sc = new Scheduler(new World(), singleton(ws));
+		
+		TaskSpecification ts1 = new TaskSpecification(
+			immutableBox(-1, -1, 1, 1),
+			atSecond(0),
+			atSecond(10),
+			ofSeconds(60));
+		
+		boolean status;
+		
+		status = sc.schedule(ts1);
+		
+		assertThat("unable to schedule task",
+			status, equalTo(status));
+		
+		TaskSpecification ts2 = new TaskSpecification(
+			immutableBox(-1, -1, 1, 1),
+			atSecond(20),
+			atSecond(30),
+			ofSeconds(10));
+		
+		status = sc.schedule(ts2);
+		
+		assertThat("scheduled task when it shouldn't have",
+			status, equalTo(false));
 	}
 
 	@Test
-	public void test() {
+	public void testComplexTaskSet() {
 		World world = WorldFixtures.twoRooms();
-
-		WorkerUnitSpecification ws1 = wFact.createWorkerUnitSpecification(11., 31.);
-		WorkerUnitSpecification ws2 = wFact.createWorkerUnitSpecification(25., 11.);
-
+	
+		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
+		
+		WorkerUnitSpecification ws1 =
+			wFact.createWorkerUnitSpecification(shape, 1.0, 11, 31, 0);
+		WorkerUnitSpecification ws2 =
+			wFact.createWorkerUnitSpecification(shape, 1.0, 25, 11, 0);
+	
 		Collection<WorkerUnitSpecification> workerSpecs = Arrays.asList(ws1, ws2);
-
+	
 		// top right
 		TaskSpecification s1 = new TaskSpecification(
 			immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
@@ -52,14 +105,13 @@ public class SchedulerTest {
 		// top left
 		TaskSpecification s4 = new TaskSpecification(
 			immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
-
 		Scheduler sc = new Scheduler(world, workerSpecs);
 		
 		List<WorkerUnitReference> refs = sc.getWorkerReferences();
 		WorkerUnitReference w1 = refs.get(0), w2 = refs.get(1);
 		
 		boolean status;
-
+	
 		status = sc.schedule(s1);
 		
 		assertThat("unable to schedule s1",
@@ -88,28 +140,5 @@ public class SchedulerTest {
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 	}
-
-	@Test
-	public void testNoLocation() {
-		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
-		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
-		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
-		
-		Scheduler sc = new Scheduler(world, singleton(ws));
-		
-		TaskSpecification spec = new TaskSpecification(
-			immutableBox(12, 12, 18, 18),
-			atSecond(0),
-			atSecond(60),
-			ofSeconds(10));
-		
-		boolean status = sc.schedule(spec);
-		
-		assertThat("scheduled task when it shouldn't have",
-			status, equalTo(false));
-	}
-	
-	// TODO all busy
 
 }

@@ -62,7 +62,7 @@ public class TaskSpecification {
 	 *             <ul>
 	 *             <li>the locationSpace is empty, non-simple, or invalid</li>
 	 *             <li>the earliestStartTime is after the latestStartTime</li>
-	 *             <li>the duration is negative</li>
+	 *             <li>the duration is negative or zero</li>
 	 *             </ul>
 	 */
 	public TaskSpecification(
@@ -78,8 +78,8 @@ public class TaskSpecification {
 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
-		if (duration.isNegative())
-			throw new IllegalArgumentException("duration is negative");
+		if (duration.isNegative() || duration.isZero())
+			throw new IllegalArgumentException("illegal duration");
 
 		this.locationSpace = locationSpace;
 		this.earliestStartTime = earliestStartTime;

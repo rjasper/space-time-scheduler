@@ -280,9 +280,16 @@ public class TaskPlanner {
 	 * Sets the duration of the {@link Task task} to be planned.
 	 *
 	 * @param duration
+	 * @throws IllegalArgumentException
+	 *             if duration is negative or zero.
 	 */
 	public void setDuration(Duration duration) {
-		this.duration = Objects.requireNonNull(duration, "duration");
+		Objects.requireNonNull(duration, "duration");
+		
+		if (duration.isNegative() || duration.isZero())
+			throw new IllegalArgumentException("illegal duration");
+		
+		this.duration = duration;
 	}
 
 	/**
@@ -694,18 +701,16 @@ public class TaskPlanner {
 
 			// create segments
 
-			segmentToTask = trajToTask.getDuration().isZero()
-				? null
-				: new MovingWorkerUnitObstacle(worker, trajToTask, task);
+			segmentToTask = trajToTask.getDuration().isZero() ?
+				null : new MovingWorkerUnitObstacle(worker, trajToTask, task);
 			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
 
 			if (segment instanceof MovingWorkerUnitObstacle) {
 				Task nextTask = ((MovingWorkerUnitObstacle) segment).getGoal();
 				
 				// don't introduce trajectories without duration
-				segmentFromTask = trajFromTask.getDuration().isZero()
-					? null
-					: new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
+				segmentFromTask = trajFromTask.getDuration().isZero() ?
+					null : new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
 			} else if (segment instanceof IdlingWorkerUnitObstacle) {
 				LocalDateTime taskFinishTime = task.getFinishTime();
 				segmentFromTask = new IdlingWorkerUnitObstacle(worker, taskLocation, taskFinishTime);
@@ -715,11 +720,9 @@ public class TaskPlanner {
 
 			// add segments to current dynamic obstacles
 
-			// there might not be a preceding trajectory
 			if (segmentToTask != null)
 				addWorkerUnitObstacle(segmentToTask);
 			addWorkerUnitObstacle(segmentAtTask);
-			// there might not be a successive trajectory
 			if (segmentFromTask != null)
 				addWorkerUnitObstacle(segmentFromTask);
 
@@ -821,11 +824,9 @@ public class TaskPlanner {
 			// add obstacle segments and task
 			WorkerUnit worker = getWorkerUnit();
 			worker.removeObstacleSegment(segment);
-			// there might not be a preceding trajectory
 			if (segmentToTask != null)
 				worker.addObstacleSegment(segmentToTask);
 			worker.addObstacleSegment(segmentAtTask);
-			// there might not be a successive trajectory
 			if (segmentFromTask != null)
 				worker.addObstacleSegment(segmentFromTask);
 			worker.addTask(task);

@@ -1,6 +1,7 @@
 package jts.geom.util;
 
-import java.util.EmptyStackException;
+import static java.util.Collections.singleton;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -10,7 +11,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.Polygon;
 
-// TODO implement test
 /**
  * Iterates over the contained geometries of a geometry.
  * 
@@ -39,6 +39,11 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 * Whether to skip polygons. Useful if only polygon components are desired.
 	 */
 	private final boolean skipPolygons;
+	
+	/**
+	 * The next geometry to be yielded.
+	 */
+	private Geometry next = null;
 	
 	/**
 	 * Constructs a new {@code GeometryIterator} for the given {@code Geometry}.
@@ -72,7 +77,8 @@ public class GeometryIterator implements Iterator<Geometry> {
 		this.overPolygonComponents = overPolygonComponents;
 		this.skipPolygons = skipPolygons;
 		
-		stack.push(makeIterator(geometry));
+		stack.push(singleton(geometry).iterator());
+		next = prepareNext();
 	}
 
 	/*
@@ -81,7 +87,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 */
 	@Override
 	public boolean hasNext() {
-		return !stack.isEmpty() && stack.peek().hasNext();
+		return next != null;
 	}
 
 	/*
@@ -90,15 +96,25 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 */
 	@Override
 	public Geometry next() {
+		if (next == null)
+			throw new NoSuchElementException();
+		
+		Geometry current = next;
+		next = prepareNext();
+		
+		return current;
+	}
+	
+	/**
+	 * @return the next geometry to be yielded by {@link #next()}.
+	 */
+	private Geometry prepareNext() {
 		// breaks by returning a non geometry collection
 		while (true) {
-			Iterator<Geometry> it;
-			
-			try {
-				it = stack.peek();
-			} catch (EmptyStackException e) {
-				throw new NoSuchElementException();
-			}
+			if (stack.isEmpty())
+				return null;
+
+			Iterator<Geometry> it = stack.peek();
 			
 			// remove finished iterators
 			if (!it.hasNext()) {
@@ -109,7 +125,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 			Geometry geometry = it.next();
 	
 			if (geometry instanceof GeometryCollection) {
-				stack.push(makeIterator(geometry));
+				stack.push(new SubGeometryIterator(geometry));
 				
 				if (!onlyPrimitives)
 					return geometry;
@@ -117,33 +133,13 @@ public class GeometryIterator implements Iterator<Geometry> {
 				Polygon polygon = (Polygon) geometry;
 				
 				if (overPolygonComponents)
-					stack.push(makeIterator(polygon));
+					stack.push(new PolygonComponentIterator(polygon));
 				if (!skipPolygons)
 					return geometry;
 			} else {
 				return geometry;
 			}
 		}
-	}
-	
-	/**
-	 * Makes a non-recursive {@code Iterator} for a geometry.
-	 * 
-	 * @param geometry
-	 * @return the iterator.
-	 */
-	private static Iterator<Geometry> makeIterator(Geometry geometry) {
-		return new SubGeometryIterator(geometry);
-	}
-
-	/**
-	 * Makes a {@code Iterator} for a polygon iterating over its components.
-	 * 
-	 * @param polygon
-	 * @return the iterator.
-	 */
-	private static Iterator<Geometry> makeIterator(Polygon polygon) {
-		return new PolygonComponentIterator(polygon);
 	}
 	
 	/**
