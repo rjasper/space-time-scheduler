@@ -12,6 +12,8 @@ import static world.factories.TrajectoryFactory.*;
 import java.util.Collection;
 import java.util.Collections;
 
+import jts.geom.immutable.ImmutablePolygon;
+
 import org.junit.Test;
 
 import util.TimeFactory;
@@ -21,7 +23,6 @@ import world.Trajectory;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class ForbiddenRegionBuilderTest {
 	
@@ -43,9 +44,9 @@ public class ForbiddenRegionBuilderTest {
 	@Test
 	public void testStationaryCase() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
-			point(2, 3), point(2, 3)));
+			immutablePoint(2, 3), immutablePoint(2, 3)));
 		DynamicObstacle obstacle = new DynamicObstacle(
-			box(-1, -1, 1, 1),
+			immutableBox(-1, -1, 1, 1),
 			trajectory(
 				2, 2,
 				5, 1,
@@ -65,12 +66,12 @@ public class ForbiddenRegionBuilderTest {
 	@Test
 	public void testParallelCase() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
-			point(0., 4.), point(10., 4.)));
+			immutablePoint(0., 4.), immutablePoint(10., 4.)));
 		Trajectory trajectory = trajectory(
 			6, 6,
 			4, 4,
 			0, 1);
-		Polygon shape = polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
+		ImmutablePolygon shape = immutablePolygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 	
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -86,7 +87,7 @@ public class ForbiddenRegionBuilderTest {
 	
 		ForbiddenRegion region = regions.iterator().next();
 	
-		Geometry expected = polygon(
+		Geometry expected = immutablePolygon(
 			4., 0.,
 			4., 1.,
 			8., 1.,
@@ -99,12 +100,12 @@ public class ForbiddenRegionBuilderTest {
 	@Test
 	public void testRegularCase() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
-			point(2., 2.), point(8., 8.)));
+			immutablePoint(2., 2.), immutablePoint(8., 8.)));
 		Trajectory trajectory = trajectory(
 			3, 7,
 			7, 3,
 			0, 4);
-		Polygon shape = polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
+		ImmutablePolygon shape = immutablePolygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -121,7 +122,7 @@ public class ForbiddenRegionBuilderTest {
 		ForbiddenRegion region = regions.iterator().next();
 
 		double sqrt2 = Math.sqrt(2.);
-		Geometry expected = polygon(
+		Geometry expected = immutablePolygon(
 			3.*sqrt2, 1.,
 			2.*sqrt2, 2.,
 			3.*sqrt2, 3.,
@@ -134,12 +135,12 @@ public class ForbiddenRegionBuilderTest {
 	@Test
 	public void testPathSplit() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
-			point(2., 4.), point(6., 8.), point(10., 4.)));
+			immutablePoint(2., 4.), immutablePoint(6., 8.), immutablePoint(10., 4.)));
 		Trajectory trajectory = trajectory(
 			 6, 6,
 			12, 2,
 			 0, 5);
-		Polygon shape = polygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
+		ImmutablePolygon shape = immutablePolygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -156,7 +157,7 @@ public class ForbiddenRegionBuilderTest {
 		ForbiddenRegion region = regions.iterator().next();
 
 		double sqrt2 = Math.sqrt(2.);
-		Geometry expected = polygon(
+		Geometry expected = immutablePolygon(
 			2.*sqrt2, 2.,
 			2.*sqrt2, 4.,
 			4.*sqrt2, 3.,
@@ -171,12 +172,12 @@ public class ForbiddenRegionBuilderTest {
 	@Test
 	public void testTrajectorySplit() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
-			point(2., 6.), point(12., 6.)));
+			immutablePoint(2., 6.), immutablePoint(12., 6.)));
 		Trajectory trajectory = trajectory(
 			3, 9, 9,
 			3, 9, 3,
 			0, 3, 6);
-		Polygon shape = polygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
+		ImmutablePolygon shape = immutablePolygon(-1., -1., 1., -1., 1., 1., -1., 1., -1., -1.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();

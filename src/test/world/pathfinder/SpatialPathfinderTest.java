@@ -45,7 +45,7 @@ public abstract class SpatialPathfinderTest {
 	@Test
 	public void testPolygonHolesPositive() {
 		StaticObstacle obstacle = new StaticObstacle(
-			polygon(
+			immutablePolygon(
 				linearRing(1, 1, 6, 1, 6, 5, 1, 5, 1, 1),
 				linearRing(2, 2, 5, 2, 5, 4, 2, 4, 2, 2)));
 		
@@ -61,8 +61,11 @@ public abstract class SpatialPathfinderTest {
 	
 	@Test
 	public void testPolygonHolesNegative() {
+		// FIXME: This test fails since the StraightEdgePathfinder is unable to
+		// handle polygons with holes.
+		
 		StaticObstacle obstacle = new StaticObstacle(
-			polygon(
+			immutablePolygon(
 				linearRing(1, 1, 6, 1, 6, 5, 1, 5, 1, 1),
 				linearRing(2, 2, 5, 2, 5, 4, 2, 4, 2, 2)));
 		

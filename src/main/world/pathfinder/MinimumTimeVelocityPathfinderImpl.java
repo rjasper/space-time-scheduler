@@ -197,7 +197,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 			ImmutablePoint vertex = vertices.getFirst();
 			return new ArcTimePath(ImmutableList.of(vertex, vertex));
 		} else {
-			return new ArcTimePath(vertices);
+			return new ArcTimePath(ImmutableList.copyOf(vertices));
 		}
 	}
 

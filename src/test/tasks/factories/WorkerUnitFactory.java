@@ -7,6 +7,8 @@ import static util.TimeFactory.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import jts.geom.immutable.ImmutablePoint;
+import jts.geom.immutable.ImmutablePolygon;
 import tasks.TaskPlanner;
 import tasks.WorkerUnit;
 import tasks.WorkerUnitSpecification;
@@ -16,12 +18,11 @@ import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class WorkerUnitFactory {
 
-	private static final Polygon DEFAULT_SHAPE =
-		polygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
+	private static final ImmutablePolygon DEFAULT_SHAPE =
+		immutablePolygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
 
 	private static final double DEFAULT_MAX_SPEED = 1.0;
 
@@ -31,7 +32,7 @@ public class WorkerUnitFactory {
 
 	private TaskPlanner taskPlanner = new TaskPlanner();
 
-	private Polygon shape;
+	private ImmutablePolygon shape;
 
 	private double maxSpeed;
 
@@ -45,7 +46,7 @@ public class WorkerUnitFactory {
 		);
 	}
 
-	public WorkerUnitFactory(Polygon shape, double maxSpeed, long initialSeconds) {
+	public WorkerUnitFactory(ImmutablePolygon shape, double maxSpeed, long initialSeconds) {
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
@@ -65,7 +66,7 @@ public class WorkerUnitFactory {
 		return instance;
 	}
 
-	private Polygon getShape() {
+	private ImmutablePolygon getShape() {
 		return shape;
 	}
 
@@ -73,7 +74,7 @@ public class WorkerUnitFactory {
 		return taskPlanner;
 	}
 
-	public void setShape(Polygon shape) {
+	public void setShape(ImmutablePolygon shape) {
 		this.shape = shape;
 	}
 
@@ -97,7 +98,7 @@ public class WorkerUnitFactory {
 		return createWorkerUnit(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnit createWorkerUnit(Polygon shape, double maxSpeed, double x, double y, double t) {
+	public WorkerUnit createWorkerUnit(ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
 		return new WorkerUnit(createWorkerUnitSpecification(shape, maxSpeed, x, y, t));
 	}
 
@@ -105,8 +106,8 @@ public class WorkerUnitFactory {
 		return createWorkerUnitSpecification(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnitSpecification createWorkerUnitSpecification(Polygon shape, double maxSpeed, double x, double y, double t) {
-		Point initialLocation = point(x, y);
+	public WorkerUnitSpecification createWorkerUnitSpecification(ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
+		ImmutablePoint initialLocation = immutablePoint(x, y);
 		LocalDateTime initialTime = atSecond(t);
 
 		return new WorkerUnitSpecification(shape, maxSpeed, initialLocation, initialTime);

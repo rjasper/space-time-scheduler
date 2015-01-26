@@ -20,13 +20,15 @@ import world.StaticObstacle;
 import world.World;
 import world.fixtures.WorldFixtures;
 
+import com.google.common.collect.ImmutableList;
+
 public class SchedulerTest {
 
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		wFact.setShape(box(-0.5, -0.5, 0.5, 0.5));
+		wFact.setShape(immutableBox(-0.5, -0.5, 0.5, 0.5));
 	}
 
 	@Test
@@ -40,16 +42,16 @@ public class SchedulerTest {
 
 		// top right
 		TaskSpecification s1 = new TaskSpecification(
-			box(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
+			immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom left
 		TaskSpecification s2 = new TaskSpecification(
-			box( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
+			immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom right
 		TaskSpecification s3 = new TaskSpecification(
-			box(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
+			immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
 		// top left
 		TaskSpecification s4 = new TaskSpecification(
-			box( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
+			immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
 
 		Scheduler sc = new Scheduler(world, workerSpecs);
 		
@@ -89,15 +91,15 @@ public class SchedulerTest {
 
 	@Test
 	public void testNoLocation() {
-		StaticObstacle obstacle = new StaticObstacle(box(10, 10, 20, 20));
-		World world = new World(singletonList(obstacle), emptyList());
+		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
+		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification(box(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(world, singleton(ws));
 		
 		TaskSpecification spec = new TaskSpecification(
-			box(12, 12, 18, 18),
+			immutableBox(12, 12, 18, 18),
 			atSecond(0),
 			atSecond(60),
 			ofSeconds(10));

@@ -35,21 +35,6 @@ public class ArcTimePath extends Path {
 	}
 
 	/**
-	 * Constructs a arc-time path of the given vertices. If the given list is
-	 * immutable and contains immutable points, the argument will be stored
-	 * directly.
-	 * 
-	 * @param vertices
-	 * @throws NullPointerException
-	 *             if {@code vertices} are {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code vertices} contain invalid points.
-	 */
-	public ArcTimePath(List<? extends Point> vertices) {
-		super(vertices);
-	}
-
-	/**
 	 * Constructs a arc-time path of the given vertices. The argument will be
 	 * stored directly.
 	 * 

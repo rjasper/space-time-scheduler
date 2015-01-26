@@ -5,7 +5,6 @@ import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -36,7 +35,7 @@ public class TrajectoryFactory {
 		
 		SpatialPath path = new SpatialPath(builder.build());
 		
-		List<LocalDateTime> times = Arrays.stream(ordinates, tOffset, ordinates.length)
+		ImmutableList<LocalDateTime> times = Arrays.stream(ordinates, tOffset, ordinates.length)
 			.mapToObj(DurationConv::ofSeconds)
 			.map(TimeFactory.BASE_TIME::plus)
 			.collect(toImmutableList());

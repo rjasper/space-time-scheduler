@@ -1,16 +1,11 @@
 package tasks;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
-
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Specifies the representation of a physical worker unit in the real world.
@@ -64,9 +59,9 @@ public class WorkerUnitSpecification {
 	 *             </ul>
 	 */
 	public WorkerUnitSpecification(
-		Polygon shape,
+		ImmutablePolygon shape,
 		double maxSpeed,
-		Point initialLocation,
+		ImmutablePoint initialLocation,
 		LocalDateTime initialTime)
 	{
 		Objects.requireNonNull(initialLocation, "initialLocation");
@@ -77,9 +72,9 @@ public class WorkerUnitSpecification {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
 			throw new IllegalArgumentException("maximum speed is not a positive finite number");
 
-		this.shape = immutable(shape);
+		this.shape = shape;
 		this.maxSpeed = maxSpeed;
-		this.initialLocation = immutable(initialLocation);
+		this.initialLocation = initialLocation;
 		this.initialTime = initialTime;
 	}
 

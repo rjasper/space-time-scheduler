@@ -1,14 +1,13 @@
 package world.factories;
 
-import static java.util.Collections.*;
-
-import java.util.Collection;
-
 import world.RadiusBasedWorldPerspectiveCache;
 import world.StaticObstacle;
 import world.World;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
+
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Provides static methods to construct {@link PerspectiveCache}s.
@@ -25,7 +24,7 @@ public final class PerspectiveCacheFactory {
 	 * @return the cache.
 	 */
 	public static WorldPerspectiveCache emptyPerspectiveCache() {
-		return perspectiveCache(emptyList());
+		return perspectiveCache(ImmutableList.of());
 	}
 
 	/**
@@ -35,8 +34,8 @@ public final class PerspectiveCacheFactory {
 	 * @param staticObstacles
 	 * @return the cache.
 	 */
-	public static WorldPerspectiveCache perspectiveCache(Collection<StaticObstacle> staticObstacles) {
-		World world = new World(staticObstacles, emptyList());
+	public static WorldPerspectiveCache perspectiveCache(ImmutableCollection<StaticObstacle> staticObstacles) {
+		World world = new World(staticObstacles, ImmutableList.of());
 		RadiusBasedWorldPerspectiveCache cache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 

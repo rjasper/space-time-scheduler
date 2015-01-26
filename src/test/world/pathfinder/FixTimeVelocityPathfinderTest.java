@@ -9,8 +9,6 @@ import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 
 import org.junit.Test;
 
@@ -18,6 +16,7 @@ import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 
 public abstract class FixTimeVelocityPathfinderTest {
@@ -27,18 +26,18 @@ public abstract class FixTimeVelocityPathfinderTest {
 	@Test
 	public void test() {
 		double maxSpeed = 1.0;
-		Collection<DynamicObstacle> dynamicObstacles = Collections.singleton(
+		ImmutableCollection<DynamicObstacle> dynamicObstacles = ImmutableList.of(
 			new DynamicObstacle(
-				box(-0.5, -0.5, 0.5, 0.5),
+				immutableBox(-0.5, -0.5, 0.5, 0.5),
 				trajectory(
 					2.5, 2.5, 2.5,  2.5,
 					5.5, 2.5, 2.5, -0.5,
 					0.0, 3.0, 7.0, 10.0)));
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-			point(1., 4.),
-			point(4., 4.),
-			point(4., 1.),
-			point(1., 1.)));
+			immutablePoint(1., 4.),
+			immutablePoint(4., 4.),
+			immutablePoint(4., 1.),
+			immutablePoint(1., 1.)));
 		LocalDateTime startTime = atSecond(0);
 		LocalDateTime finishTime = atSecond(11);
 		

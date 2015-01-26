@@ -28,8 +28,8 @@ public class StaticObstacle {
 	 * @throws IllegalArgumentException
 	 *             if the shape is empty, non-simple, or invalid.
 	 */
-	public StaticObstacle(Polygon shape) {
-		this.shape = immutable(GeometriesRequire.requireValidSimple2DPolygon(shape, "shape"));
+	public StaticObstacle(ImmutablePolygon shape) {
+		this.shape = GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
 	}
 
 	/**
@@ -53,7 +53,9 @@ public class StaticObstacle {
 		if (!Double.isFinite(distance) || distance < 0.0)
 			throw new IllegalArgumentException("invalid distance");
 		
-		return new StaticObstacle((Polygon) shape.buffer(distance));
+		Polygon buffered = (Polygon) shape.buffer(distance);
+		
+		return new StaticObstacle(immutable(buffered));
 	}
 
 }

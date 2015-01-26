@@ -2,6 +2,7 @@ package tasks;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
+import static jts.geom.immutable.ImmutableGeometries.*;
 import static util.Comparables.*;
 import static util.DurationConv.*;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 import world.DecomposedTrajectory;
@@ -89,7 +91,7 @@ public class TaskPlanner {
 	/**
 	 * The location of the {@link Task task}.
 	 */
-	private Point location = null;
+	private ImmutablePoint location = null;
 
 	/**
 	 * The earliest start time of the {@link Task task} to be planned.
@@ -212,7 +214,7 @@ public class TaskPlanner {
 	/**
 	 * @return the location of the {@link Task task} to be planned.
 	 */
-	private Point getLocation() {
+	private ImmutablePoint getLocation() {
 		return location;
 	}
 
@@ -224,7 +226,7 @@ public class TaskPlanner {
 	public void setLocation(Point location) {
 		GeometriesRequire.requireValid2DPoint(location, "location");
 		
-		this.location = location;
+		this.location = immutable(location);
 	}
 
 	/**
@@ -676,7 +678,7 @@ public class TaskPlanner {
 
 			// create task
 
-			Point taskLocation = getLocation();
+			ImmutablePoint taskLocation = getLocation();
 			Duration taskDuration = getDuration();
 			LocalDateTime taskStartTime = trajToTask.getFinishTime();
 

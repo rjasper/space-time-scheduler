@@ -1,6 +1,5 @@
 package world;
 
-import static common.collect.Immutables.*;
 import static common.collect.ImmutablesCollectors.*;
 import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
@@ -67,7 +66,7 @@ public class SimpleTrajectory implements Trajectory {
 	 *             <li>{@code times} is not causal (increasing in time).</li>
 	 *             </ul>
 	 */
-	public SimpleTrajectory(SpatialPath spatialPath, List<LocalDateTime> times) {
+	public SimpleTrajectory(SpatialPath spatialPath, ImmutableList<LocalDateTime> times) {
 		Objects.requireNonNull(spatialPath, "spatialPath");
 		Objects.requireNonNull(times, "times");
 
@@ -76,7 +75,7 @@ public class SimpleTrajectory implements Trajectory {
 				"spatialPath and times do not have the same size");
 
 		this.spatialPath = spatialPath;
-		this.times = immutable(times);
+		this.times = times;
 	}
 
 	/*

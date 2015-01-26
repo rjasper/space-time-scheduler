@@ -1,7 +1,5 @@
 package tasks;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -12,7 +10,6 @@ import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * <p>An object of this class describes the specifications of a task.</p>
@@ -69,7 +66,7 @@ public class TaskSpecification {
 	 *             </ul>
 	 */
 	public TaskSpecification(
-		Polygon locationSpace,
+		ImmutablePolygon locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
@@ -84,7 +81,7 @@ public class TaskSpecification {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("duration is negative");
 
-		this.locationSpace = immutable(locationSpace);
+		this.locationSpace = locationSpace;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
 		this.duration = duration;

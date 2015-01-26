@@ -7,10 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jts.geom.immutable.ImmutablePoint;
+import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -28,7 +29,7 @@ public class DynamicObstacle implements Cloneable {
 	/**
 	 * The physical shape.
 	 */
-	private Polygon shape;
+	private ImmutablePolygon shape;
 
 	/**
 	 * The trajectory.
@@ -50,7 +51,7 @@ public class DynamicObstacle implements Cloneable {
 	 *             <li>The trajectory is empty or instantaneous.</li>
 	 *             </ul>
 	 */
-	public DynamicObstacle(Polygon shape, Trajectory trajectory) {
+	public DynamicObstacle(ImmutablePolygon shape, Trajectory trajectory) {
 		Objects.requireNonNull(shape, "shape");
 		Objects.requireNonNull(trajectory, "trajectory");
 		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
@@ -65,7 +66,7 @@ public class DynamicObstacle implements Cloneable {
 	/**
 	 * @return the physical shape.
 	 */
-	public Polygon getShape() {
+	public ImmutablePolygon getShape() {
 		return shape;
 	}
 
@@ -88,7 +89,7 @@ public class DynamicObstacle implements Cloneable {
 	 * @return the start location of the trajectory.
 	 * @see Trajectory#getStartLocation()
 	 */
-	public Point getStartLocation() {
+	public ImmutablePoint getStartLocation() {
 		return trajectory.getStartLocation();
 	}
 
@@ -96,7 +97,7 @@ public class DynamicObstacle implements Cloneable {
 	 * @return the finish location of the trajectory.
 	 * @see Trajectory#getFinishLocation()
 	 */
-	public Point getFinishLocation() {
+	public ImmutablePoint getFinishLocation() {
 		return trajectory.getFinishLocation();
 	}
 
@@ -148,7 +149,7 @@ public class DynamicObstacle implements Cloneable {
 
 		DynamicObstacle clone = clone();
 
-		clone.shape = (Polygon) getShape().buffer(distance);
+		clone.shape = immutable((Polygon) getShape().buffer(distance));
 
 		return clone;
 	}

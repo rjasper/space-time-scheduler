@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
+import jts.geom.immutable.ImmutablePolygon;
+
 import org.junit.Test;
 
 import world.DynamicObstacle;
@@ -21,7 +23,6 @@ import world.SpatialPath;
 import world.Trajectory;
 
 import com.google.common.collect.ImmutableList;
-import com.vividsolutions.jts.geom.Polygon;
 
 public abstract class MinimumTimeVelocityPathfinderTest {
 
@@ -32,8 +33,8 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-			point(0., 2.), point(3., 2.)));
-		Polygon obstacleShape = box(-0.5, -0.5, 0.5, 0.5);
+			immutablePoint(0., 2.), immutablePoint(3., 2.)));
+		ImmutablePolygon obstacleShape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 		Trajectory obstacleTrajectory = trajectory(
 			1.5, 1.5,
 			3.5, 0.5,
@@ -92,7 +93,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
 		DynamicObstacle obstacle = new DynamicObstacle(
-			box(-1, -1, 1, 1),
+			immutableBox(-1, -1, 1, 1),
 			trajectory(
 				 5,  5,
 				-2,  2,
@@ -117,7 +118,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
 		DynamicObstacle obstacle = new DynamicObstacle(
-			box(-1, -1, 1, 1),
+			immutableBox(-1, -1, 1, 1),
 			trajectory(
 				 5,  5,
 				-2,  2,

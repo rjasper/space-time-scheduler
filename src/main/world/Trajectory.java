@@ -2,7 +2,6 @@ package world;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -131,13 +130,11 @@ public interface Trajectory {
 		List<LocalDateTime> lhsTimes = getTimes();
 		List<LocalDateTime> rhsTimes = other.getTimes();
 
-		int n = lhsSpatialPath.size() + rhsSpatialPath.size();
-
 		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
-		List<LocalDateTime> times = new ArrayList<>(n);
-
-		times.addAll(lhsTimes);
-		times.addAll(rhsTimes);
+		ImmutableList<LocalDateTime> times = ImmutableList.<LocalDateTime>builder()
+			.addAll(lhsTimes)
+			.addAll(rhsTimes)
+			.build();
 
 		return new SimpleTrajectory(spatialPath, times);
 	}

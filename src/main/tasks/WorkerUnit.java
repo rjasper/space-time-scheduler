@@ -24,7 +24,6 @@ import world.Trajectory;
 import world.WorkerUnitObstacle;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -114,7 +113,7 @@ public class WorkerUnit {
 	 * time.
 	 */
 	private void putInitialObstacleSegment() {
-		Point initialLocation = getInitialLocation();
+		ImmutablePoint initialLocation = getInitialLocation();
 		LocalDateTime initialTime = getInitialTime();
 
 		WorkerUnitObstacle segment = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);

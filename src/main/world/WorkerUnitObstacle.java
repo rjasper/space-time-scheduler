@@ -6,9 +6,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import jts.geom.immutable.ImmutablePolygon;
 import tasks.WorkerUnit;
-
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * <p>A {@code WorkerUnitObstacle} is a path segment of a worker represented as a
@@ -69,7 +68,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 * @return the shape.
 	 * @throws NullPointerException if the worker is {@code null}.
 	 */
-	private static Polygon retrieveShape(WorkerUnit worker) {
+	private static ImmutablePolygon retrieveShape(WorkerUnit worker) {
 		Objects.requireNonNull(worker, "worker");
 		
 		return worker.getShape();

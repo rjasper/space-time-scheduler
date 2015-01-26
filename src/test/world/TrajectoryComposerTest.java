@@ -16,20 +16,20 @@ public class TrajectoryComposerTest {
 	@Test
 	public void test() {
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
-			point(0., 1.),
-			point(2., 1.),
-			point(2., 4.),
-			point(5., 4.),
-			point(5., 1.)));
+			immutablePoint(0., 1.),
+			immutablePoint(2., 1.),
+			immutablePoint(2., 4.),
+			immutablePoint(5., 4.),
+			immutablePoint(5., 1.)));
 		ArcTimePath arcTimePath = new ArcTimePath(ImmutableList.of(
-			point(0., 0.),
-			point(1., 2.),
-			point(4., 5.),
-			point(6., 6.),
-			point(7., 7.),
-			point(8., 9.),
-			point(8., 10.),
-			point(11., 13.)));
+			immutablePoint(0., 0.),
+			immutablePoint(1., 2.),
+			immutablePoint(4., 5.),
+			immutablePoint(6., 6.),
+			immutablePoint(7., 7.),
+			immutablePoint(8., 9.),
+			immutablePoint(8., 10.),
+			immutablePoint(11., 13.)));
 		
 		TrajectoryComposer composer = new TrajectoryComposer();
 		

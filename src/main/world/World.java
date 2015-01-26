@@ -1,7 +1,7 @@
 package world;
 
 import static common.collect.Immutables.*;
-import static java.util.Collections.*;
+import static common.collect.ImmutablesCollectors.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.ImmutableGeometries.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
@@ -12,6 +12,7 @@ import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
@@ -44,7 +45,7 @@ public class World {
 	 * Creates an empty World without any obstacles.
 	 */
 	public World() {
-		this(emptyList(), emptyList());
+		this(ImmutableList.of(), ImmutableList.of());
 	}
 
 	/**
@@ -55,7 +56,10 @@ public class World {
 	 * @throws NullPointerException
 	 *             if any collection is {@code null} or contains {@code null}.
 	 */
-	public World(Collection<StaticObstacle> staticObstacles, Collection<DynamicObstacle> dynamicObstacles) {
+	public World(
+		ImmutableCollection<StaticObstacle> staticObstacles,
+		ImmutableCollection<DynamicObstacle> dynamicObstacles)
+	{
 		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
 		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
 		
@@ -138,12 +142,12 @@ public class World {
 		if (!Double.isFinite(distance))
 			throw new IllegalArgumentException("distance is not finite");
 		
-		Collection<StaticObstacle> staticObstacles = getStaticObstacles().stream()
+		ImmutableList<StaticObstacle> staticObstacles = getStaticObstacles().stream()
 			.map(o -> o.buffer(distance)) // buffer always returns a polygon
-			.collect(toList());
-		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles().stream()
+			.collect(toImmutableList());
+		ImmutableList<DynamicObstacle> dynamicObstacles = getDynamicObstacles().stream()
 			.map(o -> o.buffer(distance))
-			.collect(toList());
+			.collect(toImmutableList());
 
 		return new World(staticObstacles, dynamicObstacles);
 	}

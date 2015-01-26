@@ -1,15 +1,11 @@
 package tasks;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
-
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>The IdleSlot class represents the idle time of a {@link WorkerUnit} while
@@ -68,8 +64,8 @@ public class IdleSlot {
 	 *             the startTime is equal to or before the finishTime
 	 */
 	public IdleSlot(
-		Point startLocation,
-		Point finishLocation,
+		ImmutablePoint startLocation,
+		ImmutablePoint finishLocation,
 		LocalDateTime startTime,
 		LocalDateTime finishTime)
 	{
@@ -81,8 +77,8 @@ public class IdleSlot {
 		if (startTime.compareTo(finishTime) >= 0)
 			throw new IllegalArgumentException("startTime is after finishTime");
 
-		this.startLocation = immutable(startLocation);
-		this.finishLocation = immutable(finishLocation);
+		this.startLocation = startLocation;
+		this.finishLocation = finishLocation;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
 	}

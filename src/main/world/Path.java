@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import jts.geom.immutable.ImmutableGeometries;
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
@@ -45,24 +44,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	}
 	
 	/**
-	 * Constructs a path of the given vertices. If the given list is immutable
-	 * and contains immutable points, the argument will be stored directly.
-	 * 
-	 * @param vertices
-	 * @throws NullPointerException
-	 *             if {@code vertices} are {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code vertices} contain invalid points.
-	 */
-	public Path(List<? extends Point> vertices) {
-		checkVertices(vertices);
-		
-		this.vertices = makeImmutable(vertices);
-	}
-	
-	/**
-	 * Constructs a path of the given vertices. The argument will be stored
-	 * directly.
+	 * Constructs a path of the given vertices.
 	 * 
 	 * @param vertices
 	 * @throws NullPointerException
@@ -105,31 +87,6 @@ public class Path implements Iterable<ImmutablePoint> {
 		
 		vertices.forEach(p ->
 			GeometriesRequire.requireValid2DPoint((Point) p, "vertices"));
-	}
-	
-	/**
-	 * Makes a immutable list of immutable points from the given list of
-	 * vertices.
-	 * 
-	 * @param vertices
-	 * @return the list.
-	 */
-	@SuppressWarnings("unchecked")
-	private ImmutableList<ImmutablePoint> makeImmutable(List<? extends Point> vertices) {
-		// if already immutable
-		if (vertices instanceof ImmutableList<?> &&
-			vertices.stream().allMatch(ImmutableGeometries::isImmutable))
-		{
-			return (ImmutableList<ImmutablePoint>) vertices;
-		} else {
-			Builder<ImmutablePoint> builder = ImmutableList.builder();
-			
-			vertices.stream()
-				.map(ImmutableGeometries::immutable)
-				.forEach(builder::add);
-			
-			return builder.build();
-		}
 	}
 
 	/**

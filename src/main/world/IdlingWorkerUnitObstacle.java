@@ -1,17 +1,13 @@
 package world;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
-
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 import tasks.WorkerUnit;
 
 import com.google.common.collect.ImmutableList;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * An {@code IdlingWorkerUnitObstacle} represents the very last path segment of
@@ -35,9 +31,9 @@ public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if the location is empty or invalid.
 	 */
-	public IdlingWorkerUnitObstacle(WorkerUnit worker, Point location, LocalDateTime startTime) {
+	public IdlingWorkerUnitObstacle(WorkerUnit worker, ImmutablePoint location, LocalDateTime startTime) {
 		// see super and buildTrajectory for @throws
-		super(worker, buildTrajectory(immutable(location), startTime));
+		super(worker, buildTrajectory(location, startTime));
 	}
 
 	/**
@@ -50,13 +46,13 @@ public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if the location is empty or invalid.
 	 */
-	private static Trajectory buildTrajectory(Point location, LocalDateTime startTime) {
+	private static Trajectory buildTrajectory(ImmutablePoint location, LocalDateTime startTime) {
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(startTime, "startTime");
 		GeometriesRequire.requireValid2DPoint(location, "location");
 		
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(location, location));
-		List<LocalDateTime> times = Arrays.asList(startTime, LocalDateTime.MAX);
+		ImmutableList<LocalDateTime> times = ImmutableList.of(startTime, LocalDateTime.MAX);
 
 		return new SimpleTrajectory(spatialPath, times);
 	}

@@ -1,7 +1,5 @@
 package tasks;
 
-import static jts.geom.immutable.ImmutableGeometries.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -10,8 +8,6 @@ import java.util.function.Supplier;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
-
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>A Task represents the smallest assignment of a {@link WorkerUnit} that the
@@ -63,7 +59,7 @@ public class Task {
 	 *             <li>The duration is negative.</li>
 	 *             </ul>
 	 */
-	private Task(Point location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
+	private Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(duration, "duration");
@@ -74,7 +70,7 @@ public class Task {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("negative duration");
 
-		this.location = immutable(location);
+		this.location = location;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
 		this.duration = duration;
@@ -88,7 +84,7 @@ public class Task {
 	 * @param startTime
 	 * @param finishTime
 	 */
-	public Task(Point location, LocalDateTime startTime, LocalDateTime finishTime) {
+	public Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime) {
 		this(location, startTime, finishTime, Duration.between(startTime, finishTime));
 	}
 
@@ -100,7 +96,7 @@ public class Task {
 	 * @param startTime
 	 * @param duration
 	 */
-	public Task(Point location, LocalDateTime startTime, Duration duration) {
+	public Task(ImmutablePoint location, LocalDateTime startTime, Duration duration) {
 		this(location, startTime, startTime.plus(duration), duration);
 	}
 

@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 
+import jts.geom.immutable.ImmutablePolygon;
+
 import org.junit.Test;
 
 import tasks.factories.WorkerUnitFactory;
@@ -28,8 +30,8 @@ import world.World;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
 
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class TaskPlannerTest {
 
@@ -54,12 +56,12 @@ public class TaskPlannerTest {
 	@Test
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
-			box(30., 10., 40., 40.));
+			immutableBox(30., 10., 40., 40.));
 		WorkerUnit w = wuFact.createWorkerUnit(10.0, 20.0);
 
 		setNameFor(w, "w");
 
-		World world = new World(singleton(obstacle), emptyList());
+		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		WorldPerspectiveCache perspectiveCache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 
@@ -82,7 +84,7 @@ public class TaskPlannerTest {
 	
 	@Test
 	public void testDynamicObstacles() {
-		Polygon obstacleShape = box(-5., -5., 5., 5.);
+		ImmutablePolygon obstacleShape = immutableBox(-5., -5., 5., 5.);
 		Trajectory obstacleTrajectory = trajectory(
 			30, 30,
 			40,  0,
@@ -92,7 +94,7 @@ public class TaskPlannerTest {
 
 		setNameFor(w, "w");
 
-		World world = new World(emptyList(), singleton(obstacle));
+		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
 		WorldPerspectiveCache perspectiveCache =
 			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 
@@ -115,7 +117,7 @@ public class TaskPlannerTest {
 
 	@Test
 	public void testObsoleteEvasions() {
-		Polygon shape = box(-0.25, -0.25, 0.25, 0.25);
+		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
 		WorkerUnit w1 = wuFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
 		WorkerUnit w2 = wuFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
 	
@@ -177,7 +179,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan1() {
 		WorkerUnit w = wuFact.createWorkerUnit(
-			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		setNameFor(w, "w");
 		
 		TaskPlanner tp = new TaskPlanner();
@@ -209,7 +211,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan2() {
 		WorkerUnit w = wuFact.createWorkerUnit(
-			box(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		setNameFor(w, "w");
 		
 		TaskPlanner tp = new TaskPlanner();

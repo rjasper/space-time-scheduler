@@ -1,12 +1,10 @@
 package world;
 
 import java.util.Iterator;
-import java.util.List;
 
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
@@ -29,23 +27,7 @@ public class SpatialPath extends Path {
 	}
 
 	/**
-	 * Constructs a spatial path of the given vertices. If the given list is
-	 * immutable and contains immutable points, the argument will be stored
-	 * directly.
-	 * 
-	 * @param vertices
-	 * @throws NullPointerException
-	 *             if {@code vertices} are {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code vertices} contain invalid points.
-	 */
-	public SpatialPath(List<Point> vertices) {
-		super(vertices);
-	}
-
-	/**
-	 * Constructs a spatial path of the given vertices. The argument will be
-	 * stored directly.
+	 * Constructs a spatial path of the given vertices.
 	 * 
 	 * @param vertices
 	 * @throws NullPointerException

@@ -25,9 +25,9 @@ public class WorkerUnitTest {
 		);
 		
 		Collection<IdleSlot> expected = Arrays.asList(
-			new IdleSlot(point( 0,  0), point(10, 10), atHour( 0), atHour( 6)),
-			new IdleSlot(point(10, 10), point(20, 10), atHour( 7), atHour(12)),
-			new IdleSlot(point(20, 10), point(20, 20), atHour(15), atHour(18)));
+			new IdleSlot(immutablePoint( 0,  0), immutablePoint(10, 10), atHour( 0), atHour( 6)),
+			new IdleSlot(immutablePoint(10, 10), immutablePoint(20, 10), atHour( 7), atHour(12)),
+			new IdleSlot(immutablePoint(20, 10), immutablePoint(20, 20), atHour(15), atHour(18)));
 		
 		assertThat(slots, equalTo(expected));
 	}
