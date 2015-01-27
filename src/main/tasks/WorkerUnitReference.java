@@ -72,7 +72,7 @@ public class WorkerUnitReference {
 	 * @return the merged trajectory.
 	 */
 	public Trajectory calcTrajectory() {
-		return worker.calcMergedTrajectory();
+		return worker.calcTrajectory();
 	}
 
 }

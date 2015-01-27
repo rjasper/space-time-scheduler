@@ -312,14 +312,14 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * Calculates a trajectory from all obstacle segments merged together.
+	 * Calculates a trajectory from all obstacle segments concatenated together.
 	 *
 	 * @return the merged trajectory.
 	 */
-	public Trajectory calcMergedTrajectory() {
+	public Trajectory calcTrajectory() {
 		return obstacleSegments.values().stream()
 			.map(DynamicObstacle::getTrajectory)
-			.reduce((u, v) -> u.merge(v))
+			.reduce((u, v) -> u.concat(v))
 			.orElse(emptyTrajectory());
 	}
 

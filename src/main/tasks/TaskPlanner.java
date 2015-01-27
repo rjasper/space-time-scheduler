@@ -354,6 +354,10 @@ public class TaskPlanner {
 		// assert earliest <= latest 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalStateException("earliestStartTime is after latestStartTime");
+
+		// cannot plan with worker which is not initialized yet
+		if (latestStartTime.compareTo(workerUnit.getInitialTime()) < 0)
+			throw new IllegalStateException("worker not initialized yet");
 	}
 
 	/**
@@ -387,10 +391,6 @@ public class TaskPlanner {
 	 */
 	private boolean planImpl() {
 		WorkerUnit worker = getWorkerUnit();
-
-		// cannot plan with worker which is not initialized yet
-		if (getLatestStartTime().compareTo( worker.getInitialTime() ) < 0)
-			return false;
 
 		// the segment to be replaced by two segment to and form the new task
 		WorkerUnitObstacle segment = worker.getObstacleSegment( getEarliestStartTime() );
@@ -701,6 +701,7 @@ public class TaskPlanner {
 
 			// create segments
 
+			// don't introduce trajectories without duration
 			segmentToTask = trajToTask.getDuration().isZero() ?
 				null : new MovingWorkerUnitObstacle(worker, trajToTask, task);
 			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
@@ -876,7 +877,7 @@ public class TaskPlanner {
 		public double calcLaxity() {
 			WorkerUnit worker = segment.getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
-			double length = segment.getTrajectory().getLength();
+			double length = segment.getTrajectory().length();
 			double maxDuration = inSeconds( getJobDuration() );
 
 			return maxDuration/length - 1./maxSpeed;

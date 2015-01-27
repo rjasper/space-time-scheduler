@@ -88,6 +88,7 @@ public class DecomposedTrajectory implements Trajectory {
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 
+		// TODO no tolerance might be too strict
 		if (spatialPathComponent.length() != arcTimePathComponent.length())
 			throw new IllegalArgumentException("path components' lengths differ");
 		
@@ -221,12 +222,12 @@ public class DecomposedTrajectory implements Trajectory {
 	}
 
 	@Override
-	public double getLength() {
+	public double length() {
 		return getArcTimePathComponent().length();
 	}
 
 	@Override
-	public Geometry getTrace() {
+	public Geometry trace() {
 		return getSpatialPathComponent().trace();
 	}
 

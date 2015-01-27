@@ -6,6 +6,7 @@ import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -226,7 +227,7 @@ public class SimpleTrajectory implements Trajectory {
 	 * @see world.Trajectory#getLength()
 	 */
 	@Override
-	public double getLength() {
+	public double length() {
 		return spatialPath.length();
 	}
 
@@ -235,7 +236,7 @@ public class SimpleTrajectory implements Trajectory {
 	 * @see world.Trajectory#getTrace()
 	 */
 	@Override
-	public Geometry getTrace() {
+	public Geometry trace() {
 		return spatialPath.trace();
 	}
 
@@ -275,7 +276,25 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	@Override
 	public String toString() {
-		return String.format("(%s, %s)", getSpatialPath(), getTimes());
+		Iterator<ImmutablePoint> points = getSpatialPath().iterator();
+		Iterator<LocalDateTime> times = getTimes().iterator();
+		
+		StringBuffer buf = new StringBuffer();
+		
+		buf.append("(");
+		
+		while (points.hasNext()) { // equivalent to times.hasNext()
+			buf.append(points.next());
+			buf.append(' ');
+			buf.append(times.next());
+			
+			if (points.hasNext())
+				buf.append(", ");
+		}
+		
+		buf.append(")");
+		
+		return buf.toString();
 	}
 
 }

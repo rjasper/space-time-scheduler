@@ -23,7 +23,7 @@ public class WorkerUnitCollidesWithDynamicObstacles extends MapMatcher<WorkerUni
 	
 	public WorkerUnitCollidesWithDynamicObstacles(Collection<? extends DynamicObstacle> obstacles) {
 		super(obstaclesCollideWith(obstacles), w ->
-			new DynamicObstacle(w.getShape(), w.calcMergedTrajectory()));
+			new DynamicObstacle(w.getShape(), w.calcTrajectory()));
 		
 		this.obstacles = Objects.requireNonNull(obstacles, "obstacles");
 	}

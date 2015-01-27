@@ -5,10 +5,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import jts.geom.immutable.ImmutablePolygon;
+import jts.geom.immutable.ImmutableGeometry;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -30,7 +31,7 @@ public class TaskSpecification {
 	/**
 	 * The spatial space for a valid location.
 	 */
-	private final ImmutablePolygon locationSpace;
+	private final Geometry locationSpace;
 
 	/**
 	 * The earliest possible start time.
@@ -65,8 +66,8 @@ public class TaskSpecification {
 	 *             <li>the duration is negative or zero</li>
 	 *             </ul>
 	 */
-	public TaskSpecification(
-		ImmutablePolygon locationSpace,
+	public <G extends Geometry & ImmutableGeometry> TaskSpecification(
+		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
@@ -74,7 +75,7 @@ public class TaskSpecification {
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
-		GeometriesRequire.requireValidSimple2DPolygon(locationSpace, "locationSpace");
+		GeometriesRequire.requireValidSimple2DGeometry(locationSpace, "locationSpace");
 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
@@ -88,9 +89,9 @@ public class TaskSpecification {
 	}
 
 	/**
-	 * @return the spatial space for a valid {@link Point location}.
+	 * @return the immutable spatial space for a valid {@link Point location}.
 	 */
-	public ImmutablePolygon getLocationSpace() {
+	public Geometry getLocationSpace() {
 		return locationSpace;
 	}
 

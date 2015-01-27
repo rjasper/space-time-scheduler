@@ -46,7 +46,7 @@ public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeMatcher<Worker
 	protected boolean matchesSafely(WorkerUnit item) {
 		StaticObstacle bufferedObstacle = obstacle.buffer(item.getRadius());
 		Geometry shape = bufferedObstacle.getShape();
-		Geometry trace = item.calcMergedTrajectory().getTrace();
+		Geometry trace = item.calcTrajectory().trace();
 		
 		IntersectionMatrix mat = shape.relate(trace);
 		

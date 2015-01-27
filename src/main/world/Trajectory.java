@@ -90,13 +90,13 @@ public interface Trajectory {
 	/**
 	 * @return the euclidean length of the spatial path.
 	 */
-	public abstract double getLength();
+	public abstract double length();
 
 	/**
 	 * @return the trace which is a geometry only including all points of the
 	 *         spatial path.
 	 */
-	public abstract Geometry getTrace();
+	public abstract Geometry trace();
 	
 	/**
 	 * Calculates the arc time path (s-t) of this trajectory in relation to the
@@ -119,7 +119,7 @@ public interface Trajectory {
 	 * @throws NullPointerException if other is {@code null}.
 	 * @throws IllegalArgumentException if other's time is before this one's.
 	 */
-	public default Trajectory merge(Trajectory other) {
+	public default Trajectory concat(Trajectory other) {
 		Objects.requireNonNull(other, "other");
 		
 		if (getFinishTime().compareTo(other.getStartTime()) > 0)
