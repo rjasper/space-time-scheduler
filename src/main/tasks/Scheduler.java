@@ -150,6 +150,7 @@ public class Scheduler {
 
 		// TODO prefilter the workers who have time without considering their location
 		// return if no workers remain
+		// TODO workers which already are in position shouldn't need to move.
 
 		Iterable<Point> locations = new IteratorIterable<>(
 			new LocationIterator(locationSpace, MAX_LOCATION_PICKS));
