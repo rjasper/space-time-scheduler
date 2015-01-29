@@ -128,8 +128,6 @@ public class Scheduler {
 	public boolean schedule(TaskSpecification specification) {
 		Objects.requireNonNull(specification, "specification");
 
-		// get necessary information
-
 		World world = getWorld();
 		List<WorkerUnit> pool = getWorkerPool();
 		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
@@ -137,8 +135,6 @@ public class Scheduler {
 		LocalDateTime earliest = specification.getEarliestStartTime();
 		LocalDateTime latest = specification.getLatestStartTime();
 		Duration duration = specification.getDuration();
-
-		// initialize the task planner
 
 		TaskPlanner tp = new TaskPlanner();
 
@@ -167,7 +163,6 @@ public class Scheduler {
 				new WorkerUnitSlotIterator(filterByLocation(loc), loc, earliest, latest, duration));
 
 			for (WorkerUnitSlot ws : workerSlots) {
-				// get slot information
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
 				LocalDateTime slotStartTime = s.getStartTime();
@@ -181,7 +176,6 @@ public class Scheduler {
 				// plan the routes of affected workers and schedule task
 				boolean status = tp.plan();
 
-				// if planning was successful then return
 				if (status)
 					return true;
 			}
