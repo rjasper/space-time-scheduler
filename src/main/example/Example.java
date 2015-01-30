@@ -1,6 +1,5 @@
 package example;
 
-import static java.util.Collections.*;
 import static java.util.UUID.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
@@ -83,9 +82,8 @@ public final class Example {
 		WorkerUnitSpecification workerSpec =
 			new WorkerUnitSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
-		Scheduler scheduler = new Scheduler(world, singleton(workerSpec));
-		
-		WorkerUnitReference workerRef = scheduler.getWorkerReferences().get(0);
+		Scheduler scheduler = new Scheduler(world);
+		WorkerUnitReference workerRef = scheduler.addWorker(workerSpec);
 		
 		// specification
 		// for specification

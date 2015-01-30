@@ -1,13 +1,13 @@
 package tasks;
 
-import static common.collect.ImmutablesCollectors.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,7 +22,6 @@ import world.WorldPerspective;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
 
-import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -58,14 +57,8 @@ public class Scheduler {
 	/**
 	 * The workers managed by this scheduler.
 	 */
-	private final ImmutableList<WorkerUnit> workerPool;
+	private final Map<String, WorkerUnit> workerPool = new HashMap<>();
 	
-	/**
-	 * The references to the workers.
-	 * @see #workerReferences
-	 */
-	private final ImmutableList<WorkerUnitReference> workerReferences;
-
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
 	 * The workers are expected to be managed exclusively by this scheduler.
@@ -74,21 +67,14 @@ public class Scheduler {
 	 * @param workerPool
 	 * @throws NullPointerException if world or workers is null
 	 */
-	public Scheduler(World world, Collection<WorkerUnitSpecification> workerSpecs) {
+	public Scheduler(World world) {
 		Objects.requireNonNull(world, "world");
-		Objects.requireNonNull(workerSpecs, "workerSpecs");
 
 		// TODO check validity of world and workerPool
 		//      (e.g. no overlapping of obstacles)
 		
 		this.world = world;
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-		this.workerPool = workerSpecs.stream()
-			.map(WorkerUnit::new)
-			.collect(toImmutableList());
-		this.workerReferences = workerPool.stream()
-			.map(WorkerUnit::getReference)
-			.collect(toImmutableList());
 	}
 
 	/**
@@ -108,17 +94,40 @@ public class Scheduler {
 	/**
 	 * @return the workers.
 	 */
-	private ImmutableList<WorkerUnit> getWorkerPool() {
+	private Map<String, WorkerUnit> getWorkerPool() {
 		return workerPool;
 	}
 	
 	/**
-	 * @return the references to the workers.
+	 * Adds a new {@link WorkerUnit} to the scheduler. The given specification
+	 * is used to create the worker.
+	 * 
+	 * @param spec
+	 * @return a reference to the worker.
 	 */
-	public ImmutableList<WorkerUnitReference> getWorkerReferences() {
-		return workerReferences;
+	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
+		WorkerUnit worker = new WorkerUnit(spec);
+		workerPool.put(worker.getId(), worker);
+		
+		return worker.getReference();
 	}
-
+	
+	/**
+	 * Returns the reference to the worker with the given id.
+	 * 
+	 * @param workerId
+	 * @return the reference.
+	 */
+	public WorkerUnitReference getWorkerReference(String workerId) {
+		WorkerUnit worker = workerPool.get(
+			Objects.requireNonNull(workerId, "workerId"));
+		
+		if (worker == null)
+			throw new IllegalArgumentException("unknown worker id");
+		
+		return worker.getReference();
+	}
+	
 	/**
 	 * Tries to schedule a new task satisfying the given specification.
 	 *
@@ -130,7 +139,7 @@ public class Scheduler {
 		Objects.requireNonNull(specification, "specification");
 
 		World world = getWorld();
-		List<WorkerUnit> pool = getWorkerPool();
+		Collection<WorkerUnit> pool = getWorkerPool().values();
 		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
 		Geometry locationSpace = world.space(specification.getLocationSpace());
 		UUID taskId = specification.getTaskId();
@@ -212,7 +221,7 @@ public class Scheduler {
 	 * @return the filtered workers which are able to reach the location.
 	 */
 	private Collection<WorkerUnit> filterByLocation(Point location) {
-		Collection<WorkerUnit> pool = getWorkerPool();
+		Collection<WorkerUnit> pool = getWorkerPool().values();
 
 		return pool.stream()
 			.filter(w -> checkLocationFor(location, w))
