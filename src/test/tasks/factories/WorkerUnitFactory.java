@@ -95,23 +95,23 @@ public class WorkerUnitFactory {
 		this.initialSeconds = initialSeconds;
 	}
 
-	public WorkerUnit createWorkerUnit(double x, double y) {
-		return createWorkerUnit(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
+	public WorkerUnit createWorkerUnit(String id, double x, double y) {
+		return createWorkerUnit(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnit createWorkerUnit(ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
-		return new WorkerUnit(createWorkerUnitSpecification(shape, maxSpeed, x, y, t));
+	public WorkerUnit createWorkerUnit(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
+		return new WorkerUnit(createWorkerUnitSpecification(id, shape, maxSpeed, x, y, t));
 	}
 
-	public WorkerUnitSpecification createWorkerUnitSpecification(double x, double y) {
-		return createWorkerUnitSpecification(getShape(), getMaxSpeed(), x, y, getInitialSeconds());
+	public WorkerUnitSpecification createWorkerUnitSpecification(String id, double x, double y) {
+		return createWorkerUnitSpecification(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnitSpecification createWorkerUnitSpecification(ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
+	public WorkerUnitSpecification createWorkerUnitSpecification(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
 		ImmutablePoint initialLocation = immutablePoint(x, y);
 		LocalDateTime initialTime = atSecond(t);
 
-		return new WorkerUnitSpecification(shape, maxSpeed, initialLocation, initialTime);
+		return new WorkerUnitSpecification(id, shape, maxSpeed, initialLocation, initialTime);
 	}
 
 	public boolean addTask(WorkerUnit worker, UUID taskId, double x, double y, long tStart, long tEnd) {

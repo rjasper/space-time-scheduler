@@ -81,7 +81,7 @@ public final class Example {
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 0, 0); // 1/1/2015 12:00 AM
 		// worker actual
 		WorkerUnitSpecification workerSpec =
-			new WorkerUnitSpecification(workerShape, maxSpeed, initialLocation, initialTime);
+			new WorkerUnitSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
 		Scheduler scheduler = new Scheduler(world, singleton(workerSpec));
 		

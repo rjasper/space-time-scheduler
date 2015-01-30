@@ -61,7 +61,7 @@ public class TaskPlannerTest {
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
 			immutableBox(30., 10., 40., 40.));
-		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -94,7 +94,7 @@ public class TaskPlannerTest {
 			40,  0,
 			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
-		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -122,11 +122,8 @@ public class TaskPlannerTest {
 	@Test
 	public void testObsoleteEvasions() {
 		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
-		WorkerUnit w1 = wFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
-		WorkerUnit w2 = wFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
-	
-		setNameFor(w1, "w1");
-		setNameFor(w2, "w2");
+		WorkerUnit w1 = wFact.createWorkerUnit("w1", shape, 1.0, 3.0, 5.0, 0.0);
+		WorkerUnit w2 = wFact.createWorkerUnit("w2", shape, 1.0, 2.0, 3.0, 5.0);
 	
 		World world = new World();
 		WorldPerspectiveCache perspectiveCache =
@@ -183,7 +180,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightTask1() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			"w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 	
 		TaskPlanner tp = new TaskPlanner();
 	
@@ -202,8 +199,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan2() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
-		setNameFor(w, "w");
+			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		
 		TaskPlanner tp = new TaskPlanner();
 	
@@ -234,8 +230,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan3() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
-		setNameFor(w, "w");
+			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		
 		TaskPlanner tp = new TaskPlanner();
 	

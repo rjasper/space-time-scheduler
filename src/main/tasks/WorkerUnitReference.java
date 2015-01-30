@@ -32,6 +32,13 @@ public class WorkerUnitReference {
 	}
 
 	/**
+	 * @return the worker's ID.
+	 */
+	public String getId() {
+		return worker.getId();
+	}
+
+	/**
 	 * @return the physical shape of the worker.
 	 */
 	public ImmutablePolygon getShape() {

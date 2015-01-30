@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
-import util.NameProvider;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
@@ -42,6 +41,11 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author Rico Jasper
  */
 public class WorkerUnit {
+	
+	/**
+	 * The worker's ID.
+	 */
+	private final String id;
 
 	/**
 	 * The physical shape of this worker.
@@ -98,6 +102,7 @@ public class WorkerUnit {
 	 *            the specification used to define configure the worker.
 	 */
 	public WorkerUnit(WorkerUnitSpecification spec) {
+		this.id = spec.getWorkerId();
 		this.shape = spec.getShape();
 		this.maxSpeed = spec.getMaxSpeed();
 		this.initialLocation = spec.getInitialLocation();
@@ -119,6 +124,13 @@ public class WorkerUnit {
 		WorkerUnitObstacle segment = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);
 
 		putObstacleSegment(segment);
+	}
+
+	/**
+	 * @return the ID.
+	 */
+	public String getId() {
+		return id;
 	}
 
 	/**
@@ -329,7 +341,7 @@ public class WorkerUnit {
 	 */
 	@Override
 	public String toString() {
-		return NameProvider.nameFor(this);
+		return id;
 	}
 
 }

@@ -33,7 +33,7 @@ public class SchedulerTest {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			wFact.createWorkerUnitSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(world, singleton(ws));
 		
@@ -52,7 +52,7 @@ public class SchedulerTest {
 	@Test
 	public void testAllBusy() {
 		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification(immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			wFact.createWorkerUnitSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(new World(), singleton(ws));
 		
@@ -88,9 +88,9 @@ public class SchedulerTest {
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 		
 		WorkerUnitSpecification ws1 =
-			wFact.createWorkerUnitSpecification(shape, 1.0, 11, 31, 0);
+			wFact.createWorkerUnitSpecification("w1", shape, 1.0, 11, 31, 0);
 		WorkerUnitSpecification ws2 =
-			wFact.createWorkerUnitSpecification(shape, 1.0, 25, 11, 0);
+			wFact.createWorkerUnitSpecification("w2", shape, 1.0, 25, 11, 0);
 	
 		Collection<WorkerUnitSpecification> workerSpecs = Arrays.asList(ws1, ws2);
 	
