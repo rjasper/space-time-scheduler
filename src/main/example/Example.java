@@ -1,4 +1,4 @@
-package main;
+package example;
 
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
