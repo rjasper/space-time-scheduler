@@ -3,6 +3,7 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -20,6 +21,11 @@ import util.NameProvider;
  * @author Rico Jasper
  */
 public class Task {
+	
+	/**
+	 * The ID of this task.
+	 */
+	private final UUID id;
 
 	/**
 	 * The location where the task is executed.
@@ -44,11 +50,12 @@ public class Task {
 	/**
 	 * Helper constructor checking all arguments and initializing all fields.
 	 * Does not check consistency of duration.
-	 *
+	 * @param id
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
 	 * @param duration
+	 *
 	 * @throws NullPointerException
 	 *             if any argument is null
 	 * @throws IllegalArgumentException
@@ -59,7 +66,8 @@ public class Task {
 	 *             <li>The duration is negative.</li>
 	 *             </ul>
 	 */
-	private Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
+	private Task(UUID id, ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
+		Objects.requireNonNull(id, "id");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(duration, "duration");
@@ -70,6 +78,7 @@ public class Task {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("negative duration");
 
+		this.id = id;
 		this.location = location;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
@@ -79,25 +88,34 @@ public class Task {
 	/**
 	 * Constructs a Task where the duration is derived from the start and
 	 * finish time.
-	 *
+	 * 
+	 * @param id
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
 	 */
-	public Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime) {
-		this(location, startTime, finishTime, Duration.between(startTime, finishTime));
+	public Task(UUID id, ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime) {
+		this(id, location, startTime, finishTime, Duration.between(startTime, finishTime));
 	}
 
 	/**
 	 * Constructs a Task where the finish time is derived from the start time
 	 * and duration.
-	 *
+	 * 
+	 * @param id
 	 * @param location
 	 * @param startTime
 	 * @param duration
 	 */
-	public Task(ImmutablePoint location, LocalDateTime startTime, Duration duration) {
-		this(location, startTime, startTime.plus(duration), duration);
+	public Task(UUID id, ImmutablePoint location, LocalDateTime startTime, Duration duration) {
+		this(id, location, startTime, startTime.plus(duration), duration);
+	}
+
+	/**
+	 * @return the id of this task.
+	 */
+	public UUID getId() {
+		return id;
 	}
 
 	/**

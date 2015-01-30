@@ -1,5 +1,6 @@
 package tasks;
 
+import static util.UUIDFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
@@ -37,10 +38,10 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(world, singleton(ws));
 		
 		TaskSpecification spec = new TaskSpecification(
+			uuid("spec"),
 			immutableBox(12, 12, 18, 18),
 			atSecond(0),
-			atSecond(60),
-			ofSeconds(10));
+			atSecond(60), ofSeconds(10));
 		
 		boolean status = sc.schedule(spec);
 		
@@ -56,10 +57,10 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World(), singleton(ws));
 		
 		TaskSpecification ts1 = new TaskSpecification(
+			uuid("ts1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
-			atSecond(10),
-			ofSeconds(60));
+			atSecond(10), ofSeconds(60));
 		
 		boolean status;
 		
@@ -69,10 +70,10 @@ public class SchedulerTest {
 			status, equalTo(status));
 		
 		TaskSpecification ts2 = new TaskSpecification(
+			uuid("ts2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
-			atSecond(30),
-			ofSeconds(10));
+			atSecond(30), ofSeconds(10));
 		
 		status = sc.schedule(ts2);
 		
@@ -95,16 +96,16 @@ public class SchedulerTest {
 	
 		// top right
 		TaskSpecification s1 = new TaskSpecification(
-			immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
+			uuid("s1"), immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom left
 		TaskSpecification s2 = new TaskSpecification(
-			immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
+			uuid("s2"), immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
 		// bottom right
 		TaskSpecification s3 = new TaskSpecification(
-			immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
+			uuid("s3"), immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
 		// top left
 		TaskSpecification s4 = new TaskSpecification(
-			immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
+			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
 		Scheduler sc = new Scheduler(world, workerSpecs);
 		
 		List<WorkerUnitReference> refs = sc.getWorkerReferences();

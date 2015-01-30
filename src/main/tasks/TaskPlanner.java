@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -87,9 +88,14 @@ public class TaskPlanner {
 	 * times.
 	 */
 	private Collection<WorkerUnitObstacle> workerObstacles = new LinkedList<>();
+	
+	/**
+	 * The id of the {@link Task task} to be planned.
+	 */
+	private UUID taskId = null;
 
 	/**
-	 * The location of the {@link Task task}.
+	 * The location of the {@link Task task} to be planned.
 	 */
 	private ImmutablePoint location = null;
 
@@ -209,6 +215,22 @@ public class TaskPlanner {
 	 */
 	private void clearCurrentDynamicObstacles() {
 		workerObstacles.clear();
+	}
+
+	/**
+	 * @return the id of the {@link Task task} to be planned.
+	 */
+	private UUID getTaskId() {
+		return taskId;
+	}
+
+	/**
+	 * Sets the id of the {@link Task task} to be planned.
+	 * 
+	 * @param taskId
+	 */
+	public void setTaskId(UUID taskId) {
+		this.taskId = taskId;
 	}
 
 	/**
@@ -343,6 +365,7 @@ public class TaskPlanner {
 		if (workerUnit        == null ||
 			workerPool        == null ||
 			perspectiveCache  == null ||
+			taskId            == null ||
 			location          == null ||
 			earliestStartTime == null ||
 			latestStartTime   == null ||
@@ -685,11 +708,12 @@ public class TaskPlanner {
 
 			// create task
 
+			UUID taskId = getTaskId();
 			ImmutablePoint taskLocation = getLocation();
 			Duration taskDuration = getDuration();
 			LocalDateTime taskStartTime = trajToTask.getFinishTime();
 
-			task = new Task(taskLocation, taskStartTime, taskDuration);
+			task = new Task(taskId, taskLocation, taskStartTime, taskDuration);
 
 			// calculate trajectory from task
 

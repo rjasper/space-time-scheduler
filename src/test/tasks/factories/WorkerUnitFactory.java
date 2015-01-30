@@ -6,6 +6,7 @@ import static util.TimeFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
@@ -113,11 +114,11 @@ public class WorkerUnitFactory {
 		return new WorkerUnitSpecification(shape, maxSpeed, initialLocation, initialTime);
 	}
 
-	public boolean addTask(WorkerUnit worker, double x, double y, long tStart, long tEnd) {
-		return addTaskWithDuration(worker, x, y, tStart, tEnd - tStart);
+	public boolean addTask(WorkerUnit worker, UUID taskId, double x, double y, long tStart, long tEnd) {
+		return addTaskWithDuration(worker, taskId, x, y, tStart, tEnd - tStart);
 	}
 
-	public boolean addTaskWithDuration(WorkerUnit worker, double x, double y, long t, long d) {
+	public boolean addTaskWithDuration(WorkerUnit worker, UUID taskId, double x, double y, long t, long d) {
 		TaskPlanner tp = getTaskPlanner();
 
 		Point location = point(x, y);
@@ -125,6 +126,7 @@ public class WorkerUnitFactory {
 		Duration duration = Duration.ofSeconds(d);
 
 		tp.setWorkerUnit(worker);
+		tp.setTaskId(taskId);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);
 		tp.setLatestStartTime(time);

@@ -3,6 +3,7 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import jts.geom.immutable.ImmutableGeometry;
@@ -27,6 +28,11 @@ import com.vividsolutions.jts.geom.Point;
  * @author Rico Jasper
  */
 public class TaskSpecification {
+	
+	/**
+	 * The ID of the task.
+	 */
+	private final UUID taskId;
 
 	/**
 	 * The spatial space for a valid location.
@@ -51,11 +57,13 @@ public class TaskSpecification {
 	/**
 	 * Constructs a new Specification defining an interval for the location and
 	 * start time and the duration of a {@link Task task}.
-	 *
+	 * 
+	 * @param taskId
 	 * @param locationSpace
 	 * @param earliestStartTime
 	 * @param latestStartTime
 	 * @param duration
+	 *
 	 * @throws NullPointerException
 	 *             if any argument is null
 	 * @throws IllegalArgumentException
@@ -67,11 +75,13 @@ public class TaskSpecification {
 	 *             </ul>
 	 */
 	public <G extends Geometry & ImmutableGeometry> TaskSpecification(
+		UUID taskId,
 		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
+		Objects.requireNonNull(taskId, "taskId");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
@@ -82,10 +92,18 @@ public class TaskSpecification {
 		if (duration.isNegative() || duration.isZero())
 			throw new IllegalArgumentException("illegal duration");
 
+		this.taskId = taskId;
 		this.locationSpace = locationSpace;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
 		this.duration = duration;
+	}
+
+	/**
+	 * @return the id of the task.
+	 */
+	public UUID getTaskId() {
+		return taskId;
 	}
 
 	/**

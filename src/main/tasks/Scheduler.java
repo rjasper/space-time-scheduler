@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.apache.commons.collections4.iterators.IteratorIterable;
 
@@ -132,6 +133,7 @@ public class Scheduler {
 		List<WorkerUnit> pool = getWorkerPool();
 		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
 		Geometry locationSpace = world.space(specification.getLocationSpace());
+		UUID taskId = specification.getTaskId();
 		LocalDateTime earliest = specification.getEarliestStartTime();
 		LocalDateTime latest = specification.getLatestStartTime();
 		Duration duration = specification.getDuration();
@@ -140,6 +142,7 @@ public class Scheduler {
 
 		tp.setWorkerPool(pool);
 		tp.setPerspectiveCache(perspectiveCache);
+		tp.setTaskId(taskId);
 		tp.setDuration(duration);
 
 		// iterate over possible locations

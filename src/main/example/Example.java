@@ -1,5 +1,6 @@
 package example;
 
+import static java.util.UUID.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
@@ -98,7 +99,7 @@ public final class Example {
 		LocalDateTime latestStartTime   = LocalDateTime.of(2015, 1, 1, 0, 4, 0);
 		Duration duration = Duration.ofSeconds(2L * 60L); // 2 minutes
 		// specification actual
-		TaskSpecification spec = new TaskSpecification(locationSpace, earliestStartTime, latestStartTime, duration);
+		TaskSpecification spec = new TaskSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
 		
 		boolean status = scheduler.schedule(spec);
 		
