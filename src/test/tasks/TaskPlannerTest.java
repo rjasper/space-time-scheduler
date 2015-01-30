@@ -1,6 +1,5 @@
 package tasks;
 
-import static util.UUIDFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
@@ -10,6 +9,7 @@ import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.NameProvider.*;
 import static util.TimeFactory.*;
+import static util.UUIDFactory.*;
 import static world.factories.PerspectiveCacheFactory.*;
 import static world.factories.TrajectoryFactory.*;
 

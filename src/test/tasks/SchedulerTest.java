@@ -1,6 +1,5 @@
 package tasks;
 
-import static util.UUIDFactory.*;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
@@ -8,6 +7,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.TimeFactory.*;
+import static util.UUIDFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;

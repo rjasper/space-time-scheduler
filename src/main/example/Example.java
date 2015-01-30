@@ -1,7 +1,7 @@
 package example;
 
-import static java.util.UUID.*;
 import static java.util.Collections.*;
+import static java.util.UUID.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;

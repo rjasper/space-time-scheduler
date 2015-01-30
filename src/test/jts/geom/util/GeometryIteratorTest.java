@@ -1,7 +1,7 @@
 package jts.geom.util;
 
-import static org.hamcrest.CoreMatchers.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
