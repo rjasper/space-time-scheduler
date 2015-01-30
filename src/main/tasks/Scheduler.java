@@ -87,7 +87,7 @@ public class Scheduler {
 			.map(WorkerUnit::new)
 			.collect(toImmutableList());
 		this.workerReferences = workerPool.stream()
-			.map(WorkerUnitReference::new)
+			.map(WorkerUnit::getReference)
 			.collect(toImmutableList());
 	}
 

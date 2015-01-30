@@ -709,11 +709,12 @@ public class TaskPlanner {
 			// create task
 
 			UUID taskId = getTaskId();
+			WorkerUnitReference workerRef = worker.getReference();
 			ImmutablePoint taskLocation = getLocation();
 			Duration taskDuration = getDuration();
 			LocalDateTime taskStartTime = trajToTask.getFinishTime();
 
-			task = new Task(taskId, taskLocation, taskStartTime, taskDuration);
+			task = new Task(taskId, workerRef, taskLocation, taskStartTime, taskDuration);
 
 			// calculate trajectory from task
 

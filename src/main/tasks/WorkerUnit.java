@@ -46,6 +46,11 @@ public class WorkerUnit {
 	 * The worker's ID.
 	 */
 	private final String id;
+	
+	/**
+	 * The reference to this worker.
+	 */
+	private final WorkerUnitReference reference;
 
 	/**
 	 * The physical shape of this worker.
@@ -103,6 +108,7 @@ public class WorkerUnit {
 	 */
 	public WorkerUnit(WorkerUnitSpecification spec) {
 		this.id = spec.getWorkerId();
+		this.reference = new WorkerUnitReference(this);
 		this.shape = spec.getShape();
 		this.maxSpeed = spec.getMaxSpeed();
 		this.initialLocation = spec.getInitialLocation();
@@ -131,6 +137,13 @@ public class WorkerUnit {
 	 */
 	public String getId() {
 		return id;
+	}
+
+	/**
+	 * @return the reference to this worker.
+	 */
+	public WorkerUnitReference getReference() {
+		return reference;
 	}
 
 	/**

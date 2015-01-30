@@ -26,6 +26,11 @@ public class Task {
 	 * The ID of this task.
 	 */
 	private final UUID id;
+	
+	/**
+	 * The worker assigned to this task.
+	 */
+	private final WorkerUnitReference assignedWorker;
 
 	/**
 	 * The location where the task is executed.
@@ -48,9 +53,11 @@ public class Task {
 	private final Duration duration;
 
 	/**
-	 * Helper constructor checking all arguments and initializing all fields.
-	 * Does not check consistency of duration.
+	 * Constructs a Task where the finish time is derived from the start time
+	 * and duration.
+	 * 
 	 * @param id
+	 * @param assignedWorker
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
@@ -66,49 +73,28 @@ public class Task {
 	 *             <li>The duration is negative.</li>
 	 *             </ul>
 	 */
-	private Task(UUID id, ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
+	public Task(
+		UUID id,
+		WorkerUnitReference assignedWorker,
+		ImmutablePoint location,
+		LocalDateTime startTime,
+		Duration duration)
+	{
 		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(assignedWorker, "assignedWorker");
 		Objects.requireNonNull(startTime, "startTime");
-		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(duration, "duration");
 		GeometriesRequire.requireValid2DPoint(location, "location");
 
-		if (startTime.compareTo(finishTime) > 0)
-			throw new IllegalArgumentException("startTime is after finishTime");
-		if (duration.isNegative())
-			throw new IllegalArgumentException("negative duration");
+		if (duration.isZero() || duration.isNegative())
+			throw new IllegalArgumentException("invalid duration");
 
 		this.id = id;
+		this.assignedWorker = assignedWorker;
 		this.location = location;
 		this.startTime = startTime;
-		this.finishTime = finishTime;
+		this.finishTime = startTime.plus(duration);
 		this.duration = duration;
-	}
-
-	/**
-	 * Constructs a Task where the duration is derived from the start and
-	 * finish time.
-	 * 
-	 * @param id
-	 * @param location
-	 * @param startTime
-	 * @param finishTime
-	 */
-	public Task(UUID id, ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime) {
-		this(id, location, startTime, finishTime, Duration.between(startTime, finishTime));
-	}
-
-	/**
-	 * Constructs a Task where the finish time is derived from the start time
-	 * and duration.
-	 * 
-	 * @param id
-	 * @param location
-	 * @param startTime
-	 * @param duration
-	 */
-	public Task(UUID id, ImmutablePoint location, LocalDateTime startTime, Duration duration) {
-		this(id, location, startTime, startTime.plus(duration), duration);
 	}
 
 	/**
@@ -116,6 +102,13 @@ public class Task {
 	 */
 	public UUID getId() {
 		return id;
+	}
+
+	/**
+	 * @return the assigned worker.
+	 */
+	public WorkerUnitReference getAssignedWorker() {
+		return assignedWorker;
 	}
 
 	/**
