@@ -104,6 +104,10 @@ public class Scheduler {
 	 * 
 	 * @param spec
 	 * @return a reference to the worker.
+	 * @throws NullPointerException
+	 *             if {@code spec} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if worker ID is already assigned.
 	 */
 	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
 		WorkerUnit worker = new WorkerUnit(spec);
@@ -111,7 +115,7 @@ public class Scheduler {
 		WorkerUnit previous = workerPool.putIfAbsent(worker.getId(), worker);
 		
 		if (previous != null)
-			throw new IllegalArgumentException("worker id already assigined");
+			throw new IllegalArgumentException("worker id already assigned");
 		
 		return worker.getReference();
 	}
@@ -121,6 +125,10 @@ public class Scheduler {
 	 * 
 	 * @param workerId
 	 * @return the reference.
+	 * @throws NullPointerException
+	 *             if {@code workerId} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if worker ID is unassigned.
 	 */
 	public WorkerUnitReference getWorkerReference(String workerId) {
 		WorkerUnit worker = workerPool.get(
