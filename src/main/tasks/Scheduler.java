@@ -107,7 +107,11 @@ public class Scheduler {
 	 */
 	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
 		WorkerUnit worker = new WorkerUnit(spec);
-		workerPool.put(worker.getId(), worker);
+		
+		WorkerUnit previous = workerPool.putIfAbsent(worker.getId(), worker);
+		
+		if (previous != null)
+			throw new IllegalArgumentException("worker id already assigined");
 		
 		return worker.getReference();
 	}
