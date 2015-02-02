@@ -1,7 +1,7 @@
 package tasks;
 
-import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
+import static java.util.stream.Collectors.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -60,6 +60,21 @@ public class Scheduler {
 	 * The workers managed by this scheduler.
 	 */
 	private final Map<String, WorkerUnit> workerPool = new HashMap<>();
+	
+	/**
+	 * The present time.
+	 */
+	private LocalDateTime presentTime = LocalDateTime.MIN;
+	
+	/**
+	 * The time of the frozen horizon.
+	 */
+	private LocalDateTime frozenHorizonTime = LocalDateTime.MIN;
+	
+	/**
+	 * The duration from {@link #presentTime} to {@link #frozenHorizonTime}.
+	 */
+	private Duration frozenHorizonDuration = Duration.ZERO;
 	
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
@@ -142,6 +157,70 @@ public class Scheduler {
 		return worker.getReference();
 	}
 	
+	/**
+	 * @return the present time
+	 */
+	public LocalDateTime getPresentTime() {
+		return presentTime;
+	}
+
+	/**
+	 * Sets the present time.
+	 * 
+	 * @param presentTime
+	 * @throws NullPointerException
+	 *             if {@code presentTime} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code presentTime} would decrease.
+	 */
+	public void setPresentTime(LocalDateTime presentTime) {
+		// also throws NullPointerException
+		if (presentTime.compareTo(this.presentTime) < 0)
+			throw new IllegalArgumentException("presentTime cannot decrease");
+		
+		this.presentTime = presentTime;
+		
+		updateFrozenHorizonTime();
+	}
+
+	/**
+	 * @return the frozenHorizonTime
+	 */
+	public LocalDateTime getFrozenHorizonTime() {
+		return frozenHorizonTime;
+	}
+
+	/**
+	 * @param frozenHorizonTime the frozenHorizonTime to set
+	 */
+	private void updateFrozenHorizonTime() {
+		LocalDateTime tmp = presentTime.plus(frozenHorizonDuration);
+		
+		// frozen horizon cannot go backwards
+		if (tmp.isAfter(frozenHorizonTime))
+			frozenHorizonTime = tmp;
+	}
+
+	/**
+	 * @return the frozenHorizonDuration
+	 */
+	public Duration getFrozenHorizonDuration() {
+		return frozenHorizonDuration;
+	}
+
+	/**
+	 * @param frozenHorizonDuration the frozenHorizonDuration to set
+	 */
+	public void setFrozenHorizonDuration(Duration frozenHorizonDuration) {
+		// also throws NullPointerException
+		if (frozenHorizonDuration.isNegative())
+			throw new IllegalArgumentException("frozenHorizonDuration be negative");
+		
+		this.frozenHorizonDuration = frozenHorizonDuration;
+		
+		updateFrozenHorizonTime();
+	}
+
 	/**
 	 * Tries to schedule a new task satisfying the given specification.
 	 *
