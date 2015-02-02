@@ -91,6 +91,7 @@ public class Scheduler {
 		//      (e.g. no overlapping of obstacles)
 		
 		this.world = world;
+		// TODO use an envelope based cache
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 	}
 

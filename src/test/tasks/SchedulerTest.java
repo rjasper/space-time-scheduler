@@ -10,7 +10,9 @@ import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
 import jts.geom.immutable.ImmutablePolygon;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import tasks.factories.WorkerUnitFactory;
 import world.StaticObstacle;
@@ -20,6 +22,9 @@ import world.fixtures.WorldFixtures;
 import com.google.common.collect.ImmutableList;
 
 public class SchedulerTest {
+	
+	@Rule
+    public ExpectedException thrown = ExpectedException.none();
 
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
 
@@ -145,6 +150,90 @@ public class SchedulerTest {
 			result.getTasks().get(uuid("s4")), satisfies(s4));
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
+	}
+	
+	@Test
+	public void testIncreasePresentTime() {
+		Scheduler sc = new Scheduler(new World());
+		
+		sc.setPresentTime(atSecond(0));
+		
+		assertThat("present was not set",
+			sc.getPresentTime(), equalTo( atSecond(0) ));
+		
+		sc.setPresentTime(atSecond(1));
+
+		assertThat("present was not increased",
+			sc.getPresentTime(), equalTo( atSecond(1) ));
+	}
+	
+	@Test
+	public void testDecreasePresentTime() {
+		Scheduler sc = new Scheduler(new World());
+		
+		sc.setPresentTime(atSecond(1));
+		
+		assertThat("present was not set",
+			sc.getPresentTime(), equalTo( atSecond(1) ));
+		
+		thrown.expect(IllegalArgumentException.class);
+		
+		sc.setPresentTime(atSecond(0)); // should throw exception
+		
+		fail("decreased present was accepted");
+	}
+	
+	@Test
+	public void testIncreaseFrozenHorizonByPresent() {
+		Scheduler sc = new Scheduler(new World());
+		
+		sc.setPresentTime(atSecond(0));
+		sc.setFrozenHorizonDuration(ofSeconds(1));
+		
+		assertThat("horizon was not set",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(1) ));
+		
+		sc.setPresentTime(atSecond(1));
+
+		assertThat("horizon was not increased",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
+	}
+	
+	@Test
+	public void testIncreaseFrozenHorizonByDuration() {
+		Scheduler sc = new Scheduler(new World());
+		
+		sc.setPresentTime(atSecond(0));
+		sc.setFrozenHorizonDuration(ofSeconds(1));
+		
+		assertThat("horizon was not set",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(1) ));
+		
+		sc.setFrozenHorizonDuration(ofSeconds(2));
+
+		assertThat("horizon was not increased",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
+	}
+	
+	@Test
+	public void testDecreaseFrozenHorizon() {
+		Scheduler sc = new Scheduler(new World());
+		
+		sc.setPresentTime(atSecond(0));
+		sc.setFrozenHorizonDuration(ofSeconds(2));
+		
+		assertThat("horizon was not set",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
+		
+		sc.setFrozenHorizonDuration(ofSeconds(1));
+
+		assertThat("horizon was modified",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
+		
+		sc.setPresentTime(atSecond(2));
+
+		assertThat("horizon was not increased",
+			sc.getFrozenHorizonTime(), equalTo( atSecond(3) ));
 	}
 
 }
