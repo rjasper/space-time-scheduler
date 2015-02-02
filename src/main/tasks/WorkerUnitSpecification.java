@@ -15,6 +15,11 @@ import jts.geom.util.GeometriesRequire;
  * @author Rico
  */
 public class WorkerUnitSpecification {
+	
+	/**
+	 * The worker's ID.
+	 */
+	private final String workerId;
 
 	/**
 	 * The physical shape of this worker.
@@ -59,11 +64,13 @@ public class WorkerUnitSpecification {
 	 *             </ul>
 	 */
 	public WorkerUnitSpecification(
+		String workerId,
 		ImmutablePolygon shape,
 		double maxSpeed,
 		ImmutablePoint initialLocation,
 		LocalDateTime initialTime)
 	{
+		Objects.requireNonNull(workerId, "workerId");
 		Objects.requireNonNull(initialLocation, "initialLocation");
 		Objects.requireNonNull(initialTime, "initialTime");
 		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
@@ -72,10 +79,18 @@ public class WorkerUnitSpecification {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0)
 			throw new IllegalArgumentException("maximum speed is not a positive finite number");
 
+		this.workerId = workerId;
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialLocation = initialLocation;
 		this.initialTime = initialTime;
+	}
+
+	/**
+	 * @return the worker's ID.
+	 */
+	public String getWorkerId() {
+		return workerId;
 	}
 
 	/**

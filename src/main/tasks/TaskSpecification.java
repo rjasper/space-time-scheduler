@@ -3,12 +3,14 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
-import jts.geom.immutable.ImmutablePolygon;
+import jts.geom.immutable.ImmutableGeometry;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -26,11 +28,16 @@ import com.vividsolutions.jts.geom.Point;
  * @author Rico Jasper
  */
 public class TaskSpecification {
+	
+	/**
+	 * The ID of the task.
+	 */
+	private final UUID taskId;
 
 	/**
 	 * The spatial space for a valid location.
 	 */
-	private final ImmutablePolygon locationSpace;
+	private final Geometry locationSpace;
 
 	/**
 	 * The earliest possible start time.
@@ -50,11 +57,13 @@ public class TaskSpecification {
 	/**
 	 * Constructs a new Specification defining an interval for the location and
 	 * start time and the duration of a {@link Task task}.
-	 *
+	 * 
+	 * @param taskId
 	 * @param locationSpace
 	 * @param earliestStartTime
 	 * @param latestStartTime
 	 * @param duration
+	 *
 	 * @throws NullPointerException
 	 *             if any argument is null
 	 * @throws IllegalArgumentException
@@ -65,22 +74,25 @@ public class TaskSpecification {
 	 *             <li>the duration is negative or zero</li>
 	 *             </ul>
 	 */
-	public TaskSpecification(
-		ImmutablePolygon locationSpace,
+	public <G extends Geometry & ImmutableGeometry> TaskSpecification(
+		UUID taskId,
+		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
+		Objects.requireNonNull(taskId, "taskId");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
-		GeometriesRequire.requireValidSimple2DPolygon(locationSpace, "locationSpace");
+		GeometriesRequire.requireValidSimple2DGeometry(locationSpace, "locationSpace");
 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
 		if (duration.isNegative() || duration.isZero())
 			throw new IllegalArgumentException("illegal duration");
 
+		this.taskId = taskId;
 		this.locationSpace = locationSpace;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
@@ -88,9 +100,16 @@ public class TaskSpecification {
 	}
 
 	/**
-	 * @return the spatial space for a valid {@link Point location}.
+	 * @return the id of the task.
 	 */
-	public ImmutablePolygon getLocationSpace() {
+	public UUID getTaskId() {
+		return taskId;
+	}
+
+	/**
+	 * @return the immutable spatial space for a valid {@link Point location}.
+	 */
+	public Geometry getLocationSpace() {
 		return locationSpace;
 	}
 
@@ -122,8 +141,8 @@ public class TaskSpecification {
 	@Override
 	public String toString() {
 		// lazy evaluation
-		Supplier<String> defaultString = () -> String.format("(%s, %s, %s)",
-			getLocationSpace(), getEarliestStartTime(), getLatestStartTime());
+		Supplier<String> defaultString = () -> String.format("(%s, %s, %s, %s)",
+			getLocationSpace(), getEarliestStartTime(), getLatestStartTime(), getDuration());
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

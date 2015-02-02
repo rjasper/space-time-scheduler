@@ -32,6 +32,13 @@ public class WorkerUnitReference {
 	}
 
 	/**
+	 * @return the worker's ID.
+	 */
+	public String getId() {
+		return worker.getId();
+	}
+
+	/**
 	 * @return the physical shape of the worker.
 	 */
 	public ImmutablePolygon getShape() {
@@ -72,7 +79,16 @@ public class WorkerUnitReference {
 	 * @return the merged trajectory.
 	 */
 	public Trajectory calcTrajectory() {
-		return worker.calcMergedTrajectory();
+		return worker.calcTrajectory();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return worker.toString();
+	}
+	
 }

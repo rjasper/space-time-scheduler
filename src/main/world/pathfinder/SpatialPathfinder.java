@@ -142,7 +142,7 @@ public abstract class SpatialPathfinder {
 		SpatialPath spatialPath = calculateSpatialPath();
 		setResultSpatialPath(spatialPath);
 
-		return spatialPath != null;
+		return !spatialPath.isEmpty();
 	}
 
 	/**

@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 import static util.DurationConv.*;
 import static util.NameProvider.*;
 import static util.TimeFactory.*;
+import static util.UUIDFactory.*;
 import static world.factories.PerspectiveCacheFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePolygon;
 
@@ -40,12 +42,14 @@ public class TaskPlannerTest {
 	private static boolean planTask(
 		TaskPlanner taskPlanner,
 		WorkerUnit worker,
+		UUID taskId,
 		Point location,
 		LocalDateTime startTime,
 		Duration duration)
 	{
 		taskPlanner.setWorkerUnit(worker);
 		taskPlanner.setLocation(location);
+		taskPlanner.setTaskId(taskId);
 		taskPlanner.setEarliestStartTime(startTime);
 		taskPlanner.setLatestStartTime(startTime);
 		taskPlanner.setDuration(duration);
@@ -57,7 +61,7 @@ public class TaskPlannerTest {
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
 			immutableBox(30., 10., 40., 40.));
-		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -71,7 +75,7 @@ public class TaskPlannerTest {
 		tp.setPerspectiveCache(perspectiveCache);
 		
 		// P = (60, 20), t = 120, d = 30
-		boolean status = planTask(tp, w,
+		boolean status = planTask(tp, w, uuid("task"),
 			point(60., 20.),
 			atSecond(120.),
 			ofSeconds(30.));
@@ -90,7 +94,7 @@ public class TaskPlannerTest {
 			40,  0,
 			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
-		WorkerUnit w = wFact.createWorkerUnit(10.0, 20.0);
+		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
 
 		setNameFor(w, "w");
 
@@ -104,7 +108,7 @@ public class TaskPlannerTest {
 		tp.setPerspectiveCache(perspectiveCache);
 		
 		// P = (60, 20), t = 120, d = 30
-		boolean status = planTask(tp, w,
+		boolean status = planTask(tp, w, uuid("task"),
 			point(50., 20.),
 			atSecond(60.),
 			ofSeconds(30.));
@@ -118,11 +122,8 @@ public class TaskPlannerTest {
 	@Test
 	public void testObsoleteEvasions() {
 		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
-		WorkerUnit w1 = wFact.createWorkerUnit(shape, 1.0, 3.0, 5.0, 0.0);
-		WorkerUnit w2 = wFact.createWorkerUnit(shape, 1.0, 2.0, 3.0, 5.0);
-	
-		setNameFor(w1, "w1");
-		setNameFor(w2, "w2");
+		WorkerUnit w1 = wFact.createWorkerUnit("w1", shape, 1.0, 3.0, 5.0, 0.0);
+		WorkerUnit w2 = wFact.createWorkerUnit("w2", shape, 1.0, 2.0, 3.0, 5.0);
 	
 		World world = new World();
 		WorldPerspectiveCache perspectiveCache =
@@ -137,7 +138,7 @@ public class TaskPlannerTest {
 		boolean status;
 	
 		// w = w1, P = (3, 1), t = 10, d = 2
-		status = planTask(tp, w1,
+		status = planTask(tp, w1, uuid("task1"),
 			point(3.0, 1.0),
 			atSecond(10.0),
 			ofSeconds(2.0));
@@ -148,7 +149,7 @@ public class TaskPlannerTest {
 			workers, not(areEvadedBy(w1)));
 	
 		// w = w2, P = (5, 3), t = 10, d = 2
-		status = planTask(tp, w2,
+		status = planTask(tp, w2, uuid("task2"),
 			point(5.0, 3.0),
 			atSecond(10.0),
 			ofSeconds(2.0));
@@ -163,7 +164,7 @@ public class TaskPlannerTest {
 			workers, evadedByNumTimes(w2, 1));
 	
 		// w = w1, P = (1, 3), t = 4, d = 2
-		status = planTask(tp, w1,
+		status = planTask(tp, w1, uuid("task3"),
 			point(1.0, 3.0),
 			atSecond(4.0),
 			ofSeconds(2.0));
@@ -179,14 +180,14 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightTask1() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			"w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 	
 		TaskPlanner tp = new TaskPlanner();
 	
 		tp.setWorkerPool(singleton(w));
 		tp.setPerspectiveCache(emptyPerspectiveCache());
 		
-		boolean status = planTask(tp, w,
+		boolean status = planTask(tp, w, uuid("task"),
 			point(0, 0),
 			atSecond(0),
 			ofSeconds(10));
@@ -198,8 +199,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan2() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
-		setNameFor(w, "w");
+			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		
 		TaskPlanner tp = new TaskPlanner();
 	
@@ -209,7 +209,7 @@ public class TaskPlannerTest {
 		boolean status;
 
 		// P = (3, 1), t = 2, d = 1
-		status = planTask(tp, w,
+		status = planTask(tp, w, uuid("task1"),
 			point(3, 1),
 			atSecond(2),
 			ofSeconds(1));
@@ -218,7 +218,7 @@ public class TaskPlannerTest {
 			status, equalTo(true));
 
 		// P = (3, 1), t = 3, d = 1
-		status = planTask(tp, w,
+		status = planTask(tp, w, uuid("task2"),
 			point(3, 1),
 			atSecond(3),
 			ofSeconds(1));
@@ -230,8 +230,7 @@ public class TaskPlannerTest {
 	@Test
 	public void testTightPlan3() {
 		WorkerUnit w = wFact.createWorkerUnit(
-			immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
-		setNameFor(w, "w");
+			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 		
 		TaskPlanner tp = new TaskPlanner();
 	
@@ -241,7 +240,7 @@ public class TaskPlannerTest {
 		boolean status;
 
 		// P = (3, 1), t = 3, d = 1
-		status = planTask(tp, w,
+		status = planTask(tp, w, uuid("task1"),
 			point(3, 1),
 			atSecond(3),
 			ofSeconds(1));
@@ -250,7 +249,7 @@ public class TaskPlannerTest {
 			status, equalTo(true));
 
 		// P = (3, 1), t = 2, d = 1
-		status = planTask(tp, w,
+		status = planTask(tp, w, uuid("task2"),
 			point(3, 1),
 			atSecond(2),
 			ofSeconds(1));

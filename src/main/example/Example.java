@@ -1,6 +1,6 @@
-package main;
+package example;
 
-import static java.util.Collections.*;
+import static java.util.UUID.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.time.Duration;
@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import tasks.ScheduleResult;
 import tasks.Scheduler;
 import tasks.TaskSpecification;
 import tasks.WorkerUnitReference;
@@ -80,11 +81,10 @@ public final class Example {
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 0, 0); // 1/1/2015 12:00 AM
 		// worker actual
 		WorkerUnitSpecification workerSpec =
-			new WorkerUnitSpecification(workerShape, maxSpeed, initialLocation, initialTime);
+			new WorkerUnitSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
-		Scheduler scheduler = new Scheduler(world, singleton(workerSpec));
-		
-		WorkerUnitReference workerRef = scheduler.getWorkerReferences().get(0);
+		Scheduler scheduler = new Scheduler(world);
+		WorkerUnitReference workerRef = scheduler.addWorker(workerSpec);
 		
 		// specification
 		// for specification
@@ -98,11 +98,11 @@ public final class Example {
 		LocalDateTime latestStartTime   = LocalDateTime.of(2015, 1, 1, 0, 4, 0);
 		Duration duration = Duration.ofSeconds(2L * 60L); // 2 minutes
 		// specification actual
-		TaskSpecification spec = new TaskSpecification(locationSpace, earliestStartTime, latestStartTime, duration);
+		TaskSpecification spec = new TaskSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
 		
-		boolean status = scheduler.schedule(spec);
+		ScheduleResult result = scheduler.schedule(spec);
 		
-		System.out.println(status);
+		System.out.println(result);
 		System.out.println(workerRef.calcTrajectory());
 	}
 

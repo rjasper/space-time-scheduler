@@ -5,7 +5,6 @@ import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
@@ -137,7 +136,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 * </ul>
 	 */
 	public WorkerUnitSlotIterator(
-		Collection<WorkerUnit> workers,
+		Iterable<WorkerUnit> workers,
 		Point location,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
@@ -156,7 +155,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		if (duration.isNegative())
 			throw new IllegalArgumentException("duration is negative");
 
-		this.workerIterator = new ArrayList<>(workers).iterator();
+		this.workerIterator = workers.iterator();
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
@@ -289,6 +288,10 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		this.currentSlot = currentSlot;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.util.Iterator#next()
+	 */
 	@Override
 	public WorkerUnitSlot next() {
 		setCurrentWorker(getNextWorker());

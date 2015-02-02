@@ -296,8 +296,14 @@ public class TrajectoryComposer {
 	 *            the merged t-values.
 	 * @return number of 3-dimensional vertices.
 	 */
-	private int mergePaths(double[] tSpatial, double[] xArcTime,
-		double[] yArcTime, double[] x, double[] y, double[] t) {
+	private int mergePaths(
+		double[] tSpatial,
+		double[] xArcTime,
+		double[] yArcTime,
+		double[] x,
+		double[] y,
+		double[] t)
+	{
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 

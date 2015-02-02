@@ -3,6 +3,7 @@ package tasks;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -20,6 +21,16 @@ import util.NameProvider;
  * @author Rico Jasper
  */
 public class Task {
+	
+	/**
+	 * The ID of this task.
+	 */
+	private final UUID id;
+	
+	/**
+	 * The worker assigned to this task.
+	 */
+	private final WorkerUnitReference assignedWorker;
 
 	/**
 	 * The location where the task is executed.
@@ -42,13 +53,16 @@ public class Task {
 	private final Duration duration;
 
 	/**
-	 * Helper constructor checking all arguments and initializing all fields.
-	 * Does not check consistency of duration.
-	 *
+	 * Constructs a Task where the finish time is derived from the start time
+	 * and duration.
+	 * 
+	 * @param id
+	 * @param assignedWorker
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
 	 * @param duration
+	 *
 	 * @throws NullPointerException
 	 *             if any argument is null
 	 * @throws IllegalArgumentException
@@ -59,45 +73,42 @@ public class Task {
 	 *             <li>The duration is negative.</li>
 	 *             </ul>
 	 */
-	private Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime, Duration duration) {
+	public Task(
+		UUID id,
+		WorkerUnitReference assignedWorker,
+		ImmutablePoint location,
+		LocalDateTime startTime,
+		Duration duration)
+	{
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(assignedWorker, "assignedWorker");
 		Objects.requireNonNull(startTime, "startTime");
-		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(duration, "duration");
 		GeometriesRequire.requireValid2DPoint(location, "location");
 
-		if (startTime.compareTo(finishTime) > 0)
-			throw new IllegalArgumentException("startTime is after finishTime");
-		if (duration.isNegative())
-			throw new IllegalArgumentException("negative duration");
+		if (duration.isZero() || duration.isNegative())
+			throw new IllegalArgumentException("invalid duration");
 
+		this.id = id;
+		this.assignedWorker = assignedWorker;
 		this.location = location;
 		this.startTime = startTime;
-		this.finishTime = finishTime;
+		this.finishTime = startTime.plus(duration);
 		this.duration = duration;
 	}
 
 	/**
-	 * Constructs a Task where the duration is derived from the start and
-	 * finish time.
-	 *
-	 * @param location
-	 * @param startTime
-	 * @param finishTime
+	 * @return the id of this task.
 	 */
-	public Task(ImmutablePoint location, LocalDateTime startTime, LocalDateTime finishTime) {
-		this(location, startTime, finishTime, Duration.between(startTime, finishTime));
+	public UUID getId() {
+		return id;
 	}
 
 	/**
-	 * Constructs a Task where the finish time is derived from the start time
-	 * and duration.
-	 *
-	 * @param location
-	 * @param startTime
-	 * @param duration
+	 * @return the assigned worker.
 	 */
-	public Task(ImmutablePoint location, LocalDateTime startTime, Duration duration) {
-		this(location, startTime, startTime.plus(duration), duration);
+	public WorkerUnitReference getAssignedWorker() {
+		return assignedWorker;
 	}
 
 	/**
@@ -136,8 +147,8 @@ public class Task {
 	@Override
 	public String toString() {
 		// lazy evaluation
-		Supplier<String> defaultString = () -> String.format("(%s, %s, %s)",
-			getLocation(), getStartTime(), getFinishTime());
+		Supplier<String> defaultString = () -> String.format("%s:(%s, %s, %s)",
+			getAssignedWorker(), getLocation(), getStartTime(), getFinishTime());
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

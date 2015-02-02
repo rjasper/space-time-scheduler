@@ -42,7 +42,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test
 	public void testCreatePerspective() {
-		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
+		WorkerUnit perceiver = wFact.createWorkerUnit("perceiver", 0.0, 0.0);
 		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective = cache.getPerspectiveFor(perceiver);
@@ -53,7 +53,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test
 	public void testRecallPerspective() {
-		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
+		WorkerUnit perceiver = wFact.createWorkerUnit("perceiver", 0.0, 0.0);
 		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver);
@@ -66,8 +66,8 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	@Test
 	public void testReusePerspective() {
 		// Both perceivers have the same shape and therefore the same perspective.
-		WorkerUnit perceiver1 = wFact.createWorkerUnit( 0.0,  0.0);
-		WorkerUnit perceiver2 = wFact.createWorkerUnit(50.0, 50.0);
+		WorkerUnit perceiver1 = wFact.createWorkerUnit("perceiver1",  0.0,  0.0);
+		WorkerUnit perceiver2 = wFact.createWorkerUnit("perceiver2", 50.0, 50.0);
 		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver1);
@@ -81,8 +81,8 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 	public void testUsesDifferentPerspectives() {
 		ImmutablePolygon shape1 = immutableBox(-1.0, -1.0, 1.0, 1.0);
 		ImmutablePolygon shape2 = immutableBox(-2.0, -2.0, 2.0, 2.0);
-		WorkerUnit perceiver1 = wFact.createWorkerUnit(shape1, 1.0,  0.0,  0.0, 0.0);
-		WorkerUnit perceiver2 = wFact.createWorkerUnit(shape2, 1.0, 50.0, 50.0, 0.0);
+		WorkerUnit perceiver1 = wFact.createWorkerUnit("perceiver1", shape1, 1.0,  0.0,  0.0, 0.0);
+		WorkerUnit perceiver2 = wFact.createWorkerUnit("perceiver2", shape2, 1.0, 50.0, 50.0, 0.0);
 		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver1);
@@ -94,7 +94,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test
 	public void testRemovePerspective() {
-		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
+		WorkerUnit perceiver = wFact.createWorkerUnit("perceiver", 0.0, 0.0);
 		WorldPerspectiveCache cache = emptyPerspectiveCache();
 
 		WorldPerspective perspective1 = cache.getPerspectiveFor(perceiver);
@@ -107,7 +107,7 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test
 	public void testBufferPerspective() {
-		WorkerUnit perceiver = wFact.createWorkerUnit(0.0, 0.0);
+		WorkerUnit perceiver = wFact.createWorkerUnit("perceiver", 0.0, 0.0);
 		StaticObstacle obstacle = new StaticObstacle(
 			immutableBox(10.0, 10.0, 20.0, 20.0));
 		WorldPerspectiveCache cache = perspectiveCache(ImmutableList.of(obstacle));

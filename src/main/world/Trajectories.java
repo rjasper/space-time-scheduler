@@ -65,12 +65,12 @@ public final class Trajectories {
 		}
 		
 		@Override
-		public double getLength() {
+		public double length() {
 			return Double.NaN;
 		}
 		
 		@Override
-		public Geometry getTrace() {
+		public Geometry trace() {
 			return null;
 		}
 		

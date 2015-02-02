@@ -1,6 +1,6 @@
 package jts.geom.util;
 
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

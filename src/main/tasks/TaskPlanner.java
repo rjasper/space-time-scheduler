@@ -12,10 +12,12 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
+import tasks.ScheduleResult.TrajectoryUpdate;
 import util.CollectionsRequire;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
@@ -23,6 +25,7 @@ import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
 import world.OccupiedWorkerUnitObstacle;
 import world.SpatialPath;
+import world.Trajectory;
 import world.WorkerUnitObstacle;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
@@ -66,6 +69,16 @@ import com.vividsolutions.jts.geom.Point;
 public class TaskPlanner {
 
 	/**
+	 * The FixTimeVelocityPathfinder to be used.
+	 */
+	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
+
+	/**
+	 * The MinimumTimeVelocityPathfinder to be used.
+	 */
+	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
+
+	/**
 	 * The current worker.
 	 */
 	private WorkerUnit workerUnit = null;
@@ -87,9 +100,14 @@ public class TaskPlanner {
 	 * times.
 	 */
 	private Collection<WorkerUnitObstacle> workerObstacles = new LinkedList<>();
+	
+	/**
+	 * The id of the {@link Task task} to be planned.
+	 */
+	private UUID taskId = null;
 
 	/**
-	 * The location of the {@link Task task}.
+	 * The location of the {@link Task task} to be planned.
 	 */
 	private ImmutablePoint location = null;
 
@@ -107,16 +125,30 @@ public class TaskPlanner {
 	 * The duration of the {@link Task task} to be planned.
 	 */
 	private Duration duration = null;
+	
+	/**
+	 * The planned task.
+	 */
+	private Task resultTask = null;
+	
+	/**
+	 * The trajectory updates.
+	 */
+	private List<TrajectoryUpdate> resultTrajectoryUpdates = null;
 
 	/**
-	 * The FixTimeVelocityPathfinder to be used.
+	 * @return the FixTimeVelocityPathfinder.
 	 */
-	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
+	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
+		return fixTimeVelocityPathfinder;
+	}
 
 	/**
-	 * The MinimumTimeVelocityPathfinder to be used.
+	 * @return the MinimumTimeVelocityPathfinder.
 	 */
-	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
+	private MinimumTimeVelocityPathfinder getMinimumTimeVelocityPathfinder() {
+		return minimumTimeVelocityPathfinder;
+	}
 
 	/**
 	 * @return the current worker.
@@ -212,6 +244,22 @@ public class TaskPlanner {
 	}
 
 	/**
+	 * @return the id of the {@link Task task} to be planned.
+	 */
+	private UUID getTaskId() {
+		return taskId;
+	}
+
+	/**
+	 * Sets the id of the {@link Task task} to be planned.
+	 * 
+	 * @param taskId
+	 */
+	public void setTaskId(UUID taskId) {
+		this.taskId = taskId;
+	}
+
+	/**
 	 * @return the location of the {@link Task task} to be planned.
 	 */
 	private ImmutablePoint getLocation() {
@@ -291,6 +339,61 @@ public class TaskPlanner {
 		
 		this.duration = duration;
 	}
+	
+	/**
+	 * @return a list of newly planned tasks.
+	 */
+	public List<Task> getResultTasks() {
+		if (resultTask == null)
+			return emptyList();
+		else
+			return singletonList(resultTask);
+	}
+	
+	/**
+	 * Resets the {@link #resultTask} to {@code null}.
+	 */
+	private void resetResultTask() {
+		resultTask = null;
+	}
+
+	/**
+	 * Sets the result task.
+	 * 
+	 * @param resultTask
+	 */
+	private void setResultTask(Task resultTask) {
+		this.resultTask = resultTask;
+	}
+
+	/**
+	 * @return the trajectory updates.
+	 */
+	public List<TrajectoryUpdate> getResultTrajectoryUpdates() {
+		if (resultTrajectoryUpdates == null)
+			return emptyList();
+		else
+			return resultTrajectoryUpdates;
+	}
+	
+	/**
+	 * Adds a new {@link TrajectoryUpdate} to {@link #resultTrajectoryUpdates}.
+	 * 
+	 * @param trajectory the updated trajectory
+	 * @param worker whose trajectory was updated
+	 */
+	private void addTrajectoryUpdate(Trajectory trajectory, WorkerUnit worker) {
+		resultTrajectoryUpdates.add(
+			new TrajectoryUpdate(trajectory, worker.getReference()));
+	}
+
+	/**
+	 * Resets the {@link #resultTrajectoryUpdates} to an empty
+	 * {@link LinkedList}.
+	 */
+	private void resetResultTrajectoryUpdates() {
+		resultTrajectoryUpdates = new LinkedList<>();
+	}
 
 	/**
 	 * @return the SpatialPathfinder.
@@ -302,20 +405,6 @@ public class TaskPlanner {
 		WorldPerspective perspective = cache.getPerspectiveFor(worker);
 
 		return perspective.getSpatialPathfinder();
-	}
-
-	/**
-	 * @return the FixTimeVelocityPathfinder.
-	 */
-	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
-		return fixTimeVelocityPathfinder;
-	}
-
-	/**
-	 * @return the MinimumTimeVelocityPathfinder.
-	 */
-	private MinimumTimeVelocityPathfinder getMinimumTimeVelocityPathfinder() {
-		return minimumTimeVelocityPathfinder;
 	}
 
 	/**
@@ -343,6 +432,7 @@ public class TaskPlanner {
 		if (workerUnit        == null ||
 			workerPool        == null ||
 			perspectiveCache  == null ||
+			taskId            == null ||
 			location          == null ||
 			earliestStartTime == null ||
 			latestStartTime   == null ||
@@ -354,8 +444,12 @@ public class TaskPlanner {
 		// assert earliest <= latest 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalStateException("earliestStartTime is after latestStartTime");
-	}
 
+		// cannot plan with worker which is not initialized yet
+		if (latestStartTime.compareTo(workerUnit.getInitialTime()) < 0)
+			throw new IllegalStateException("worker not initialized yet");
+	}
+	
 	/**
 	 * <p>Plans new path segments of the current worker to the new task and
 	 * the following one. The old segment is replaced by the new ones.</p>
@@ -370,7 +464,12 @@ public class TaskPlanner {
 	 */
 	public boolean plan() {
 		checkParameters();
+		
+		resetResultTask();
+		resetResultTrajectoryUpdates();
+		
 		boolean status = planImpl();
+		
 		clearCurrentDynamicObstacles();
 
 		return status;
@@ -387,10 +486,6 @@ public class TaskPlanner {
 	 */
 	private boolean planImpl() {
 		WorkerUnit worker = getWorkerUnit();
-
-		// cannot plan with worker which is not initialized yet
-		if (getLatestStartTime().compareTo( worker.getInitialTime() ) < 0)
-			return false;
 
 		// the segment to be replaced by two segment to and form the new task
 		WorkerUnitObstacle segment = worker.getObstacleSegment( getEarliestStartTime() );
@@ -685,11 +780,13 @@ public class TaskPlanner {
 
 			// create task
 
+			UUID taskId = getTaskId();
+			WorkerUnitReference workerRef = worker.getReference();
 			ImmutablePoint taskLocation = getLocation();
 			Duration taskDuration = getDuration();
 			LocalDateTime taskStartTime = trajToTask.getFinishTime();
 
-			task = new Task(taskLocation, taskStartTime, taskDuration);
+			task = new Task(taskId, workerRef, taskLocation, taskStartTime, taskDuration);
 
 			// calculate trajectory from task
 
@@ -701,6 +798,7 @@ public class TaskPlanner {
 
 			// create segments
 
+			// don't introduce trajectories without duration
 			segmentToTask = trajToTask.getDuration().isZero() ?
 				null : new MovingWorkerUnitObstacle(worker, trajToTask, task);
 			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
@@ -824,12 +922,21 @@ public class TaskPlanner {
 			// add obstacle segments and task
 			WorkerUnit worker = getWorkerUnit();
 			worker.removeObstacleSegment(segment);
-			if (segmentToTask != null)
+			if (segmentToTask != null) {
 				worker.addObstacleSegment(segmentToTask);
+				addTrajectoryUpdate(trajToTask, worker);
+			}
+			
 			worker.addObstacleSegment(segmentAtTask);
-			if (segmentFromTask != null)
+			addTrajectoryUpdate(segmentAtTask.getTrajectory(), worker);
+			
+			if (segmentFromTask != null) {
 				worker.addObstacleSegment(segmentFromTask);
+				addTrajectoryUpdate(trajFromTask, worker);
+			}
+			
 			worker.addTask(task);
+			setResultTask(task);
 		}
 
 	}
@@ -876,7 +983,7 @@ public class TaskPlanner {
 		public double calcLaxity() {
 			WorkerUnit worker = segment.getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
-			double length = segment.getTrajectory().getLength();
+			double length = segment.getTrajectory().length();
 			double maxDuration = inSeconds( getJobDuration() );
 
 			return maxDuration/length - 1./maxSpeed;
@@ -931,6 +1038,7 @@ public class TaskPlanner {
 			WorkerUnit worker = segment.getWorkerUnit();
 			worker.removeObstacleSegment(segment);
 			worker.addObstacleSegment(updatedSegment);
+			addTrajectoryUpdate(updatedSegment.getTrajectory(), worker);
 		}
 
 	}
