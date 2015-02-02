@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
+import tasks.ScheduleResult.TrajectoryUpdate;
 import util.CollectionsRequire;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
@@ -24,6 +25,7 @@ import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
 import world.OccupiedWorkerUnitObstacle;
 import world.SpatialPath;
+import world.Trajectory;
 import world.WorkerUnitObstacle;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
@@ -65,6 +67,16 @@ import com.vividsolutions.jts.geom.Point;
  * @author Rico Jasper
  */
 public class TaskPlanner {
+
+	/**
+	 * The FixTimeVelocityPathfinder to be used.
+	 */
+	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
+
+	/**
+	 * The MinimumTimeVelocityPathfinder to be used.
+	 */
+	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
 
 	/**
 	 * The current worker.
@@ -113,16 +125,30 @@ public class TaskPlanner {
 	 * The duration of the {@link Task task} to be planned.
 	 */
 	private Duration duration = null;
+	
+	/**
+	 * The planned task.
+	 */
+	private Task resultTask = null;
+	
+	/**
+	 * The trajectory updates.
+	 */
+	private List<TrajectoryUpdate> resultTrajectoryUpdates = null;
 
 	/**
-	 * The FixTimeVelocityPathfinder to be used.
+	 * @return the FixTimeVelocityPathfinder.
 	 */
-	private FixTimeVelocityPathfinder fixTimeVelocityPathfinder = new FixTimeVelocityPathfinderImpl();
+	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
+		return fixTimeVelocityPathfinder;
+	}
 
 	/**
-	 * The MinimumTimeVelocityPathfinder to be used.
+	 * @return the MinimumTimeVelocityPathfinder.
 	 */
-	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
+	private MinimumTimeVelocityPathfinder getMinimumTimeVelocityPathfinder() {
+		return minimumTimeVelocityPathfinder;
+	}
 
 	/**
 	 * @return the current worker.
@@ -313,6 +339,61 @@ public class TaskPlanner {
 		
 		this.duration = duration;
 	}
+	
+	/**
+	 * @return a list of newly planned tasks.
+	 */
+	public List<Task> getResultTasks() {
+		if (resultTask == null)
+			return emptyList();
+		else
+			return singletonList(resultTask);
+	}
+	
+	/**
+	 * Resets the {@link #resultTask} to {@code null}.
+	 */
+	private void resetResultTask() {
+		resultTask = null;
+	}
+
+	/**
+	 * Sets the result task.
+	 * 
+	 * @param resultTask
+	 */
+	private void setResultTask(Task resultTask) {
+		this.resultTask = resultTask;
+	}
+
+	/**
+	 * @return the trajectory updates.
+	 */
+	public List<TrajectoryUpdate> getResultTrajectoryUpdates() {
+		if (resultTrajectoryUpdates == null)
+			return emptyList();
+		else
+			return resultTrajectoryUpdates;
+	}
+	
+	/**
+	 * Adds a new {@link TrajectoryUpdate} to {@link #resultTrajectoryUpdates}.
+	 * 
+	 * @param trajectory the updated trajectory
+	 * @param worker whose trajectory was updated
+	 */
+	private void addTrajectoryUpdate(Trajectory trajectory, WorkerUnit worker) {
+		resultTrajectoryUpdates.add(
+			new TrajectoryUpdate(trajectory, worker.getReference()));
+	}
+
+	/**
+	 * Resets the {@link #resultTrajectoryUpdates} to an empty
+	 * {@link LinkedList}.
+	 */
+	private void resetResultTrajectoryUpdates() {
+		resultTrajectoryUpdates = new LinkedList<>();
+	}
 
 	/**
 	 * @return the SpatialPathfinder.
@@ -324,20 +405,6 @@ public class TaskPlanner {
 		WorldPerspective perspective = cache.getPerspectiveFor(worker);
 
 		return perspective.getSpatialPathfinder();
-	}
-
-	/**
-	 * @return the FixTimeVelocityPathfinder.
-	 */
-	private FixTimeVelocityPathfinder getFixTimeVelocityPathfinder() {
-		return fixTimeVelocityPathfinder;
-	}
-
-	/**
-	 * @return the MinimumTimeVelocityPathfinder.
-	 */
-	private MinimumTimeVelocityPathfinder getMinimumTimeVelocityPathfinder() {
-		return minimumTimeVelocityPathfinder;
 	}
 
 	/**
@@ -382,7 +449,7 @@ public class TaskPlanner {
 		if (latestStartTime.compareTo(workerUnit.getInitialTime()) < 0)
 			throw new IllegalStateException("worker not initialized yet");
 	}
-
+	
 	/**
 	 * <p>Plans new path segments of the current worker to the new task and
 	 * the following one. The old segment is replaced by the new ones.</p>
@@ -397,7 +464,12 @@ public class TaskPlanner {
 	 */
 	public boolean plan() {
 		checkParameters();
+		
+		resetResultTask();
+		resetResultTrajectoryUpdates();
+		
 		boolean status = planImpl();
+		
 		clearCurrentDynamicObstacles();
 
 		return status;
@@ -850,12 +922,21 @@ public class TaskPlanner {
 			// add obstacle segments and task
 			WorkerUnit worker = getWorkerUnit();
 			worker.removeObstacleSegment(segment);
-			if (segmentToTask != null)
+			if (segmentToTask != null) {
 				worker.addObstacleSegment(segmentToTask);
+				addTrajectoryUpdate(trajToTask, worker);
+			}
+			
 			worker.addObstacleSegment(segmentAtTask);
-			if (segmentFromTask != null)
+			addTrajectoryUpdate(segmentAtTask.getTrajectory(), worker);
+			
+			if (segmentFromTask != null) {
 				worker.addObstacleSegment(segmentFromTask);
+				addTrajectoryUpdate(trajFromTask, worker);
+			}
+			
 			worker.addTask(task);
+			setResultTask(task);
 		}
 
 	}
@@ -957,6 +1038,7 @@ public class TaskPlanner {
 			WorkerUnit worker = segment.getWorkerUnit();
 			worker.removeObstacleSegment(segment);
 			worker.addObstacleSegment(updatedSegment);
+			addTrajectoryUpdate(updatedSegment.getTrajectory(), worker);
 		}
 
 	}

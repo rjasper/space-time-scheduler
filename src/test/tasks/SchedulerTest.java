@@ -2,6 +2,7 @@ package tasks;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
+import static matchers.TaskMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.DurationConv.*;
@@ -38,10 +39,10 @@ public class SchedulerTest {
 			atSecond(0),
 			atSecond(60), ofSeconds(10));
 		
-		boolean status = sc.schedule(spec);
+		ScheduleResult result = sc.schedule(spec);
 		
 		assertThat("scheduled task when it shouldn't have",
-			status, equalTo(false));
+			result.isError(), equalTo(true));
 	}
 	
 	@Test
@@ -58,12 +59,14 @@ public class SchedulerTest {
 			atSecond(0),
 			atSecond(10), ofSeconds(60));
 		
-		boolean status;
+		ScheduleResult result;
 		
-		status = sc.schedule(ts1);
+		result = sc.schedule(ts1);
 		
 		assertThat("unable to schedule task",
-			status, equalTo(status));
+			result.isSuccess(), equalTo(true));
+		assertThat("scheduled task doesn't meet specification",
+			result.getTasks().get(uuid("ts1")), satisfies(ts1));
 		
 		TaskSpecification ts2 = new TaskSpecification(
 			uuid("ts2"),
@@ -71,10 +74,10 @@ public class SchedulerTest {
 			atSecond(20),
 			atSecond(30), ofSeconds(10));
 		
-		status = sc.schedule(ts2);
+		result = sc.schedule(ts2);
 		
 		assertThat("scheduled task when it shouldn't have",
-			status, equalTo(false));
+			result.isError(), equalTo(true));
 	}
 
 	@Test
@@ -104,34 +107,42 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(world);
 		WorkerUnitReference w1 = sc.addWorker(ws1);
 		WorkerUnitReference w2 = sc.addWorker(ws2);
-		
-		boolean status;
+
+		ScheduleResult result;
 	
-		status = sc.schedule(s1);
+		result = sc.schedule(s1);
 		
 		assertThat("unable to schedule s1",
-			status, equalTo(true));
+			result.isSuccess(), equalTo(true));
+		assertThat("scheduled task doesn't meet specification",
+			result.getTasks().get(uuid("s1")), satisfies(s1));
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 		
-		status = sc.schedule(s2);
+		result = sc.schedule(s2);
 		
 		assertThat("unable to schedule s2",
-			status, equalTo(true));
+			result.isSuccess(), equalTo(true));
+		assertThat("scheduled task doesn't meet specification",
+			result.getTasks().get(uuid("s2")), satisfies(s2));
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 		
-		status = sc.schedule(s3);
+		result = sc.schedule(s3);
 		
 		assertThat("unable to schedule s3",
-			status, equalTo(true));
+			result.isSuccess(), equalTo(true));
+		assertThat("scheduled task doesn't meet specification",
+			result.getTasks().get(uuid("s3")), satisfies(s3));
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 		
-		status = sc.schedule(s4);
+		result = sc.schedule(s4);
 		
 		assertThat("unable to schedule s4",
-			status, equalTo(true));
+			result.isSuccess(), equalTo(true));
+		assertThat("scheduled task doesn't meet specification",
+			result.getTasks().get(uuid("s4")), satisfies(s4));
 		assertThat("collision detected",
 			w1, not(workerCollidesWith(w2)));
 	}

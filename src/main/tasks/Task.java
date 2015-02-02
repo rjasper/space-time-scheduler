@@ -147,8 +147,8 @@ public class Task {
 	@Override
 	public String toString() {
 		// lazy evaluation
-		Supplier<String> defaultString = () -> String.format("(%s, %s, %s)",
-			getLocation(), getStartTime(), getFinishTime());
+		Supplier<String> defaultString = () -> String.format("%s:(%s, %s, %s)",
+			getAssignedWorker(), getLocation(), getStartTime(), getFinishTime());
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

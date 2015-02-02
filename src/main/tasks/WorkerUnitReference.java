@@ -82,4 +82,13 @@ public class WorkerUnitReference {
 		return worker.calcTrajectory();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return worker.toString();
+	}
+	
 }

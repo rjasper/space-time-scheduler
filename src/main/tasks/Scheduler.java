@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 import pickers.LocationIterator;
 import pickers.WorkerUnitSlotIterator;
 import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
+import tasks.ScheduleResult.TrajectoryUpdate;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
 import world.WorldPerspective;
@@ -147,7 +149,7 @@ public class Scheduler {
 	 * @return {@code true} iff a task was scheduled. {@code false} iff no task
 	 *         could be scheduled satisfying the specification.
 	 */
-	public boolean schedule(TaskSpecification specification) {
+	public ScheduleResult schedule(TaskSpecification specification) {
 		Objects.requireNonNull(specification, "specification");
 
 		World world = getWorld();
@@ -200,14 +202,18 @@ public class Scheduler {
 				// plan the routes of affected workers and schedule task
 				boolean status = tp.plan();
 
-				if (status)
-					return true;
+				if (status) {
+					List<Task> tasks = tp.getResultTasks();
+					List<TrajectoryUpdate> trajectoryUpdates = tp.getResultTrajectoryUpdates();
+					
+					return ScheduleResult.success(tasks, trajectoryUpdates);
+				}
 			}
 		}
 
 		// all possible variable combinations are depleted without being able
 		// to schedule a task
-		return false;
+		return ScheduleResult.error();
 	}
 
 	/**

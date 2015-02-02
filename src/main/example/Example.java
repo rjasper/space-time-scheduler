@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import tasks.ScheduleResult;
 import tasks.Scheduler;
 import tasks.TaskSpecification;
 import tasks.WorkerUnitReference;
@@ -99,9 +100,9 @@ public final class Example {
 		// specification actual
 		TaskSpecification spec = new TaskSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
 		
-		boolean status = scheduler.schedule(spec);
+		ScheduleResult result = scheduler.schedule(spec);
 		
-		System.out.println(status);
+		System.out.println(result);
 		System.out.println(workerRef.calcTrajectory());
 	}
 
