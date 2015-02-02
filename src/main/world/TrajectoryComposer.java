@@ -3,6 +3,7 @@ package world;
 import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -196,13 +197,24 @@ public class TrajectoryComposer {
 		// build path
 		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
 		for (int i = 0; i < n; ++i)
-			builder.add(immutablePoint(x[i], y[i]));		
+			builder.add(immutablePoint(x[i], y[i]));
 		SpatialPath path = new SpatialPath(builder.build());
+		
+		Duration minDuration = Duration.between(baseTime, LocalDateTime.MIN);
+		Duration maxDuration = Duration.between(baseTime, LocalDateTime.MAX);
 		
 		// build times
 		ImmutableList<LocalDateTime> times = Arrays.stream(t, 0, n)
 			.mapToObj(DurationConv::ofSeconds)
-			.map(baseTime::plus)
+			.map(d -> {
+				// double inaccuracy might lead to overflow
+				if (d.compareTo(minDuration) < 0)
+					return LocalDateTime.MIN;
+				if (d.compareTo(maxDuration) > 0)
+					return LocalDateTime.MAX;
+				
+				return baseTime.plus(d);
+			})
 			.collect(toImmutableList());
 		
 		setResultTrajectory(new SimpleTrajectory(path, times));
