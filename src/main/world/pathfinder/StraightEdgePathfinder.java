@@ -6,6 +6,7 @@ import static jts.geom.immutable.StaticGeometryBuilder.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import straightedge.geom.KPoint;
@@ -19,6 +20,7 @@ import world.SpatialPath;
 import world.StaticObstacle;
 
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -57,7 +59,6 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		return pathFinder;
 	}
 
-	// TODO cannot handle polygon with holes
 	/*
 	 * (non-Javadoc)
 	 * @see world.pathfinder.SpatialPathfinder#setStaticObstacles(java.util.Collection)
@@ -75,11 +76,27 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 		double maxConnectionDistance = getMaxConnectionDistance();
 
 		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
-
-		staticObstacles.stream()
+		
+		Stream<PathBlockingObstacle> shells = staticObstacles.stream()
 			.map(StaticObstacle::getShape)
 			.map(conv::makeKPolygonFromExterior)
-			.map(PathBlockingObstacleImpl::createObstacleFromInnerPolygon)
+			.map(PathBlockingObstacleImpl::createObstacleFromInnerPolygon);
+		
+		Stream<PathBlockingObstacle> holes = staticObstacles.stream()
+			.map(StaticObstacle::getShape)
+			.filter(p -> p.getNumInteriorRing() > 0)
+			.flatMap(p -> {
+				Stream.Builder<LineString> builder = Stream.builder();
+				
+				for (int i = 0; i < p.getNumInteriorRing(); ++i)
+					builder.add(p.getInteriorRingN(i));
+				
+				return builder.build();
+			})
+			.map(conv::makeKPolygonFrom)
+			.map(PathBlockingObstacleImpl::createObstacleFromOuterPolygon);
+		
+		Stream.concat(shells, holes)
 			.forEach(pbo -> {
 				pathBlockingObstacles.add(pbo);
 				nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
@@ -118,7 +135,8 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 	 * @param pathBlockingObstacles
 	 */
 	private void setPathBlockingObstacles(
-		ArrayList<PathBlockingObstacle> pathBlockingObstacles) {
+		ArrayList<PathBlockingObstacle> pathBlockingObstacles)
+	{
 		this.pathBlockingObstacles = pathBlockingObstacles;
 	}
 
