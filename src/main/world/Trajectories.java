@@ -63,6 +63,11 @@ public final class Trajectories {
 		}
 		
 		@Override
+		public ImmutablePoint interpolateLocation(LocalDateTime time) {
+			return null;
+		}
+
+		@Override
 		public double length() {
 			return Double.NaN;
 		}

@@ -73,11 +73,6 @@ public class DecomposedTrajectory implements Trajectory {
 	private final ArcTimePath arcTimePathComponent;
 
 	/**
-	 * The cached composed trajectory.
-	 */
-	private transient SimpleTrajectory composedTrajectory = null;
-
-	/**
 	 * Constructs a new DecomposedTrajectory using the provided components.
 	 * The baseTime is used to determine the vertex times of the arc time path.
 	 *
@@ -100,10 +95,16 @@ public class DecomposedTrajectory implements Trajectory {
 		Objects.requireNonNull(baseTime, "baseTime");
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
-
-		// TODO no tolerance might be too strict
-		if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
-			throw new IllegalArgumentException("path components' incompatible");
+		
+		// both components must either be empty or non-empty
+		if (spatialPathComponent.isEmpty() != arcTimePathComponent.isEmpty())
+			throw new IllegalArgumentException("incompatible path components sizes");
+		
+		if (!arcTimePathComponent.isEmpty()) {
+			// TODO no tolerance might be too strict
+			if (spatialPathComponent.length() != arcTimePathComponent.maxArc())
+				throw new IllegalArgumentException("arcTimePath includes arcs larger than spatialPath");
+		}
 		
 		this.baseTime = baseTime;
 		this.spatialPathComponent = spatialPathComponent;
@@ -121,6 +122,11 @@ public class DecomposedTrajectory implements Trajectory {
 	public boolean isComposed() {
 		return composedTrajectory != null;
 	}
+
+	/**
+	 * The cached composed trajectory.
+	 */
+	private transient SimpleTrajectory composedTrajectory = null;
 
 	/**
 	 * @return the composed trajectory.
@@ -170,6 +176,11 @@ public class DecomposedTrajectory implements Trajectory {
 	public ImmutableList<LocalDateTime> getTimes() {
 		return getComposedTrajectory().getTimes();
 	}
+	
+	/**
+	 * Caches the start location.
+	 */
+	private transient ImmutablePoint startLocation = null;
 
 	/*
 	 * (non-Javadoc)
@@ -179,9 +190,23 @@ public class DecomposedTrajectory implements Trajectory {
 	public ImmutablePoint getStartLocation() {
 		if (isEmpty())
 			return null;
-
-		return getSpatialPathComponent().get(0);
+		
+		if (startLocation == null) {
+			double s = getArcTimePathComponent().getFirst().getX();
+			SpatialPath xy = getSpatialPathComponent();
+			
+			startLocation = s == 0.0
+				? xy.getFirst()
+				: xy.interpolateLocation(s);
+		}
+		
+		return startLocation;
 	}
+	
+	/**
+	 * Caches the finish location.
+	 */
+	private transient ImmutablePoint finishLocation = null;
 
 	/*
 	 * (non-Javadoc)
@@ -191,11 +216,18 @@ public class DecomposedTrajectory implements Trajectory {
 	public ImmutablePoint getFinishLocation() {
 		if (isEmpty())
 			return null;
+		
+		if (finishLocation == null) {
+			ArcTimePath st = getArcTimePathComponent();
+			SpatialPath xy = getSpatialPathComponent();
+			double s = getArcTimePathComponent().getLast().getX();
+			
+			finishLocation = s == st.maxArc()
+				? xy.getLast()
+				: xy.interpolateLocation(s);
+		}
 
-		SpatialPath spatialPathComponent = getSpatialPathComponent();
-		int n = spatialPathComponent.size();
-
-		return spatialPathComponent.get(n-1);
+		return finishLocation;
 	}
 
 	/*
@@ -250,6 +282,16 @@ public class DecomposedTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
+	 */
+	@Override
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see world.Trajectory#length()
 	 */
 	@Override
@@ -272,8 +314,56 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public DecomposedTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
-		// TODO Auto-generated method stub
-		return null;
+		// check empty cases
+		
+		// if trajectory is empty
+		if (isEmpty())
+			return this; // empty
+		
+		ArcTimePath st = getArcTimePathComponent();
+		int n = st.size();
+		double t0 = st.get(0).getY(), tEnd = st.get(n-1).getY();
+		double tStart = inSeconds(Duration.between(baseTime, startTime));
+		double tFinish = inSeconds(Duration.between(baseTime, finishTime));
+		
+		// if the interval is empty or does not intersect
+		if (tStart >= tEnd || tStart >= tEnd || tFinish <= t0)
+			return empty();
+		
+		// at this point it is is guaranteed that the trajectory intersects with the interval
+		
+		// if identical
+		if (tStart <= t0 && tFinish >= tEnd)
+			return this;
+		
+		int startIndex = 0, finishIndex = n;
+		double startAlpha = 0.0, finishAlpha = 0.0;
+		
+		double t1 = t0;
+		
+		// determine times of the sub trajectory and determine start and finish
+		// indices to calculate the spatial path
+		for (int i = 1; i < n; ++i) {
+			double t2 = st.get(i).getY();
+			
+			// t1 <= startTime < t2
+			if (tStart >= t1 && tStart < t2) {
+				startIndex = i-1;
+				startAlpha = (tStart - t1) / (t2 - t1);
+			}
+			// t1 <= finishTime < t2
+			if (tFinish >= t1 && tFinish < t2) {
+				finishIndex = i;
+				finishAlpha = (tFinish - t1) / (t2 - t1);
+				break;
+			}
+			
+			t1 = t2;
+		}
+		
+		ArcTimePath subArcTimePath = st.subPath(startIndex, startAlpha, finishIndex, finishAlpha);
+		
+		return new DecomposedTrajectory(getBaseTime(), getSpatialPathComponent(), subArcTimePath);
 	}
 
 	/*

@@ -5,7 +5,6 @@ import static java.util.Spliterator.*;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -15,6 +14,7 @@ import jts.geom.immutable.ImmutablePoint;
 import org.apache.commons.collections4.iterators.IteratorIterable;
 
 import util.DurationConv;
+import world.util.ArcTimePathInterpolator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class ArcTimePath extends Path {
+public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Segment> {
 	
 	/**
 	 * An empty {@code ArcTimePath}.
@@ -125,6 +125,25 @@ public class ArcTimePath extends Path {
 	}
 
 	/**
+	 * An interpolator for this arc-time path.
+	 */
+	private ArcTimePathInterpolator interpolator =
+		new ArcTimePathInterpolator(this, false);
+	
+	/**
+	 * Interpolates the arc value of the given time.
+	 * 
+	 * @param time
+	 * @return the arc value.
+	 * @throws IllegalArgumentException
+	 *             if the time is not within the range [{@link #minArc()},
+	 *             {@link #maxArc()}].
+	 */
+	public double interpolateArc(double time) {
+		return interpolator.interpolate(time);
+	}
+
+	/**
 	 * @return the minimum arc.
 	 */
 	public double minArc() {
@@ -196,7 +215,7 @@ public class ArcTimePath extends Path {
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public ArcTimePath concat(Path other) {
+	public ArcTimePath concat(AbstractPath<?, ?> other) {
 		if (!(other instanceof ArcTimePath))
 			throw new IllegalArgumentException("incompatible path");
 		
@@ -229,29 +248,29 @@ public class ArcTimePath extends Path {
 		return new VertexIterator();
 	}
 
-	/* (non-Javadoc)
-	 * @see world.Path#vertexSpliterator()
-	 */
-	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Vertex> to Spliterator<Vertex>
-	@Override
-	public Spliterator<Vertex> vertexSpliterator() {
-		return (Spliterator<Vertex>) super.vertexSpliterator();
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#vertexStream()
-	 */
-	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Vertex> to Stream<Vertex>
-	@Override
-	public Stream<Vertex> vertexStream() {
-		return (Stream<Vertex>) super.vertexStream();
-	}
+//	/* (non-Javadoc)
+//	 * @see world.Path#vertexSpliterator()
+//	 */
+//	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Vertex> to Spliterator<Vertex>
+//	@Override
+//	public Spliterator<Vertex> vertexSpliterator() {
+//		return (Spliterator<Vertex>) super.vertexSpliterator();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see world.Path#vertexStream()
+//	 */
+//	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Vertex> to Stream<Vertex>
+//	@Override
+//	public Stream<Vertex> vertexStream() {
+//		return (Stream<Vertex>) super.vertexStream();
+//	}
 
 	/**
 	 * The vertex of a {@code ArcTimePath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends Path.Vertex {
+	public static class Vertex extends AbstractPath.Vertex {
 
 		/**
 		 * Constructs a new {@code Vertex}.
@@ -271,14 +290,14 @@ public class ArcTimePath extends Path {
 	/**
 	 * The {@code VertexIterator} of a {@code ArcTimePath}.
 	 */
-	private class VertexIterator extends AbstractVertexIterator<Vertex> {
+	private class VertexIterator extends AbstractVertexIterator {
 
 		/*
 		 * (non-Javadoc)
 		 * @see world.Path.AbstractVertexIterator#nextVertex(jts.geom.immutable.ImmutablePoint)
 		 */
 		@Override
-		protected Vertex nextVertex(ImmutablePoint point) {
+		protected Vertex createNextVertex(ImmutablePoint point) {
 			return new Vertex(point, isFirst(), isLast());
 		}
 		
@@ -293,29 +312,29 @@ public class ArcTimePath extends Path {
 		return new SegmentIterator();
 	}
 	
-	/* (non-Javadoc)
-	 * @see world.Path#segmentSpliterator()
-	 */
-	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Segment> to Spliterator<Segment>
-	@Override
-	public Spliterator<Segment> segmentSpliterator() {
-		return (Spliterator<Segment>) super.segmentSpliterator();
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#segmentStream()
-	 */
-	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Segment> to Stream<Segment>
-	@Override
-	public Stream<Segment> segmentStream() {
-		return (Stream<Segment>) super.segmentStream();
-	}
+//	/* (non-Javadoc)
+//	 * @see world.Path#segmentSpliterator()
+//	 */
+//	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Segment> to Spliterator<Segment>
+//	@Override
+//	public Spliterator<Segment> segmentSpliterator() {
+//		return (Spliterator<Segment>) super.segmentSpliterator();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see world.Path#segmentStream()
+//	 */
+//	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Segment> to Stream<Segment>
+//	@Override
+//	public Stream<Segment> segmentStream() {
+//		return (Stream<Segment>) super.segmentStream();
+//	}
 
 	/**
 	 * The segment of a {@code ArcTimePath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends Path.Segment<Vertex> {
+	public static class Segment extends AbstractPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
@@ -355,7 +374,7 @@ public class ArcTimePath extends Path {
 	/**
 	 * The {@code SegmentIterator} of a {@code ArcTimePath}.
 	 */
-	private class SegmentIterator extends AbstractSegmentIterator<Vertex, Segment> {
+	private class SegmentIterator extends AbstractSegmentIterator {
 		
 		/*
 		 * (non-Javadoc)
@@ -371,7 +390,7 @@ public class ArcTimePath extends Path {
 		 * @see world.Path.AbstractSegmentIterator#nextSegment(world.Path.Vertex, world.Path.Vertex)
 		 */
 		@Override
-		protected Segment nextSegment(Vertex start, Vertex finish) {
+		protected Segment createNextSegment(Vertex start, Vertex finish) {
 			return new Segment(start, finish);
 		}
 		

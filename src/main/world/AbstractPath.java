@@ -29,19 +29,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class Path implements Iterable<ImmutablePoint> {
-	
-	/**
-	 * An empty {@code Path}.
-	 */
-	private static final Path EMPTY = new Path(ImmutableList.of());
-	
-	/**
-	 * @return an empty {@code SpatialPath}.
-	 */
-	public static Path empty() {
-		return EMPTY;
-	}
+public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends AbstractPath.Segment<? extends V>> implements Iterable<ImmutablePoint> {
 	
 	/**
 	 * The vertices of the path.
@@ -64,7 +52,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * 
 	 * @param vertices
 	 */
-	public Path(ImmutableList<ImmutablePoint> points) {
+	public AbstractPath(ImmutableList<ImmutablePoint> points) {
 		checkVertices(points);
 		
 		this.points = points;
@@ -76,16 +64,12 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * @param vertices
 	 * @return the new path.
 	 */
-	protected Path create(ImmutableList<ImmutablePoint> vertices) {
-		return new Path(vertices);
-	}
+	protected abstract AbstractPath<V, S> create(ImmutableList<ImmutablePoint> vertices);
 	
 	/**
 	 * @return an empty path.
 	 */
-	protected Path getEmpty() {
-		return empty();
-	}
+	protected abstract AbstractPath<V, S> getEmpty();
 	
 	/**
 	 * Checks for validity of the given vertices.
@@ -121,15 +105,41 @@ public class Path implements Iterable<ImmutablePoint> {
 	}
 
 	/**
-	 * Gets the vertex at the specified position of this path.
+	 * Gets the point at the specified position of this path.
 	 * 
 	 * @param index
-	 * @return the vertex.
+	 * @return the point.
 	 * @throws IndexOutOfBoundsException
 	 *             if the index is out of range (index < 0 || index >= size())
 	 */
 	public ImmutablePoint get(int index) {
 		return points.get(index);
+	}
+
+	/**
+	 * Gets the point at the first position of this path.
+	 * 
+	 * @param index
+	 * @return the point. {@code null} if the path is empty.
+	 */
+	public ImmutablePoint getFirst() {
+		if (isEmpty())
+			return null;
+		else
+			return points.get(0);
+	}
+
+	/**
+	 * Gets the point at the last position of this path.
+	 * 
+	 * @param index
+	 * @return the point. {@code null} if the path is empty.
+	 */
+	public ImmutablePoint getLast() {
+		if (isEmpty())
+			return null;
+		else
+			return points.get(size()-1);
 	}
 	
 	/**
@@ -151,7 +161,7 @@ public class Path implements Iterable<ImmutablePoint> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Path other = (Path) obj;
+		AbstractPath<?, ?> other = (AbstractPath<?, ?>) obj;
 		if (points == null) {
 			if (other.points != null)
 				return false;
@@ -159,7 +169,7 @@ public class Path implements Iterable<ImmutablePoint> {
 			return false;
 		return true;
 	}
-
+	
 	/**
 	 * Calculates the trace of this path. The trace is a {@code LineString}
 	 * containing all points visited by the path.
@@ -212,7 +222,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * @param other
 	 * @return the concatenated path.
 	 */
-	public Path concat(Path other) {
+	public AbstractPath<V, S> concat(AbstractPath<?, ?> other) {
 		ImmutableList<ImmutablePoint> lhsVertices = this.points;
 		ImmutableList<ImmutablePoint> rhsVertices = other.points;
 		
@@ -260,7 +270,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 *        zero</li>
 	 *        </ul>
 	 */
-	public Path subPath(
+	public AbstractPath<V, S> subPath(
 		int startIndexInclusive,
 		double startAlpha,
 		int finishIndexExclusive,
@@ -292,6 +302,7 @@ public class Path implements Iterable<ImmutablePoint> {
 		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
 			builder.add(get(i));
 		
+		// point was already added unless finishAlpha > 0.0
 		if (finishAlpha > 0.0)
 			builder.add(interpolate(finishIndexInclusive, finishAlpha));
 		
@@ -300,7 +311,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	
 	/**
 	 * <p>
-	 * Interpolates a point on segment using this formular:
+	 * Interpolates a point on segment using this formula:
 	 * </p>
 	 * 
 	 * <i>point(i, alpha) = (x<sub>i</sub> +
@@ -327,21 +338,19 @@ public class Path implements Iterable<ImmutablePoint> {
 	/**
 	 * @return a {@code VertexIterator}
 	 */
-	public Iterator<? extends Vertex> vertexIterator() {
-		return new VertexIterator();
-	}
+	public abstract Iterator<V> vertexIterator();
 	
 	/**
 	 * @return a {@code Spliterator} over all vertices.
 	 */
-	public Spliterator<? extends Vertex> vertexSpliterator() {
+	public Spliterator<V> vertexSpliterator() {
 		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
 	/**
 	 * @return a {@code Stream} over all vertices.
 	 */
-	public Stream<? extends Vertex> vertexStream() {
+	public Stream<V> vertexStream() {
 		return StreamSupport.stream(vertexSpliterator(), false);
 	}
 	
@@ -423,7 +432,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * 
 	 * @param <V> the vertex type.
 	 */
-	protected abstract class AbstractVertexIterator<V extends Vertex> implements Iterator<V> {
+	protected abstract class AbstractVertexIterator implements Iterator<V> {
 		
 		/**
 		 * The point iterator.
@@ -446,7 +455,7 @@ public class Path implements Iterable<ImmutablePoint> {
 		 * @param point
 		 * @return the next vertex.
 		 */
-		protected abstract V nextVertex(ImmutablePoint point);
+		protected abstract V createNextVertex(ImmutablePoint point);
 
 		/**
 		 * @return whether the current vertex is the first one.
@@ -485,47 +494,29 @@ public class Path implements Iterable<ImmutablePoint> {
 		@Override
 		public V next() {
 			nextPoint = points.next();
-			V vertex = nextVertex(nextPoint);
+			V vertex = createNextVertex(nextPoint);
 			last = vertex;
 			
 			return vertex;
 		}
 	}
-
-	/**
-	 * The {@code VertexIterator} of a {@code Path}.
-	 */
-	protected class VertexIterator extends AbstractVertexIterator<Vertex> {
-		
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractVertexIterator#nextVertex(jts.geom.immutable.ImmutablePoint)
-		 */
-		@Override
-		protected Vertex nextVertex(ImmutablePoint point) {
-			return new Vertex(point, isFirst(), isLast());
-		}
-		
-	}
 	
 	/**
 	 * @return a {@code SegmentIterator}.
 	 */
-	public Iterator<? extends Segment<? extends Vertex>> segmentIterator() {
-		return new SegmentIterator();
-	}
+	public abstract Iterator<S> segmentIterator();
 	
 	/**
 	 * @return a {@code Spliterator} over all segments.
 	 */
-	public Spliterator<? extends Segment<? extends Vertex>> segmentSpliterator() {
+	public Spliterator<S> segmentSpliterator() {
 		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
 	/**
 	 * @return a {@code Stream} over all segments.
 	 */
-	public Stream<? extends Segment<? extends Vertex>> segmentStream() {
+	public Stream<S> segmentStream() {
 		return StreamSupport.stream(segmentSpliterator(), false);
 	}
 	
@@ -613,7 +604,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * @param <S>
 	 *            the segment type
 	 */
-	protected abstract class AbstractSegmentIterator<V extends Vertex, S extends Segment<V>> implements Iterator<S> {
+	protected abstract class AbstractSegmentIterator implements Iterator<S> {
 		
 		/**
 		 * The vertex iterator.
@@ -647,7 +638,7 @@ public class Path implements Iterable<ImmutablePoint> {
 		 *            finish vertex
 		 * @return the next segment.
 		 */
-		protected abstract S nextSegment(V start, V finish);
+		protected abstract S createNextSegment(V start, V finish);
 		
 		/*
 		 * (non-Javadoc)
@@ -667,36 +658,12 @@ public class Path implements Iterable<ImmutablePoint> {
 			V start = lastVertex;
 			V finish = vertexIterator.next();
 			
-			S segment = nextSegment(start, finish);
+			S segment = createNextSegment(start, finish);
 			lastVertex = finish;
 			
 			return segment;
 		}
 		
-	}
-	
-	/**
-	 * The {@code SegmentIterator} of a {@code Path}.
-	 */
-	protected class SegmentIterator extends AbstractSegmentIterator<Vertex, Segment<Vertex>> {
-		
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#supplyVertexIterator()
-		 */
-		@Override
-		protected Iterator<Vertex> supplyVertexIterator() {
-			return new VertexIterator();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#nextSegment(world.Path.Vertex, world.Path.Vertex)
-		 */
-		@Override
-		protected Segment<Vertex> nextSegment(Vertex start, Vertex finish) {
-			return new Segment<>(start, finish);
-		}
 	}
 	
 	/*

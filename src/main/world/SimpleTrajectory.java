@@ -241,6 +241,16 @@ public class SimpleTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
+	 */
+	@Override
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see world.Trajectory#getLength()
 	 */
 	@Override

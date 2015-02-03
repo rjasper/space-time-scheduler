@@ -2,6 +2,7 @@ package world;
 
 import java.util.Iterator;
 
+import world.util.SpatialPathInterpolator;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
@@ -12,7 +13,7 @@ import com.vividsolutions.jts.operation.distance.DistanceOp;
  * 
  * @author Rico
  */
-public class SpatialPath extends Path {
+public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Segment> {
 	
 	/**
 	 * An empty {@code SpatialPath}.
@@ -49,7 +50,7 @@ public class SpatialPath extends Path {
 	 * @see world.Path#create(com.google.common.collect.ImmutableList)
 	 */
 	@Override
-	protected Path create(ImmutableList<ImmutablePoint> vertices) {
+	protected SpatialPath create(ImmutableList<ImmutablePoint> vertices) {
 		return new SpatialPath(vertices);
 	}
 	
@@ -61,13 +62,29 @@ public class SpatialPath extends Path {
 	protected SpatialPath getEmpty() {
 		return empty();
 	}
+	
+	/**
+	 * An interpolator for this spatial path.
+	 */
+	private SpatialPathInterpolator interpolator =
+		new SpatialPathInterpolator(this, false);
+	
+	/**
+	 * Interpolates the location of the given arc.
+	 * 
+	 * @param arc
+	 * @return the location.
+	 */
+	public ImmutablePoint interpolateLocation(double arc) {
+		return interpolator.interpolate(arc);
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public SpatialPath concat(Path other) {
+	public SpatialPath concat(AbstractPath<?, ?> other) {
 		if (!(other instanceof SpatialPath))
 			throw new IllegalArgumentException("incompatible path");
 		
@@ -115,12 +132,12 @@ public class SpatialPath extends Path {
 	public Iterator<Vertex> vertexIterator() {
 		return new VertexIterator();
 	}
-	
+
 	/**
 	 * The vertex of a {@code SpatialPath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends Path.Vertex {
+	public static class Vertex extends AbstractPath.Vertex {
 		
 		/**
 		 * The arc value.
@@ -156,7 +173,7 @@ public class SpatialPath extends Path {
 	/**
 	 * The {@code VertexIterator} of a {@code SpatialPath}.
 	 */
-	private class VertexIterator extends AbstractVertexIterator<Vertex> {
+	private class VertexIterator extends AbstractVertexIterator {
 		
 		/**
 		 * The accumulated arc value.
@@ -168,7 +185,7 @@ public class SpatialPath extends Path {
 		 * @see world.Path.AbstractVertexIterator#nextVertex(jts.geom.immutable.ImmutablePoint)
 		 */
 		@Override
-		protected Vertex nextVertex(ImmutablePoint point) {
+		protected Vertex createNextVertex(ImmutablePoint point) {
 			if (!isFirst())
 				arc += DistanceOp.distance(getLastVertex().getPoint(), point);
 			
@@ -190,7 +207,7 @@ public class SpatialPath extends Path {
 	 * The segment of a {@code SpatialPath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends Path.Segment<Vertex> {
+	public static class Segment extends AbstractPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
@@ -215,7 +232,7 @@ public class SpatialPath extends Path {
 	/**
 	 * The {@code SegmentIterator} of a {@code SpatialPath}.
 	 */
-	private class SegmentIterator extends AbstractSegmentIterator<Vertex, Segment> {
+	private class SegmentIterator extends AbstractSegmentIterator {
 		
 		/*
 		 * (non-Javadoc)
@@ -231,7 +248,7 @@ public class SpatialPath extends Path {
 		 * @see world.Path.AbstractSegmentIterator#nextSegment(world.Path.Vertex, world.Path.Vertex)
 		 */
 		@Override
-		protected Segment nextSegment(Vertex start, Vertex finish) {
+		protected Segment createNextSegment(Vertex start, Vertex finish) {
 			return new Segment(start, finish);
 		}
 		

@@ -86,6 +86,16 @@ public interface Trajectory {
 	 * @return the time difference between the first and last vertex.
 	 */
 	public abstract Duration getDuration();
+	
+	/**
+	 * Interpolates the location at the given time.
+	 * 
+	 * @param time
+	 * @return the location.
+	 * @throws NullPointerException
+	 *             if {@code time} is {@code null}.
+	 */
+	public abstract ImmutablePoint interpolateLocation(LocalDateTime time);
 
 	/**
 	 * @return the euclidean length of the spatial path.

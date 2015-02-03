@@ -3,16 +3,11 @@ package world.factories;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import jts.geom.immutable.ImmutablePoint;
 import world.ArcTimePath;
-import world.Path;
 import world.SpatialPath;
 
 import com.google.common.collect.ImmutableList;
 
 public final class PathFactory {
-	
-	public static Path path(double... ordinates) {
-		return new Path(vertices(ordinates));
-	}
 	
 	public static SpatialPath spatialPath(double... ordinates) {
 		return new SpatialPath(vertices(ordinates));
