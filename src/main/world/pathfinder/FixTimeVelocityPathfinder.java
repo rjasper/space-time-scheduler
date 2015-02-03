@@ -29,7 +29,7 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 	protected LocalDateTime getBaseTime() {
 		return getStartTime();
 	}
-
+	
 	/**
 	 * @return the start time.
 	 */
@@ -76,11 +76,8 @@ public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
 	protected void checkParameters() {
 		super.checkParameters();
 		
-		if (startTime  == null ||
-			finishTime == null)
-		{
+		if (startTime  == null || finishTime == null)
 			throw new IllegalStateException("some parameters are not set");
-		}
 	}
 
 }

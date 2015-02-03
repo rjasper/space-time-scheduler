@@ -4,9 +4,9 @@ import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import world.AbstractPath;
 
@@ -26,6 +26,7 @@ public abstract class AbstractPathInterpolator<
 		Objects.requireNonNull(path, "spatialPath");
 		
 		this.path = path;
+		// TODO don't use look up for short paths
 		this.lookUp = lookUp ? makeLookUp(path) : null;
 	}
 	

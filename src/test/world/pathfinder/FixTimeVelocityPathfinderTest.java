@@ -9,6 +9,7 @@ import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import org.junit.Test;
 
@@ -22,6 +23,27 @@ import com.google.common.collect.ImmutableList;
 public abstract class FixTimeVelocityPathfinderTest {
 	
 	protected abstract FixTimeVelocityPathfinder createPathfinder();
+	
+	private boolean calcPath(
+		FixTimeVelocityPathfinder pf,
+		Collection<DynamicObstacle> dynObst,
+		SpatialPath path,
+		double maxSpeed,
+		LocalDateTime startTime,
+		LocalDateTime finishTime)
+	{
+		pf.setDynamicObstacles(dynObst);
+		pf.setMaxSpeed(maxSpeed);
+		pf.setSpatialPath(path);
+		pf.setMinArc(0.0);
+		pf.setMaxArc(path.length());
+		pf.setStartArc(0.0);
+		pf.setFinishArc(path.length());
+		pf.setStartTime(startTime);
+		pf.setFinishTime(finishTime);
+		
+		return pf.calculate();
+	}
 	
 	@Test
 	public void test() {
@@ -43,13 +65,12 @@ public abstract class FixTimeVelocityPathfinderTest {
 		
 		FixTimeVelocityPathfinder pf = createPathfinder();
 
-		pf.setMaxSpeed(maxSpeed);
-		pf.setDynamicObstacles(dynamicObstacles);
-		pf.setSpatialPath(spatialPath);
-		pf.setStartTime(startTime);
-		pf.setFinishTime(finishTime);
-		
-		boolean validPath = pf.calculate();
+		boolean validPath = calcPath(pf,
+			dynamicObstacles,
+			spatialPath,
+			maxSpeed,
+			startTime,
+			finishTime);
 		
 		assertTrue(validPath);
 		
@@ -67,13 +88,14 @@ public abstract class FixTimeVelocityPathfinderTest {
 	public void testInsufficientTime() {
 		FixTimeVelocityPathfinder pf = createPathfinder();
 		
-		pf.setSpatialPath     ( spatialPath(0, 0, 10, 0) );
-		pf.setDynamicObstacles( emptyList()              );
-		pf.setMaxSpeed        ( 1.0                      );
-		pf.setStartTime       ( atSecond(0)              );
-		pf.setFinishTime      ( atSecond(5)              );
+		SpatialPath spatialPath = spatialPath(0, 0, 10, 0);
 		
-		boolean status = pf.calculate();
+		boolean status = calcPath(pf,
+			emptyList(),
+			spatialPath,
+			1.0,
+			atSecond(0),
+			atSecond(5));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));

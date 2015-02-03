@@ -80,11 +80,10 @@ public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
 	protected void checkParameters() {
 		super.checkParameters();
 		
-		if (startPoint  == null ||
-			finishPoint == null)
-		{
+		if (startPoint  == null || finishPoint == null)
 			throw new IllegalStateException("some parameters are not set");
-		}
+		if (startPoint.getX() < getMinArc() || finishPoint.getX() > getMaxArc())
+			throw new IllegalStateException("start and finish vertices outside of arc range");
 	}
 
 	/*

@@ -1,9 +1,9 @@
 package world.util;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import world.SpatialPath.Vertex;
 import jts.geom.immutable.ImmutablePoint;
 import world.SpatialPath;
+import world.SpatialPath.Vertex;
 
 // TODO document
 public class SpatialPathInterpolator extends AbstractPathInterpolator<

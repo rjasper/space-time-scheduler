@@ -1,12 +1,12 @@
 package world;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static util.TimeFactory.*;
 import static world.factories.PathFactory.*;
-import static org.junit.Assert.*;
 
 import java.time.LocalDateTime;
 
-import static org.hamcrest.CoreMatchers.*;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

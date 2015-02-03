@@ -102,7 +102,7 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		if (!arcTimePathComponent.isEmpty()) {
 			// TODO no tolerance might be too strict
-			if (spatialPathComponent.length() != arcTimePathComponent.maxArc())
+			if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
 				throw new IllegalArgumentException("arcTimePath includes arcs larger than spatialPath");
 		}
 		
@@ -282,16 +282,6 @@ public class DecomposedTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
-	 */
-	@Override
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see world.Trajectory#length()
 	 */
 	@Override
@@ -305,7 +295,28 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Geometry trace() {
+		// FIXME not accurate, use sub path of spatial path.
+		
 		return getSpatialPathComponent().trace();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
+	 */
+	@Override
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		// TODO Auto-generated method stub
+		Objects.requireNonNull(time, "time");
+		
+		if (isComposed()) {
+			return getComposedTrajectory().interpolateLocation(time);
+		} else {
+			double t = inSeconds(Duration.between(getBaseTime(), time));
+			double s = getArcTimePathComponent().interpolateArc(t);
+			
+			return getSpatialPathComponent().interpolateLocation(s);
+		}
 	}
 
 	/*

@@ -1,7 +1,7 @@
 package tasks;
 
-import static util.Comparables.*;
 import static java.util.stream.Collectors.*;
+import static util.Comparables.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

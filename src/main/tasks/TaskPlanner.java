@@ -19,6 +19,7 @@ import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 import tasks.ScheduleResult.TrajectoryUpdate;
 import util.CollectionsRequire;
+import world.ArcTimePath;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
@@ -845,6 +846,10 @@ public class TaskPlanner {
 
 			pf.setDynamicObstacles  ( dynamicObstacles       );
 			pf.setSpatialPath       ( toTask                 );
+			pf.setStartArc          ( 0.0                    );
+			pf.setFinishArc         ( toTask.length()        );
+			pf.setMinArc            ( 0.0                    );
+			pf.setMaxArc            ( toTask.length()        );
 			pf.setMaxSpeed          ( getWorkerUnit().getMaxSpeed() );
 			pf.setStartTime         ( segment.getStartTime() );
 			pf.setEarliestFinishTime( getEarliestStartTime() );
@@ -882,6 +887,10 @@ public class TaskPlanner {
 
 			pf.setDynamicObstacles( dynamicObstacles        );
 			pf.setSpatialPath     ( fromTask                );
+			pf.setStartArc        ( 0.0                     );
+			pf.setFinishArc       ( fromTask.length()       );
+			pf.setMinArc          ( 0.0                     );
+			pf.setMaxArc          ( fromTask.length()       );
 			pf.setMaxSpeed        ( getWorkerUnit().getMaxSpeed() );
 			pf.setStartTime       ( task.getFinishTime()    );
 			pf.setFinishTime      ( segment.getFinishTime() );
@@ -1000,9 +1009,15 @@ public class TaskPlanner {
 		public boolean calculate() {
 			WorkerUnit worker = segment.getWorkerUnit();
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
+			
+			ArcTimePath st = segment.getArcTimePathComponent();
 
 			pf.setDynamicObstacles( buildDynamicObstaclesFor(worker)  );
 			pf.setSpatialPath     ( segment.getSpatialPathComponent() );
+			pf.setMinArc          ( st.minArc()                       );
+			pf.setMaxArc          ( st.maxArc()                       );
+			pf.setStartArc        ( st.getFirst().getX()              );
+			pf.setFinishArc       ( st.getLast().getX()               );
 			pf.setMaxSpeed        ( worker.getMaxSpeed()              );
 			pf.setStartTime       ( segment.getStartTime()            );
 			pf.setFinishTime      ( segment.getFinishTime()           );

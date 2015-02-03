@@ -32,7 +32,7 @@ public class VelocityGraphTest {
 		FixTimeMeshBuilder meshBuilder = new FixTimeMeshBuilder();
 //		MinimumTimeMeshBuilder meshBuilder = new MinimumTimeMeshBuilder();
 		meshBuilder.setForbiddenRegions(regions);
-		meshBuilder.setFinishArc(600.0);
+		meshBuilder.setMaxArc(600.0);
 		meshBuilder.setMaxSpeed(1.0);
 		meshBuilder.setStartPoint(point(0.0, 0.0));
 		meshBuilder.setFinishPoint(point(600.0, 1000.0));

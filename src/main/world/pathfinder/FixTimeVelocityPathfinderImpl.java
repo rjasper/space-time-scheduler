@@ -64,8 +64,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	private void updateArcTimeStartPoint() {
 		// The mesh builder uses immutable geometries.
 		// It is important that the start point and the finish point
-		// are structurally the same to the ones used in the mesh. Therefore,
-		// the points are already converted immutable here.
+		// are structurally the same to the ones used in the mesh.
 		arcTimeStartPoint = immutablePoint(
 			getStartArc(), inSeconds(getStartTime()));
 	}
@@ -83,8 +82,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 	private void updateArcTimeFinishPoint() {
 		// The mesh builder uses immutable geometries.
 		// It is important that the start point and the finish point
-		// are structurally the same to the ones used in the mesh. Therefore,
-		// the points are already converted immutable here.
+		// are structurally the same to the ones used in the mesh.
 		arcTimeFinishPoint =  immutablePoint(
 			getFinishArc(), inSeconds(getFinishTime()));
 	}
@@ -117,7 +115,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		Collection<ForbiddenRegion> forbiddenRegions)
 	{
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getFinishArc();
+		double startArc = getMinArc();
+		double finishArc = getMaxArc();
 		Point startPoint = getArcTimeStartPoint();
 		Point finishPoint = getArcTimeFinishPoint();
 		
@@ -125,7 +124,8 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);
-		builder.setFinishArc(maxArc);
+		builder.setMinArc(startArc);
+		builder.setMaxArc(finishArc);
 		builder.setStartPoint(startPoint);
 		builder.setFinishPoint(finishPoint);
 		

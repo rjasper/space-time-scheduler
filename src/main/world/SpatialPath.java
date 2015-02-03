@@ -2,8 +2,8 @@ package world;
 
 import java.util.Iterator;
 
-import world.util.SpatialPathInterpolator;
 import jts.geom.immutable.ImmutablePoint;
+import world.util.SpatialPathInterpolator;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.operation.distance.DistanceOp;

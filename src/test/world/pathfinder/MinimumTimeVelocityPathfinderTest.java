@@ -28,6 +28,31 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 
 	protected abstract MinimumTimeVelocityPathfinder createPathfinder();
 	
+	private boolean calcPath(
+		MinimumTimeVelocityPathfinder pf,
+		Collection<DynamicObstacle> dynObst,
+		SpatialPath path,
+		double maxSpeed,
+		LocalDateTime startTime,
+		LocalDateTime earliestFinishTime,
+		LocalDateTime latestFinishTime,
+		Duration bufferDuration)
+	{
+		pf.setDynamicObstacles(dynObst);
+		pf.setMaxSpeed(maxSpeed);
+		pf.setSpatialPath(path);
+		pf.setStartArc(0.0);
+		pf.setFinishArc(path.length());
+		pf.setMinArc(0.0);
+		pf.setMaxArc(path.length());
+		pf.setStartTime(startTime);
+		pf.setEarliestFinishTime(earliestFinishTime);
+		pf.setLatestFinishTime(latestFinishTime);
+		pf.setBufferDuration(bufferDuration);
+		
+		return pf.calculate();
+	}
+	
 	@Test
 	public void test() {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
@@ -48,15 +73,14 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 		LocalDateTime latestFinishTime = atSecond(5.0);
 		Duration bufferDuration = Duration.ofSeconds(0L);
 		
-		pf.setSpatialPath(spatialPath);
-		pf.setDynamicObstacles(dynamicObstacles);
-		pf.setMaxSpeed(maxSpeed);
-		pf.setStartTime(startTime);
-		pf.setEarliestFinishTime(earliestFinishTime);
-		pf.setLatestFinishTime(latestFinishTime);
-		pf.setBufferDuration(bufferDuration);
-		
-		boolean status = pf.calculate();
+		boolean status = calcPath(pf,
+			dynamicObstacles,
+			spatialPath,
+			maxSpeed,
+			startTime,
+			earliestFinishTime,
+			latestFinishTime,
+			bufferDuration);
 		
 		assertTrue(status);
 		
@@ -74,15 +98,16 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	public void testInsufficientTime() {
 		MinimumTimeVelocityPathfinder pf = createPathfinder();
 		
-		pf.setSpatialPath       ( spatialPath(0, 0, 10, 0) );
-		pf.setDynamicObstacles  ( emptyList()              );
-		pf.setMaxSpeed          ( 1.0                      );
-		pf.setStartTime         ( atSecond(0)              );
-		pf.setEarliestFinishTime( atSecond(5)              );
-		pf.setLatestFinishTime  ( atSecond(6)              );
-		pf.setBufferDuration    ( ofSeconds(0)             );
+		SpatialPath spatialPath = spatialPath(0, 0, 10, 0);
 		
-		boolean status = pf.calculate();
+		boolean status = calcPath(pf,
+			emptyList(),
+			spatialPath,
+			1.0,
+			atSecond(0),
+			atSecond(5),
+			atSecond(6),
+			ofSeconds(0));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -99,15 +124,16 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 				-2,  2,
 				10, 15));
 		
-		pf.setSpatialPath       ( spatialPath(0, 0, 5, 0) );
-		pf.setDynamicObstacles  ( singletonList(obstacle) );
-		pf.setMaxSpeed          ( 1.0                     );
-		pf.setStartTime         ( atSecond(0)             );
-		pf.setEarliestFinishTime( atSecond(10)            );
-		pf.setLatestFinishTime  ( atSecond(10)            );
-		pf.setBufferDuration    ( ofSeconds(10)           );
-		
-		boolean status = pf.calculate();
+		SpatialPath spatialPath = spatialPath(0, 0, 5, 0);
+
+		boolean status = calcPath(pf,
+			singletonList(obstacle),
+			spatialPath,
+			1.0,
+			atSecond(0),
+			atSecond(10),
+			atSecond(10),
+			ofSeconds(10));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -123,16 +149,16 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 				 5,  5,
 				-2,  2,
 				10, 15));
-		
-		pf.setSpatialPath       ( spatialPath(0, 0, 5, 0) );
-		pf.setDynamicObstacles  ( singletonList(obstacle) );
-		pf.setMaxSpeed          ( 1.0                     );
-		pf.setStartTime         ( atSecond(0)             );
-		pf.setEarliestFinishTime( atSecond(10)            );
-		pf.setLatestFinishTime  ( atSecond(10)            );
-		pf.setBufferDuration    ( ofSeconds(1.25)         );
-		
-		boolean status = pf.calculate();
+		SpatialPath spatialPath = spatialPath(0, 0, 5, 0);
+
+		boolean status = calcPath(pf,
+			singletonList(obstacle),
+			spatialPath,
+			1.0,
+			atSecond(0),
+			atSecond(10),
+			atSecond(10),
+			ofSeconds(1.25));
 
 		assertThat("no path found",
 			status, equalTo(true));

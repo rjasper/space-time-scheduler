@@ -36,11 +36,6 @@ import com.vividsolutions.jts.geom.Polygon;
 public abstract class ArcTimeMeshBuilder {
 	
 	/**
-	 * The finish arc value.
-	 */
-	protected static final double START_ARC = 0.0;
-	
-	/**
 	 * The forbidden regions.
 	 */
 	private Collection<ForbiddenRegion> forbiddenRegions = null;
@@ -56,9 +51,14 @@ public abstract class ArcTimeMeshBuilder {
 	private double maxSpeed = Double.NaN;
 	
 	/**
-	 * The finish arc value.
+	 * The minimum arc value.
 	 */
-	private double finishArc = Double.NaN;
+	private double minArc = Double.NaN;
+	
+	/**
+	 * The maximum arc value.
+	 */
+	private double maxArc = Double.NaN;
 	
 	/**
 	 * The core vertices.
@@ -165,31 +165,45 @@ public abstract class ArcTimeMeshBuilder {
 	}
 	
 	/**
-	 * @return the start arc value.
+	 * @return the minimum arc value.
 	 */
-	protected double getStartArc() {
-		return START_ARC;
+	protected double getMinArc() {
+		return minArc;
 	}
 
 	/**
-	 * @return the finish arc value.
-	 */
-	protected double getFinishArc() {
-		return finishArc;
-	}
-
-	/**
-	 * Sets the finish arc value.
+	 * Sets the minimum arc value.
 	 * 
-	 * @param maxArc
+	 * @param minArc the startArc to set
 	 * @throws IllegalArgumentException
 	 *             if the maxArc is not non-negative finite.
 	 */
-	public void setFinishArc(double maxArc) {
-		if (!Double.isFinite(maxArc) || maxArc < 0.0)
-			throw new IllegalArgumentException("maxArc is not non-negative finite");
+	public void setMinArc(double minArc) {
+		if (!Double.isFinite(minArc) || minArc < 0.0)
+			throw new IllegalArgumentException("startArc is not non-negative finite");
 		
-		this.finishArc = maxArc;
+		this.minArc = minArc;
+	}
+
+	/**
+	 * @return the maximum arc value.
+	 */
+	protected double getMaxArc() {
+		return maxArc;
+	}
+
+	/**
+	 * Sets the maximum arc value.
+	 * 
+	 * @param maxArc the startArc to set
+	 * @throws IllegalArgumentException
+	 *             if the maxArc is not non-negative finite.
+	 */
+	public void setMaxArc(double maxArc) {
+		if (!Double.isFinite(maxArc) || maxArc < 0.0)
+			throw new IllegalArgumentException("startArc is not non-negative finite");
+		
+		this.maxArc = maxArc;
 	}
 
 	/**
@@ -364,7 +378,7 @@ public abstract class ArcTimeMeshBuilder {
 		forbiddenRegions = null;
 		regionMap = null;
 		maxSpeed = Double.NaN;
-		finishArc = Double.NaN;
+		maxArc = Double.NaN;
 		coreVertices = null;
 		startVertices = null;
 		finishVertices = null;
@@ -375,15 +389,19 @@ public abstract class ArcTimeMeshBuilder {
 	 * Checks if all parameters are properly set. Throws an exception otherwise.
 	 * 
 	 * @throws IllegalStateException
-	 *             if any parameter is not set.
+	 *             if any parameter is not set or minArc &gt; maxArc.
 	 */
 	protected void checkParameters() {
 		if (forbiddenRegions == null ||
-			Double.isNaN(maxSpeed)   ||
-			Double.isNaN(finishArc))
+			Double.isNaN(maxSpeed )  ||
+			Double.isNaN(minArc   )  ||
+			Double.isNaN(maxArc   ))
 		{
 			throw new IllegalStateException("some parameters are not set");
 		}
+		
+		if (minArc > maxArc)
+			throw new IllegalArgumentException("minArc is greater than maxArc");
 	}
 
 	/**
@@ -503,8 +521,8 @@ public abstract class ArcTimeMeshBuilder {
 	 * @return
 	 */
 	protected boolean checkConnection(Point from, Point to) {
-		double minArc = getStartArc();
-		double maxArc = getFinishArc();
+		double minArc = getMinArc();
+		double maxArc = getMaxArc();
 		double minTime = getMinTime();
 		double maxTime = getMaxTime();
 		double maxSpeed = getMaxSpeed();

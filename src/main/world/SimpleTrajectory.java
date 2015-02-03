@@ -1,9 +1,9 @@
 package world;
 
-import static util.DurationConv.*;
 import static common.collect.ImmutablesCollectors.*;
 import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -241,16 +241,6 @@ public class SimpleTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
-	 */
-	@Override
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see world.Trajectory#getLength()
 	 */
 	@Override
@@ -272,6 +262,16 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	public int size() {
 		return spatialPath.size();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
+	 */
+	@Override
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
@@ -301,7 +301,7 @@ public class SimpleTrajectory implements Trajectory {
 		// if identical
 		if (t0CmpStartTime >= 0 && tEndCmpFinishTime <= 0)
 			return this;
-		
+		 
 		int n = size();
 		int t0CmpFinishTime = getStartTime().compareTo(finishTime);
 		// start values will always be set in the for loop
@@ -365,6 +365,17 @@ public class SimpleTrajectory implements Trajectory {
 		SpatialPath subSpatialPath = getSpatialPath().subPath(startIndex, startAlpha, finishIndex, finishAlpha);
 		
 		return new SimpleTrajectory(subSpatialPath, subTimes);
+	}
+	
+	/**
+	 * Seeks the position of the segment covering the given time.
+	 * 
+	 * @param time
+	 * @return the segment position.
+	 */
+	private int seekSegment(LocalDateTime time) {
+		// TODO implement
+		return 0;
 	}
 
 	/*

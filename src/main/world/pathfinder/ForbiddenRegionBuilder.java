@@ -34,6 +34,8 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.LineStringExtracter;
 import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
+// TODO does not consider start and finish arcs yet
+
 /**
  * The {@code ForbiddenRegion} calculates the forbidden regions for spatial
  * paths introduced by dynamic obstacles.

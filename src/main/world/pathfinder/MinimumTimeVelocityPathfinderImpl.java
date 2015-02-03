@@ -113,7 +113,9 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		Collection<ForbiddenRegion> forbiddenRegions)
 	{
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getFinishArc();
+		double minArc = getMinArc();
+		double maxArc = getMaxArc();
+		double finishArc = getFinishArc();
 		double bufferDuration = DurationConv.inSeconds( getBufferDuration() );
 		Point startPoint = getArcTimeStartPoint();
 		double earliest = inSeconds( getEarliestFinishTime() );
@@ -123,8 +125,10 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);
-		builder.setFinishArc(maxArc);
+		builder.setMinArc(minArc);
+		builder.setMaxArc(maxArc);
 		builder.setStartPoint(startPoint);
+		builder.setFinishArc(finishArc);
 		builder.setEarliestFinishTime(earliest);
 		builder.setLatestFinishTime(latest);
 		builder.setBufferDuration(bufferDuration);

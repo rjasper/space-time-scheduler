@@ -41,6 +41,11 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	private Point startPoint = null;
 	
 	/**
+	 * The finish arc.
+	 */
+	private double finishArc = Double.NaN;
+	
+	/**
 	 * The earliest time for the finish vertices.
 	 */
 	private double earliestFinishTime = Double.NaN;
@@ -66,6 +71,13 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	private Point earliestFinishVertex;
 	
 	/**
+	 * @return the startPoint
+	 */
+	private Point getStartPoint() {
+		return startPoint;
+	}
+
+	/**
 	 * Sets the start vertex.
 	 * 
 	 * @param startPoint
@@ -76,6 +88,20 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		GeometriesRequire.requireValid2DPoint(startPoint, "startPoint");
 		
 		this.startPoint = startPoint;
+	}
+
+	/**
+	 * @return the finishArc
+	 */
+	private double getFinishArc() {
+		return finishArc;
+	}
+
+	/**
+	 * @param finishArc the finishArc to set
+	 */
+	public void setFinishArc(double finishArc) {
+		this.finishArc = finishArc;
 	}
 
 	/**
@@ -192,11 +218,15 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		super.checkParameters();
 		
 		if (startPoint == null               ||
+			Double.isNaN(finishArc         ) ||
 			Double.isNaN(earliestFinishTime) ||
-			Double.isNaN(latestFinishTime))
+			Double.isNaN(latestFinishTime  ))
 		{
 			throw new IllegalStateException("some parameters are not set");
 		}
+		
+		if (startPoint.getX() < getMinArc() || finishArc > getMaxArc())
+			throw new IllegalStateException("start and finish vertices outside of arc range");
 	}
 
 	/*
@@ -205,7 +235,7 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 	 */
 	@Override
 	protected Collection<Point> buildStartVertices() {
-		return Collections.singleton(startPoint);
+		return Collections.singleton(getStartPoint());
 	}
 
 	/*
@@ -218,8 +248,8 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		Collection<Point> coreVertices = getCoreVertices();
 		Collection<Point> startVertices = getStartVertices();
 		
-		double minArc = getStartArc();
-		double maxArc = getFinishArc();
+		double minArc = getMinArc();
+		double maxArc = getMaxArc();
 		double earliest = getEarliestFinishTime();
 		
 		Point earliestFinishVertex = point(maxArc, earliest);
@@ -261,12 +291,12 @@ public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
 		
 		double s = origin.getX(), t = origin.getY();
 		double maxSpeed = getMaxSpeed();
-		double maxArc = getFinishArc();
+		double finishArc = getFinishArc();
 		
-		if (s == maxArc) {
+		if (s == finishArc) {
 			return new VertexPair(origin, origin);
 		} else { // s < maxArc
-			Point finishPoint = point(maxArc, (maxArc - s) / maxSpeed + t);
+			Point finishPoint = point(finishArc, (finishArc - s) / maxSpeed + t);
 			
 			return new VertexPair(origin, finishPoint);
 		}

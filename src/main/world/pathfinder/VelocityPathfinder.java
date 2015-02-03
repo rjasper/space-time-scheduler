@@ -33,19 +33,29 @@ import world.SpatialPath;
 public abstract class VelocityPathfinder {
 	
 	/**
-	 * The start arc.
-	 */
-	protected static final double START_ARC = 0.0;
-	
-	/**
 	 * The forbidden region builder.
 	 */
 	private ForbiddenRegionBuilder forbiddenRegionBuilder = new ForbiddenRegionBuilder();
 
 	/**
+	 * The minimum arc.
+	 */
+	private double minArc = Double.NaN;
+
+	/**
+	 * The maximum arc.
+	 */
+	private double maxArc = Double.NaN;
+
+	/**
+	 * The start arc.
+	 */
+	private double startArc = Double.NaN;
+
+	/**
 	 * The finish arc.
 	 */
-	private double finishArc;
+	private double finishArc = Double.NaN;
 
 	/**
 	 * The dynamic obstacles.
@@ -60,7 +70,7 @@ public abstract class VelocityPathfinder {
 	/**
 	 * The maximum speed.
 	 */
-	private double maxSpeed = 0.0;
+	private double maxSpeed = Double.NaN;
 	
 	/**
 	 * The calculated trajectory.
@@ -83,27 +93,89 @@ public abstract class VelocityPathfinder {
 	private ForbiddenRegionBuilder getForbiddenRegionBuilder() {
 		return forbiddenRegionBuilder;
 	}
-
+	
 	/**
-	 * @return the start arc.
+	 * Sets the minimum arc value.
+	 * 
+	 * @param minArc the startArc to set
+	 * @throws IllegalArgumentException
+	 *             if the minArc is not non-negative finite.
 	 */
-	protected double getStartArc() {
-		return START_ARC;
+	public void setMinArc(double minArc) {
+		if (!Double.isFinite(minArc) || minArc < 0.0)
+			throw new IllegalArgumentException("startArc is not non-negative finite");
+		
+		this.minArc = minArc;
 	}
 
 	/**
-	 * @return the finish arc.
+	 * @return the minimum arc.
+	 */
+	protected double getMinArc() {
+		return minArc;
+	}
+
+	/**
+	 * Sets the maximum arc value.
+	 * 
+	 * @param maxArc
+	 * @throws IllegalArgumentException
+	 *             if the maxArc is not non-negative finite.
+	 */
+	public void setMaxArc(double maxArc) {
+		if (!Double.isFinite(maxArc) || maxArc < 0.0)
+			throw new IllegalArgumentException("finishArc is not non-negative finite");
+		
+		this.maxArc = maxArc;
+	}
+
+	/**
+	 * @return the maximum arc.
+	 */
+	protected double getMaxArc() {
+		return maxArc;
+	}
+	
+	/**
+	 * @return the start arc value.
+	 */
+	protected double getStartArc() {
+		return startArc;
+	}
+
+	/**
+	 * Sets the start arc value.
+	 * 
+	 * @param startArc the startArc to set
+	 * @throws IllegalArgumentException
+	 *             if the maxArc is not non-negative finite.
+	 */
+	public void setStartArc(double startArc) {
+		if (!Double.isFinite(startArc) || startArc < 0.0)
+			throw new IllegalArgumentException("startArc is not non-negative finite");
+		
+		this.startArc = startArc;
+	}
+
+	/**
+	 * @return the finish arc value.
 	 */
 	protected double getFinishArc() {
 		return finishArc;
 	}
 
 	/**
-	 * Recalculates the finish arc by calculating the total length of the
-	 * spatial path.
+	 * Sets the finish arc value.
+	 * 
+	 * @param finishArc the startArc to set
+	 * @throws IllegalArgumentException
+	 *             if the maxArc is not non-negative finite.
 	 */
-	protected void updateFinishArc() {
-		finishArc = getSpatialPath().length();
+	public void setFinishArc(double finishArc) {
+		if (!Double.isFinite(finishArc) || finishArc < 0.0)
+			throw new IllegalArgumentException("startArc is not non-negative finite");
+		
+		this.finishArc = finishArc;
 	}
 
 	/**
@@ -206,11 +278,17 @@ public abstract class VelocityPathfinder {
 	 *             if any parameter is not set.
 	 */
 	protected void checkParameters() {
-		if (spatialPath == null ||
-			maxSpeed <= 0.0)
+		if (spatialPath == null     ||
+			Double.isNaN(minArc   ) ||
+			Double.isNaN(maxArc   ) ||
+			Double.isNaN(startArc ) ||
+			Double.isNaN(finishArc) ||
+			Double.isNaN(maxSpeed ))
 		{
 			throw new IllegalStateException("some parameters are not set");
 		}
+		if (startArc > finishArc || startArc < minArc || finishArc > maxArc)
+			throw new IllegalArgumentException("start or finish arc not within valid range");
 	}
 
 	/**
@@ -233,7 +311,6 @@ public abstract class VelocityPathfinder {
 			
 			reachable = false;
 		} else {
-			updateFinishArc();
 			forbiddenRegions = calculateForbiddenRegions();
 			arcTimePath = calculateArcTimePath(forbiddenRegions);
 			reachable = !arcTimePath.isEmpty();
@@ -299,8 +376,8 @@ public abstract class VelocityPathfinder {
 			// TODO remove cast as soon as ECJ is able to infer type (Stream<SimpleEntry<Point, DynamicObstacle>>)
 			// for each coordinate of each region
 			.flatMap(r -> (Stream<SimpleEntry<ImmutablePoint, DynamicObstacle>>) Arrays.stream(r.getRegion().getCoordinates())
-				.map(c -> immutablePoint(c.x, c.y))             // map to a point
-				.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle())))  // map to an entry
+			.map(c -> immutablePoint(c.x, c.y))                      // map to a point
+			.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle()))) // map to an entry
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
 		
 		// return a list of each obstacle met by a point in the path
