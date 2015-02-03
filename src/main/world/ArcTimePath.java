@@ -1,8 +1,14 @@
 package world;
 
+import static java.util.Spliterator.*;
+
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import jts.geom.immutable.ImmutablePoint;
 
@@ -23,16 +29,36 @@ import com.vividsolutions.jts.geom.Point;
 public class ArcTimePath extends Path {
 	
 	/**
+	 * An empty {@code ArcTimePath}.
+	 */
+	private static final ArcTimePath EMPTY = new ArcTimePath(ImmutableList.of());
+	
+	/**
+	 * @return an empty {@code ArcTimePath}.
+	 */
+	public static ArcTimePath empty() {
+		return EMPTY;
+	}
+	
+	/**
 	 * Caches the duration of the path.
 	 */
 	private transient Duration duration = null;
+	
+	/**
+	 * Caches the length of the path.
+	 */
+	private transient double length = Double.NaN;
+	
+	/**
+	 * Caches the minimum arc.
+	 */
+	private transient double minArc = Double.NaN;
 
 	/**
-	 * Creates an empty {@code ArcTimePath}.
+	 * Caches the maximum arc.
 	 */
-	public ArcTimePath() {
-		super();
-	}
+	private transient double maxArc = Double.NaN;
 
 	/**
 	 * Constructs a arc-time path of the given vertices. The argument will be
@@ -50,6 +76,38 @@ public class ArcTimePath extends Path {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.Path#checkVertices(java.util.List)
+	 */
+	@Override
+	protected void checkVertices(List<? extends Point> vertices) {
+		super.checkVertices(vertices);
+		
+		// check arc ordinates
+		// arcs have to be equal or greater than 0
+		
+		boolean nonNegativeArcs = vertices.stream()
+			.map(Point::getX) // arc ordinate
+			.allMatch(s -> s >= 0.0);
+		
+		if (!nonNegativeArcs) // e.g. negative arcs
+			throw new IllegalArgumentException("path has negative arc values");
+		
+		// check time ordinates
+		// times have to be strictly increasing
+		
+		Iterator<Double> it = vertices.stream()
+			.map(Point::getY) // time ordinate
+			.iterator();
+		
+		boolean isOrdered = Ordering.natural()
+			.isOrdered(new IteratorIterable<>(it));
+		
+		if (!isOrdered)
+			throw new IllegalArgumentException("path is not causal");
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see world.Path#create(com.google.common.collect.ImmutableList)
 	 */
 	@Override
@@ -57,14 +115,67 @@ public class ArcTimePath extends Path {
 		return new ArcTimePath(vertices);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#getEmpty()
+	 */
+	@Override
+	protected ArcTimePath getEmpty() {
+		return empty();
+	}
+
+	/**
+	 * @return the minimum arc.
+	 */
+	public double minArc() {
+		if (isEmpty())
+			return Double.NaN;
+		
+		if (Double.isNaN(minArc)) {
+			minArc = vertexStream()
+				.mapToDouble(Vertex::getX)
+				.min().getAsDouble();
+		}
+		
+		return minArc;
+	}
+
+	/**
+	 * @return the maximum arc.
+	 */
+	public double maxArc() {
+		if (isEmpty())
+			return Double.NaN;
+		
+		if (Double.isNaN(maxArc)) {
+			maxArc = vertexStream()
+				.mapToDouble(Vertex::getX)
+				.max().getAsDouble();
+		}
+		
+		return maxArc;
+	}
+	
 	/**
 	 * @return the length of the path.
 	 */
 	public double length() {
-		if (isEmpty())
-			return 0.0;
-		else
-			return get(size()-1).getX();
+		if (Double.isNaN(length)) {
+			if (isEmpty()) {
+				length = 0.0;
+			} else {
+				Stream<Segment> segments = StreamSupport.stream(Spliterators.spliterator(
+					segmentIterator(),
+					size()-1,
+					IMMUTABLE | SIZED | NONNULL), false);
+				
+				length = segments
+					.mapToDouble(Segment::length)
+					.sum();
+			}
+		}
+		
+		return length;
 	}
 	
 	/**
@@ -91,39 +202,24 @@ public class ArcTimePath extends Path {
 		
 		return (ArcTimePath) super.concat(other);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.Path#checkVertices(java.util.List)
+	
+	/* (non-Javadoc)
+	 * @see world.Path#subPath(int, double, int, double)
 	 */
 	@Override
-	protected void checkVertices(List<? extends Point> vertices) {
-		super.checkVertices(vertices);
-		
-		// check arc ordinates
-		// arcs have to be equal or greater than 0
-		
-		boolean nonNegativeArcs = vertices.stream()
-			.map(Point::getX) // arc ordinate
-			.allMatch(s -> s >= 0);
-		
-		if (!nonNegativeArcs) // e.g. negative arcs
-			throw new IllegalArgumentException("path has negative arc values");
-		
-		// check time ordinates
-		// times have to be strictly increasing
-		
-		Iterator<Double> it = vertices.stream()
-			.map(Point::getY) // time ordinate
-			.iterator();
-		
-		boolean isOrdered = Ordering.natural()
-			.isOrdered(new IteratorIterable<>(it));
-		
-		if (!isOrdered)
-			throw new IllegalArgumentException("path is not causal");
+	public ArcTimePath subPath(
+		int startIndexInclusive,
+		double startAlpha,
+		int finishIndexExclusive,
+		double finishAlpha)
+	{
+		return (ArcTimePath) super.subPath(
+			startIndexInclusive,
+			startAlpha,
+			finishIndexExclusive,
+			finishAlpha);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.Path#vertexIterator()
@@ -131,6 +227,24 @@ public class ArcTimePath extends Path {
 	@Override
 	public Iterator<Vertex> vertexIterator() {
 		return new VertexIterator();
+	}
+
+	/* (non-Javadoc)
+	 * @see world.Path#vertexSpliterator()
+	 */
+	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Vertex> to Spliterator<Vertex>
+	@Override
+	public Spliterator<Vertex> vertexSpliterator() {
+		return (Spliterator<Vertex>) super.vertexSpliterator();
+	}
+
+	/* (non-Javadoc)
+	 * @see world.Path#vertexStream()
+	 */
+	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Vertex> to Stream<Vertex>
+	@Override
+	public Stream<Vertex> vertexStream() {
+		return (Stream<Vertex>) super.vertexStream();
 	}
 
 	/**
@@ -179,6 +293,24 @@ public class ArcTimePath extends Path {
 		return new SegmentIterator();
 	}
 	
+	/* (non-Javadoc)
+	 * @see world.Path#segmentSpliterator()
+	 */
+	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Segment> to Spliterator<Segment>
+	@Override
+	public Spliterator<Segment> segmentSpliterator() {
+		return (Spliterator<Segment>) super.segmentSpliterator();
+	}
+
+	/* (non-Javadoc)
+	 * @see world.Path#segmentStream()
+	 */
+	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Segment> to Stream<Segment>
+	@Override
+	public Stream<Segment> segmentStream() {
+		return (Stream<Segment>) super.segmentStream();
+	}
+
 	/**
 	 * The segment of a {@code ArcTimePath}. Stores additional information about
 	 * the segment in context to the path.
@@ -201,7 +333,7 @@ public class ArcTimePath extends Path {
 		 * @return the length of the segment.
 		 */
 		public double length() {
-			return getFinishVertex().getX() - getStartVertex().getX();
+			return Math.abs(getFinishVertex().getX() - getStartVertex().getX());
 		}
 		
 		/**

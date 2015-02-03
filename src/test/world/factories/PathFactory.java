@@ -10,24 +10,12 @@ import com.google.common.collect.ImmutableList;
 
 public final class PathFactory {
 	
-	public static Path path() {
-		return new Path();
-	}
-	
 	public static Path path(double... ordinates) {
 		return new Path(vertices(ordinates));
 	}
 	
-	public static SpatialPath spatialPath() {
-		return new SpatialPath();
-	}
-	
 	public static SpatialPath spatialPath(double... ordinates) {
 		return new SpatialPath(vertices(ordinates));
-	}
-	
-	public static ArcTimePath arcTimePath() {
-		return new ArcTimePath();
 	}
 	
 	public static ArcTimePath arcTimePath(double... ordinates) {

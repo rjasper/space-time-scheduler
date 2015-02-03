@@ -43,6 +43,19 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Rico Jasper
  */
 public class DecomposedTrajectory implements Trajectory {
+	
+	/**
+	 * An empty {@code DecomposedTrajectory}.
+	 */
+	private static final DecomposedTrajectory EMPTY =
+		new DecomposedTrajectory(LocalDateTime.MIN, SpatialPath.empty(), ArcTimePath.empty());
+	
+	/**
+	 * @return an empty {@code DecomposedTrajectory}.
+	 */
+	public static DecomposedTrajectory empty() {
+		return EMPTY;
+	}
 
 	/**
 	 * The base time.
@@ -89,8 +102,8 @@ public class DecomposedTrajectory implements Trajectory {
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 
 		// TODO no tolerance might be too strict
-		if (spatialPathComponent.length() != arcTimePathComponent.length())
-			throw new IllegalArgumentException("path components' lengths differ");
+		if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
+			throw new IllegalArgumentException("path components' incompatible");
 		
 		this.baseTime = baseTime;
 		this.spatialPathComponent = spatialPathComponent;
@@ -107,6 +120,16 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	public boolean isComposed() {
 		return composedTrajectory != null;
+	}
+
+	/**
+	 * @return the composed trajectory.
+	 */
+	public SimpleTrajectory getComposedTrajectory() {
+		if (composedTrajectory == null)
+			composedTrajectory = compose();
+	
+		return composedTrajectory;
 	}
 
 	/**
@@ -216,21 +239,47 @@ public class DecomposedTrajectory implements Trajectory {
 		return baseTime.plus(duration);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#getDuration()
+	 */
 	@Override
 	public Duration getDuration() {
 		return getArcTimePathComponent().duration();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#length()
+	 */
 	@Override
 	public double length() {
 		return getArcTimePathComponent().length();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#trace()
+	 */
 	@Override
 	public Geometry trace() {
 		return getSpatialPathComponent().trace();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#subTrajectory(java.time.LocalDateTime, java.time.LocalDateTime)
+	 */
+	@Override
+	public DecomposedTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
+	 */
 	@Override
 	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
 		LocalDateTime ownBaseTime = getBaseTime();
@@ -241,21 +290,11 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		double offset = inSeconds( Duration.between(baseTime, ownBaseTime) );
 		
-		ImmutableList<ImmutablePoint> vertices = arcTimePathComponent.getVertices().stream()
+		ImmutableList<ImmutablePoint> vertices = arcTimePathComponent.getPoints().stream()
 			.map(p -> immutablePoint(p.getX(), p.getY() + offset))
 			.collect(toImmutableList());
 		
 		return new ArcTimePath(vertices);
-	}
-
-	/**
-	 * @return the composed trajectory.
-	 */
-	public SimpleTrajectory getComposedTrajectory() {
-		if (composedTrajectory == null)
-			composedTrajectory = compose();
-
-		return composedTrajectory;
 	}
 
 	/**

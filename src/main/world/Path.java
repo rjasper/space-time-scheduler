@@ -1,5 +1,6 @@
 package world;
 
+import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static jts.geom.util.GeometrySequencer.*;
 
@@ -7,6 +8,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
@@ -19,7 +24,7 @@ import com.vividsolutions.jts.geom.Point;
 
 /**
  * A {@code Path} is an immutable list of immutable {@link Point}s. It ensures
- * validity of the path. All vertices have to be valid 2-dimensional points.
+ * validity of the path. All points have to be valid 2-dimensional points.
  * Singular paths of only one vertex are not allowed while empty paths are.
  * 
  * @author Rico
@@ -27,9 +32,21 @@ import com.vividsolutions.jts.geom.Point;
 public class Path implements Iterable<ImmutablePoint> {
 	
 	/**
+	 * An empty {@code Path}.
+	 */
+	private static final Path EMPTY = new Path(ImmutableList.of());
+	
+	/**
+	 * @return an empty {@code SpatialPath}.
+	 */
+	public static Path empty() {
+		return EMPTY;
+	}
+	
+	/**
 	 * The vertices of the path.
 	 */
-	private final ImmutableList<ImmutablePoint> vertices;
+	private final ImmutableList<ImmutablePoint> points;
 	
 	/**
 	 * Caches the trace of the path.
@@ -37,27 +54,20 @@ public class Path implements Iterable<ImmutablePoint> {
 	private transient ImmutableLineString trace = null;
 	
 	/**
-	 * Constructs an empty path.
-	 */
-	public Path() {
-		this.vertices = ImmutableList.of();
-	}
-	
-	/**
 	 * Constructs a path of the given vertices.
 	 * 
-	 * @param vertices
+	 * @param points
 	 * @throws NullPointerException
-	 *             if {@code vertices} are {@code null}.
+	 *             if {@code points} are {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code vertices} contain invalid points.
+	 *             if {@code points} contain invalid points.
 	 * 
 	 * @param vertices
 	 */
-	public Path(ImmutableList<ImmutablePoint> vertices) {
-		checkVertices(vertices);
+	public Path(ImmutableList<ImmutablePoint> points) {
+		checkVertices(points);
 		
-		this.vertices = vertices;
+		this.points = points;
 	}
 
 	/**
@@ -68,6 +78,13 @@ public class Path implements Iterable<ImmutablePoint> {
 	 */
 	protected Path create(ImmutableList<ImmutablePoint> vertices) {
 		return new Path(vertices);
+	}
+	
+	/**
+	 * @return an empty path.
+	 */
+	protected Path getEmpty() {
+		return empty();
 	}
 	
 	/**
@@ -93,14 +110,14 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * @return if the path is empty.
 	 */
 	public boolean isEmpty() {
-		return vertices.isEmpty();
+		return points.isEmpty();
 	}
 
 	/**
 	 * @return the amount of vertices.
 	 */
 	public int size() {
-		return vertices.size();
+		return points.size();
 	}
 
 	/**
@@ -112,14 +129,14 @@ public class Path implements Iterable<ImmutablePoint> {
 	 *             if the index is out of range (index < 0 || index >= size())
 	 */
 	public ImmutablePoint get(int index) {
-		return vertices.get(index);
+		return points.get(index);
 	}
 	
 	/**
-	 * @return the vertices
+	 * @return the points
 	 */
-	public ImmutableList<ImmutablePoint> getVertices() {
-		return vertices;
+	public ImmutableList<ImmutablePoint> getPoints() {
+		return points;
 	}
 
 	/*
@@ -135,10 +152,10 @@ public class Path implements Iterable<ImmutablePoint> {
 		if (getClass() != obj.getClass())
 			return false;
 		Path other = (Path) obj;
-		if (vertices == null) {
-			if (other.vertices != null)
+		if (points == null) {
+			if (other.points != null)
 				return false;
-		} else if (!vertices.equals(other.vertices))
+		} else if (!points.equals(other.points))
 			return false;
 		return true;
 	}
@@ -151,7 +168,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 */
 	public ImmutableLineString trace() {
 		if (trace == null) {
-			List<ImmutablePoint> points = new LinkedList<>(getVertices());
+			List<ImmutablePoint> points = new LinkedList<>(getPoints());
 			Iterator<ImmutablePoint> it = points.iterator();
 	
 			// removes points which are identical to their predecessor
@@ -186,7 +203,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 */
 	@Override
 	public UnmodifiableIterator<ImmutablePoint> iterator() {
-		return vertices.iterator();
+		return points.iterator();
 	}
 
 	/**
@@ -196,8 +213,8 @@ public class Path implements Iterable<ImmutablePoint> {
 	 * @return the concatenated path.
 	 */
 	public Path concat(Path other) {
-		ImmutableList<ImmutablePoint> lhsVertices = this.vertices;
-		ImmutableList<ImmutablePoint> rhsVertices = other.vertices;
+		ImmutableList<ImmutablePoint> lhsVertices = this.points;
+		ImmutableList<ImmutablePoint> rhsVertices = other.points;
 		
 		Builder<ImmutablePoint> builder = ImmutableList.builder();
 		
@@ -208,12 +225,123 @@ public class Path implements Iterable<ImmutablePoint> {
 		
 		return create(vertices);
 	}
+	
+	/**
+	 * <p>
+	 * Calculates a sub path from this path. The index parameters specify the
+	 * the relevant segments. The alpha values specify the start and finish
+	 * points of the first and last segment to be included. Such a point is
+	 * calculated according to this formular:
+	 * </p>
+	 * 
+	 * <i>point(i, alpha) = (x<sub>i</sub> +
+	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
+	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
+	 * 
+	 * <p>
+	 * Where <i>i</i> is the index of the segment and <i>(x<sub>i</sub>,
+	 * y<sub>i</sub>)</i> is the <i>i</i>-th vertex.
+	 * </p>
+	 * 
+	 * @param startIndexInclusive
+	 *            the position of the first segment
+	 * @param startAlpha
+	 *            specifies the start point on the first segment
+	 * @param finishIndexExclusive
+	 *            the position after the last segment
+	 * @param finishAlpha
+	 *            specifies the finish point on the last segment
+	 * @return the sub path
+	 * @throw IllegalArgumentException if any of the following is true:
+	 *        <ul>
+	 *        <li>The indices are out of bounds.</li>
+	 *        <li>The alpha values are not within [0, 1)</li>
+	 *        <li>The finish index is equal to size()-1 and finish alpha is not
+	 *        zero</li>
+	 *        </ul>
+	 */
+	public Path subPath(
+		int startIndexInclusive,
+		double startAlpha,
+		int finishIndexExclusive,
+		double finishAlpha)
+	{
+		int n = size();
+		int finishIndexInclusive = finishIndexExclusive - 1;
+		if (startIndexInclusive < 0 || startIndexInclusive >= n)
+			throw new IllegalArgumentException("startIndex is out of bounds");
+		if (finishIndexInclusive < 0 || finishIndexInclusive >= n)
+			throw new IllegalArgumentException("finishIndex is out of bounds");
+		if (startAlpha < 0.0 || startAlpha >= 1.0)
+			throw new IllegalArgumentException("startAlpha is out of bounds");
+		if (finishAlpha < 0.0 || finishAlpha >= 1.0 || (finishIndexInclusive == n-1 && finishAlpha != 0.0))
+			throw new IllegalArgumentException("finishAlpha is out of bounds");
+		
+		// if interval is empty
+		if (startIndexInclusive > finishIndexInclusive || (startIndexInclusive == finishIndexInclusive && startAlpha > finishAlpha))
+			return getEmpty();
+		
+		// if is identical
+		if (startIndexInclusive == 0 && startAlpha == 0.0 && finishIndexInclusive == n-1 && finishAlpha == 0.0)
+			return this;
+		
+		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
+
+		builder.add(interpolate(startIndexInclusive, startAlpha));
+			
+		for (int i = startIndexInclusive+1; i <= finishIndexInclusive-1; ++i)
+			builder.add(get(i));
+		
+		builder.add(interpolate(finishIndexInclusive, finishAlpha));
+		
+		return null;
+	}
+	
+	/**
+	 * <p>
+	 * Interpolates a point on segment using this formular:
+	 * </p>
+	 * 
+	 * <i>point(i, alpha) = (x<sub>i</sub> +
+	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
+	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
+	 * 
+	 * @param index the index of the segment
+	 * @param alpha
+	 * @return the interpolated point.
+	 */
+	private ImmutablePoint interpolate(int index, double alpha) {
+		if (alpha == 0.0)
+			return get(index);
+		
+		ImmutablePoint p1 = get(index);
+		ImmutablePoint p2 = get(index+1);
+		
+		double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
+		double dx = x2 - x1, dy = y2 - y1;
+		
+		return immutablePoint(x1 + alpha*dx, x2 + alpha*dy);
+	}
 
 	/**
 	 * @return a {@code VertexIterator}
 	 */
 	public Iterator<? extends Vertex> vertexIterator() {
 		return new VertexIterator();
+	}
+	
+	/**
+	 * @return a {@code Spliterator} over all vertices.
+	 */
+	public Spliterator<? extends Vertex> vertexSpliterator() {
+		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+	}
+
+	/**
+	 * @return a {@code Stream} over all vertices.
+	 */
+	public Stream<? extends Vertex> vertexStream() {
+		return StreamSupport.stream(vertexSpliterator(), false);
 	}
 	
 	/**
@@ -362,7 +490,7 @@ public class Path implements Iterable<ImmutablePoint> {
 			return vertex;
 		}
 	}
-	
+
 	/**
 	 * The {@code VertexIterator} of a {@code Path}.
 	 */
@@ -378,12 +506,26 @@ public class Path implements Iterable<ImmutablePoint> {
 		}
 		
 	}
-
+	
 	/**
 	 * @return a {@code SegmentIterator}.
 	 */
 	public Iterator<? extends Segment<? extends Vertex>> segmentIterator() {
 		return new SegmentIterator();
+	}
+	
+	/**
+	 * @return a {@code Spliterator} over all segments.
+	 */
+	public Spliterator<? extends Segment<? extends Vertex>> segmentSpliterator() {
+		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+	}
+
+	/**
+	 * @return a {@code Stream} over all segments.
+	 */
+	public Stream<? extends Segment<? extends Vertex>> segmentStream() {
+		return StreamSupport.stream(segmentSpliterator(), false);
 	}
 	
 	/**
@@ -562,7 +704,7 @@ public class Path implements Iterable<ImmutablePoint> {
 	 */
 	@Override
 	public String toString() {
-		return vertices.toString();
+		return points.toString();
 	}
 
 }

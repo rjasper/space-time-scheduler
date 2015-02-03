@@ -1,7 +1,5 @@
 package world;
 
-import static world.Paths.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
@@ -31,7 +29,7 @@ public final class Trajectories {
 		
 		@Override
 		public SpatialPath getSpatialPath() {
-			return Paths.emptySpatialPath();
+			return SpatialPath.empty();
 		}
 		
 		@Override
@@ -75,6 +73,11 @@ public final class Trajectories {
 		}
 		
 		@Override
+		public Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
+			return this; // empty
+		}
+
+		@Override
 		public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
 			return null;
 		}
@@ -82,36 +85,10 @@ public final class Trajectories {
 	};
 
 	/**
-	 * An empty {@code SimpleTrajectory} instance.
-	 */
-	private static final SimpleTrajectory EMPTY_SIMPLE_TRAJECTORY =
-		new SimpleTrajectory(emptySpatialPath(), ImmutableList.of());
-
-	/**
-	 * An empty {@code DecomposedTrajectory} instance.
-	 */
-	private static final DecomposedTrajectory EMPTY_DECOMPOSED_TRAJECTORY =
-		new DecomposedTrajectory(LocalDateTime.MIN, emptySpatialPath(), emptyArcTimePath());
-	
-	/**
 	 * @return an empty {@code Trajectory} instance.
 	 */
 	public static Trajectory emptyTrajectory() {
 		return EMPTY_TRAJECTORY;
 	}
-	
-	/**
-	 * @return an empty {@code SimpleTrajectory} instance.
-	 */
-	public static SimpleTrajectory emptySimpleTrajectory() {
-		return EMPTY_SIMPLE_TRAJECTORY;
-	}
 
-	/**
-	 * @return an empty {@code DecomposedTrajectory} instance.
-	 */
-	public static DecomposedTrajectory emptyDecomposedTrajectory() {
-		return EMPTY_DECOMPOSED_TRAJECTORY;
-	}
-	
 }

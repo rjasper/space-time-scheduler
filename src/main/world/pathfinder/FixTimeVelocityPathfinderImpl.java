@@ -154,7 +154,7 @@ public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
 		
 		// if the finish point is unreachable
 		if (graphPath == null) {
-			return new ArcTimePath();
+			return ArcTimePath.empty();
 		} else {
 			Stream<Point> sourceVertices = graphPath.getEdgeList().stream()
 				.map(mesh::getEdgeSource);

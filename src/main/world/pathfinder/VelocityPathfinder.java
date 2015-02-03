@@ -3,7 +3,6 @@ package world.pathfinder;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static world.Trajectories.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -247,7 +246,7 @@ public abstract class VelocityPathfinder {
 				calculateEvadedObstacles(forbiddenRegions, arcTimePath));
 		} else {
 			setResultTrajectory(
-				emptyDecomposedTrajectory());
+				DecomposedTrajectory.empty());
 			setResultEvadedObstacles(
 				emptyList());
 		}
@@ -305,7 +304,7 @@ public abstract class VelocityPathfinder {
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
 		
 		// return a list of each obstacle met by a point in the path
-		return arcTimePath.getVertices().stream()
+		return arcTimePath.getPoints().stream()
 			.map(lookup::get)
 			.collect(toSet());
 	}

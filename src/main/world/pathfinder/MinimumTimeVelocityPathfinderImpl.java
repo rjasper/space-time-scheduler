@@ -163,7 +163,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 				return buildPath(mesh, it, cur);
 		}
 		
-		return new ArcTimePath();
+		return ArcTimePath.empty();
 	}
 
 	/**

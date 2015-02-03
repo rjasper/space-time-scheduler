@@ -1,5 +1,6 @@
 package world;
 
+import static util.DurationConv.*;
 import static common.collect.ImmutablesCollectors.*;
 import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
@@ -16,6 +17,7 @@ import java.util.stream.StreamSupport;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -34,6 +36,19 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Rico Jasper
  */
 public class SimpleTrajectory implements Trajectory {
+	
+	/**
+	 * An empty {@code SimpleTrajectory}.
+	 */
+	private static final SimpleTrajectory EMPTY =
+		new SimpleTrajectory(SpatialPath.empty(), ImmutableList.of());
+	
+	/**
+	 * @return an empty {@code SimpleTrajectory}.
+	 */
+	public static SimpleTrajectory empty() {
+		return EMPTY;
+	}
 
 	/**
 	 * The spatial (x-y) ordinates.
@@ -74,6 +89,8 @@ public class SimpleTrajectory implements Trajectory {
 		if (spatialPath.size() != times.size())
 			throw new IllegalArgumentException(
 				"spatialPath and times do not have the same size");
+		if (!Ordering.natural().isOrdered(times))
+			throw new IllegalArgumentException("times is not causal");
 
 		this.spatialPath = spatialPath;
 		this.times = times;
@@ -245,6 +262,95 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	public int size() {
 		return spatialPath.size();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#subTrajectory(java.time.LocalDateTime, java.time.LocalDateTime)
+	 */
+	@Override
+	public SimpleTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
+		// check empty cases
+		
+		// if trajectory is empty
+		if (isEmpty())
+			return this; // empty
+		// if the interval is empty or does not intersect
+		if (startTime.compareTo(finishTime) >= 0 ||
+			startTime.compareTo(getFinishTime()) >= 0 ||
+			finishTime.compareTo(getStartTime()) <= 0)
+		{
+			return empty();
+		}
+		
+		// at this point it is is guaranteed that the trajectory intersects with the interval
+		
+		int startCmp = getStartTime().compareTo(startTime);
+		int finishCmp = getFinishTime().compareTo(finishTime);
+		
+		// if identical
+		if (startCmp >= 0 && finishCmp <= 0)
+			return this;
+		
+		int n = size();
+		// start values will always be set in the for loop
+		// finish values will not be set in the loop if finishCmp >= 0
+		int startIndex = 0, finishIndex = n - 1;
+		double startAlpha = 0.0, finishAlpha = 0.0;
+		
+		ImmutableList.Builder<LocalDateTime> builder = ImmutableList.builder();
+		
+		List<LocalDateTime> times = getTimes();
+		LocalDateTime t1 = times.get(0);
+		int t1CmpStartTime = startCmp;
+		int t1CmpFinishTime = finishCmp;
+		
+		// determine times of the sub trajectory and determine start and finish
+		// indices to calculate the spatial path
+		for (int i = 1; i < n-1; ++i) {
+			LocalDateTime t2 = times.get(i);
+			int t2CmpStartTime = t2.compareTo(startTime);
+			int t2CmpFinishTime = t2.compareTo(finishTime);
+			// calculate duration if needed (t1 <= startTime, finishTime < t2)
+			double d = t1CmpStartTime <= 1 && t2CmpFinishTime > 0
+				? inSeconds(Duration.between(t1, t2))
+				: Double.NaN;
+				
+			// add times to list
+
+			// t1 < startTime < t2
+			if (t1CmpStartTime < 0 && t2CmpFinishTime > 0)
+				builder.add(startTime);
+			// startTime <= t1 <= finishTime
+			if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
+				builder.add(t1);
+			// t1 < finishTime < t2
+			if (t1CmpStartTime < 0 && t2CmpFinishTime > 0)
+				builder.add(finishTime);
+			
+			// determine indices and alpha values
+			
+			// t1 <= startTime < t2
+			if (t1CmpStartTime <= 0 && t2CmpFinishTime > 0) {
+				startIndex = i-1;
+				startAlpha = inSeconds(Duration.between(t1, startTime)) / d;
+			}
+			// t1 <= finishTime < t2
+			if (t1CmpFinishTime <= 0 && t2CmpFinishTime > 0) {
+				finishIndex = i;
+				startAlpha = inSeconds(Duration.between(t1, finishTime)) / d;
+			}
+			
+			t1 = t2;
+			t1CmpStartTime = t2CmpStartTime;
+			t1CmpFinishTime = t2CmpFinishTime;
+		}
+		
+		ImmutableList<LocalDateTime> subTimes = builder.build();
+		
+		SpatialPath subSpatialPath = getSpatialPath().subPath(startIndex, startAlpha, finishIndex, finishAlpha);
+		
+		return new SimpleTrajectory(subSpatialPath, subTimes);
 	}
 
 	/*

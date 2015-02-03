@@ -99,14 +99,16 @@ public interface Trajectory {
 	public abstract Geometry trace();
 	
 	/**
-	 * Calculates the arc time path (s-t) of this trajectory in relation to the
-	 * given base time.
+	 * Calculates the sub trajectory given by a time interval.
 	 * 
-	 * @param baseTime
-	 * @return the arc time path.
-	 * @throws NullPointerException if {@code baseTime} is {@code null}.
+	 * @param startTime
+	 * @param finishTime
+	 * @return the sub trajectory. The trajectory will be empty if
+	 *         {@code startTime} &lt;= {@code finishTime}
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
 	 */
-	public abstract ArcTimePath calcArcTimePath(LocalDateTime baseTime);
+	public abstract Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime);
 
 	/**
 	 * Calculates the merge of two trajectories. This trajectory serves as
@@ -129,16 +131,26 @@ public interface Trajectory {
 		SpatialPath rhsSpatialPath = other.getSpatialPath();
 		List<LocalDateTime> lhsTimes = getTimes();
 		List<LocalDateTime> rhsTimes = other.getTimes();
-
+	
 		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
 		ImmutableList<LocalDateTime> times = ImmutableList.<LocalDateTime>builder()
 			.addAll(lhsTimes)
 			.addAll(rhsTimes)
 			.build();
-
+	
 		return new SimpleTrajectory(spatialPath, times);
 	}
-	
+
+	/**
+	 * Calculates the arc time path (s-t) of this trajectory in relation to the
+	 * given base time.
+	 * 
+	 * @param baseTime
+	 * @return the arc time path.
+	 * @throws NullPointerException if {@code baseTime} is {@code null}.
+	 */
+	public abstract ArcTimePath calcArcTimePath(LocalDateTime baseTime);
+
 	/**
 	 * @return a {@code VertexIterator}
 	 */

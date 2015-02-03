@@ -15,17 +15,22 @@ import com.vividsolutions.jts.operation.distance.DistanceOp;
 public class SpatialPath extends Path {
 	
 	/**
+	 * An empty {@code SpatialPath}.
+	 */
+	private static final SpatialPath EMPTY = new SpatialPath(ImmutableList.of());
+	
+	/**
+	 * @return an empty {@code SpatialPath}.
+	 */
+	public static SpatialPath empty() {
+		return EMPTY;
+	}
+	
+	/**
 	 * Caches the length of the path.
 	 */
 	private transient double length = Double.NaN;
 	
-	/**
-	 * Creates an empty {@code SpatialPath}.
-	 */
-	public SpatialPath() {
-		super();
-	}
-
 	/**
 	 * Constructs a spatial path of the given vertices.
 	 * 
@@ -47,6 +52,15 @@ public class SpatialPath extends Path {
 	protected Path create(ImmutableList<ImmutablePoint> vertices) {
 		return new SpatialPath(vertices);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#getEmpty()
+	 */
+	@Override
+	protected SpatialPath getEmpty() {
+		return empty();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -60,6 +74,23 @@ public class SpatialPath extends Path {
 		return (SpatialPath) super.concat(other);
 	}
 	
+	/* (non-Javadoc)
+	 * @see world.Path#subPath(int, double, int, double)
+	 */
+	@Override
+	public SpatialPath subPath(
+		int startIndexInclusive,
+		double startAlpha,
+		int finishIndexExclusive,
+		double finishAlpha)
+	{
+		return (SpatialPath) super.subPath(
+			startIndexInclusive,
+			startAlpha,
+			finishIndexExclusive,
+			finishAlpha);
+	}
+
 	/**
 	 * @return the length of the path.
 	 */

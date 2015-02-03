@@ -184,7 +184,7 @@ public class StraightEdgePathfinder extends SpatialPathfinder {
 
 		// if path finder couldn't find a path
 		if (pathData.isError())
-			return new SpatialPath();
+			return SpatialPath.empty();
 
 		SpatialPath path = makeSpatialPath(pathData);
 		

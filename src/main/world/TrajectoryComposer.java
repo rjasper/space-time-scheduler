@@ -172,6 +172,7 @@ public class TrajectoryComposer {
 		int nSpatial = getSpatialPathSize();
 		int nArcTime = getArcTimePathSize();
 
+		// TODO tXY interpolation only works with bijective arc-time mapping
 		// interpolate tXY
 		double[] tSpatial = new double[nSpatial];
 
