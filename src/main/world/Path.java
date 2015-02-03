@@ -289,12 +289,13 @@ public class Path implements Iterable<ImmutablePoint> {
 
 		builder.add(interpolate(startIndexInclusive, startAlpha));
 			
-		for (int i = startIndexInclusive+1; i <= finishIndexInclusive-1; ++i)
+		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
 			builder.add(get(i));
 		
-		builder.add(interpolate(finishIndexInclusive, finishAlpha));
+		if (finishAlpha > 0.0)
+			builder.add(interpolate(finishIndexInclusive, finishAlpha));
 		
-		return null;
+		return create(builder.build());
 	}
 	
 	/**
@@ -320,7 +321,7 @@ public class Path implements Iterable<ImmutablePoint> {
 		double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
 		double dx = x2 - x1, dy = y2 - y1;
 		
-		return immutablePoint(x1 + alpha*dx, x2 + alpha*dy);
+		return immutablePoint(x1 + alpha*dx, y1 + alpha*dy);
 	}
 
 	/**

@@ -285,66 +285,70 @@ public class SimpleTrajectory implements Trajectory {
 		
 		// at this point it is is guaranteed that the trajectory intersects with the interval
 		
-		int startCmp = getStartTime().compareTo(startTime);
-		int finishCmp = getFinishTime().compareTo(finishTime);
+		int t0CmpStartTime = getStartTime().compareTo(startTime);
+		int tEndCmpFinishTime = getFinishTime().compareTo(finishTime);
 		
 		// if identical
-		if (startCmp >= 0 && finishCmp <= 0)
+		if (t0CmpStartTime >= 0 && tEndCmpFinishTime <= 0)
 			return this;
 		
 		int n = size();
+		int t0CmpFinishTime = getStartTime().compareTo(finishTime);
 		// start values will always be set in the for loop
 		// finish values will not be set in the loop if finishCmp >= 0
-		int startIndex = 0, finishIndex = n - 1;
+		// start index is inclusive, finish index exclusive
+		int startIndex = 0, finishIndex = n;
 		double startAlpha = 0.0, finishAlpha = 0.0;
 		
 		ImmutableList.Builder<LocalDateTime> builder = ImmutableList.builder();
 		
 		List<LocalDateTime> times = getTimes();
 		LocalDateTime t1 = times.get(0);
-		int t1CmpStartTime = startCmp;
-		int t1CmpFinishTime = finishCmp;
+		int t1CmpStartTime = t0CmpStartTime;
+		int t1CmpFinishTime = t0CmpFinishTime;
 		
 		// determine times of the sub trajectory and determine start and finish
 		// indices to calculate the spatial path
-		for (int i = 1; i < n-1; ++i) {
+		for (int i = 1; i < n; ++i) {
 			LocalDateTime t2 = times.get(i);
 			int t2CmpStartTime = t2.compareTo(startTime);
 			int t2CmpFinishTime = t2.compareTo(finishTime);
-			// calculate duration if needed (t1 <= startTime, finishTime < t2)
-			double d = t1CmpStartTime <= 1 && t2CmpFinishTime > 0
-				? inSeconds(Duration.between(t1, t2))
-				: Double.NaN;
-				
+			
 			// add times to list
 
 			// t1 < startTime < t2
-			if (t1CmpStartTime < 0 && t2CmpFinishTime > 0)
+			if (t1CmpStartTime < 0 && t2CmpStartTime > 0)
 				builder.add(startTime);
 			// startTime <= t1 <= finishTime
 			if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
 				builder.add(t1);
 			// t1 < finishTime < t2
-			if (t1CmpStartTime < 0 && t2CmpFinishTime > 0)
+			if (t1CmpFinishTime < 0 && t2CmpFinishTime > 0)
 				builder.add(finishTime);
 			
 			// determine indices and alpha values
 			
 			// t1 <= startTime < t2
-			if (t1CmpStartTime <= 0 && t2CmpFinishTime > 0) {
+			if (t1CmpStartTime <= 0 && t2CmpStartTime > 0) {
 				startIndex = i-1;
-				startAlpha = inSeconds(Duration.between(t1, startTime)) / d;
+				startAlpha = inSeconds(Duration.between(t1, startTime))
+					/ inSeconds(Duration.between(t1, t2));
 			}
 			// t1 <= finishTime < t2
 			if (t1CmpFinishTime <= 0 && t2CmpFinishTime > 0) {
 				finishIndex = i;
-				startAlpha = inSeconds(Duration.between(t1, finishTime)) / d;
+				finishAlpha = inSeconds(Duration.between(t1, finishTime))
+					/ inSeconds(Duration.between(t1, t2));
 			}
 			
 			t1 = t2;
 			t1CmpStartTime = t2CmpStartTime;
 			t1CmpFinishTime = t2CmpFinishTime;
 		}
+
+		// startTime <= t1 <= finishTime
+		if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
+			builder.add(t1);
 		
 		ImmutableList<LocalDateTime> subTimes = builder.build();
 		
