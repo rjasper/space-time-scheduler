@@ -306,7 +306,6 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		// TODO Auto-generated method stub
 		Objects.requireNonNull(time, "time");
 		
 		if (isComposed()) {
