@@ -15,7 +15,7 @@ import world.Trajectory;
  * @see WorkerUnit
  * @see Scheduler
  */
-public class WorkerUnitReference {
+public class WorkerUnitReference  {
 	
 	/**
 	 * The referenced worker.

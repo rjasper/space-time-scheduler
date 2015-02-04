@@ -36,14 +36,14 @@ public class ScheduleResult {
 		/**
 		 * @return the updated trajectory.
 		 */
-		public final Trajectory getTrajectory() {
+		public Trajectory getTrajectory() {
 			return trajectory;
 		}
 
 		/**
 		 * @return the worker reference whose trajectory was changed.
 		 */
-		public final WorkerUnitReference getWorkerRef() {
+		public WorkerUnitReference getWorkerRef() {
 			return workerRef;
 		}
 		
