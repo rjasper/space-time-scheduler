@@ -87,7 +87,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public SpatialPath concat(AbstractPath<?, ?> other) {
+	public SpatialPath concat(Path<?, ?> other) {
 		if (!(other instanceof SpatialPath))
 			throw new IllegalArgumentException("incompatible path");
 		

@@ -220,9 +220,9 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	 * @see world.Path#concat(world.AbstractPath)
 	 */
 	@Override
-	public Path<V, S> concat(AbstractPath<?, ?> other) {
-		ImmutableList<ImmutablePoint> lhsVertices = this.points;
-		ImmutableList<ImmutablePoint> rhsVertices = other.points;
+	public Path<V, S> concat(Path<?, ?> other) {
+		ImmutableList<ImmutablePoint> lhsVertices = this.getPoints();
+		ImmutableList<ImmutablePoint> rhsVertices = other.getPoints();
 		
 		Builder<ImmutablePoint> builder = ImmutableList.builder();
 		

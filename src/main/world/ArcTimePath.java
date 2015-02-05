@@ -218,7 +218,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public ArcTimePath concat(AbstractPath<?, ?> other) {
+	public ArcTimePath concat(Path<?, ?> other) {
 		if (!(other instanceof ArcTimePath))
 			throw new IllegalArgumentException("incompatible path");
 		

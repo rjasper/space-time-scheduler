@@ -235,7 +235,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @param other
 	 * @return the concatenated path.
 	 */
-	public abstract Path<V, S> concat(AbstractPath<?, ?> other);
+	public abstract Path<V, S> concat(Path<?, ?> other);
 
 	/**
 	 * <p>
