@@ -89,7 +89,7 @@ public class WorkerUnitSpecification {
 	/**
 	 * @return the worker's ID.
 	 */
-	public String getWorkerId() {
+	public final String getWorkerId() {
 		return workerId;
 	}
 

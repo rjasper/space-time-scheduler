@@ -102,35 +102,35 @@ public class TaskSpecification {
 	/**
 	 * @return the id of the task.
 	 */
-	public UUID getTaskId() {
+	public final UUID getTaskId() {
 		return taskId;
 	}
 
 	/**
 	 * @return the immutable spatial space for a valid {@link Point location}.
 	 */
-	public Geometry getLocationSpace() {
+	public final Geometry getLocationSpace() {
 		return locationSpace;
 	}
 
 	/**
 	 * @return the earliest possible start time.
 	 */
-	public LocalDateTime getEarliestStartTime() {
+	public final LocalDateTime getEarliestStartTime() {
 		return earliestStartTime;
 	}
 
 	/**
 	 * @return the latest possible start time.
 	 */
-	public LocalDateTime getLatestStartTime() {
+	public final LocalDateTime getLatestStartTime() {
 		return latestStartTime;
 	}
 
 	/**
 	 * @return the exact duration of a task.
 	 */
-	public Duration getDuration() {
+	public final Duration getDuration() {
 		return duration;
 	}
 
