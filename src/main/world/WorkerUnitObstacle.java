@@ -111,7 +111,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 * @throws NullPointerException if the evasion is {@code null}.
 	 * @throws IllegalArgumentException if the evasion was not registered.
 	 */
-	public void removeEvasion(WorkerUnitObstacle evasion) {
+	public void removeEvasion(MovingWorkerUnitObstacle evasion) {
 		Objects.requireNonNull(evasion, "evasion");
 		
 		boolean status = evasions.remove(evasion);
