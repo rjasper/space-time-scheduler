@@ -7,13 +7,12 @@ import world.ArcTimePath.Vertex;
 public class ArcTimePathInterpolator extends AbstractPathInterpolator<
 	Double,
 	ArcTimePath.Vertex,
-	ArcTimePath.Segment,
 	ArcTimePath>
 {
 
 	public ArcTimePathInterpolator(
 		ArcTimePath path,
-		PathVertexSeeker<ArcTimePath.Vertex, ArcTimePath.Segment, ArcTimePath> seeker)
+		PathVertexSeeker<ArcTimePath.Vertex> seeker)
 	{
 		super(path, seeker);
 	}

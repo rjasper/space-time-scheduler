@@ -7,15 +7,13 @@ import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import world.Path;
+import world.PointPath;
 
 // TODO document
 public class LookUpPathVertexSeeker<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
-
-	extends AbstractPathVertexSeeker<V, S, P>
+	V extends PointPath.Vertex,
+	P extends PointPath<V, ?>>
+extends AbstractPathVertexSeeker<V, P>
 {
 	
 	private final TreeMap<Double, V> lookUp;

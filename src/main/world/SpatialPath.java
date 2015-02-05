@@ -15,7 +15,7 @@ import com.vividsolutions.jts.operation.distance.DistanceOp;
  * 
  * @author Rico
  */
-public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Segment> {
+public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPath.Segment> {
 	
 	/**
 	 * An empty {@code SpatialPath}.
@@ -70,7 +70,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 */
 	private Interpolator<ImmutablePoint> interpolator = new SpatialPathInterpolator(
 		this,
-		new ForwardPathVertexSeeker<Vertex, Segment, SpatialPath>(this, Vertex::getArc));
+		new ForwardPathVertexSeeker<Vertex, SpatialPath>(this, Vertex::getArc));
 	
 	/**
 	 * Interpolates the location of the given arc.
@@ -87,7 +87,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public SpatialPath concat(Path<?, ?> other) {
+	public SpatialPath concat(Path<? extends Vertex, ? extends Segment> other) {
 		if (!(other instanceof SpatialPath))
 			throw new IllegalArgumentException("incompatible path");
 		
@@ -140,7 +140,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * The vertex of a {@code SpatialPath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends Path.Vertex {
+	public static class Vertex extends PointPath.Vertex {
 		
 		/**
 		 * The arc value.
@@ -211,7 +211,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * The segment of a {@code SpatialPath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends Path.Segment<Vertex> {
+	public static class Segment extends PointPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.

@@ -103,7 +103,7 @@ public class TrajectoryComposer {
 	public void setArcTimePathComponent(ArcTimePath arcTimePathComponent) {
 		int nArcTime = arcTimePathComponent.size();
 
-		Iterator<ImmutablePoint> it = arcTimePathComponent.iterator();
+		Iterator<ImmutablePoint> it = arcTimePathComponent.getPoints().iterator();
 
 		sArcTime = new double[nArcTime];
 		tArcTime = new double[nArcTime];

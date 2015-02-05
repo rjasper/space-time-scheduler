@@ -3,15 +3,8 @@ package world.util;
 import java.util.Objects;
 import java.util.function.Function;
 
-import world.Path;
-
 // TODO document
-public abstract class AbstractPathVertexSeeker<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
-implements PathVertexSeeker<V, S, P>
-{
+public abstract class AbstractPathVertexSeeker<V, P> implements PathVertexSeeker<V> {
 	
 	private final P path;
 	

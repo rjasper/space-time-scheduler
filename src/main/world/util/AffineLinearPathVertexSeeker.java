@@ -5,16 +5,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import world.Path;
+import world.PointPath;
 
 // TODO document
 // TODO test
 public class AffineLinearPathVertexSeeker<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
-
-	extends AbstractPathVertexSeeker<V, S, P>
+	V extends PointPath.Vertex,
+	P extends PointPath<V, ?>>
+extends AbstractPathVertexSeeker<V, P>
 {
 	
 	private int lastIndex = 0;

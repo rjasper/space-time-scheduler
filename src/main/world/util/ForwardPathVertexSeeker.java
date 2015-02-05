@@ -3,14 +3,13 @@ package world.util;
 import java.util.Iterator;
 import java.util.function.Function;
 
-import world.Path;
+import world.PointPath;
 
 public class ForwardPathVertexSeeker<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
+	V extends PointPath.Vertex,
+	P extends PointPath<V, ?>>
 	
-	extends AbstractPathVertexSeeker<V, S, P>
+	extends AbstractPathVertexSeeker<V, P>
 {
 	
 	private final Iterator<V> iterator;

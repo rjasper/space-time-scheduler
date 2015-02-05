@@ -2,22 +2,21 @@ package world.util;
 
 import java.util.Objects;
 
-import world.Path;
+import world.PointPath;
 
 // TODO document
 public abstract class AbstractPathInterpolator<
 	T,
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
+	V extends PointPath.Vertex,
+	P extends PointPath<V, ?>>
 implements Interpolator<T>
 {
 	
 	private final P path;
 	
-	private final PathVertexSeeker<V, S, P> seeker;
+	private final PathVertexSeeker<V> seeker;
 	
-	public AbstractPathInterpolator(P path, PathVertexSeeker<V, S, P> seeker) {
+	public AbstractPathInterpolator(P path, PathVertexSeeker<V> seeker) {
 		this.path = Objects.requireNonNull(path, "path");;
 		this.seeker = Objects.requireNonNull(seeker, "seeker");
 	}

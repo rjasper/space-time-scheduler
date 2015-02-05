@@ -9,13 +9,12 @@ import world.SpatialPath.Vertex;
 public class SpatialPathInterpolator extends AbstractPathInterpolator<
 	ImmutablePoint,
 	SpatialPath.Vertex,
-	SpatialPath.Segment,
 	SpatialPath>
 {
 	
 	public SpatialPathInterpolator(
 		SpatialPath spatialPath,
-		PathVertexSeeker<SpatialPath.Vertex, SpatialPath.Segment, SpatialPath> seeker)
+		PathVertexSeeker<SpatialPath.Vertex> seeker)
 	{
 		super(spatialPath, seeker);
 	}

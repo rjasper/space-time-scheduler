@@ -19,7 +19,6 @@ import jts.geom.util.GeometriesRequire;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.UnmodifiableIterator;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -29,10 +28,10 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public abstract class AbstractPath<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>>
-implements Path<V, S>, Iterable<ImmutablePoint>
+public abstract class AbstractPointPath<
+	V extends PointPath.Vertex,
+	S extends PointPath.Segment<? extends V>>
+implements PointPath<V, S>
 {
 	
 	/**
@@ -56,7 +55,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	 * 
 	 * @param vertices
 	 */
-	public AbstractPath(ImmutableList<ImmutablePoint> points) {
+	public AbstractPointPath(ImmutableList<ImmutablePoint> points) {
 		checkVertices(points);
 		
 		this.points = points;
@@ -68,12 +67,12 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	 * @param vertices
 	 * @return the new path.
 	 */
-	protected abstract Path<V, S> create(ImmutableList<ImmutablePoint> vertices);
+	protected abstract PointPath<V, S> create(ImmutableList<ImmutablePoint> vertices);
 	
 	/**
 	 * @return an empty path.
 	 */
-	protected abstract Path<V, S> getEmpty();
+	protected abstract PointPath<V, S> getEmpty();
 	
 	/**
 	 * Checks for validity of the given vertices.
@@ -110,6 +109,20 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 		return points.size();
 	}
 
+	@Override
+	public V getFirstVertex() {
+		assert false;
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V getLastVertex() {
+		assert false;
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/* (non-Javadoc)
 	 * @see world.Path#get(int)
 	 */
@@ -121,7 +134,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	/* (non-Javadoc)
 	 * @see world.Path#getFirst()
 	 */
-	@Override
+//	@Override TODO
 	public ImmutablePoint getFirst() {
 		if (isEmpty())
 			return null;
@@ -132,7 +145,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	/* (non-Javadoc)
 	 * @see world.Path#getLast()
 	 */
-	@Override
+//	@Override 
 	public ImmutablePoint getLast() {
 		if (isEmpty())
 			return null;
@@ -160,7 +173,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AbstractPath<?, ?> other = (AbstractPath<?, ?>) obj;
+		AbstractPointPath<?, ?> other = (AbstractPointPath<?, ?>) obj;
 		if (points == null) {
 			if (other.points != null)
 				return false;
@@ -204,25 +217,25 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 		return trace;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Iterable#iterator()
-	 */
-	/* (non-Javadoc)
-	 * @see world.Path#iterator()
-	 */
-	@Override
-	public UnmodifiableIterator<ImmutablePoint> iterator() {
-		return points.iterator();
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 * @see java.lang.Iterable#iterator()
+//	 */
+//	@Override
+//	public UnmodifiableIterator<ImmutablePoint> iterator() {
+//		return points.iterator();
+//	}
 
 	/* (non-Javadoc)
 	 * @see world.Path#concat(world.AbstractPath)
 	 */
 	@Override
-	public Path<V, S> concat(Path<?, ?> other) {
+	public PointPath<V, S> concat(Path<? extends V, ? extends S> other) {
+		if (!(other instanceof PointPath))
+			throw new IllegalArgumentException("incompatible type");
+		
 		ImmutableList<ImmutablePoint> lhsVertices = this.getPoints();
-		ImmutableList<ImmutablePoint> rhsVertices = other.getPoints();
+		ImmutableList<ImmutablePoint> rhsVertices = ((PointPath<?, ?>) other).getPoints();
 		
 		Builder<ImmutablePoint> builder = ImmutableList.builder();
 		
@@ -238,7 +251,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 	 * @see world.Path#subPath(int, double, int, double)
 	 */
 	@Override
-	public Path<V, S> subPath(
+	public PointPath<V, S> subPath(
 		int startIndexInclusive,
 		double startAlpha,
 		int finishIndexExclusive,
@@ -347,7 +360,7 @@ implements Path<V, S>, Iterable<ImmutablePoint>
 		/**
 		 * The point iterator.
 		 */
-		private final Iterator<ImmutablePoint> points = iterator();
+		private final Iterator<ImmutablePoint> points = AbstractPointPath.this.points.iterator();
 		
 		/**
 		 * The last yielded vertex.

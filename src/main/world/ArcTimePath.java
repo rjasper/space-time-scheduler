@@ -20,6 +20,7 @@ import world.util.Interpolator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.UnmodifiableIterator;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -28,7 +29,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Segment> {
+public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePath.Segment> {
 	
 	/**
 	 * An empty {@code ArcTimePath}.
@@ -131,7 +132,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	 */
 	private Interpolator<Double> interpolator = new ArcTimePathInterpolator(
 		this,
-		new ForwardPathVertexSeeker<Vertex, Segment, ArcTimePath>(this, Vertex::getY));
+		new ForwardPathVertexSeeker<Vertex, ArcTimePath>(this, Vertex::getY));
 	
 	/**
 	 * Interpolates the arc value of the given time.
@@ -218,7 +219,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public ArcTimePath concat(Path<?, ?> other) {
+	public ArcTimePath concat(Path<? extends Vertex, ? extends Segment> other) {
 		if (!(other instanceof ArcTimePath))
 			throw new IllegalArgumentException("incompatible path");
 		
@@ -255,7 +256,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	 * The vertex of a {@code ArcTimePath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends Path.Vertex {
+	public static class Vertex extends PointPath.Vertex {
 
 		/**
 		 * Constructs a new {@code Vertex}.
@@ -302,7 +303,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	 * The segment of a {@code ArcTimePath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends Path.Segment<Vertex> {
+	public static class Segment extends PointPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.

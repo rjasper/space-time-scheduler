@@ -1,12 +1,13 @@
 package world.util;
 
-import world.Path;
-
 // TODO document
-public interface PathVertexSeeker<
-	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>,
-	P extends Path<V, S>>
+/**
+ * 
+ * @author Rico
+ *
+ * @param <V> Vertex Type
+ */
+public interface PathVertexSeeker<V>
 {
 
 	public abstract V seekFloor(double position);

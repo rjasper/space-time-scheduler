@@ -287,7 +287,7 @@ public class SimpleTrajectory implements Trajectory {
 		LocalDateTime t1 = times.get(segmentPos);
 		Duration d1 = Duration.between(t1, time);
 		
-		// is time is on spot of one point
+		// if time is on spot of one point
 		if (d1.isZero())
 			return spatialPath.get(segmentPos);
 		
@@ -479,7 +479,7 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	@Override
 	public String toString() {
-		Iterator<ImmutablePoint> points = getSpatialPath().iterator();
+		Iterator<ImmutablePoint> points = getSpatialPath().getPoints().iterator();
 		Iterator<LocalDateTime> times = getTimes().iterator();
 		
 		StringBuffer buf = new StringBuffer();
