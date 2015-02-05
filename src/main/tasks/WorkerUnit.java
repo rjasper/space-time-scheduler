@@ -80,7 +80,7 @@ public class WorkerUnit {
 	/**
 	 * All tasks which were assigned to this worker.
 	 */
-	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
+	private NavigableMap<LocalDateTime, Task> tasks = new TreeMap<>();
 
 	/**
 	 * An unmodifiable view on {@link #tasks}.
@@ -91,7 +91,7 @@ public class WorkerUnit {
 	/**
 	 * All obstacle segments of this worker.
 	 */
-	private TreeMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
+	private NavigableMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
 
 	/**
 	 * An unmodifiable view on {@link #obstacleSegments}.
