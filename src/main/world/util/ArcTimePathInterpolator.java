@@ -11,17 +11,11 @@ public class ArcTimePathInterpolator extends AbstractPathInterpolator<
 	ArcTimePath>
 {
 
-	public ArcTimePathInterpolator(ArcTimePath path, boolean lookUp) {
-		super(path, lookUp);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.util.AbstractPathInterpolator#position(world.AbstractPath.Vertex)
-	 */
-	@Override
-	protected double position(Vertex vertex) {
-		return vertex.getY();
+	public ArcTimePathInterpolator(
+		ArcTimePath path,
+		PathVertexSeeker<ArcTimePath.Vertex, ArcTimePath.Segment, ArcTimePath> seeker)
+	{
+		super(path, seeker);
 	}
 
 	/*

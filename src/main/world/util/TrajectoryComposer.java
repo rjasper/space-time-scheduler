@@ -1,4 +1,4 @@
-package world;
+package world.util;
 
 import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
@@ -11,6 +11,9 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
+import world.ArcTimePath;
+import world.SimpleTrajectory;
+import world.SpatialPath;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;

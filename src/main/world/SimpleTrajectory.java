@@ -270,8 +270,33 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	@Override
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		// TODO Auto-generated method stub
-		return null;
+		Objects.requireNonNull(time, "time");
+		
+		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
+			throw new IllegalArgumentException("time must be covered by this trajectory");
+		
+		int n = size();
+		int segmentPos = seekSegment(time);
+		
+		// if after the last segment (or last point)
+		if (segmentPos == n-1)
+			return getFinishLocation();
+		
+		SpatialPath spatialPath = getSpatialPath();
+		List<LocalDateTime> times = getTimes();
+		LocalDateTime t1 = times.get(segmentPos);
+		Duration d1 = Duration.between(t1, time);
+		
+		// is time is on spot of one point
+		if (d1.isZero())
+			return spatialPath.get(segmentPos);
+		
+		LocalDateTime t2 = times.get(segmentPos+1);
+		Duration d = Duration.between(t1, t2);
+		
+		double alpha = inSeconds(d1) / inSeconds(d);
+		
+		return spatialPath.interpolate(segmentPos, alpha);
 	}
 
 	/*
@@ -368,13 +393,60 @@ public class SimpleTrajectory implements Trajectory {
 	}
 	
 	/**
-	 * Seeks the position of the segment covering the given time.
+	 * Seeks the position of the segment covering the given time. If two
+	 * segments cover the time (i.e., the time is on spot of a vertex) the
+	 * second one's position is returned. This method assumes that {@code time}
+	 * is covered by this trajectory.
 	 * 
 	 * @param time
 	 * @return the segment position.
 	 */
 	private int seekSegment(LocalDateTime time) {
-		// TODO implement
+		// d1 + d2 == getDuration()
+		Duration d1 = Duration.between(getStartTime(), time);
+		Duration d2 = Duration.between(time, getFinishTime());
+		
+		if (d1.compareTo(d2) <= 0)
+			return seekSegmentForward(time);
+		else
+			return seekSegmentBackward(time);
+	}
+	
+	/**
+	 * Seeks the segment covering the given time using a forward loop. This
+	 * method assumes that {@code time} is covered by this trajectory.
+	 * 
+	 * @param time
+	 * @return the segment's position.
+	 */
+	private int seekSegmentForward(LocalDateTime time) {
+		List<LocalDateTime> times = getTimes();
+		int n = times.size();
+		
+		for (int i = 1; i < n; ++i) {
+			if (times.get(i).compareTo(time) < 0)
+				return i-1;
+		}
+		
+		return n-1;
+	}
+
+	/**
+	 * Seeks the segment covering the given time using a backward loop. This
+	 * method assumes that {@code time} is covered by this trajectory.
+	 * 
+	 * @param time
+	 * @return the segment's position.
+	 */
+	private int seekSegmentBackward(LocalDateTime time) {
+		List<LocalDateTime> times = getTimes();
+		int n = times.size();
+		
+		for (int i = n-1; i > 0; --i) {
+			if (times.get(i).compareTo(time) >= 0)
+				return i;
+		}
+		
 		return 0;
 	}
 

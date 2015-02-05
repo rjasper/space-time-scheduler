@@ -13,17 +13,11 @@ public class SpatialPathInterpolator extends AbstractPathInterpolator<
 	SpatialPath>
 {
 	
-	public SpatialPathInterpolator(SpatialPath spatialPath, boolean lookUp) {
-		super(spatialPath, lookUp);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.util.AbstractPathInterpolator#position(world.AbstractPath.Vertex)
-	 */
-	@Override
-	protected double position(Vertex vertex) {
-		return vertex.getArc();
+	public SpatialPathInterpolator(
+		SpatialPath spatialPath,
+		PathVertexSeeker<SpatialPath.Vertex, SpatialPath.Segment, SpatialPath> seeker)
+	{
+		super(spatialPath, seeker);
 	}
 
 	/*

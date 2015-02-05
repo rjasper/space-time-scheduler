@@ -8,6 +8,7 @@ import static world.factories.TrajectoryFactory.*;
 import org.junit.Test;
 
 import util.TimeFactory;
+import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
 

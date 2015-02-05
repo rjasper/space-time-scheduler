@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
+import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
@@ -307,6 +308,9 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
+		
+		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
+			throw new IllegalArgumentException("time must be covered by this trajectory");
 		
 		if (isComposed()) {
 			return getComposedTrajectory().interpolateLocation(time);

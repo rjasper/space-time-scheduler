@@ -1,113 +1,51 @@
 package world.util;
 
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
-
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.TreeMap;
 
-import world.AbstractPath;
+import world.Path;
 
 // TODO document
 public abstract class AbstractPathInterpolator<
 	T,
-	V extends AbstractPath.Vertex,
-	S extends AbstractPath.Segment<? extends V>,
-	P extends AbstractPath<V, S>>
+	V extends Path.Vertex,
+	S extends Path.Segment<? extends V>,
+	P extends Path<V, S>>
+implements Interpolator<T>
 {
 	
 	private final P path;
 	
-	private final TreeMap<Double, V> lookUp;
+	private final PathVertexSeeker<V, S, P> seeker;
 	
-	public AbstractPathInterpolator(P path, boolean lookUp) {
-		Objects.requireNonNull(path, "spatialPath");
-		
-		this.path = path;
-		// TODO don't use look up for short paths
-		this.lookUp = lookUp ? makeLookUp(path) : null;
+	public AbstractPathInterpolator(P path, PathVertexSeeker<V, S, P> seeker) {
+		this.path = Objects.requireNonNull(path, "path");;
+		this.seeker = Objects.requireNonNull(seeker, "seeker");
 	}
-	
-	private TreeMap<Double, V> makeLookUp(P path) {
-		path.vertexStream();
-		
-		return path.vertexStream()
-			.collect(toMap(
-				this::position,
-				identity(),
-				(u, v) -> u,
-				TreeMap::new));
-	}
-	
-	public boolean hasLookUp() {
-		return lookUp != null;
-	}
-	
-	protected abstract double position(V vertex);
 
+	/* (non-Javadoc)
+	 * @see world.util.PathInterpolator#interpolate(double)
+	 */
+	@Override
 	public T interpolate(double position) {
 		if (path.isEmpty())
 			throw new IllegalArgumentException("cannot interpolate empty path");
 		if (!Double.isFinite(position))
-			throw new IllegalArgumentException("arc is not finite");
+			throw new IllegalArgumentException("position is not finite");
 		
-		if (hasLookUp())
-			return seekWithLookUp(position);
-		else
-			return seekNormal(position);
-	}
-	
-	private T seekNormal(double position) {
-		Iterator<V> it = path.vertexIterator();
+		V v1 = seeker.seekFloor(position);
 		
-		V v1 = it.next();
-		double s1 = position(v1);
+		double pos1 = seeker.position(v1);
 		
-		if (s1 > position)
-			throw new IllegalArgumentException("arc too small");
-		
-		while (it.hasNext()) {
-			if (s1 > position)
-				continue;
-			if (s1 == position)
-				return onSpot(v1);
-			
-			V v2 = it.next();
-			
-			double s2 = position(v2);
-			
-			if (s2 < position)
-				return interpolate(position, v1, v2);
-			
-			v1 = v2;
-			s1 = s2;
-		}
-
-		throw new IllegalArgumentException("arc too big");
-	}
-	
-	private T seekWithLookUp(double position) {
-		Entry<Double, V> floor = lookUp.floorEntry(position);
-		
-		if (floor == null)
-			throw new IllegalArgumentException("arc too small");
-		
-		double s1 = floor.getKey();
-		V v1 = floor.getValue();
-		
-		if (s1 == position)
+		if (pos1 == position)
 			return onSpot(v1);
 		
-		Entry<Double, V> ceiling = lookUp.ceilingEntry(position);
-		
-		if (ceiling == null)
-			throw new IllegalArgumentException("arc too big");
-		
-		V v2 = ceiling.getValue();
+		V v2 = seeker.seekCeiling(position);
 		
 		return interpolate(position, v1, v2);
+	}
+	
+	protected double position(V vertex) {
+		return seeker.position(vertex);
 	}
 	
 	protected abstract T interpolate(double position, V v1, V v2);

@@ -15,6 +15,8 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 
 import util.DurationConv;
 import world.util.ArcTimePathInterpolator;
+import world.util.ForwardPathVertexSeeker;
+import world.util.Interpolator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -127,8 +129,9 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	/**
 	 * An interpolator for this arc-time path.
 	 */
-	private ArcTimePathInterpolator interpolator =
-		new ArcTimePathInterpolator(this, false);
+	private Interpolator<Double> interpolator = new ArcTimePathInterpolator(
+		this,
+		new ForwardPathVertexSeeker<Vertex, Segment, ArcTimePath>(this, Vertex::getY));
 	
 	/**
 	 * Interpolates the arc value of the given time.
@@ -248,41 +251,24 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 		return new VertexIterator();
 	}
 
-//	/* (non-Javadoc)
-//	 * @see world.Path#vertexSpliterator()
-//	 */
-//	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Vertex> to Spliterator<Vertex>
-//	@Override
-//	public Spliterator<Vertex> vertexSpliterator() {
-//		return (Spliterator<Vertex>) super.vertexSpliterator();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see world.Path#vertexStream()
-//	 */
-//	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Vertex> to Stream<Vertex>
-//	@Override
-//	public Stream<Vertex> vertexStream() {
-//		return (Stream<Vertex>) super.vertexStream();
-//	}
-
 	/**
 	 * The vertex of a {@code ArcTimePath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends AbstractPath.Vertex {
+	public static class Vertex extends Path.Vertex {
 
 		/**
 		 * Constructs a new {@code Vertex}.
 		 * 
+		 * @param index
 		 * @param point
 		 * @param first
 		 *            whether the vertex is the first one
 		 * @param last
 		 *            whether the vertex is the last one
 		 */
-		private Vertex(ImmutablePoint point, boolean first, boolean last) {
-			super(point, first, last);
+		private Vertex(int index, ImmutablePoint point, boolean first, boolean last) {
+			super(index, point, first, last);
 		}
 		
 	}
@@ -298,7 +284,7 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 		 */
 		@Override
 		protected Vertex createNextVertex(ImmutablePoint point) {
-			return new Vertex(point, isFirst(), isLast());
+			return new Vertex(getIndex(), point, isFirst(), isLast());
 		}
 		
 	}
@@ -311,30 +297,12 @@ public class ArcTimePath extends AbstractPath<ArcTimePath.Vertex, ArcTimePath.Se
 	public Iterator<Segment> segmentIterator() {
 		return new SegmentIterator();
 	}
-	
-//	/* (non-Javadoc)
-//	 * @see world.Path#segmentSpliterator()
-//	 */
-//	@SuppressWarnings("unchecked") // cast Spliterator<? extends Path.Segment> to Spliterator<Segment>
-//	@Override
-//	public Spliterator<Segment> segmentSpliterator() {
-//		return (Spliterator<Segment>) super.segmentSpliterator();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see world.Path#segmentStream()
-//	 */
-//	@SuppressWarnings("unchecked") // cast Stream<? extends Path.Segment> to Stream<Segment>
-//	@Override
-//	public Stream<Segment> segmentStream() {
-//		return (Stream<Segment>) super.segmentStream();
-//	}
 
 	/**
 	 * The segment of a {@code ArcTimePath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends AbstractPath.Segment<Vertex> {
+	public static class Segment extends Path.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.

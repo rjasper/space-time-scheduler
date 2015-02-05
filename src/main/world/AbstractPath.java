@@ -29,7 +29,11 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends AbstractPath.Segment<? extends V>> implements Iterable<ImmutablePoint> {
+public abstract class AbstractPath<
+	V extends Path.Vertex,
+	S extends Path.Segment<? extends V>>
+implements Path<V, S>, Iterable<ImmutablePoint>
+{
 	
 	/**
 	 * The vertices of the path.
@@ -64,12 +68,12 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 	 * @param vertices
 	 * @return the new path.
 	 */
-	protected abstract AbstractPath<V, S> create(ImmutableList<ImmutablePoint> vertices);
+	protected abstract Path<V, S> create(ImmutableList<ImmutablePoint> vertices);
 	
 	/**
 	 * @return an empty path.
 	 */
-	protected abstract AbstractPath<V, S> getEmpty();
+	protected abstract Path<V, S> getEmpty();
 	
 	/**
 	 * Checks for validity of the given vertices.
@@ -90,38 +94,34 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 			GeometriesRequire.requireValid2DPoint((Point) p, "vertices"));
 	}
 
-	/**
-	 * @return if the path is empty.
+	/* (non-Javadoc)
+	 * @see world.Path#isEmpty()
 	 */
+	@Override
 	public boolean isEmpty() {
 		return points.isEmpty();
 	}
 
-	/**
-	 * @return the amount of vertices.
+	/* (non-Javadoc)
+	 * @see world.Path#size()
 	 */
+	@Override
 	public int size() {
 		return points.size();
 	}
 
-	/**
-	 * Gets the point at the specified position of this path.
-	 * 
-	 * @param index
-	 * @return the point.
-	 * @throws IndexOutOfBoundsException
-	 *             if the index is out of range (index < 0 || index >= size())
+	/* (non-Javadoc)
+	 * @see world.Path#get(int)
 	 */
+	@Override
 	public ImmutablePoint get(int index) {
 		return points.get(index);
 	}
 
-	/**
-	 * Gets the point at the first position of this path.
-	 * 
-	 * @param index
-	 * @return the point. {@code null} if the path is empty.
+	/* (non-Javadoc)
+	 * @see world.Path#getFirst()
 	 */
+	@Override
 	public ImmutablePoint getFirst() {
 		if (isEmpty())
 			return null;
@@ -129,12 +129,10 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 			return points.get(0);
 	}
 
-	/**
-	 * Gets the point at the last position of this path.
-	 * 
-	 * @param index
-	 * @return the point. {@code null} if the path is empty.
+	/* (non-Javadoc)
+	 * @see world.Path#getLast()
 	 */
+	@Override
 	public ImmutablePoint getLast() {
 		if (isEmpty())
 			return null;
@@ -142,9 +140,10 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 			return points.get(size()-1);
 	}
 	
-	/**
-	 * @return the points
+	/* (non-Javadoc)
+	 * @see world.Path#getPoints()
 	 */
+	@Override
 	public ImmutableList<ImmutablePoint> getPoints() {
 		return points;
 	}
@@ -170,12 +169,10 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		return true;
 	}
 	
-	/**
-	 * Calculates the trace of this path. The trace is a {@code LineString}
-	 * containing all points visited by the path.
-	 * 
-	 * @return the line string.
+	/* (non-Javadoc)
+	 * @see world.Path#trace()
 	 */
+	@Override
 	public ImmutableLineString trace() {
 		if (trace == null) {
 			List<ImmutablePoint> points = new LinkedList<>(getPoints());
@@ -211,18 +208,19 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 	 * (non-Javadoc)
 	 * @see java.lang.Iterable#iterator()
 	 */
+	/* (non-Javadoc)
+	 * @see world.Path#iterator()
+	 */
 	@Override
 	public UnmodifiableIterator<ImmutablePoint> iterator() {
 		return points.iterator();
 	}
 
-	/**
-	 * Concatenates this path with the given one.
-	 * 
-	 * @param other
-	 * @return the concatenated path.
+	/* (non-Javadoc)
+	 * @see world.Path#concat(world.AbstractPath)
 	 */
-	public AbstractPath<V, S> concat(AbstractPath<?, ?> other) {
+	@Override
+	public Path<V, S> concat(AbstractPath<?, ?> other) {
 		ImmutableList<ImmutablePoint> lhsVertices = this.points;
 		ImmutableList<ImmutablePoint> rhsVertices = other.points;
 		
@@ -236,41 +234,11 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		return create(vertices);
 	}
 	
-	/**
-	 * <p>
-	 * Calculates a sub path from this path. The index parameters specify the
-	 * the relevant segments. The alpha values specify the start and finish
-	 * points of the first and last segment to be included. Such a point is
-	 * calculated according to this formular:
-	 * </p>
-	 * 
-	 * <i>point(i, alpha) = (x<sub>i</sub> +
-	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
-	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
-	 * 
-	 * <p>
-	 * Where <i>i</i> is the index of the segment and <i>(x<sub>i</sub>,
-	 * y<sub>i</sub>)</i> is the <i>i</i>-th vertex.
-	 * </p>
-	 * 
-	 * @param startIndexInclusive
-	 *            the position of the first segment
-	 * @param startAlpha
-	 *            specifies the start point on the first segment
-	 * @param finishIndexExclusive
-	 *            the position after the last segment
-	 * @param finishAlpha
-	 *            specifies the finish point on the last segment
-	 * @return the sub path
-	 * @throw IllegalArgumentException if any of the following is true:
-	 *        <ul>
-	 *        <li>The indices are out of bounds.</li>
-	 *        <li>The alpha values are not within [0, 1)</li>
-	 *        <li>The finish index is equal to size()-1 and finish alpha is not
-	 *        zero</li>
-	 *        </ul>
+	/* (non-Javadoc)
+	 * @see world.Path#subPath(int, double, int, double)
 	 */
-	public AbstractPath<V, S> subPath(
+	@Override
+	public Path<V, S> subPath(
 		int startIndexInclusive,
 		double startAlpha,
 		int finishIndexExclusive,
@@ -297,32 +265,44 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		
 		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
 
-		builder.add(interpolate(startIndexInclusive, startAlpha));
+		builder.add(interpolateImpl(startIndexInclusive, startAlpha));
 			
 		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
 			builder.add(get(i));
 		
 		// point was already added unless finishAlpha > 0.0
 		if (finishAlpha > 0.0)
-			builder.add(interpolate(finishIndexInclusive, finishAlpha));
+			builder.add(interpolateImpl(finishIndexInclusive, finishAlpha));
 		
 		return create(builder.build());
 	}
+
+	/* (non-Javadoc)
+	 * @see world.Path#interpolate(int, double)
+	 */
+	@Override
+	public ImmutablePoint interpolate(int index, double alpha) {
+		int n = size();
+		if (index < 0 || index >= n-1)
+			throw new IllegalArgumentException("index is out of bounds");
+		if (alpha < 0.0 || alpha >= 1.0)
+			throw new IllegalArgumentException("alpha is out of bounds");
+		if (index == n-1 && alpha != 0.0)
+			throw new IllegalArgumentException("alpha must be 0.0 if index is size()-1");
+		
+		return interpolateImpl(index, alpha);
+	}
 	
 	/**
-	 * <p>
-	 * Interpolates a point on segment using this formula:
-	 * </p>
+	 * Actual implementation of {@link #interpolate(int, double)}. Doesn't check
+	 * arguments.
 	 * 
-	 * <i>point(i, alpha) = (x<sub>i</sub> +
-	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
-	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
-	 * 
-	 * @param index the index of the segment
+	 * @param index
+	 *            the index of the segment
 	 * @param alpha
 	 * @return the interpolated point.
 	 */
-	private ImmutablePoint interpolate(int index, double alpha) {
+	private ImmutablePoint interpolateImpl(int index, double alpha) {
 		if (alpha == 0.0)
 			return get(index);
 		
@@ -335,96 +315,26 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		return immutablePoint(x1 + alpha*dx, y1 + alpha*dy);
 	}
 
-	/**
-	 * @return a {@code VertexIterator}
+	/* (non-Javadoc)
+	 * @see world.Path#vertexIterator()
 	 */
+	@Override
 	public abstract Iterator<V> vertexIterator();
 	
-	/**
-	 * @return a {@code Spliterator} over all vertices.
+	/* (non-Javadoc)
+	 * @see world.Path#vertexSpliterator()
 	 */
+	@Override
 	public Spliterator<V> vertexSpliterator() {
 		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
-	/**
-	 * @return a {@code Stream} over all vertices.
+	/* (non-Javadoc)
+	 * @see world.Path#vertexStream()
 	 */
+	@Override
 	public Stream<V> vertexStream() {
 		return StreamSupport.stream(vertexSpliterator(), false);
-	}
-	
-	/**
-	 * The vertex of a {@code Path}. Stores additional information about the
-	 * vertex in context to the path.
-	 */
-	public static class Vertex {
-		
-		/**
-		 * The point of the vertex.
-		 */
-		private final ImmutablePoint point;
-		
-		/**
-		 * Whether the vertex is the first one.
-		 */
-		private final boolean first;
-		
-		/**
-		 * Whether the vertex is the last one.
-		 */
-		private final boolean last;
-		
-		/**
-		 * Constructs a new {@code Vertex}.
-		 * 
-		 * @param point
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
-		 */
-		protected Vertex(ImmutablePoint point, boolean first, boolean last) {
-			this.point = point;
-			this.first = first;
-			this.last = last;
-		}
-
-		/**
-		 * @return the point
-		 */
-		public ImmutablePoint getPoint() {
-			return point;
-		}
-
-		/**
-		 * @return x-ordinate of the point.
-		 */
-		public double getX() {
-			return point.getX();
-		}
-
-		/**
-		 * @return y-ordinate of the point.
-		 */
-		public double getY() {
-			return point.getY();
-		}
-
-		/**
-		 * @return whether the vertex is the first one.
-		 */
-		public boolean isFirst() {
-			return first;
-		}
-
-		/**
-		 * @return last whether the vertex is the last one.
-		 */
-		public boolean isLast() {
-			return last;
-		}
-		
 	}
 	
 	/**
@@ -442,7 +352,7 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		/**
 		 * The last yielded vertex.
 		 */
-		private Vertex last = null;
+		private V last = null;
 		
 		/**
 		 * The point of the next vertex.
@@ -456,6 +366,16 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		 * @return the next vertex.
 		 */
 		protected abstract V createNextVertex(ImmutablePoint point);
+		
+		/**
+		 * @return the current vertex' index.
+		 */
+		protected int getIndex() {
+			if (last == null)
+				return 0;
+			else
+				return last.getIndex() + 1;
+		}
 
 		/**
 		 * @return whether the current vertex is the first one.
@@ -474,7 +394,7 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		/**
 		 * @return the last yielded vertex.
 		 */
-		protected Vertex getLastVertex() {
+		protected V getLastVertex() {
 			return last;
 		}
 
@@ -501,98 +421,26 @@ public abstract class AbstractPath<V extends AbstractPath.Vertex, S extends Abst
 		}
 	}
 	
-	/**
-	 * @return a {@code SegmentIterator}.
+	/* (non-Javadoc)
+	 * @see world.Path#segmentIterator()
 	 */
+	@Override
 	public abstract Iterator<S> segmentIterator();
 	
-	/**
-	 * @return a {@code Spliterator} over all segments.
+	/* (non-Javadoc)
+	 * @see world.Path#segmentSpliterator()
 	 */
+	@Override
 	public Spliterator<S> segmentSpliterator() {
 		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
-	/**
-	 * @return a {@code Stream} over all segments.
+	/* (non-Javadoc)
+	 * @see world.Path#segmentStream()
 	 */
+	@Override
 	public Stream<S> segmentStream() {
 		return StreamSupport.stream(segmentSpliterator(), false);
-	}
-	
-	/**
-	 * The segment of a {@code Path}. Stores additional information about the
-	 * segment in context to the path.
-	 * 
-	 * @param <V> the vertex type
-	 */
-	public static class Segment<V extends Vertex> {
-
-		/**
-		 * The start vertex.
-		 */
-		private final V start;
-		
-		/**
-		 * The finish vertex.
-		 */
-		private final V finish;
-		
-		/**
-		 * Constructs a new {@code Segment} connecting the given vertices.
-		 * 
-		 * @param start
-		 *            start vertex
-		 * @param finish
-		 *            finish vertex
-		 */
-		protected Segment(V start, V finish) {
-			this.start = start;
-			this.finish = finish;
-		}
-		
-		/**
-		 * @return whether the segment is the first one.
-		 */
-		public boolean isFirst() {
-			return start.isFirst();
-		}
-
-		/**
-		 * @return whether the segment is the last one.
-		 */
-		public boolean isLast() {
-			return finish.isLast();
-		}
-
-		/**
-		 * @return the start vertex.
-		 */
-		public V getStartVertex() {
-			return start;
-		}
-
-		/**
-		 * @return the finish vertex.
-		 */
-		public V getFinishVertex() {
-			return finish;
-		}
-		
-		/**
-		 * @return the start point.
-		 */
-		public ImmutablePoint getStartPoint() {
-			return start.getPoint();
-		}
-		
-		/**
-		 * @return the finish point
-		 */
-		public ImmutablePoint getFinishPoint() {
-			return finish.getPoint();
-		}
-		
 	}
 	
 	/**

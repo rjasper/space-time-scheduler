@@ -3,6 +3,8 @@ package world;
 import java.util.Iterator;
 
 import jts.geom.immutable.ImmutablePoint;
+import world.util.ForwardPathVertexSeeker;
+import world.util.Interpolator;
 import world.util.SpatialPathInterpolator;
 
 import com.google.common.collect.ImmutableList;
@@ -66,8 +68,9 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	/**
 	 * An interpolator for this spatial path.
 	 */
-	private SpatialPathInterpolator interpolator =
-		new SpatialPathInterpolator(this, false);
+	private Interpolator<ImmutablePoint> interpolator = new SpatialPathInterpolator(
+		this,
+		new ForwardPathVertexSeeker<Vertex, Segment, SpatialPath>(this, Vertex::getArc));
 	
 	/**
 	 * Interpolates the location of the given arc.
@@ -137,7 +140,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * The vertex of a {@code SpatialPath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex extends AbstractPath.Vertex {
+	public static class Vertex extends Path.Vertex {
 		
 		/**
 		 * The arc value.
@@ -147,6 +150,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 		/**
 		 * Constructs a new {@code Vertex}.
 		 * 
+		 * @param index
 		 * @param point
 		 * @param arc
 		 *            value
@@ -155,8 +159,8 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 		 * @param last
 		 *            whether the vertex is the last one
 		 */
-		private Vertex(ImmutablePoint point, double arc, boolean first, boolean last) {
-			super(point, first, last);
+		private Vertex(int index, ImmutablePoint point, double arc, boolean first, boolean last) {
+			super(index, point, first, last);
 			
 			this.arc = arc;
 		}
@@ -189,7 +193,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 			if (!isFirst())
 				arc += DistanceOp.distance(getLastVertex().getPoint(), point);
 			
-			return new Vertex(point, arc, isFirst(), isLast());
+			return new Vertex(getIndex(), point, arc, isFirst(), isLast());
 		}
 		
 	}
@@ -207,7 +211,7 @@ public class SpatialPath extends AbstractPath<SpatialPath.Vertex, SpatialPath.Se
 	 * The segment of a {@code SpatialPath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends AbstractPath.Segment<Vertex> {
+	public static class Segment extends Path.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.

@@ -94,6 +94,8 @@ public interface Trajectory {
 	 * @return the location.
 	 * @throws NullPointerException
 	 *             if {@code time} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code time} is not covered by the trajectory.
 	 */
 	public abstract ImmutablePoint interpolateLocation(LocalDateTime time);
 
