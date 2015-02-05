@@ -2,7 +2,6 @@ package tasks;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
-import static world.Trajectories.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -19,6 +18,7 @@ import jts.geom.immutable.ImmutablePolygon;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
+import world.SimpleTrajectory;
 import world.Trajectory;
 import world.WorkerUnitObstacle;
 
@@ -345,7 +345,7 @@ public class WorkerUnit {
 		return obstacleSegments.values().stream()
 			.map(DynamicObstacle::getTrajectory)
 			.reduce((u, v) -> u.concat(v))
-			.orElse(emptyTrajectory());
+			.orElse(SimpleTrajectory.empty());
 	}
 
 	/*

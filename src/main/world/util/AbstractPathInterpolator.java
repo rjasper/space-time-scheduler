@@ -14,9 +14,9 @@ implements Interpolator<T>
 	
 	private final P path;
 	
-	private final PathVertexSeeker<V> seeker;
+	private final VertexSeeker<V> seeker;
 	
-	public AbstractPathInterpolator(P path, PathVertexSeeker<V> seeker) {
+	public AbstractPathInterpolator(P path, VertexSeeker<V> seeker) {
 		this.path = Objects.requireNonNull(path, "path");;
 		this.seeker = Objects.requireNonNull(seeker, "seeker");
 	}

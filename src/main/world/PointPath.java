@@ -144,15 +144,6 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 			return finish.isLast();
 		}
 	
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.Segment#getIndex()
-		 */
-		@Override
-		public int getIndex() {
-			return start.getIndex();
-		}
-
 		/* (non-Javadoc)
 		 * @see world.PathSegment#getStartVertex()
 		 */
@@ -189,6 +180,34 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 	 * @return the points
 	 */
 	public abstract ImmutableList<ImmutablePoint> getPoints();
+	
+	/**
+	 * Returns the point at the specified index.
+	 * 
+	 * @param index
+	 * @return the point.
+	 */
+	public abstract ImmutablePoint getPoint(int index);
+
+	/**
+	 * @return the first point.
+	 */
+	public default ImmutablePoint getFirst() {
+		if (isEmpty())
+			return null;
+		else
+			return getPoint(0);
+	}
+
+	/**
+	 * @return the last point.
+	 */
+	public default ImmutablePoint getLast() {
+		if (isEmpty())
+			return null;
+		else
+			return getPoint(size()-1);
+	}
 
 	/**
 	 * Calculates the trace of this path. The trace is a {@code LineString}

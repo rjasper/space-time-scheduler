@@ -1,10 +1,12 @@
 package world;
 
+import static java.util.Spliterator.*;
+
 import java.util.Iterator;
 import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Stream;
-
-import jts.geom.immutable.ImmutablePoint;
+import java.util.stream.StreamSupport;
 
 // TODO document
 public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>> {
@@ -33,7 +35,9 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 		/**
 		 * @return the index
 		 */
-		public abstract int getIndex();
+		public default int getIndex() {
+			return getStartVertex().getIndex();
+		}
 	
 		/**
 		 * @return whether the segment is the first one.
@@ -60,39 +64,15 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	/**
 	 * @return if the path is empty.
 	 */
-	public abstract boolean isEmpty();
+	public default boolean isEmpty() {
+		return size() == 0;
+	}
 
 	/**
 	 * @return the amount of vertices.
 	 */
 	public abstract int size();
-
-	/**
-	 * Gets the point at the specified position of this path.
-	 * 
-	 * @param index
-	 * @return the point.
-	 * @throws IndexOutOfBoundsException
-	 *             if the index is out of range (index < 0 || index >= size())
-	 */
-	public abstract ImmutablePoint get(int index);
-
-	/**
-	 * Gets the vertex at the first position of this path.
-	 * 
-	 * @param index
-	 * @return the point. {@code null} if the path is empty.
-	 */
-	public abstract V getFirstVertex();
-
-	/**
-	 * Gets the vertex at the last position of this path.
-	 * 
-	 * @param index
-	 * @return the point. {@code null} if the path is empty.
-	 */
-	public abstract V getLastVertex();
-
+	
 	/**
 	 * Concatenates this path with the given one.
 	 * 
@@ -109,13 +89,17 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	/**
 	 * @return a {@code Spliterator} over all vertices.
 	 */
-	public abstract Spliterator<V> vertexSpliterator();
+	public default Spliterator<V> vertexSpliterator() {
+		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+	}
 
 	/**
 	 * @return a {@code Stream} over all vertices.
 	 */
-	public abstract Stream<V> vertexStream();
-
+	public default Stream<V> vertexStream() {
+		return StreamSupport.stream(vertexSpliterator(), false);
+	}
+	
 	/**
 	 * @return a {@code SegmentIterator}.
 	 */
@@ -124,11 +108,15 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	/**
 	 * @return a {@code Spliterator} over all segments.
 	 */
-	public abstract Spliterator<S> segmentSpliterator();
+	public default Spliterator<S> segmentSpliterator() {
+		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+	}
 
 	/**
 	 * @return a {@code Stream} over all segments.
 	 */
-	public abstract Stream<S> segmentStream();
+	public default Stream<S> segmentStream() {
+		return StreamSupport.stream(segmentSpliterator(), false);
+	}
 
 }

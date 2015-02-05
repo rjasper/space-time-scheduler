@@ -9,10 +9,10 @@ import world.PointPath;
 
 // TODO document
 // TODO test
-public class AffineLinearPathVertexSeeker<
+public class AffineLinearVertexSeeker<
 	V extends PointPath.Vertex,
 	P extends PointPath<V, ?>>
-extends AbstractPathVertexSeeker<V, P>
+extends AbstractVertexSeeker<V, P>
 {
 	
 	private int lastIndex = 0;
@@ -23,7 +23,7 @@ extends AbstractPathVertexSeeker<V, P>
 	
 	private List<V> vertices;
 	
-	public AffineLinearPathVertexSeeker(P path, Function<V, Double> positionMapper) {
+	public AffineLinearVertexSeeker(P path, Function<V, Double> positionMapper) {
 		super(path, positionMapper);
 		
 		this.vertices = new ArrayList<>(path.size());

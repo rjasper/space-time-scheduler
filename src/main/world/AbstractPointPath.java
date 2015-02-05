@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
@@ -109,48 +107,12 @@ implements PointPath<V, S>
 		return points.size();
 	}
 
-	@Override
-	public V getFirstVertex() {
-		assert false;
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public V getLastVertex() {
-		assert false;
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/* (non-Javadoc)
 	 * @see world.Path#get(int)
 	 */
 	@Override
-	public ImmutablePoint get(int index) {
+	public ImmutablePoint getPoint(int index) {
 		return points.get(index);
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#getFirst()
-	 */
-//	@Override TODO
-	public ImmutablePoint getFirst() {
-		if (isEmpty())
-			return null;
-		else
-			return points.get(0);
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#getLast()
-	 */
-//	@Override 
-	public ImmutablePoint getLast() {
-		if (isEmpty())
-			return null;
-		else
-			return points.get(size()-1);
 	}
 	
 	/* (non-Javadoc)
@@ -217,15 +179,6 @@ implements PointPath<V, S>
 		return trace;
 	}
 
-//	/*
-//	 * (non-Javadoc)
-//	 * @see java.lang.Iterable#iterator()
-//	 */
-//	@Override
-//	public UnmodifiableIterator<ImmutablePoint> iterator() {
-//		return points.iterator();
-//	}
-
 	/* (non-Javadoc)
 	 * @see world.Path#concat(world.AbstractPath)
 	 */
@@ -281,7 +234,7 @@ implements PointPath<V, S>
 		builder.add(interpolateImpl(startIndexInclusive, startAlpha));
 			
 		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
-			builder.add(get(i));
+			builder.add(getPoint(i));
 		
 		// point was already added unless finishAlpha > 0.0
 		if (finishAlpha > 0.0)
@@ -317,10 +270,10 @@ implements PointPath<V, S>
 	 */
 	private ImmutablePoint interpolateImpl(int index, double alpha) {
 		if (alpha == 0.0)
-			return get(index);
+			return getPoint(index);
 		
-		ImmutablePoint p1 = get(index);
-		ImmutablePoint p2 = get(index+1);
+		ImmutablePoint p1 = getPoint(index);
+		ImmutablePoint p2 = getPoint(index+1);
 		
 		double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
 		double dx = x2 - x1, dy = y2 - y1;
@@ -340,14 +293,6 @@ implements PointPath<V, S>
 	@Override
 	public Spliterator<V> vertexSpliterator() {
 		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#vertexStream()
-	 */
-	@Override
-	public Stream<V> vertexStream() {
-		return StreamSupport.stream(vertexSpliterator(), false);
 	}
 	
 	/**
@@ -448,14 +393,6 @@ implements PointPath<V, S>
 		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
-	/* (non-Javadoc)
-	 * @see world.Path#segmentStream()
-	 */
-	@Override
-	public Stream<S> segmentStream() {
-		return StreamSupport.stream(segmentSpliterator(), false);
-	}
-	
 	/**
 	 * 
 	 * Base segment iterator to iterate over path segments.

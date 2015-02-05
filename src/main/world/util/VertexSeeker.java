@@ -7,7 +7,7 @@ package world.util;
  *
  * @param <V> Vertex Type
  */
-public interface PathVertexSeeker<V>
+public interface VertexSeeker<V>
 {
 
 	public abstract V seekFloor(double position);

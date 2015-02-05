@@ -42,11 +42,12 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public interface Trajectory {
+public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> {
 
 	/**
 	 * @return {@code true} iff trajectory has no vertices.
 	 */
+	@Override
 	public abstract boolean isEmpty();
 
 	/**
@@ -133,16 +134,22 @@ public interface Trajectory {
 	 * @throws NullPointerException if other is {@code null}.
 	 * @throws IllegalArgumentException if other's time is before this one's.
 	 */
-	public default Trajectory concat(Trajectory other) {
+	@Override
+	public default Trajectory concat(Path<? extends Vertex, ? extends Segment> other) {
 		Objects.requireNonNull(other, "other");
 		
-		if (getFinishTime().compareTo(other.getStartTime()) > 0)
+		if (!(other instanceof Trajectory))
+			throw new IllegalArgumentException("incompatible path");
+		
+		Trajectory traj = (Trajectory) other;
+		
+		if (getFinishTime().compareTo(traj.getStartTime()) > 0)
 			throw new IllegalArgumentException("other is before this one");
 		
 		SpatialPath lhsSpatialPath = getSpatialPath();
-		SpatialPath rhsSpatialPath = other.getSpatialPath();
+		SpatialPath rhsSpatialPath = traj.getSpatialPath();
 		List<LocalDateTime> lhsTimes = getTimes();
-		List<LocalDateTime> rhsTimes = other.getTimes();
+		List<LocalDateTime> rhsTimes = traj.getTimes();
 	
 		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
 		ImmutableList<LocalDateTime> times = ImmutableList.<LocalDateTime>builder()
@@ -166,6 +173,7 @@ public interface Trajectory {
 	/**
 	 * @return a {@code VertexIterator}
 	 */
+	@Override
 	public default Iterator<Vertex> vertexIterator() {
 		return new VertexIterator(this);
 	}
@@ -174,7 +182,7 @@ public interface Trajectory {
 	 * The vertex of a {@code Trajectory}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex {
+	public static class Vertex implements Path.Vertex {
 		
 		/**
 		 * The spatial vertex.
@@ -197,20 +205,21 @@ public interface Trajectory {
 			this.time = time;
 		}
 	
-		/**
-		 * @return whether this vertex the first one.
-		 */
+		@Override
 		public boolean isFirst() {
 			return spatialVertex.isFirst();
 		}
 	
-		/**
-		 * @return whether this vertex the first one.
-		 */
+		@Override
 		public boolean isLast() {
 			return spatialVertex.isLast();
 		}
 	
+		@Override
+		public int getIndex() {
+			return spatialVertex.getIndex();
+		}
+
 		/**
 		 * @return the spatial vertex.
 		 */
@@ -313,6 +322,7 @@ public interface Trajectory {
 	/**
 	 * @return a {@code SegmentIterator}.
 	 */
+	@Override
 	public default Iterator<Segment> segmentIterator() {
 		return new SegmentIterator(this);
 	}
@@ -321,7 +331,7 @@ public interface Trajectory {
 	 * The segment of a {@code Trajectory}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment {
+	public static class Segment implements Path.Segment<Vertex> {
 		
 		/**
 		 * The start vertex.
@@ -366,6 +376,7 @@ public interface Trajectory {
 		/**
 		 * @return whether this segment is the first one.
 		 */
+		@Override
 		public boolean isFirst() {
 			return spatialSegment.isFirst();
 		}
@@ -373,6 +384,7 @@ public interface Trajectory {
 		/**
 		 * @return whether this segment is the last one.
 		 */
+		@Override
 		public boolean isLast() {
 			return spatialSegment.isLast();
 		}
@@ -388,6 +400,7 @@ public interface Trajectory {
 		/**
 		 * @return the start vertex.
 		 */
+		@Override
 		public Vertex getStartVertex() {
 			return start;
 		}
@@ -395,6 +408,7 @@ public interface Trajectory {
 		/**
 		 * @return the finish vertex.
 		 */
+		@Override
 		public Vertex getFinishVertex() {
 			return finish;
 		}

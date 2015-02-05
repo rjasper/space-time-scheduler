@@ -130,6 +130,15 @@ public class DecomposedTrajectory implements Trajectory {
 	private transient SimpleTrajectory composedTrajectory = null;
 
 	/**
+	 * @return
+	 * @see world.SimpleTrajectory#size()
+	 */
+	@Override
+	public int size() {
+		return getComposedTrajectory().size();
+	}
+
+	/**
 	 * @return the composed trajectory.
 	 */
 	public SimpleTrajectory getComposedTrajectory() {
@@ -245,7 +254,7 @@ public class DecomposedTrajectory implements Trajectory {
 		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
 
-		double t = arcTimePath.get(0).getY();
+		double t = arcTimePath.getPoint(0).getY();
 		Duration duration = DurationConv.ofSeconds(t);
 
 		return baseTime.plus(duration);
@@ -266,7 +275,7 @@ public class DecomposedTrajectory implements Trajectory {
 		LocalDateTime baseTime = getBaseTime();
 
 		int n = arcTimePath.size();
-		double t = arcTimePath.get(n-1).getY();
+		double t = arcTimePath.getPoint(n-1).getY();
 		Duration duration = DurationConv.ofSeconds(t);
 
 		return baseTime.plus(duration);
@@ -336,7 +345,7 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		ArcTimePath st = getArcTimePathComponent();
 		int n = st.size();
-		double t0 = st.get(0).getY(), tEnd = st.get(n-1).getY();
+		double t0 = st.getPoint(0).getY(), tEnd = st.getPoint(n-1).getY();
 		double tStart = inSeconds(Duration.between(baseTime, startTime));
 		double tFinish = inSeconds(Duration.between(baseTime, finishTime));
 		
@@ -358,7 +367,7 @@ public class DecomposedTrajectory implements Trajectory {
 		// determine times of the sub trajectory and determine start and finish
 		// indices to calculate the spatial path
 		for (int i = 1; i < n; ++i) {
-			double t2 = st.get(i).getY();
+			double t2 = st.getPoint(i).getY();
 			
 			// t1 <= startTime < t2
 			if (tStart >= t1 && tStart < t2) {

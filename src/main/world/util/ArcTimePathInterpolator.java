@@ -12,7 +12,7 @@ public class ArcTimePathInterpolator extends AbstractPathInterpolator<
 
 	public ArcTimePathInterpolator(
 		ArcTimePath path,
-		PathVertexSeeker<ArcTimePath.Vertex> seeker)
+		VertexSeeker<ArcTimePath.Vertex> seeker)
 	{
 		super(path, seeker);
 	}

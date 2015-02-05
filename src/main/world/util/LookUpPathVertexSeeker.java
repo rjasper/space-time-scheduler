@@ -13,7 +13,7 @@ import world.PointPath;
 public class LookUpPathVertexSeeker<
 	V extends PointPath.Vertex,
 	P extends PointPath<V, ?>>
-extends AbstractPathVertexSeeker<V, P>
+extends AbstractVertexSeeker<V, P>
 {
 	
 	private final TreeMap<Double, V> lookUp;

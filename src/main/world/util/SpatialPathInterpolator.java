@@ -14,7 +14,7 @@ public class SpatialPathInterpolator extends AbstractPathInterpolator<
 	
 	public SpatialPathInterpolator(
 		SpatialPath spatialPath,
-		PathVertexSeeker<SpatialPath.Vertex> seeker)
+		VertexSeeker<SpatialPath.Vertex> seeker)
 	{
 		super(spatialPath, seeker);
 	}

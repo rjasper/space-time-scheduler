@@ -20,7 +20,6 @@ import world.util.Interpolator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.UnmodifiableIterator;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -206,7 +205,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 */
 	public Duration duration() {
 		if (duration == null) {
-			double seconds = get(size()-1).getY();
+			double seconds = getPoint(size()-1).getY();
 			
 			duration = DurationConv.ofSeconds(seconds);
 		}

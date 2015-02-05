@@ -178,7 +178,7 @@ public class SimpleTrajectory implements Trajectory {
 		if (isEmpty())
 			return null;
 
-		return getSpatialPath().get(0);
+		return getSpatialPath().getPoint(0);
 	};
 
 	/*
@@ -191,7 +191,7 @@ public class SimpleTrajectory implements Trajectory {
 		if (isEmpty())
 			return null;
 
-		return getSpatialPath().get(size() - 1);
+		return getSpatialPath().getPoint(size() - 1);
 	};
 
 	/*
@@ -239,6 +239,14 @@ public class SimpleTrajectory implements Trajectory {
 		return duration;
 	}
 
+	/**
+	 * @return the number of vertices.
+	 */
+	@Override
+	public int size() {
+		return spatialPath.size();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.Trajectory#getLength()
@@ -255,13 +263,6 @@ public class SimpleTrajectory implements Trajectory {
 	@Override
 	public Geometry trace() {
 		return spatialPath.trace();
-	}
-
-	/**
-	 * @return the number of vertices.
-	 */
-	public int size() {
-		return spatialPath.size();
 	}
 
 	/*
@@ -289,7 +290,7 @@ public class SimpleTrajectory implements Trajectory {
 		
 		// if time is on spot of one point
 		if (d1.isZero())
-			return spatialPath.get(segmentPos);
+			return spatialPath.getPoint(segmentPos);
 		
 		LocalDateTime t2 = times.get(segmentPos+1);
 		Duration d = Duration.between(t1, t2);
@@ -392,6 +393,28 @@ public class SimpleTrajectory implements Trajectory {
 		return new SimpleTrajectory(subSpatialPath, subTimes);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
+	 */
+	@Override
+	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
+		Spliterator<Vertex> spliterator = Spliterators.spliterator(
+			vertexIterator(), size(), IMMUTABLE | ORDERED);
+	
+		ImmutableList<ImmutablePoint> vertices = StreamSupport
+			.stream(spliterator, false)
+			.map(v -> {
+				double arc = v.getSpatialVertex().getArc();
+				double seconds = v.getTimeInSeconds(baseTime);
+				
+				return immutablePoint(arc, seconds);
+			})
+			.collect(toImmutableList());
+	
+		return new ArcTimePath(vertices);
+	}
+
 	/**
 	 * Seeks the position of the segment covering the given time. If two
 	 * segments cover the time (i.e., the time is on spot of a vertex) the
@@ -448,28 +471,6 @@ public class SimpleTrajectory implements Trajectory {
 		}
 		
 		return 0;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
-	 */
-	@Override
-	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
-		Spliterator<Vertex> spliterator = Spliterators.spliterator(
-			vertexIterator(), size(), IMMUTABLE | ORDERED);
-
-		ImmutableList<ImmutablePoint> vertices = StreamSupport
-			.stream(spliterator, false)
-			.map(v -> {
-				double arc = v.getSpatialVertex().getArc();
-				double seconds = v.getTimeInSeconds(baseTime);
-				
-				return immutablePoint(arc, seconds);
-			})
-			.collect(toImmutableList());
-
-		return new ArcTimePath(vertices);
 	}
 
 	/*

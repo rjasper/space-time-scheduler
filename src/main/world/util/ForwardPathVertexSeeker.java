@@ -9,7 +9,7 @@ public class ForwardPathVertexSeeker<
 	V extends PointPath.Vertex,
 	P extends PointPath<V, ?>>
 	
-	extends AbstractPathVertexSeeker<V, P>
+	extends AbstractVertexSeeker<V, P>
 {
 	
 	private final Iterator<V> iterator;
