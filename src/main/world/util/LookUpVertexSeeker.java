@@ -10,7 +10,7 @@ import java.util.function.Function;
 import world.PointPath;
 
 // TODO document
-public class LookUpPathVertexSeeker<
+public class LookUpVertexSeeker<
 	V extends PointPath.Vertex,
 	P extends PointPath<V, ?>>
 extends AbstractVertexSeeker<V, P>
@@ -18,7 +18,7 @@ extends AbstractVertexSeeker<V, P>
 	
 	private final TreeMap<Double, V> lookUp;
 
-	public LookUpPathVertexSeeker(P path, Function<V, Double> positionMapper) {
+	public LookUpVertexSeeker(P path, Function<V, Double> positionMapper) {
 		super(path, positionMapper);
 		
 		this.lookUp = makeLookUp(path);

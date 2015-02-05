@@ -23,8 +23,5 @@ public abstract class AbstractVertexSeeker<V, P> implements VertexSeeker<V> {
 	public double position(V vertex) {
 		return positionMapper.apply(vertex);
 	}
-	
-	@Override
-	public abstract V seekFloor(double position);
 
 }
