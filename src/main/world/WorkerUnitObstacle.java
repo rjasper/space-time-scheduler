@@ -16,14 +16,14 @@ import tasks.WorkerUnit;
  * locations in time which a worker has to visit. The path between those
  * locations is interchangeable. This enables to replace singular segments due
  * to task planning.</p>
- * 
+ *
  * <p>Another property of a {@code WorkerUnitObstacle} are evasions. Workers
  * might need to evade another worker to avoid collisions. When a worker changes
  * one of its segments due to task planning a previous evasion might become
  * obsolete. A {@code WorkerUnitObstacle} provides the functionality to register
  * the path segment of the worker which was evading this one. This enables to
  * detect any obsolete evasions for further actions.</p>
- * 
+ *
  * @author Rico
  */
 public abstract class WorkerUnitObstacle extends DynamicObstacle {
@@ -37,7 +37,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	 * Stores the path segments of worker which where evading this one.
 	 */
 	private final Set<MovingWorkerUnitObstacle> evasions = new HashSet<>();
-	
+
 	/**
 	 * Stores an unmodifiable view on {@link #evasions}.
 	 */
@@ -46,7 +46,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 	/**
 	 * Creates a new {@code WorkerUnitObstacle} for the given worker along the
 	 * trajectory.
-	 * 
+	 *
 	 * @param worker
 	 * @param trajectory
 	 * @throws NullPointerException
@@ -60,17 +60,17 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 
 		this.workerUnit = worker;
 	}
-	
+
 	/**
 	 * Returns the worker's shape.
-	 * 
+	 *
 	 * @param worker
 	 * @return the shape.
 	 * @throws NullPointerException if the worker is {@code null}.
 	 */
 	private static ImmutablePolygon retrieveShape(WorkerUnit worker) {
 		Objects.requireNonNull(worker, "worker");
-		
+
 		return worker.getShape();
 	}
 
@@ -90,30 +90,31 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 
 	/**
 	 * Registers a path segment which had to evade this one.
-	 * 
+	 *
 	 * @param evasion the segment which had to evade.
 	 * @throws NullPointerException if the evasion is {@code null}.
 	 * @throws IllegalArgumentException if the evasion was already registered.
 	 */
 	public void addEvasion(MovingWorkerUnitObstacle evasion) {
 		Objects.requireNonNull(evasion, "evasion");
-		
+
 		boolean status = evasions.add(evasion);
 
 		if (!status)
 			throw new IllegalArgumentException("evasion already present");
 	}
 
+	// TODO this method is never called. Someone should do this :P
 	/**
 	 * Removes a registered evasion which was evading this one.
-	 * 
+	 *
 	 * @param evasion to be unregistered
 	 * @throws NullPointerException if the evasion is {@code null}.
 	 * @throws IllegalArgumentException if the evasion was not registered.
 	 */
 	public void removeEvasion(MovingWorkerUnitObstacle evasion) {
 		Objects.requireNonNull(evasion, "evasion");
-		
+
 		boolean status = evasions.remove(evasion);
 
 		if (!status)
