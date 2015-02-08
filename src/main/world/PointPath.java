@@ -192,7 +192,7 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 	/**
 	 * @return the first point.
 	 */
-	public default ImmutablePoint getFirst() {
+	public default ImmutablePoint getFirstPoint() {
 		if (isEmpty())
 			return null;
 		else
@@ -202,7 +202,7 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 	/**
 	 * @return the last point.
 	 */
-	public default ImmutablePoint getLast() {
+	public default ImmutablePoint getLastPoint() {
 		if (isEmpty())
 			return null;
 		else
@@ -272,8 +272,8 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 	 *             <li>If {@code index} does not represent a valid point
 	 *             position.</li>
 	 *             <li>If {@code alpha} is not within [0, 1).</li>
-	 *             <li>If {@code index} is equal to {@link #size()}{@code -1} and
-	 *             alpha is unequal to {@code 0.0}.</li>
+	 *             <li>If {@code index} is equal to {@link #size()}{@code -1}
+	 *             and alpha is unequal to {@code 0.0}.</li>
 	 *             </ul>
 	 */
 	public abstract ImmutablePoint interpolate(int index, double alpha);

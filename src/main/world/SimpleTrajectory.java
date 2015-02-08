@@ -1,7 +1,6 @@
 package world;
 
 import static common.collect.ImmutablesCollectors.*;
-import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static util.DurationConv.*;
 
@@ -10,9 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 
 import jts.geom.immutable.ImmutablePoint;
 
@@ -35,7 +31,7 @@ import com.vividsolutions.jts.geom.Geometry;
  *
  * @author Rico Jasper
  */
-public class SimpleTrajectory implements Trajectory {
+public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory.Segment> implements Trajectory {
 	
 	/**
 	 * An empty {@code SimpleTrajectory}.
@@ -98,6 +94,30 @@ public class SimpleTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.AbstractPath#makeVertex(int, boolean, boolean)
+	 */
+	@Override
+	protected Trajectory.Vertex makeVertex(int index, boolean first, boolean last) {
+		SpatialPath.Vertex spatialVertex = getSpatialPath().getVertex(index);
+		LocalDateTime time = getTimes().get(index);
+		
+		return new Trajectory.Vertex(spatialVertex, time);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
+	 */
+	@Override
+	protected Trajectory.Segment makeSegment(Trajectory.Vertex start, Trajectory.Vertex finish) {
+		SpatialPath.Segment spatialSegment = new SpatialPath.Segment(
+			start.getSpatialVertex(), finish.getSpatialVertex());
+		
+		return new Trajectory.Segment(start, finish, spatialSegment);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -136,16 +156,6 @@ public class SimpleTrajectory implements Trajectory {
 		} else if (!times.equals(other.times))
 			return false;
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see world.Trajectory#isEmpty()
-	 */
-	@Override
-	public boolean isEmpty() {
-		return size() == 0;
 	}
 
 	/*
@@ -392,6 +402,36 @@ public class SimpleTrajectory implements Trajectory {
 		
 		return new SimpleTrajectory(subSpatialPath, subTimes);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#concat(world.Path)
+	 */
+	@Override
+	public Trajectory concat(Path<? extends Trajectory.Vertex, ? extends Trajectory.Segment> other) {
+		Objects.requireNonNull(other, "other");
+		
+		if (!(other instanceof Trajectory))
+			throw new IllegalArgumentException("incompatible path");
+		
+		Trajectory traj = (Trajectory) other;
+		
+		if (getFinishTime().compareTo(traj.getStartTime()) > 0)
+			throw new IllegalArgumentException("other is before this one");
+		
+		SpatialPath lhsSpatialPath = getSpatialPath();
+		SpatialPath rhsSpatialPath = traj.getSpatialPath();
+		List<LocalDateTime> lhsTimes = getTimes();
+		List<LocalDateTime> rhsTimes = traj.getTimes();
+	
+		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
+		ImmutableList<LocalDateTime> times = ImmutableList.<LocalDateTime>builder()
+			.addAll(lhsTimes)
+			.addAll(rhsTimes)
+			.build();
+	
+		return new SimpleTrajectory(spatialPath, times);
+	}
 	
 	/*
 	 * (non-Javadoc)
@@ -399,11 +439,7 @@ public class SimpleTrajectory implements Trajectory {
 	 */
 	@Override
 	public ArcTimePath calcArcTimePath(LocalDateTime baseTime) {
-		Spliterator<Vertex> spliterator = Spliterators.spliterator(
-			vertexIterator(), size(), IMMUTABLE | ORDERED);
-	
-		ImmutableList<ImmutablePoint> vertices = StreamSupport
-			.stream(spliterator, false)
+		ImmutableList<ImmutablePoint> vertices = vertexStream()
 			.map(v -> {
 				double arc = v.getSpatialVertex().getArc();
 				double seconds = v.getTimeInSeconds(baseTime);

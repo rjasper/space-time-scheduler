@@ -1,8 +1,5 @@
 package world.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Function;
 
 import world.PointPath;
@@ -19,17 +16,8 @@ extends AbstractVertexSeeker<V, P>
 	
 	private int currIndex;
 	
-	private final Iterator<V> iterator;
-	
-	private List<V> vertices;
-	
 	public AffineLinearVertexSeeker(P path, Function<V, Double> positionMapper) {
 		super(path, positionMapper);
-		
-		this.vertices = new ArrayList<>(path.size());
-		this.iterator = path.vertexIterator();
-		
-		explore();
 	}
 
 	@Override
@@ -39,7 +27,7 @@ extends AbstractVertexSeeker<V, P>
 		if (!Double.isFinite(position))
 			throw new IllegalArgumentException("position is not finite");
 		
-		return vertices.get(seekIndex(position));
+		return getPath().getVertex(seekIndex(position));
 	}
 	
 	@Override
@@ -52,9 +40,9 @@ extends AbstractVertexSeeker<V, P>
 		int index = seekIndex(position);
 		
 		if (position(index) == position)
-			return vertices.get(index);
+			return getPath().getVertex(index);
 		else
-			return vertices.get(index+1);
+			return getPath().getVertex(index+1);
 	}
 	
 	private int seekIndex(double position) {
@@ -70,7 +58,7 @@ extends AbstractVertexSeeker<V, P>
 				if (currIndex == 0)
 					throw new IllegalArgumentException("position too small");
 				
-				currPosition = backward();
+				currPosition = position(--currIndex);
 			} while (position < currPosition);
 			
 			// position >= currPosition
@@ -86,40 +74,13 @@ extends AbstractVertexSeeker<V, P>
 				if (currIndex == n-1)
 					throw new IllegalArgumentException("position too big");
 				
-				currPosition = forward();
+				currPosition = position(++currIndex);
 			} while (position >= currPosition);
 			
 			// position < currPosition
 			
 			return --currIndex;
 		}
-	}
-	
-	private double position(int index) {
-		return position(vertices.get(index));
-	}
-	
-	private double explore() {
-		V vertex = iterator.next();
-		
-		vertices.add(vertex);
-		
-		return position(vertex);
-	}
-	
-	private double forward() {
-		++currIndex;
-		
-		if (currIndex == vertices.size())
-			return explore();
-		else // currIndex < vertices.size()
-			return position(currIndex);
-	}
-	
-	private double backward() {
-		--currIndex;
-		
-		return position(currIndex);
 	}
 
 }

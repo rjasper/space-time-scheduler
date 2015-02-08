@@ -3,6 +3,7 @@ package world;
 import static java.util.Spliterator.*;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -72,6 +73,74 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @return the amount of vertices.
 	 */
 	public abstract int size();
+
+	/**
+	 * @return the first vertex.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
+	 */
+	public default V getFirstVertex() {
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		return getVertex(0);
+	}
+
+	/**
+	 * @return the last vertex.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
+	 */
+	public default V getLastVertex() {
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		return getVertex(size()-1);
+	}
+	
+	/**
+	 * Returns the vertex at position {@code index}.
+	 * 
+	 * @param index
+	 * @return the vertex.
+	 * @throws IllegalArgumentException
+	 *             if the {@code index} is invalid.
+	 */
+	public abstract V getVertex(int index);
+
+	/**
+	 * @return the first segment.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
+	 */
+	public default S getFirstSegment() {
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		return getSegment(0);
+	}
+
+	/**
+	 * @return the last segment.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
+	 */
+	public default S getLastSegment() {
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		return getSegment(size()-2);
+	}
+
+	/**
+	 * Returns the segment at position {@code index}.
+	 * 
+	 * @param index
+	 * @return the segment.
+	 * @throws IllegalArgumentException
+	 *             if the {@code index} is invalid.
+	 */
+	public abstract S getSegment(int index);
 	
 	/**
 	 * Concatenates this path with the given one.

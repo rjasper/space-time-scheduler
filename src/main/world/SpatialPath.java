@@ -1,13 +1,15 @@
 package world;
 
-import java.util.Iterator;
+import java.util.List;
 
 import jts.geom.immutable.ImmutablePoint;
-import world.util.ForwardPathVertexSeeker;
+import world.util.BinarySearchVertexSeeker;
 import world.util.Interpolator;
 import world.util.SpatialPathInterpolator;
+import world.util.VertexSeeker;
 
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
@@ -30,9 +32,9 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	}
 	
 	/**
-	 * Caches the length of the path.
+	 * Stores the arc values.
 	 */
-	private transient double length = Double.NaN;
+	private final double[] arcs;
 	
 	/**
 	 * Constructs a spatial path of the given vertices.
@@ -45,6 +47,35 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 */
 	public SpatialPath(ImmutableList<ImmutablePoint> vertices) {
 		super(vertices);
+		
+		this.arcs = calcArcs(vertices);
+	}
+	
+	/**
+	 * Calculates the arc values of the vertices from the given points.
+	 * 
+	 * @param points
+	 * @return the arc values.
+	 */
+	private static double[] calcArcs(List<? extends Point> points) {
+		if (points.isEmpty())
+			return new double[0];
+		
+		// if not empty there are at least two points
+		
+		int n = points.size();
+		double[] arcs = new double[n];
+		arcs[0] = 0;
+		Point p1 = points.get(0);
+		
+		for (int i = 1; i < n; ++i) {
+			Point p2 = points.get(i);
+			
+			arcs[i] = arcs[i-1] + DistanceOp.distance(p1, p2);
+			p1 = p2;
+		}
+		
+		return arcs;
 	}
 
 	/*
@@ -66,12 +97,88 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	}
 	
 	/**
-	 * An interpolator for this spatial path.
+	 * The vertex of a {@code SpatialPath}. Stores additional information about
+	 * the vertex in context to the path.
 	 */
-	private Interpolator<ImmutablePoint> interpolator = new SpatialPathInterpolator(
-		this,
-		new ForwardPathVertexSeeker<Vertex, SpatialPath>(this, Vertex::getArc));
+	public static class Vertex extends PointPath.Vertex {
+		
+		/**
+		 * The arc value.
+		 */
+		private final double arc;
+		
+		/**
+		 * Constructs a new {@code Vertex}.
+		 * 
+		 * @param index
+		 * @param point
+		 * @param arc
+		 *            value
+		 * @param first
+		 *            whether the vertex is the first one
+		 * @param last
+		 *            whether the vertex is the last one
+		 */
+		public Vertex(int index, ImmutablePoint point, double arc, boolean first, boolean last) {
+			super(index, point, first, last);
+			
+			this.arc = arc;
+		}
+
+		/**
+		 * @return the arc value.
+		 */
+		public double getArc() {
+			return arc;
+		}
+		
+	}
 	
+	/**
+	 * The segment of a {@code SpatialPath}. Stores additional information about
+	 * the segment in context to the path.
+	 */
+	public static class Segment extends PointPath.Segment<Vertex> {
+		
+		/**
+		 * Constructs a new {@code Segment} connecting the given vertices.
+		 * 
+		 * @param start
+		 *            start vertex
+		 * @param finish
+		 *            finish vertex
+		 */
+		public Segment(Vertex start, Vertex finish) {
+			super(start, finish);
+		}
+		
+		/**
+		 * @return the length of this segment.
+		 */
+		public double length() {
+			return getFinishVertex().getArc() - getStartVertex().getArc();
+		}
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.AbstractPointPath#makeVertex(int, jts.geom.immutable.ImmutablePoint, boolean, boolean)
+	 */
+	@Override
+	protected Vertex makeVertex(int index, ImmutablePoint point, boolean first, boolean last) {
+		return new Vertex(index, point, arcs[index], first, last);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
+	 */
+	@Override
+	protected Segment makeSegment(Vertex start, Vertex finish) {
+		return new Segment(start, finish);
+	}
+
 	/**
 	 * Interpolates the location of the given arc.
 	 * 
@@ -79,6 +186,11 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * @return the location.
 	 */
 	public ImmutablePoint interpolateLocation(double arc) {
+		VertexSeeker<Vertex> seeker =
+			new BinarySearchVertexSeeker<Vertex, SpatialPath>(this, Vertex::getArc);
+		Interpolator<ImmutablePoint> interpolator =
+			new SpatialPathInterpolator(this, seeker);
+		
 		return interpolator.interpolate(arc);
 	}
 
@@ -115,147 +227,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * @return the length of the path.
 	 */
 	public double length() {
-		if (Double.isNaN(length)) {
-			Iterator<? extends Vertex> it = vertexIterator();
-			Vertex last = null;
-			while (it.hasNext())
-				last = it.next();
-			
-			length = last == null ? 0.0 : last.getArc();
-		}
-		
-		return length;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see world.Path#vertexIterator()
-	 */
-	@Override
-	public Iterator<Vertex> vertexIterator() {
-		return new VertexIterator();
-	}
-
-	/**
-	 * The vertex of a {@code SpatialPath}. Stores additional information about
-	 * the vertex in context to the path.
-	 */
-	public static class Vertex extends PointPath.Vertex {
-		
-		/**
-		 * The arc value.
-		 */
-		private final double arc;
-		
-		/**
-		 * Constructs a new {@code Vertex}.
-		 * 
-		 * @param index
-		 * @param point
-		 * @param arc
-		 *            value
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
-		 */
-		private Vertex(int index, ImmutablePoint point, double arc, boolean first, boolean last) {
-			super(index, point, first, last);
-			
-			this.arc = arc;
-		}
-
-		/**
-		 * @return the arc value.
-		 */
-		public double getArc() {
-			return arc;
-		}
-		
-	}
-	
-	/**
-	 * The {@code VertexIterator} of a {@code SpatialPath}.
-	 */
-	private class VertexIterator extends AbstractVertexIterator {
-		
-		/**
-		 * The accumulated arc value.
-		 */
-		private double arc = 0.0;
-		
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractVertexIterator#nextVertex(jts.geom.immutable.ImmutablePoint)
-		 */
-		@Override
-		protected Vertex createNextVertex(ImmutablePoint point) {
-			if (!isFirst())
-				arc += DistanceOp.distance(getLastVertex().getPoint(), point);
-			
-			return new Vertex(getIndex(), point, arc, isFirst(), isLast());
-		}
-		
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.Path#segmentIterator()
-	 */
-	@Override
-	public Iterator<Segment> segmentIterator() {
-		return new SegmentIterator();
-	}
-	
-	/**
-	 * The segment of a {@code SpatialPath}. Stores additional information about
-	 * the segment in context to the path.
-	 */
-	public static class Segment extends PointPath.Segment<Vertex> {
-		
-		/**
-		 * Constructs a new {@code Segment} connecting the given vertices.
-		 * 
-		 * @param start
-		 *            start vertex
-		 * @param finish
-		 *            finish vertex
-		 */
-		private Segment(Vertex start, Vertex finish) {
-			super(start, finish);
-		}
-		
-		/**
-		 * @return the length of this segment.
-		 */
-		public double length() {
-			return getFinishVertex().getArc() - getStartVertex().getArc();
-		}
-	}
-	
-	/**
-	 * The {@code SegmentIterator} of a {@code SpatialPath}.
-	 */
-	private class SegmentIterator extends AbstractSegmentIterator {
-		
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#supplyVertexIterator()
-		 */
-		@Override
-		protected Iterator<Vertex> supplyVertexIterator() {
-			return new VertexIterator();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#nextSegment(world.Path.Vertex, world.Path.Vertex)
-		 */
-		@Override
-		protected Segment createNextSegment(Vertex start, Vertex finish) {
-			return new Segment(start, finish);
-		}
-		
+		return isEmpty() ? 0.0 : arcs[size()-1];
 	}
 
 }

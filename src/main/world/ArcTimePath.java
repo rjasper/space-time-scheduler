@@ -15,8 +15,9 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 
 import util.DurationConv;
 import world.util.ArcTimePathInterpolator;
-import world.util.ForwardPathVertexSeeker;
+import world.util.BinarySearchVertexSeeker;
 import world.util.Interpolator;
+import world.util.VertexSeeker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -41,7 +42,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	public static ArcTimePath empty() {
 		return EMPTY;
 	}
-	
+
 	/**
 	 * Caches the duration of the path.
 	 */
@@ -125,14 +126,88 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	protected ArcTimePath getEmpty() {
 		return empty();
 	}
-
-	/**
-	 * An interpolator for this arc-time path.
-	 */
-	private Interpolator<Double> interpolator = new ArcTimePathInterpolator(
-		this,
-		new ForwardPathVertexSeeker<Vertex, ArcTimePath>(this, Vertex::getY));
 	
+	/**
+	 * The vertex of a {@code ArcTimePath}. Stores additional information about
+	 * the vertex in context to the path.
+	 */
+	public static class Vertex extends PointPath.Vertex {
+
+		/**
+		 * Constructs a new {@code Vertex}.
+		 * 
+		 * @param index
+		 * @param point
+		 * @param first
+		 *            whether the vertex is the first one
+		 * @param last
+		 *            whether the vertex is the last one
+		 */
+		private Vertex(int index, ImmutablePoint point, boolean first, boolean last) {
+			super(index, point, first, last);
+		}
+		
+	}
+	
+	/**
+	 * The segment of a {@code ArcTimePath}. Stores additional information about
+	 * the segment in context to the path.
+	 */
+	public static class Segment extends PointPath.Segment<Vertex> {
+		
+		/**
+		 * Constructs a new {@code Segment} connecting the given vertices.
+		 * 
+		 * @param start
+		 *            start vertex
+		 * @param finish
+		 *            finish vertex
+		 */
+		private Segment(Vertex start, Vertex finish) {
+			super(start, finish);
+		}
+		
+		/**
+		 * @return the length of the segment.
+		 */
+		public double length() {
+			return Math.abs(getFinishVertex().getX() - getStartVertex().getX());
+		}
+		
+		/**
+		 * @return the duration.
+		 */
+		public Duration duration() {
+			return DurationConv.ofSeconds(durationInSeconds());
+		}
+
+		/**
+		 * @return the duration in seconds.
+		 */
+		public double durationInSeconds() {
+			return getFinishVertex().getY() - getStartVertex().getY();
+		}
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.AbstractPointPath#makeVertex(int, jts.geom.immutable.ImmutablePoint, boolean, boolean)
+	 */
+	@Override
+	protected Vertex makeVertex(int index, ImmutablePoint point, boolean first, boolean last) {
+		return new Vertex(index, point, first, last);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
+	 */
+	@Override
+	protected Segment makeSegment(Vertex start, Vertex finish) {
+		return new Segment(start, finish);
+	}
+
 	/**
 	 * Interpolates the arc value of the given time.
 	 * 
@@ -143,6 +218,11 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 *             {@link #maxArc()}].
 	 */
 	public double interpolateArc(double time) {
+		VertexSeeker<Vertex> seeker =
+			new BinarySearchVertexSeeker<Vertex, ArcTimePath>(this, Vertex::getY);
+		Interpolator<Double> interpolator =
+			new ArcTimePathInterpolator(this, seeker);
+		
 		return interpolator.interpolate(time);
 	}
 
@@ -240,128 +320,6 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 			startAlpha,
 			finishIndexExclusive,
 			finishAlpha);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.Path#vertexIterator()
-	 */
-	@Override
-	public Iterator<Vertex> vertexIterator() {
-		return new VertexIterator();
-	}
-
-	/**
-	 * The vertex of a {@code ArcTimePath}. Stores additional information about
-	 * the vertex in context to the path.
-	 */
-	public static class Vertex extends PointPath.Vertex {
-
-		/**
-		 * Constructs a new {@code Vertex}.
-		 * 
-		 * @param index
-		 * @param point
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
-		 */
-		private Vertex(int index, ImmutablePoint point, boolean first, boolean last) {
-			super(index, point, first, last);
-		}
-		
-	}
-	
-	/**
-	 * The {@code VertexIterator} of a {@code ArcTimePath}.
-	 */
-	private class VertexIterator extends AbstractVertexIterator {
-
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractVertexIterator#nextVertex(jts.geom.immutable.ImmutablePoint)
-		 */
-		@Override
-		protected Vertex createNextVertex(ImmutablePoint point) {
-			return new Vertex(getIndex(), point, isFirst(), isLast());
-		}
-		
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see world.Path#segmentIterator()
-	 */
-	@Override
-	public Iterator<Segment> segmentIterator() {
-		return new SegmentIterator();
-	}
-
-	/**
-	 * The segment of a {@code ArcTimePath}. Stores additional information about
-	 * the segment in context to the path.
-	 */
-	public static class Segment extends PointPath.Segment<Vertex> {
-		
-		/**
-		 * Constructs a new {@code Segment} connecting the given vertices.
-		 * 
-		 * @param start
-		 *            start vertex
-		 * @param finish
-		 *            finish vertex
-		 */
-		private Segment(Vertex start, Vertex finish) {
-			super(start, finish);
-		}
-		
-		/**
-		 * @return the length of the segment.
-		 */
-		public double length() {
-			return Math.abs(getFinishVertex().getX() - getStartVertex().getX());
-		}
-		
-		/**
-		 * @return the duration.
-		 */
-		public Duration duration() {
-			return DurationConv.ofSeconds(durationInSeconds());
-		}
-
-		/**
-		 * @return the duration in seconds.
-		 */
-		public double durationInSeconds() {
-			return getFinishVertex().getY() - getStartVertex().getY();
-		}
-		
-	}
-	
-	/**
-	 * The {@code SegmentIterator} of a {@code ArcTimePath}.
-	 */
-	private class SegmentIterator extends AbstractSegmentIterator {
-		
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#supplyVertexIterator()
-		 */
-		@Override
-		protected Iterator<Vertex> supplyVertexIterator() {
-			return new VertexIterator();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see world.Path.AbstractSegmentIterator#nextSegment(world.Path.Vertex, world.Path.Vertex)
-		 */
-		@Override
-		protected Segment createNextSegment(Vertex start, Vertex finish) {
-			return new Segment(start, finish);
-		}
-		
 	}
 
 }

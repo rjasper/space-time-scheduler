@@ -6,6 +6,7 @@ import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -130,12 +131,42 @@ public class DecomposedTrajectory implements Trajectory {
 	private transient SimpleTrajectory composedTrajectory = null;
 
 	/**
-	 * @return
-	 * @see world.SimpleTrajectory#size()
+	 * Calculates the composed trajectory.
+	 *
+	 * @return the composed trajectory.
+	 */
+	private SimpleTrajectory compose() {
+		SpatialPath spatialPath = getSpatialPathComponent();
+		ArcTimePath arcTimePath = getArcTimePathComponent();
+		LocalDateTime baseTime = getBaseTime();
+	
+		TrajectoryComposer builder = new TrajectoryComposer();
+	
+		builder.setSpatialPathComponent(spatialPath);
+		builder.setArcTimePathComponent(arcTimePath);
+		builder.setBaseTime(baseTime);
+	
+		builder.compose();
+	
+		return builder.getResultTrajectory();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#getVertex(int)
 	 */
 	@Override
-	public int size() {
-		return getComposedTrajectory().size();
+	public Vertex getVertex(int index) {
+		return getComposedTrajectory().getVertex(index);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#getSegment(int)
+	 */
+	@Override
+	public Segment getSegment(int index) {
+		return getComposedTrajectory().getSegment(index);
 	}
 
 	/**
@@ -202,11 +233,11 @@ public class DecomposedTrajectory implements Trajectory {
 			return null;
 		
 		if (startLocation == null) {
-			double s = getArcTimePathComponent().getFirst().getX();
+			double s = getArcTimePathComponent().getFirstPoint().getX();
 			SpatialPath xy = getSpatialPathComponent();
 			
 			startLocation = s == 0.0
-				? xy.getFirst()
+				? xy.getFirstPoint()
 				: xy.interpolateLocation(s);
 		}
 		
@@ -230,10 +261,10 @@ public class DecomposedTrajectory implements Trajectory {
 		if (finishLocation == null) {
 			ArcTimePath st = getArcTimePathComponent();
 			SpatialPath xy = getSpatialPathComponent();
-			double s = getArcTimePathComponent().getLast().getX();
+			double s = getArcTimePathComponent().getLastPoint().getX();
 			
 			finishLocation = s == st.maxArc()
-				? xy.getLast()
+				? xy.getLastPoint()
 				: xy.interpolateLocation(s);
 		}
 
@@ -288,6 +319,33 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public Duration getDuration() {
 		return getArcTimePathComponent().duration();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#vertexIterator()
+	 */
+	@Override
+	public Iterator<Vertex> vertexIterator() {
+		return getComposedTrajectory().vertexIterator();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#segmentIterator()
+	 */
+	@Override
+	public Iterator<Segment> segmentIterator() {
+		return getComposedTrajectory().segmentIterator();
+	}
+
+	/**
+	 * @return
+	 * @see world.SimpleTrajectory#size()
+	 */
+	@Override
+	public int size() {
+		return getComposedTrajectory().size();
 	}
 
 	/*
@@ -391,6 +449,15 @@ public class DecomposedTrajectory implements Trajectory {
 
 	/*
 	 * (non-Javadoc)
+	 * @see world.Trajectory#concat(world.Path)
+	 */
+	@Override
+	public Trajectory concat(Path<? extends Vertex, ? extends Segment> other) {
+		return getComposedTrajectory().concat(other);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
 	 */
 	@Override
@@ -408,27 +475,6 @@ public class DecomposedTrajectory implements Trajectory {
 			.collect(toImmutableList());
 		
 		return new ArcTimePath(vertices);
-	}
-
-	/**
-	 * Calculates the composed trajectory.
-	 *
-	 * @return the composed trajectory.
-	 */
-	private SimpleTrajectory compose() {
-		SpatialPath spatialPath = getSpatialPathComponent();
-		ArcTimePath arcTimePath = getArcTimePathComponent();
-		LocalDateTime baseTime = getBaseTime();
-
-		TrajectoryComposer builder = new TrajectoryComposer();
-
-		builder.setSpatialPathComponent(spatialPath);
-		builder.setArcTimePathComponent(arcTimePath);
-		builder.setBaseTime(baseTime);
-
-		builder.compose();
-
-		return builder.getResultTrajectory();
 	}
 
 	/*

@@ -2,9 +2,6 @@ package world;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
@@ -45,140 +42,6 @@ import com.vividsolutions.jts.geom.Point;
 public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> {
 
 	/**
-	 * @return {@code true} iff trajectory has no vertices.
-	 */
-	@Override
-	public abstract boolean isEmpty();
-
-	/**
-	 * @return the spatial ordinates (x-y).
-	 */
-	public abstract SpatialPath getSpatialPath();
-
-	/**
-	 * @return the temporal ordinates (t).
-	 */
-	public abstract ImmutableList<LocalDateTime> getTimes();
-
-	/**
-	 * @return the location of the first vertex. {@code null} if trajectory is
-	 *         empty.
-	 */
-	public abstract ImmutablePoint getStartLocation();
-
-	/**
-	 * @return the location of the last vertex. {@code null} if trajectory is
-	 *         empty.
-	 */
-	public abstract ImmutablePoint getFinishLocation();
-
-	/**
-	 * @return the time of the first vertex. {@code null} if trajectory is
-	 *         empty.
-	 */
-	public abstract LocalDateTime getStartTime();
-
-	/**
-	 * @return the time of the last vertex. {@code null} if trajectory is empty.
-	 */
-	public abstract LocalDateTime getFinishTime();
-
-	/**
-	 * @return the time difference between the first and last vertex.
-	 */
-	public abstract Duration getDuration();
-	
-	/**
-	 * Interpolates the location at the given time.
-	 * 
-	 * @param time
-	 * @return the location.
-	 * @throws NullPointerException
-	 *             if {@code time} is {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code time} is not covered by the trajectory.
-	 */
-	public abstract ImmutablePoint interpolateLocation(LocalDateTime time);
-
-	/**
-	 * @return the euclidean length of the spatial path.
-	 */
-	public abstract double length();
-
-	/**
-	 * @return the trace which is a geometry only including all points of the
-	 *         spatial path.
-	 */
-	public abstract Geometry trace();
-	
-	/**
-	 * Calculates the sub trajectory given by a time interval.
-	 * 
-	 * @param startTime
-	 * @param finishTime
-	 * @return the sub trajectory. The trajectory will be empty if
-	 *         {@code startTime} &lt;= {@code finishTime}
-	 * @throws NullPointerException
-	 *             if any argument is {@code null}.
-	 */
-	public abstract Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime);
-
-	/**
-	 * Calculates the merge of two trajectories. This trajectory serves as
-	 * first section while the given one as the second one. This trajectory will
-	 * not be modified. The given trajectory must have later time ordinates.
-	 * The resulting trajectory connects the original ones by a straight line.
-	 * 
-	 * @param other the second trajectory section.
-	 * @return the merged trajectory.
-	 * @throws NullPointerException if other is {@code null}.
-	 * @throws IllegalArgumentException if other's time is before this one's.
-	 */
-	@Override
-	public default Trajectory concat(Path<? extends Vertex, ? extends Segment> other) {
-		Objects.requireNonNull(other, "other");
-		
-		if (!(other instanceof Trajectory))
-			throw new IllegalArgumentException("incompatible path");
-		
-		Trajectory traj = (Trajectory) other;
-		
-		if (getFinishTime().compareTo(traj.getStartTime()) > 0)
-			throw new IllegalArgumentException("other is before this one");
-		
-		SpatialPath lhsSpatialPath = getSpatialPath();
-		SpatialPath rhsSpatialPath = traj.getSpatialPath();
-		List<LocalDateTime> lhsTimes = getTimes();
-		List<LocalDateTime> rhsTimes = traj.getTimes();
-	
-		SpatialPath spatialPath = lhsSpatialPath.concat(rhsSpatialPath);
-		ImmutableList<LocalDateTime> times = ImmutableList.<LocalDateTime>builder()
-			.addAll(lhsTimes)
-			.addAll(rhsTimes)
-			.build();
-	
-		return new SimpleTrajectory(spatialPath, times);
-	}
-
-	/**
-	 * Calculates the arc time path (s-t) of this trajectory in relation to the
-	 * given base time.
-	 * 
-	 * @param baseTime
-	 * @return the arc time path.
-	 * @throws NullPointerException if {@code baseTime} is {@code null}.
-	 */
-	public abstract ArcTimePath calcArcTimePath(LocalDateTime baseTime);
-
-	/**
-	 * @return a {@code VertexIterator}
-	 */
-	@Override
-	public default Iterator<Vertex> vertexIterator() {
-		return new VertexIterator(this);
-	}
-
-	/**
 	 * The vertex of a {@code Trajectory}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
@@ -200,7 +63,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @param spatialVertex
 		 * @param time
 		 */
-		private Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
+		public Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
 			this.spatialVertex = spatialVertex;
 			this.time = time;
 		}
@@ -219,7 +82,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		public int getIndex() {
 			return spatialVertex.getIndex();
 		}
-
+	
 		/**
 		 * @return the spatial vertex.
 		 */
@@ -274,60 +137,6 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	}
 
 	/**
-	 * The {@code VertexIterator} of a {@code Trajectory}.
-	 */
-	public static class VertexIterator implements Iterator<Vertex> {
-	
-		/**
-		 * The spatial vertex iterator.
-		 */
-		private final Iterator<SpatialPath.Vertex> spatialIterator;
-		
-		/**
-		 * The time iterator.
-		 */
-		private final Iterator<LocalDateTime> timeIterator;
-	
-		/**
-		 * Constructs a new {@code VertexIterator} for the given trajectory.
-		 * 
-		 * @param trajectory
-		 */
-		private VertexIterator(Trajectory trajectory) {
-			this.spatialIterator = trajectory.getSpatialPath().vertexIterator();
-			this.timeIterator = trajectory.getTimes().iterator();
-		}
-	
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		@Override
-		public boolean hasNext() {
-			// equivalent to timeIterator.hasNext()
-			return spatialIterator.hasNext();
-		}
-	
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public Vertex next() {
-			return new Vertex(spatialIterator.next(), timeIterator.next());
-		}
-	
-	}
-
-	/**
-	 * @return a {@code SegmentIterator}.
-	 */
-	@Override
-	public default Iterator<Segment> segmentIterator() {
-		return new SegmentIterator(this);
-	}
-
-	/**
 	 * The segment of a {@code Trajectory}. Stores additional information about
 	 * the segment in context to the path.
 	 */
@@ -367,7 +176,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 *            finish vertex
 		 * @param spatialSegment
 		 */
-		private Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
+		public Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
 			this.start = start;
 			this.finish = finish;
 			this.spatialSegment = spatialSegment;
@@ -496,64 +305,100 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	}
 
 	/**
-	 * The {@code SegmentIterator} of a {@code Trajectory}.
+	 * @return the spatial ordinates (x-y).
 	 */
-	public static class SegmentIterator implements Iterator<Segment> {
-		
-		/**
-		 * The vertex iterator.
-		 */
-		private final Iterator<Trajectory.Vertex> vertexIterator;
-		
-		/**
-		 * The spatial segment iterator.
-		 */
-		private final Iterator<SpatialPath.Segment> spatialSegmentIterator;
-		
-		/**
-		 * The last yielded vertex.
-		 */
-		private Trajectory.Vertex lastVertex = null;
-		
-		/**
-		 * Constructs a new {@code SegmentIterator} for the given trajectory.
-		 * 
-		 * @param trajectory
-		 */
-		private SegmentIterator(Trajectory trajectory) {
-			this.vertexIterator = new VertexIterator(trajectory);
-			this.spatialSegmentIterator = trajectory.getSpatialPath().segmentIterator();
-			
-			if (vertexIterator.hasNext())
-				lastVertex = vertexIterator.next();
-		}
+	public abstract SpatialPath getSpatialPath();
+
+	/**
+	 * @return the temporal ordinates (t).
+	 */
+	public abstract ImmutableList<LocalDateTime> getTimes();
+
+	/**
+	 * @return the location of the first vertex. {@code null} if trajectory is
+	 *         empty.
+	 */
+	public abstract ImmutablePoint getStartLocation();
+
+	/**
+	 * @return the location of the last vertex. {@code null} if trajectory is
+	 *         empty.
+	 */
+	public abstract ImmutablePoint getFinishLocation();
+
+	/**
+	 * @return the time of the first vertex. {@code null} if trajectory is
+	 *         empty.
+	 */
+	public abstract LocalDateTime getStartTime();
+
+	/**
+	 * @return the time of the last vertex. {@code null} if trajectory is empty.
+	 */
+	public abstract LocalDateTime getFinishTime();
+
+	/**
+	 * @return the time difference between the first and last vertex.
+	 */
+	public abstract Duration getDuration();
 	
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		@Override
-		public boolean hasNext() {
-			// equivalent to spatialSegmentIterator.hasNext()
-			return vertexIterator.hasNext();
-		}
+	/**
+	 * Interpolates the location at the given time.
+	 * 
+	 * @param time
+	 * @return the location.
+	 * @throws NullPointerException
+	 *             if {@code time} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code time} is not covered by the trajectory.
+	 */
+	public abstract ImmutablePoint interpolateLocation(LocalDateTime time);
+
+	/**
+	 * @return the euclidean length of the spatial path.
+	 */
+	public abstract double length();
+
+	/**
+	 * @return the trace which is a geometry only including all points of the
+	 *         spatial path.
+	 */
+	public abstract Geometry trace();
 	
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public Segment next() {
-			Vertex start = lastVertex;
-			Vertex finish = vertexIterator.next();
-			SpatialPath.Segment spatialSegment = spatialSegmentIterator.next();
-			
-			Segment segment = new Segment(start, finish, spatialSegment);
-			lastVertex = finish;
-			
-			return segment;
-		}
-		
-	}
+	/**
+	 * Calculates the sub trajectory given by a time interval.
+	 * 
+	 * @param startTime
+	 * @param finishTime
+	 * @return the sub trajectory. The trajectory will be empty if
+	 *         {@code startTime} &lt;= {@code finishTime}
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 */
+	public abstract Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime);
+
+	/**
+	 * Calculates the merge of two trajectories. This trajectory serves as
+	 * first section while the given one as the second one. This trajectory will
+	 * not be modified. The given trajectory must have later time ordinates.
+	 * The resulting trajectory connects the original ones by a straight line.
+	 * 
+	 * @param other the second trajectory section.
+	 * @return the merged trajectory.
+	 * @throws NullPointerException if other is {@code null}.
+	 * @throws IllegalArgumentException if other's time is before this one's.
+	 */
+	@Override
+	public abstract Trajectory concat(Path<? extends Vertex, ? extends Segment> other);
+
+	/**
+	 * Calculates the arc time path (s-t) of this trajectory in relation to the
+	 * given base time.
+	 * 
+	 * @param baseTime
+	 * @return the arc time path.
+	 * @throws NullPointerException if {@code baseTime} is {@code null}.
+	 */
+	public abstract ArcTimePath calcArcTimePath(LocalDateTime baseTime);
 
 }

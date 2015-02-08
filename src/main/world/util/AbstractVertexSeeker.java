@@ -3,8 +3,14 @@ package world.util;
 import java.util.Objects;
 import java.util.function.Function;
 
+import world.Path;
+
 // TODO document
-public abstract class AbstractVertexSeeker<V, P> implements VertexSeeker<V> {
+public abstract class AbstractVertexSeeker<
+	V extends Path.Vertex,
+	P extends Path<V, ?>>
+implements VertexSeeker<V>
+{
 	
 	private final P path;
 	
@@ -22,6 +28,10 @@ public abstract class AbstractVertexSeeker<V, P> implements VertexSeeker<V> {
 	@Override
 	public double position(V vertex) {
 		return positionMapper.apply(vertex);
+	}
+	
+	protected double position(int index) {
+		return position(path.getVertex(index));
 	}
 
 }

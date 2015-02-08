@@ -766,11 +766,6 @@ public class ForbiddenRegionBuilder {
 		boolean first = spatialPathSegment.isFirst();
 		boolean last = spatialPathSegment.isLast();
 
-//		// used to buffer along s direction if needed
-//		Vector buffer = first || last ?
-//			// BUFFER_FACTOR * (s2 - s1)
-//			s2v.subtract(s1v).multiply(BUFFER_FACTOR) : null;
-
 		// calculate point vectors
 		Vector v1 = first ? leftBuffer (s1v) : s1v;
 		Vector v2 = last  ? rightBuffer(s2v) : s2v;

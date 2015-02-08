@@ -1,6 +1,5 @@
 package world;
 
-import static java.util.Spliterator.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static jts.geom.util.GeometrySequencer.*;
 
@@ -8,8 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Spliterator;
-import java.util.Spliterators;
 
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
@@ -22,18 +19,19 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * A {@code Path} is an immutable list of immutable {@link Point}s. It ensures
  * validity of the path. All points have to be valid 2-dimensional points.
- * Singular paths of only one vertex are not allowed while empty paths are.
+ * Singular paths of only one point are not allowed while empty paths are.
  * 
  * @author Rico
  */
 public abstract class AbstractPointPath<
 	V extends PointPath.Vertex,
 	S extends PointPath.Segment<? extends V>>
+extends AbstractPath<V, S>
 implements PointPath<V, S>
 {
 	
 	/**
-	 * The vertices of the path.
+	 * The points of the path.
 	 */
 	private final ImmutableList<ImmutablePoint> points;
 	
@@ -43,7 +41,7 @@ implements PointPath<V, S>
 	private transient ImmutableLineString trace = null;
 	
 	/**
-	 * Constructs a path of the given vertices.
+	 * Constructs a path of the given points.
 	 * 
 	 * @param points
 	 * @throws NullPointerException
@@ -51,7 +49,7 @@ implements PointPath<V, S>
 	 * @throws IllegalArgumentException
 	 *             if {@code points} contain invalid points.
 	 * 
-	 * @param vertices
+	 * @param points
 	 */
 	public AbstractPointPath(ImmutableList<ImmutablePoint> points) {
 		checkVertices(points);
@@ -60,12 +58,12 @@ implements PointPath<V, S>
 	}
 
 	/**
-	 * Creates a new path containing the given vertices.
+	 * Creates a new path containing the given points.
 	 * 
-	 * @param vertices
+	 * @param points
 	 * @return the new path.
 	 */
-	protected abstract PointPath<V, S> create(ImmutableList<ImmutablePoint> vertices);
+	protected abstract PointPath<V, S> create(ImmutableList<ImmutablePoint> points);
 	
 	/**
 	 * @return an empty path.
@@ -73,23 +71,42 @@ implements PointPath<V, S>
 	protected abstract PointPath<V, S> getEmpty();
 	
 	/**
-	 * Checks for validity of the given vertices.
+	 * Checks for validity of the given points.
 	 * 
-	 * @param vertices
+	 * @param points
 	 * @throws NullPointerException
-	 *             if the {@code vertices} are {@code null}.
+	 *             if the {@code points} are {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code vertices} contain invalid points.
+	 *             if {@code points} contain invalid points.
 	 */
-	protected void checkVertices(List<? extends Point> vertices) {
-		Objects.requireNonNull(vertices, "vertices");
+	protected void checkVertices(List<? extends Point> points) {
+		Objects.requireNonNull(points, "points");
 		
-		if (vertices.size() == 1)
+		if (points.size() == 1)
 			throw new IllegalArgumentException("invalid size");
 		
-		vertices.forEach(p ->
-			GeometriesRequire.requireValid2DPoint((Point) p, "vertices"));
+		points.forEach(p ->
+			GeometriesRequire.requireValid2DPoint((Point) p, "points"));
 	}
+
+	/* (non-Javadoc)
+	 * @see world.AbstractPath#makeVertex(int, boolean, boolean)
+	 */
+	@Override
+	protected V makeVertex(int index, boolean first, boolean last) {
+		return makeVertex(index, getPoint(index), first, last);
+	}
+	
+	/**
+	 * Makes a vertex for the given index.
+	 * 
+	 * @param index
+	 * @param point at the given index
+	 * @param first whether it's the first vertex
+	 * @param last whether it's the last vertex
+	 * @return the vertex.
+	 */
+	protected abstract V makeVertex(int index, ImmutablePoint point, boolean first, boolean last);
 
 	/* (non-Javadoc)
 	 * @see world.Path#isEmpty()
@@ -192,12 +209,12 @@ implements PointPath<V, S>
 		
 		Builder<ImmutablePoint> builder = ImmutableList.builder();
 		
-		ImmutableList<ImmutablePoint> vertices = builder
+		ImmutableList<ImmutablePoint> points = builder
 			.addAll(lhsVertices)
 			.addAll(rhsVertices)
 			.build();
 		
-		return create(vertices);
+		return create(points);
 	}
 	
 	/* (non-Javadoc)
@@ -279,189 +296,6 @@ implements PointPath<V, S>
 		double dx = x2 - x1, dy = y2 - y1;
 		
 		return immutablePoint(x1 + alpha*dx, y1 + alpha*dy);
-	}
-
-	/* (non-Javadoc)
-	 * @see world.Path#vertexIterator()
-	 */
-	@Override
-	public abstract Iterator<V> vertexIterator();
-	
-	/* (non-Javadoc)
-	 * @see world.Path#vertexSpliterator()
-	 */
-	@Override
-	public Spliterator<V> vertexSpliterator() {
-		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
-	}
-	
-	/**
-	 * Base vertex iterator to iterate over path vertices.
-	 * 
-	 * @param <V> the vertex type.
-	 */
-	protected abstract class AbstractVertexIterator implements Iterator<V> {
-		
-		/**
-		 * The point iterator.
-		 */
-		private final Iterator<ImmutablePoint> points = AbstractPointPath.this.points.iterator();
-		
-		/**
-		 * The last yielded vertex.
-		 */
-		private V last = null;
-		
-		/**
-		 * The point of the next vertex.
-		 */
-		private ImmutablePoint nextPoint = null;
-		
-		/**
-		 * Return the next vertex represented by the given point.
-		 * 
-		 * @param point
-		 * @return the next vertex.
-		 */
-		protected abstract V createNextVertex(ImmutablePoint point);
-		
-		/**
-		 * @return the current vertex' index.
-		 */
-		protected int getIndex() {
-			if (last == null)
-				return 0;
-			else
-				return last.getIndex() + 1;
-		}
-
-		/**
-		 * @return whether the current vertex is the first one.
-		 */
-		protected boolean isFirst() {
-			return getLastVertex() == null;
-		}
-		
-		/**
-		 * @return whether the current vertex is the last one.
-		 */
-		protected boolean isLast() {
-			return !hasNext();
-		}
-		
-		/**
-		 * @return the last yielded vertex.
-		 */
-		protected V getLastVertex() {
-			return last;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		@Override
-		public boolean hasNext() {
-			return points.hasNext();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public V next() {
-			nextPoint = points.next();
-			V vertex = createNextVertex(nextPoint);
-			last = vertex;
-			
-			return vertex;
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see world.Path#segmentIterator()
-	 */
-	@Override
-	public abstract Iterator<S> segmentIterator();
-	
-	/* (non-Javadoc)
-	 * @see world.Path#segmentSpliterator()
-	 */
-	@Override
-	public Spliterator<S> segmentSpliterator() {
-		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
-	}
-
-	/**
-	 * 
-	 * Base segment iterator to iterate over path segments.
-	 *
-	 * @param <V>
-	 *            the vertex type
-	 * @param <S>
-	 *            the segment type
-	 */
-	protected abstract class AbstractSegmentIterator implements Iterator<S> {
-		
-		/**
-		 * The vertex iterator.
-		 */
-		private final Iterator<V> vertexIterator = supplyVertexIterator();
-		
-		/**
-		 * The last yielded vertex.
-		 */
-		private V lastVertex = null;
-		
-		/**
-		 * Constructs a new {@code SegmentIterator}.
-		 */
-		protected AbstractSegmentIterator() {
-			if (vertexIterator.hasNext())
-				lastVertex = vertexIterator.next();
-		}
-		
-		/**
-		 * @return a vertex iterator.
-		 */
-		protected abstract Iterator<V> supplyVertexIterator();
-		
-		/**
-		 * Provides the next segment.
-		 * 
-		 * @param start
-		 *            start vertex
-		 * @param finish
-		 *            finish vertex
-		 * @return the next segment.
-		 */
-		protected abstract S createNextSegment(V start, V finish);
-		
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		@Override
-		public boolean hasNext() {
-			return vertexIterator.hasNext();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		@Override
-		public S next() {
-			V start = lastVertex;
-			V finish = vertexIterator.next();
-			
-			S segment = createNextSegment(start, finish);
-			lastVertex = finish;
-			
-			return segment;
-		}
-		
 	}
 	
 	/*
