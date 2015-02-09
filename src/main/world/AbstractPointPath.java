@@ -7,10 +7,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
+import world.util.BinarySearchSeeker;
+import world.util.Interpolator;
+import world.util.Interpolator.InterpolationResult;
+import world.util.PointPathInterpolator;
+import world.util.Seeker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -217,87 +223,133 @@ implements PointPath<V, S>
 		return create(points);
 	}
 	
+	// TODO remove
+//	/* (non-Javadoc)
+//	 * @see world.Path#subPath(int, double, int, double)
+//	 */
+//	@Override
+//	public PointPath<V, S> subPath(
+//		int startIndexInclusive,
+//		double startAlpha,
+//		int finishIndexExclusive,
+//		double finishAlpha)
+//	{
+//		int n = size();
+//		int finishIndexInclusive = finishIndexExclusive - 1;
+//		if (startIndexInclusive < 0 || startIndexInclusive >= n)
+//			throw new IllegalArgumentException("startIndex is out of bounds");
+//		if (finishIndexInclusive < 0 || finishIndexInclusive >= n)
+//			throw new IllegalArgumentException("finishIndex is out of bounds");
+//		if (startAlpha < 0.0 || startAlpha >= 1.0)
+//			throw new IllegalArgumentException("startAlpha is out of bounds");
+//		if (finishAlpha < 0.0 || finishAlpha >= 1.0 || (finishIndexInclusive == n-1 && finishAlpha != 0.0))
+//			throw new IllegalArgumentException("finishAlpha is out of bounds");
+//		
+//		// if interval is empty
+//		if (startIndexInclusive > finishIndexInclusive || (startIndexInclusive == finishIndexInclusive && startAlpha > finishAlpha))
+//			return getEmpty();
+//		
+//		// if is identical
+//		if (startIndexInclusive == 0 && startAlpha == 0.0 && finishIndexInclusive == n-1 && finishAlpha == 0.0)
+//			return this;
+//		
+//		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
+//
+//		builder.add(interpolateImpl(startIndexInclusive, startAlpha));
+//			
+//		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
+//			builder.add(getPoint(i));
+//		
+//		// point was already added unless finishAlpha > 0.0
+//		if (finishAlpha > 0.0)
+//			builder.add(interpolateImpl(finishIndexInclusive, finishAlpha));
+//		
+//		return create(builder.build());
+//	}
+
+//	/* (non-Javadoc)
+//	 * @see world.Path#interpolate(int, double)
+//	 */
+//	@Override
+//	public ImmutablePoint interpolate(int index, double alpha) {
+//		int n = size();
+//		if (index < 0 || index >= n-1)
+//			throw new IllegalArgumentException("index is out of bounds");
+//		if (alpha < 0.0 || alpha >= 1.0)
+//			throw new IllegalArgumentException("alpha is out of bounds");
+//		if (index == n-1 && alpha != 0.0)
+//			throw new IllegalArgumentException("alpha must be 0.0 if index is size()-1");
+//		
+//		return interpolateImpl(index, alpha);
+//	}
+//	
+//	/**
+//	 * Actual implementation of {@link #interpolate(int, double)}. Doesn't check
+//	 * arguments.
+//	 * 
+//	 * @param index
+//	 *            the index of the segment
+//	 * @param alpha
+//	 * @return the interpolated point.
+//	 */
+//	private ImmutablePoint interpolateImpl(int index, double alpha) {
+//		if (alpha == 0.0)
+//			return getPoint(index);
+//		
+//		ImmutablePoint p1 = getPoint(index);
+//		ImmutablePoint p2 = getPoint(index+1);
+//		
+//		double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
+//		double dx = x2 - x1, dy = y2 - y1;
+//		
+//		return immutablePoint(x1 + alpha*dx, y1 + alpha*dy);
+//	}
+	
 	/* (non-Javadoc)
-	 * @see world.Path#subPath(int, double, int, double)
+	 * @see world.Path#subPath(java.util.function.Function, double, double)
 	 */
 	@Override
 	public PointPath<V, S> subPath(
-		int startIndexInclusive,
-		double startAlpha,
-		int finishIndexExclusive,
-		double finishAlpha)
+		Function<? super V, Double> positionMapper,
+		double startPosition, double finishPosition)
 	{
-		int n = size();
-		int finishIndexInclusive = finishIndexExclusive - 1;
-		if (startIndexInclusive < 0 || startIndexInclusive >= n)
-			throw new IllegalArgumentException("startIndex is out of bounds");
-		if (finishIndexInclusive < 0 || finishIndexInclusive >= n)
-			throw new IllegalArgumentException("finishIndex is out of bounds");
-		if (startAlpha < 0.0 || startAlpha >= 1.0)
-			throw new IllegalArgumentException("startAlpha is out of bounds");
-		if (finishAlpha < 0.0 || finishAlpha >= 1.0 || (finishIndexInclusive == n-1 && finishAlpha != 0.0))
-			throw new IllegalArgumentException("finishAlpha is out of bounds");
+		Objects.requireNonNull(positionMapper, "positionMapper");
 		
-		// if interval is empty
-		if (startIndexInclusive > finishIndexInclusive || (startIndexInclusive == finishIndexInclusive && startAlpha > finishAlpha))
-			return getEmpty();
+		if (!Double.isFinite(startPosition ) ||
+			!Double.isFinite(finishPosition) ||
+			startPosition >= finishPosition)
+		{
+			throw new IllegalArgumentException("invalid position interval");
+		}
 		
-		// if is identical
-		if (startIndexInclusive == 0 && startAlpha == 0.0 && finishIndexInclusive == n-1 && finishAlpha == 0.0)
+		if (positionMapper.apply(getFirstVertex()) == startPosition &&
+			positionMapper.apply(getLastVertex ()) == finishPosition)
+		{
 			return this;
+		}
+		
+		Seeker<Double, V> seeker = new BinarySearchSeeker<Double, V>(
+			this::getVertex,
+			positionMapper,
+			(d1, d2) -> Double.compare(d1, d2),
+			size());
+		Interpolator<Double, ImmutablePoint> interpolator = new PointPathInterpolator<>(seeker);
+		
+		InterpolationResult<ImmutablePoint> res1 = interpolator.interpolate(startPosition);
+		InterpolationResult<ImmutablePoint> res2 = interpolator.interpolate(startPosition);
 		
 		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
-
-		builder.add(interpolateImpl(startIndexInclusive, startAlpha));
-			
-		for (int i = startIndexInclusive+1; i <= finishIndexInclusive; ++i)
-			builder.add(getPoint(i));
 		
-		// point was already added unless finishAlpha > 0.0
-		if (finishAlpha > 0.0)
-			builder.add(interpolateImpl(finishIndexInclusive, finishAlpha));
+		builder.add(res1.getInterpolation());
+		
+		for (int i = res1.getStartIndex() + 1; i < res2.getFinishIndex(); ++i)
+			builder.add(getPoint(i));
+
+		builder.add(res2.getInterpolation());
 		
 		return create(builder.build());
 	}
 
-	/* (non-Javadoc)
-	 * @see world.Path#interpolate(int, double)
-	 */
-	@Override
-	public ImmutablePoint interpolate(int index, double alpha) {
-		int n = size();
-		if (index < 0 || index >= n-1)
-			throw new IllegalArgumentException("index is out of bounds");
-		if (alpha < 0.0 || alpha >= 1.0)
-			throw new IllegalArgumentException("alpha is out of bounds");
-		if (index == n-1 && alpha != 0.0)
-			throw new IllegalArgumentException("alpha must be 0.0 if index is size()-1");
-		
-		return interpolateImpl(index, alpha);
-	}
-	
-	/**
-	 * Actual implementation of {@link #interpolate(int, double)}. Doesn't check
-	 * arguments.
-	 * 
-	 * @param index
-	 *            the index of the segment
-	 * @param alpha
-	 * @return the interpolated point.
-	 */
-	private ImmutablePoint interpolateImpl(int index, double alpha) {
-		if (alpha == 0.0)
-			return getPoint(index);
-		
-		ImmutablePoint p1 = getPoint(index);
-		ImmutablePoint p2 = getPoint(index+1);
-		
-		double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
-		double dx = x2 - x1, dy = y2 - y1;
-		
-		return immutablePoint(x1 + alpha*dx, y1 + alpha*dy);
-	}
-	
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()

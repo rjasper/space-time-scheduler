@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -15,9 +16,9 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 
 import util.DurationConv;
 import world.util.ArcTimePathInterpolator;
-import world.util.BinarySearchVertexSeeker;
+import world.util.BinarySearchSeeker;
 import world.util.Interpolator;
-import world.util.VertexSeeker;
+import world.util.Seeker;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -218,12 +219,15 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 *             {@link #maxArc()}].
 	 */
 	public double interpolateArc(double time) {
-		VertexSeeker<Vertex> seeker =
-			new BinarySearchVertexSeeker<Vertex, ArcTimePath>(this, Vertex::getY);
-		Interpolator<Double> interpolator =
-			new ArcTimePathInterpolator(this, seeker);
+		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
+			this::getVertex,
+			Vertex::getY,
+			(d1, d2) -> Double.compare(d1, d2),
+			size());
+		Interpolator<Double, Double> interpolator =
+			new ArcTimePathInterpolator(seeker);
 		
-		return interpolator.interpolate(time);
+		return interpolator.interpolate(time).getInterpolation();
 	}
 
 	/**
@@ -304,22 +308,35 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		
 		return (ArcTimePath) super.concat(other);
 	}
-	
+
 	/* (non-Javadoc)
-	 * @see world.Path#subPath(int, double, int, double)
+	 * @see world.AbstractPointPath#subPath(java.util.function.Function, double, double)
 	 */
 	@Override
 	public ArcTimePath subPath(
-		int startIndexInclusive,
-		double startAlpha,
-		int finishIndexExclusive,
-		double finishAlpha)
+		Function<? super Vertex, Double> positionMapper,
+		double startPosition, double finishPosition)
 	{
 		return (ArcTimePath) super.subPath(
-			startIndexInclusive,
-			startAlpha,
-			finishIndexExclusive,
-			finishAlpha);
+			positionMapper, startPosition, finishPosition);
 	}
+	
+	// TODO remove
+//	/* (non-Javadoc)
+//	 * @see world.Path#subPath(int, double, int, double)
+//	 */
+//	@Override
+//	public ArcTimePath subPath(
+//		int startIndexInclusive,
+//		double startAlpha,
+//		int finishIndexExclusive,
+//		double finishAlpha)
+//	{
+//		return (ArcTimePath) super.subPath(
+//			startIndexInclusive,
+//			startAlpha,
+//			finishIndexExclusive,
+//			finishAlpha);
+//	}
 
 }

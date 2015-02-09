@@ -2,14 +2,21 @@ package world;
 
 import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static util.DurationConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
+import world.util.BinarySearchSeeker;
+import world.util.IndexSeeker;
+import world.util.Interpolator;
+import world.util.Interpolator.InterpolationResult;
+import world.util.PointPathInterpolator;
+import world.util.Seeker;
+import world.util.TimeSubIndexInterpolator;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
@@ -275,10 +282,42 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		return spatialPath.trace();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
-	 */
+	// TODO remove
+//	/*
+//	 * (non-Javadoc)
+//	 * @see world.Trajectory#interpolateLocation(java.time.LocalDateTime)
+//	 */
+//	@Override
+//	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+//		Objects.requireNonNull(time, "time");
+//		
+//		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
+//			throw new IllegalArgumentException("time must be covered by this trajectory");
+//		
+//		int n = size();
+//		int segmentPos = seekSegment(time);
+//		
+//		// if after the last segment (or last point)
+//		if (segmentPos == n-1)
+//			return getFinishLocation();
+//		
+//		SpatialPath spatialPath = getSpatialPath();
+//		List<LocalDateTime> times = getTimes();
+//		LocalDateTime t1 = times.get(segmentPos);
+//		Duration d1 = Duration.between(t1, time);
+//		
+//		// if time is on spot of one point
+//		if (d1.isZero())
+//			return spatialPath.getPoint(segmentPos);
+//		
+//		LocalDateTime t2 = times.get(segmentPos+1);
+//		Duration d = Duration.between(t1, t2);
+//		
+//		double alpha = inSeconds(d1) / inSeconds(d);
+//		
+//		return spatialPath.interpolate(segmentPos, alpha);
+//	}
+	
 	@Override
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
@@ -286,122 +325,126 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
 			throw new IllegalArgumentException("time must be covered by this trajectory");
 		
-		int n = size();
-		int segmentPos = seekSegment(time);
+		// first step is to calculate the sub index of the given time
 		
-		// if after the last segment (or last point)
-		if (segmentPos == n-1)
-			return getFinishLocation();
+		Seeker<LocalDateTime, LocalDateTime> timeSeeker = new BinarySearchSeeker<>(
+			this.getTimes()::get,
+			Function.identity(),
+			(t1, t2) -> t1.compareTo(t2),
+			size());
+		Interpolator<LocalDateTime, Double> indexInterpolator = new TimeSubIndexInterpolator(timeSeeker);
+		
+		InterpolationResult<Double> indexResult = indexInterpolator.interpolate(time);
+		
+		double index = indexResult.getInterpolation();
+		
+		// second step interpolates the location at the given sub index
 		
 		SpatialPath spatialPath = getSpatialPath();
-		List<LocalDateTime> times = getTimes();
-		LocalDateTime t1 = times.get(segmentPos);
-		Duration d1 = Duration.between(t1, time);
 		
-		// if time is on spot of one point
-		if (d1.isZero())
-			return spatialPath.getPoint(segmentPos);
+		Seeker<Double, SpatialPath.Vertex> locationSeeker =
+			new IndexSeeker<>(spatialPath::getVertex, size());
+		Interpolator<Double, ImmutablePoint> locationInterpolator =
+			new PointPathInterpolator<SpatialPath.Vertex>(locationSeeker);
 		
-		LocalDateTime t2 = times.get(segmentPos+1);
-		Duration d = Duration.between(t1, t2);
+		InterpolationResult<ImmutablePoint> locationResult = locationInterpolator.interpolate(index);
 		
-		double alpha = inSeconds(d1) / inSeconds(d);
-		
-		return spatialPath.interpolate(segmentPos, alpha);
+		return locationResult.getInterpolation();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see world.Trajectory#subTrajectory(java.time.LocalDateTime, java.time.LocalDateTime)
-	 */
-	@Override
-	public SimpleTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
-		// check empty cases
-		
-		// if trajectory is empty
-		if (isEmpty())
-			return this; // empty
-		// if the interval is empty or does not intersect
-		if (startTime.compareTo(finishTime) >= 0 ||
-			startTime.compareTo(getFinishTime()) >= 0 ||
-			finishTime.compareTo(getStartTime()) <= 0)
-		{
-			return empty();
-		}
-		
-		// at this point it is is guaranteed that the trajectory intersects with the interval
-		
-		int t0CmpStartTime = getStartTime().compareTo(startTime);
-		int tEndCmpFinishTime = getFinishTime().compareTo(finishTime);
-		
-		// if identical
-		if (t0CmpStartTime >= 0 && tEndCmpFinishTime <= 0)
-			return this;
-		 
-		int n = size();
-		int t0CmpFinishTime = getStartTime().compareTo(finishTime);
-		// start values will always be set in the for loop
-		// finish values will not be set in the loop if finishCmp >= 0
-		// start index is inclusive, finish index exclusive
-		int startIndex = 0, finishIndex = n;
-		double startAlpha = 0.0, finishAlpha = 0.0;
-		
-		ImmutableList.Builder<LocalDateTime> builder = ImmutableList.builder();
-		
-		List<LocalDateTime> times = getTimes();
-		LocalDateTime t1 = times.get(0);
-		int t1CmpStartTime = t0CmpStartTime;
-		int t1CmpFinishTime = t0CmpFinishTime;
-		
-		// determine times of the sub trajectory and determine start and finish
-		// indices to calculate the spatial path
-		for (int i = 1; i < n; ++i) {
-			LocalDateTime t2 = times.get(i);
-			int t2CmpStartTime = t2.compareTo(startTime);
-			int t2CmpFinishTime = t2.compareTo(finishTime);
-			
-			// add times to list
-
-			// t1 < startTime < t2
-			if (t1CmpStartTime < 0 && t2CmpStartTime > 0)
-				builder.add(startTime);
-			// startTime <= t1 <= finishTime
-			if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
-				builder.add(t1);
-			// t1 < finishTime < t2
-			if (t1CmpFinishTime < 0 && t2CmpFinishTime > 0)
-				builder.add(finishTime);
-			
-			// determine indices and alpha values
-			
-			// t1 <= startTime < t2
-			if (t1CmpStartTime <= 0 && t2CmpStartTime > 0) {
-				startIndex = i-1;
-				startAlpha = inSeconds(Duration.between(t1, startTime))
-					/ inSeconds(Duration.between(t1, t2));
-			}
-			// t1 <= finishTime < t2
-			if (t1CmpFinishTime <= 0 && t2CmpFinishTime > 0) {
-				finishIndex = i;
-				finishAlpha = inSeconds(Duration.between(t1, finishTime))
-					/ inSeconds(Duration.between(t1, t2));
-			}
-			
-			t1 = t2;
-			t1CmpStartTime = t2CmpStartTime;
-			t1CmpFinishTime = t2CmpFinishTime;
-		}
-
-		// startTime <= t1 <= finishTime
-		if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
-			builder.add(t1);
-		
-		ImmutableList<LocalDateTime> subTimes = builder.build();
-		
-		SpatialPath subSpatialPath = getSpatialPath().subPath(startIndex, startAlpha, finishIndex, finishAlpha);
-		
-		return new SimpleTrajectory(subSpatialPath, subTimes);
-	}
+	// TODO remove
+//	/*
+//	 * (non-Javadoc)
+//	 * @see world.Trajectory#subTrajectory(java.time.LocalDateTime, java.time.LocalDateTime)
+//	 */
+//	@Override
+//	public SimpleTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
+//		// check empty cases
+//		
+//		// if trajectory is empty
+//		if (isEmpty())
+//			return this; // empty
+//		// if the interval is empty or does not intersect
+//		if (startTime.compareTo(finishTime) >= 0 ||
+//			startTime.compareTo(getFinishTime()) >= 0 ||
+//			finishTime.compareTo(getStartTime()) <= 0)
+//		{
+//			return empty();
+//		}
+//		
+//		// at this point it is is guaranteed that the trajectory intersects with the interval
+//		
+//		int t0CmpStartTime = getStartTime().compareTo(startTime);
+//		int tEndCmpFinishTime = getFinishTime().compareTo(finishTime);
+//		
+//		// if identical
+//		if (t0CmpStartTime >= 0 && tEndCmpFinishTime <= 0)
+//			return this;
+//		 
+//		int n = size();
+//		int t0CmpFinishTime = getStartTime().compareTo(finishTime);
+//		// start values will always be set in the for loop
+//		// finish values will not be set in the loop if finishCmp >= 0
+//		// start index is inclusive, finish index exclusive
+//		int startIndex = 0, finishIndex = n;
+//		double startAlpha = 0.0, finishAlpha = 0.0;
+//		
+//		ImmutableList.Builder<LocalDateTime> builder = ImmutableList.builder();
+//		
+//		List<LocalDateTime> times = getTimes();
+//		LocalDateTime t1 = times.get(0);
+//		int t1CmpStartTime = t0CmpStartTime;
+//		int t1CmpFinishTime = t0CmpFinishTime;
+//		
+//		// determine times of the sub trajectory and determine start and finish
+//		// indices to calculate the spatial path
+//		for (int i = 1; i < n; ++i) {
+//			LocalDateTime t2 = times.get(i);
+//			int t2CmpStartTime = t2.compareTo(startTime);
+//			int t2CmpFinishTime = t2.compareTo(finishTime);
+//			
+//			// add times to list
+//
+//			// t1 < startTime < t2
+//			if (t1CmpStartTime < 0 && t2CmpStartTime > 0)
+//				builder.add(startTime);
+//			// startTime <= t1 <= finishTime
+//			if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
+//				builder.add(t1);
+//			// t1 < finishTime < t2
+//			if (t1CmpFinishTime < 0 && t2CmpFinishTime > 0)
+//				builder.add(finishTime);
+//			
+//			// determine indices and alpha values
+//			
+//			// t1 <= startTime < t2
+//			if (t1CmpStartTime <= 0 && t2CmpStartTime > 0) {
+//				startIndex = i-1;
+//				startAlpha = inSeconds(Duration.between(t1, startTime))
+//					/ inSeconds(Duration.between(t1, t2));
+//			}
+//			// t1 <= finishTime < t2
+//			if (t1CmpFinishTime <= 0 && t2CmpFinishTime > 0) {
+//				finishIndex = i;
+//				finishAlpha = inSeconds(Duration.between(t1, finishTime))
+//					/ inSeconds(Duration.between(t1, t2));
+//			}
+//			
+//			t1 = t2;
+//			t1CmpStartTime = t2CmpStartTime;
+//			t1CmpFinishTime = t2CmpFinishTime;
+//		}
+//
+//		// startTime <= t1 <= finishTime
+//		if (t1CmpStartTime >= 0 && t1CmpFinishTime <= 0)
+//			builder.add(t1);
+//		
+//		ImmutableList<LocalDateTime> subTimes = builder.build();
+//		
+//		SpatialPath subSpatialPath = getSpatialPath().subPath(startIndex, startAlpha, finishIndex, finishAlpha);
+//		
+//		return new SimpleTrajectory(subSpatialPath, subTimes);
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -433,6 +476,23 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		return new SimpleTrajectory(spatialPath, times);
 	}
 	
+	@Override
+	public Trajectory subPath(
+		Function<? super Trajectory.Vertex, Double> positionMapper,
+		double startPosition, double finishPosition)
+	{
+		// XXX implement
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
+		// XXX implement
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.Trajectory#calcArcTimePath(java.time.LocalDateTime)
@@ -451,63 +511,64 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		return new ArcTimePath(vertices);
 	}
 
-	/**
-	 * Seeks the position of the segment covering the given time. If two
-	 * segments cover the time (i.e., the time is on spot of a vertex) the
-	 * second one's position is returned. This method assumes that {@code time}
-	 * is covered by this trajectory.
-	 * 
-	 * @param time
-	 * @return the segment position.
-	 */
-	private int seekSegment(LocalDateTime time) {
-		// d1 + d2 == getDuration()
-		Duration d1 = Duration.between(getStartTime(), time);
-		Duration d2 = Duration.between(time, getFinishTime());
-		
-		if (d1.compareTo(d2) <= 0)
-			return seekSegmentForward(time);
-		else
-			return seekSegmentBackward(time);
-	}
-	
-	/**
-	 * Seeks the segment covering the given time using a forward loop. This
-	 * method assumes that {@code time} is covered by this trajectory.
-	 * 
-	 * @param time
-	 * @return the segment's position.
-	 */
-	private int seekSegmentForward(LocalDateTime time) {
-		List<LocalDateTime> times = getTimes();
-		int n = times.size();
-		
-		for (int i = 1; i < n; ++i) {
-			if (times.get(i).compareTo(time) < 0)
-				return i-1;
-		}
-		
-		return n-1;
-	}
-
-	/**
-	 * Seeks the segment covering the given time using a backward loop. This
-	 * method assumes that {@code time} is covered by this trajectory.
-	 * 
-	 * @param time
-	 * @return the segment's position.
-	 */
-	private int seekSegmentBackward(LocalDateTime time) {
-		List<LocalDateTime> times = getTimes();
-		int n = times.size();
-		
-		for (int i = n-1; i > 0; --i) {
-			if (times.get(i).compareTo(time) >= 0)
-				return i;
-		}
-		
-		return 0;
-	}
+	// TODO remove
+//	/**
+//	 * Seeks the position of the segment covering the given time. If two
+//	 * segments cover the time (i.e., the time is on spot of a vertex) the
+//	 * second one's position is returned. This method assumes that {@code time}
+//	 * is covered by this trajectory.
+//	 * 
+//	 * @param time
+//	 * @return the segment position.
+//	 */
+//	private int seekSegment(LocalDateTime time) {
+//		// d1 + d2 == getDuration()
+//		Duration d1 = Duration.between(getStartTime(), time);
+//		Duration d2 = Duration.between(time, getFinishTime());
+//		
+//		if (d1.compareTo(d2) <= 0)
+//			return seekSegmentForward(time);
+//		else
+//			return seekSegmentBackward(time);
+//	}
+//	
+//	/**
+//	 * Seeks the segment covering the given time using a forward loop. This
+//	 * method assumes that {@code time} is covered by this trajectory.
+//	 * 
+//	 * @param time
+//	 * @return the segment's position.
+//	 */
+//	private int seekSegmentForward(LocalDateTime time) {
+//		List<LocalDateTime> times = getTimes();
+//		int n = times.size();
+//		
+//		for (int i = 1; i < n; ++i) {
+//			if (times.get(i).compareTo(time) < 0)
+//				return i-1;
+//		}
+//		
+//		return n-1;
+//	}
+//
+//	/**
+//	 * Seeks the segment covering the given time using a backward loop. This
+//	 * method assumes that {@code time} is covered by this trajectory.
+//	 * 
+//	 * @param time
+//	 * @return the segment's position.
+//	 */
+//	private int seekSegmentBackward(LocalDateTime time) {
+//		List<LocalDateTime> times = getTimes();
+//		int n = times.size();
+//		
+//		for (int i = n-1; i > 0; --i) {
+//			if (times.get(i).compareTo(time) >= 0)
+//				return i;
+//		}
+//		
+//		return 0;
+//	}
 
 	/*
 	 * (non-Javadoc)

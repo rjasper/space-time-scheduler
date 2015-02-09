@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -149,6 +150,18 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @return the concatenated path.
 	 */
 	public abstract Path<V, S> concat(Path<? extends V, ? extends S> other);
+	
+	/**
+	 * Returns a sub path from the given start position to the finish position.
+	 * 
+	 * @param positionMapper
+	 * @param startPosition
+	 * @param finishPosition
+	 * @return the sub path.
+	 */
+	public Path<V, S> subPath(
+		Function<? super V, Double> positionMapper,
+		double startPosition, double finishPosition);
 
 	/**
 	 * @return a {@code VertexIterator}
@@ -159,7 +172,9 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @return a {@code Spliterator} over all vertices.
 	 */
 	public default Spliterator<V> vertexSpliterator() {
-		return Spliterators.spliterator(vertexIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+		return Spliterators.spliterator(
+			vertexIterator(), size(),
+			NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
 	/**
@@ -178,7 +193,9 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @return a {@code Spliterator} over all segments.
 	 */
 	public default Spliterator<S> segmentSpliterator() {
-		return Spliterators.spliterator(segmentIterator(), size(), NONNULL | SIZED | IMMUTABLE | ORDERED);
+		return Spliterators.spliterator(
+			segmentIterator(), size(),
+			NONNULL | SIZED | IMMUTABLE | ORDERED);
 	}
 
 	/**

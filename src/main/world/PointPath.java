@@ -217,65 +217,66 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 	 */
 	public abstract ImmutableLineString trace();
 
-	/**
-	 * <p>
-	 * Calculates a sub path from this path. The index parameters specify the
-	 * the relevant segments. The alpha values specify the start and finish
-	 * points of the first and last segment to be included. Such a point is
-	 * calculated according to this formular:
-	 * </p>
-	 * 
-	 * <i>point(i, alpha) = (x<sub>i</sub> +
-	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
-	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
-	 * 
-	 * <p>
-	 * Where <i>i</i> is the index of the segment and <i>(x<sub>i</sub>,
-	 * y<sub>i</sub>)</i> is the <i>i</i>-th vertex.
-	 * </p>
-	 * 
-	 * @param startIndexInclusive
-	 *            the position of the first segment
-	 * @param startAlpha
-	 *            specifies the start point on the first segment
-	 * @param finishIndexExclusive
-	 *            the position after the last segment
-	 * @param finishAlpha
-	 *            specifies the finish point on the last segment
-	 * @return the sub path
-	 * @throw IllegalArgumentException if any of the following is true:
-	 *        <ul>
-	 *        <li>The indices are out of bounds.</li>
-	 *        <li>The alpha values are not within [0, 1)</li>
-	 *        <li>The finish index is equal to size()-1 and finish alpha is not
-	 *        zero</li>
-	 *        </ul>
-	 */
-	public abstract PointPath<V, S> subPath(int startIndexInclusive,
-		double startAlpha, int finishIndexExclusive, double finishAlpha);
-
-	/**
-	 * <p>
-	 * Interpolates a point on segment using this formula:
-	 * </p>
-	 * 
-	 * <i>point(i, alpha) = (x<sub>i</sub> +
-	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
-	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
-	 * 
-	 * @param index
-	 *            the index of the segment
-	 * @param alpha
-	 * @return the interpolated point.
-	 * @throws IllegalArgumentException
-	 *             <ul>
-	 *             <li>If {@code index} does not represent a valid point
-	 *             position.</li>
-	 *             <li>If {@code alpha} is not within [0, 1).</li>
-	 *             <li>If {@code index} is equal to {@link #size()}{@code -1}
-	 *             and alpha is unequal to {@code 0.0}.</li>
-	 *             </ul>
-	 */
-	public abstract ImmutablePoint interpolate(int index, double alpha);
+	// TODO remove
+//	/**
+//	 * <p>
+//	 * Calculates a sub path from this path. The index parameters specify the
+//	 * the relevant segments. The alpha values specify the start and finish
+//	 * points of the first and last segment to be included. Such a point is
+//	 * calculated according to this formular:
+//	 * </p>
+//	 * 
+//	 * <i>point(i, alpha) = (x<sub>i</sub> +
+//	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
+//	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
+//	 * 
+//	 * <p>
+//	 * Where <i>i</i> is the index of the segment and <i>(x<sub>i</sub>,
+//	 * y<sub>i</sub>)</i> is the <i>i</i>-th vertex.
+//	 * </p>
+//	 * 
+//	 * @param startIndexInclusive
+//	 *            the position of the first segment
+//	 * @param startAlpha
+//	 *            specifies the start point on the first segment
+//	 * @param finishIndexExclusive
+//	 *            the position after the last segment
+//	 * @param finishAlpha
+//	 *            specifies the finish point on the last segment
+//	 * @return the sub path
+//	 * @throw IllegalArgumentException if any of the following is true:
+//	 *        <ul>
+//	 *        <li>The indices are out of bounds.</li>
+//	 *        <li>The alpha values are not within [0, 1)</li>
+//	 *        <li>The finish index is equal to size()-1 and finish alpha is not
+//	 *        zero</li>
+//	 *        </ul>
+//	 */
+//	public abstract PointPath<V, S> subPath(int startIndexInclusive,
+//		double startAlpha, int finishIndexExclusive, double finishAlpha);
+//
+//	/**
+//	 * <p>
+//	 * Interpolates a point on segment using this formula:
+//	 * </p>
+//	 * 
+//	 * <i>point(i, alpha) = (x<sub>i</sub> +
+//	 * alpha*x<sub>i</sub>/(x<sub>i+1</sub> - x<sub>i</sub>), y<sub>i</sub> +
+//	 * alpha*<sub>i</sub>/(y<sub>i+1</sub> - y<sub>i</sub>))</i>
+//	 * 
+//	 * @param index
+//	 *            the index of the segment
+//	 * @param alpha
+//	 * @return the interpolated point.
+//	 * @throws IllegalArgumentException
+//	 *             <ul>
+//	 *             <li>If {@code index} does not represent a valid point
+//	 *             position.</li>
+//	 *             <li>If {@code alpha} is not within [0, 1).</li>
+//	 *             <li>If {@code index} is equal to {@link #size()}{@code -1}
+//	 *             and alpha is unequal to {@code 0.0}.</li>
+//	 *             </ul>
+//	 */
+//	public abstract ImmutablePoint interpolate(int index, double alpha);
 
 }

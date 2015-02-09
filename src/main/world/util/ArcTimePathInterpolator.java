@@ -4,36 +4,28 @@ import world.ArcTimePath;
 import world.ArcTimePath.Vertex;
 
 // TODO document
-public class ArcTimePathInterpolator extends AbstractPathInterpolator<
-	Double,
-	ArcTimePath.Vertex,
-	ArcTimePath>
-{
+public class ArcTimePathInterpolator extends AbstractInterpolator<Double, ArcTimePath.Vertex, Double> {
 
-	public ArcTimePathInterpolator(
-		ArcTimePath path,
-		VertexSeeker<ArcTimePath.Vertex> seeker)
-	{
-		super(path, seeker);
+	public ArcTimePathInterpolator(Seeker<Double, ? extends Vertex> seeker) {
+		super(seeker);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.util.AbstractPathInterpolator#onSpot(world.AbstractPath.Vertex)
+	 * @see world.util.AbstractInterpolator#onSpot(java.lang.Object)
 	 */
 	@Override
-	protected Double onSpot(Vertex vertex) {
+	protected Double onSpot(int index, Double position, Vertex vertex) {
 		return vertex.getX();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.util.AbstractPathInterpolator#interpolate(double, world.AbstractPath.Vertex, world.AbstractPath.Vertex)
+	 * @see world.util.AbstractInterpolator#interpolate(java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	protected Double interpolate(double position, Vertex v1, Vertex v2) {
-		double s1 = onSpot(v1), s2 = onSpot(v2);
-		double t1 = position(v1), t2 = position(v2);
+	protected Double interpolate(Double position, int idx1, Double t1, Vertex v1, int idx2, Double t2, Vertex v2) {
+		double s1 = v1.getX(), s2 = v2.getX();
 		double alpha = (position - t1) / (t2 - t1);
 		
 		return s1 + alpha*(s2-s1);
