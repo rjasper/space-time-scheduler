@@ -5,6 +5,7 @@ import static util.DurationConv.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import world.SimpleTrajectory;
 import world.Trajectory;
 
 // TODO document
@@ -12,12 +13,12 @@ public class TimeSubTrajectoryOperation
 extends SubTrajectoryOperation<LocalDateTime>
 {
 	
-	public static Trajectory subPath(
+	public static SimpleTrajectory subPath(
 		Trajectory trajectory,
 		LocalDateTime startTime,
 		LocalDateTime finishTime)
 	{
-		SubPathOperation<Trajectory, LocalDateTime> op =
+		TimeSubTrajectoryOperation op =
 			new TimeSubTrajectoryOperation(trajectory);
 		
 		return op.subPath(startTime, finishTime);

@@ -24,7 +24,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author Rico
  */
 public final class StaticGeometryBuilder {
-
+	
 	/**
 	 * The geometry factory used to provide JTS-like geometry construction.
 	 */
@@ -251,9 +251,11 @@ public final class StaticGeometryBuilder {
 	public static Geometry immutableGeometry(Geometry g) {
 		return FACTORY.createImmutableGeometry(g);
 	}
+	
+	private static final ImmutablePoint EMPTY_POINT = BUILDER.immutablePoint();
 
 	public static ImmutablePoint immutablePoint() {
-		return BUILDER.immutablePoint();
+		return EMPTY_POINT;
 	}
 
 	public static ImmutablePoint immutablePoint(Coordinate coordinate) {
@@ -271,17 +273,21 @@ public final class StaticGeometryBuilder {
 	public static ImmutablePoint immutablePoint(double x, double y) {
 		return BUILDER.immutablePoint(x, y);
 	}
+	
+	private static final ImmutablePoint EMPTY_POINTZ = BUILDER.immutablePointZ();
 
 	public static ImmutablePoint immutablePointZ() {
-		return BUILDER.immutablePointZ();
+		return EMPTY_POINTZ;
 	}
 
 	public static ImmutablePoint immutablePointZ(double x, double y, double z) {
 		return BUILDER.immutablePointZ(x, y, z);
 	}
+	
+	private static final ImmutableLineString EMPTY_LINESTRING = BUILDER.immutableLineString();
 
 	public static ImmutableLineString immutableLineString() {
-		return BUILDER.immutableLineString();
+		return EMPTY_LINESTRING;
 	}
 
 	public static ImmutableLineString immutableLineString(Coordinate... coordinates) {
@@ -299,17 +305,21 @@ public final class StaticGeometryBuilder {
 	public static ImmutableLineString immutableLineString(double... ord) {
 		return BUILDER.immutableLineString(ord);
 	}
+	
+	private static final ImmutableLineString EMPTY_LINESTRINGZ = BUILDER.immutableLineStringZ();
 
 	public static ImmutableLineString immutableLineStringZ() {
-		return BUILDER.immutableLineStringZ();
+		return EMPTY_LINESTRINGZ;
 	}
 
 	public static ImmutableLineString immutableLineStringZ(double... ord) {
 		return BUILDER.immutableLineStringZ(ord);
 	}
+	
+	private static final ImmutableLinearRing EMPTY_LINEARRING = BUILDER.immutableLinearRing();
 
 	public static ImmutableLinearRing immutableLinearRing() {
-		return BUILDER.immutableLinearRing();
+		return EMPTY_LINEARRING;
 	}
 
 	public static ImmutableLinearRing immutableLinearRing(Coordinate... coordinates) {
@@ -327,17 +337,21 @@ public final class StaticGeometryBuilder {
 	public static ImmutableLinearRing immutableLinearRing(double... ord) {
 		return BUILDER.immutableLinearRing(ord);
 	}
+	
+	private static final ImmutableLinearRing EMPTY_LINEARRINGZ = BUILDER.immutableLinearRingZ();
 
 	public static ImmutableLinearRing immutableLinearRingZ() {
-		return BUILDER.immutableLinearRingZ();
+		return EMPTY_LINEARRINGZ;
 	}
 
 	public static ImmutableLinearRing immutableLinearRingZ(double... ord) {
 		return BUILDER.immutableLinearRingZ(ord);
 	}
+	
+	private static final ImmutablePolygon EMPTY_POLYGON = BUILDER.immutablePolygon();
 
 	public static ImmutablePolygon immutablePolygon() {
-		return BUILDER.immutablePolygon();
+		return EMPTY_POLYGON;
 	}
 
 	public static ImmutablePolygon immutablePolygon(Coordinate... coordinates) {
@@ -367,9 +381,11 @@ public final class StaticGeometryBuilder {
 	public static ImmutablePolygon immutablePolygon(Polygon shell, Polygon hole) {
 		return BUILDER.immutablePolygon(shell, hole);
 	}
+	
+	private static final ImmutablePolygon EMPTY_POLYGONZ = BUILDER.immutablePolygonZ();
 
 	public static ImmutablePolygon immutablePolygonZ() {
-		return BUILDER.immutablePolygonZ();
+		return EMPTY_POLYGONZ;
 	}
 
 	public static ImmutablePolygon immutablePolygonZ(double... ord) {

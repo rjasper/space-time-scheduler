@@ -2,6 +2,7 @@ package world.util;
 
 import java.util.function.Function;
 
+import world.SimpleTrajectory;
 import world.Trajectory;
 import world.Trajectory.Vertex;
 
@@ -9,12 +10,12 @@ import world.Trajectory.Vertex;
 public class DoubleSubTrajectoryOperation
 extends SubTrajectoryOperation<Double>
 {
-	public static Trajectory subPath(
+	public static SimpleTrajectory subPath(
 		Trajectory trajectory,
 		Function<? super Vertex, Double> positionMapper,
 		double startPosition, double finishPosition)
 	{
-		SubPathOperation<Trajectory, Double> op =
+		DoubleSubTrajectoryOperation op =
 			new DoubleSubTrajectoryOperation(trajectory, positionMapper);
 		
 		return op.subPath(startPosition, finishPosition);

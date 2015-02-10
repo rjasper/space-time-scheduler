@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.Point;
 public class ImmutablePoint extends Point implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 8473118084765349243L;
-
+	
 	/**
 	 * Constructs a new {@code ImmutablePoint} from the given point.
 	 * 

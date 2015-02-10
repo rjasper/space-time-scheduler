@@ -43,7 +43,7 @@ TrajectoryInterpolator.Interpolation>
 	}
 
 	@Override
-	protected Trajectory construct(
+	protected SimpleTrajectory construct(
 		TrajectoryInterpolator.Interpolation start,
 		Iterable<Vertex> innerVertices,
 		TrajectoryInterpolator.Interpolation finish)
@@ -72,6 +72,14 @@ TrajectoryInterpolator.Interpolation>
 		ImmutableList<LocalDateTime> subTimes = timesBuilder.build();
 		
 		return new SimpleTrajectory(subSpatialPath, subTimes);
+	}
+
+	/* (non-Javadoc)
+	 * @see world.util.AbstractSubPathOperation#subPath(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public SimpleTrajectory subPath(Q startPosition, Q finishPosition) {
+		return (SimpleTrajectory) super.subPath(startPosition, finishPosition);
 	}
 
 }

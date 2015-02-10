@@ -353,7 +353,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 * @see world.Path#subPath(double, double)
 	 */
 	@Override
-	public Trajectory subPath(double startPosition, double finishPosition) {
+	public SimpleTrajectory subPath(double startPosition, double finishPosition) {
 		return DoubleSubTrajectoryOperation.subPath(this,
 			v -> (double) v.getIndex(),
 			startPosition, finishPosition);
@@ -364,7 +364,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 * @see world.Trajectory#subPath(java.time.LocalDateTime, java.time.LocalDateTime)
 	 */
 	@Override
-	public Trajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
+	public SimpleTrajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
 		return TimeSubTrajectoryOperation.subPath(this, startTime, finishTime);
 	}
 

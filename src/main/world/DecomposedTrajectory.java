@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
+import world.util.DoubleSubPointPathOperation;
 import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
@@ -356,6 +357,8 @@ public class DecomposedTrajectory implements Trajectory {
 	public double length() {
 		return getArcTimePathComponent().length();
 	}
+	
+	private transient Geometry trace = null;
 
 	/*
 	 * (non-Javadoc)
@@ -363,9 +366,29 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Geometry trace() {
-		// FIXME not accurate, use sub path of spatial path.
+		if (isEmpty())
+			return immutableLineString();
 		
-		return getSpatialPathComponent().trace();
+		if (trace == null) {
+			ArcTimePath stComponent = getArcTimePathComponent();
+			SpatialPath xyComponent = getSpatialPathComponent();
+			
+			if (stComponent.minArc() == 0.0 &&
+				stComponent.maxArc() == xyComponent.length())
+			{
+				trace = xyComponent.trace();
+			} else {
+				SpatialPath subXyComponent = DoubleSubPointPathOperation.subPath(
+					xyComponent,
+					SpatialPath.Vertex::getArc,
+					SpatialPath::new,
+					stComponent.minArc(), stComponent.maxArc());
+				
+				trace = subXyComponent.trace();
+			}
+		}
+		
+		return trace;
 	}
 
 	/*
@@ -403,8 +426,9 @@ public class DecomposedTrajectory implements Trajectory {
 	 * @see world.Path#subPath(double, double)
 	 */
 	@Override
-	public Trajectory subPath(double startPosition, double finishPosition) {
-		// TODO decomposed trajectory might be better
+	public SimpleTrajectory subPath(double startPosition, double finishPosition) {
+		// TODO decompose trajectory
+		
 		return getComposedTrajectory().subPath(startPosition, finishPosition);
 	}
 
@@ -413,9 +437,20 @@ public class DecomposedTrajectory implements Trajectory {
 	 * @see world.Trajectory#subPath(java.time.LocalDateTime, java.time.LocalDateTime)
 	 */
 	@Override
-	public Trajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
-		// TODO decomposed trajectory might be better
-		return getComposedTrajectory().subPath(startTime, finishTime);
+	public DecomposedTrajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
+		LocalDateTime baseTime = getBaseTime();
+		double t1 = inSeconds(Duration.between(baseTime, startTime ));
+		double t2 = inSeconds(Duration.between(baseTime, finishTime));
+		
+		SpatialPath xyComponent = getSpatialPathComponent();
+		ArcTimePath stComponent = getArcTimePathComponent();
+		
+		ArcTimePath stSubComponent = DoubleSubPointPathOperation.subPath(stComponent,
+			ArcTimePath.Vertex::getY,
+			ArcTimePath::new,
+			t1, t2);
+		
+		return new DecomposedTrajectory(baseTime, xyComponent, stSubComponent);
 	}
 
 	/*
