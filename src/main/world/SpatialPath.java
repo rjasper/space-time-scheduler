@@ -1,7 +1,6 @@
 package world;
 
 import java.util.List;
-import java.util.function.Function;
 
 import jts.geom.immutable.ImmutablePoint;
 import world.util.BinarySearchSeeker;
@@ -197,24 +196,6 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		
 		return interpolator.interpolate(arc).getInterpolation();
 	}
-
-	// TODO remove
-//	/* (non-Javadoc)
-//	 * @see world.Path#subPath(int, double, int, double)
-//	 */
-//	@Override
-//	public SpatialPath subPath(
-//		int startIndexInclusive,
-//		double startAlpha,
-//		int finishIndexExclusive,
-//		double finishAlpha)
-//	{
-//		return (SpatialPath) super.subPath(
-//			startIndexInclusive,
-//			startAlpha,
-//			finishIndexExclusive,
-//			finishAlpha);
-//	}
 	
 	/**
 	 * @return the length of the path.
@@ -239,30 +220,8 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * @see world.AbstractPointPath#subPath(java.util.function.Function, double, double)
 	 */
 	@Override
-	public SpatialPath subPath(
-		Function<? super Vertex, Double> positionMapper,
-		double startPosition, double finishPosition)
-	{
-		return (SpatialPath) super.subPath(
-			positionMapper, startPosition, finishPosition);
+	public SpatialPath subPath(double startPosition, double finishPosition) {
+		return (SpatialPath) super.subPath(startPosition, finishPosition);
 	}
-
-	// TODO remove
-//	/* (non-Javadoc)
-//	 * @see world.Path#subPath(int, double, int, double)
-//	 */
-//	@Override
-//	public SpatialPath subPath(
-//		int startIndexInclusive,
-//		double startAlpha,
-//		int finishIndexExclusive,
-//		double finishAlpha)
-//	{
-//		return (SpatialPath) super.subPath(
-//			startIndexInclusive,
-//			startAlpha,
-//			finishIndexExclusive,
-//			finishAlpha);
-//	}
 
 }

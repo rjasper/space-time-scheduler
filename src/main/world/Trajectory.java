@@ -375,7 +375,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	 * @throws NullPointerException
 	 *             if any argument is {@code null}.
 	 */
-	public abstract Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime);
+	public abstract Trajectory subPath(LocalDateTime startTime, LocalDateTime finishTime);
 
 	/**
 	 * Calculates the merge of two trajectories. This trajectory serves as

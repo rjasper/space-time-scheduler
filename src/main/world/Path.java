@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -152,16 +151,13 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public abstract Path<V, S> concat(Path<? extends V, ? extends S> other);
 	
 	/**
-	 * Returns a sub path from the given start position to the finish position.
+	 * Returns a sub path from the given start sub-index to the finish sub-index.
 	 * 
-	 * @param positionMapper
-	 * @param startPosition
-	 * @param finishPosition
+	 * @param startSubIndex
+	 * @param finishSubIndex
 	 * @return the sub path.
 	 */
-	public Path<V, S> subPath(
-		Function<? super V, Double> positionMapper,
-		double startPosition, double finishPosition);
+	public Path<V, S> subPath(double startSubIndex, double finishSubIndex);
 
 	/**
 	 * @return a {@code VertexIterator}

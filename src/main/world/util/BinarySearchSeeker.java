@@ -8,19 +8,6 @@ public class BinarySearchSeeker<P, T>
 extends AbstractSeeker<P, T>
 {
 	
-//	private final double minPosition;
-//	
-//	private final double maxPosition;
-//
-//	public BinarySearchVertexSeeker(P path, Function<? super V, Double> positionMapper) {
-//		super(path, positionMapper);
-//		
-//		boolean empty = path.isEmpty();
-//		
-////		this.minPosition = empty ? Double.NaN : position(path.getFirstVertex());
-////		this.maxPosition = empty ? Double.NaN : position(path.getLastVertex());
-//	}
-
 	public BinarySearchSeeker(
 		Function<Integer, ? extends T> accessor,
 		Function<? super T, ? extends P> positionMapper,
@@ -29,17 +16,6 @@ extends AbstractSeeker<P, T>
 	{
 		super(accessor, positionMapper, comparator, size);
 	}
-
-//	private void checkPosition(double position) {
-//		if (getPath().isEmpty())
-//			throw new NoSuchElementException("path is empty");
-//		if (!Double.isFinite(position))
-//			throw new IllegalArgumentException("position not finite");
-//		if (position < minPosition)
-//			throw new IllegalArgumentException("position too small");
-//		if (position > maxPosition)
-//			throw new IllegalArgumentException("position too big");
-//	}
 
 	@Override
 	public int seekFloorImpl(P position) {

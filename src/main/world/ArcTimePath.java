@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterators;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -313,30 +312,8 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @see world.AbstractPointPath#subPath(java.util.function.Function, double, double)
 	 */
 	@Override
-	public ArcTimePath subPath(
-		Function<? super Vertex, Double> positionMapper,
-		double startPosition, double finishPosition)
-	{
-		return (ArcTimePath) super.subPath(
-			positionMapper, startPosition, finishPosition);
+	public ArcTimePath subPath(double startPosition, double finishPosition) {
+		return (ArcTimePath) super.subPath(startPosition, finishPosition);
 	}
-	
-	// TODO remove
-//	/* (non-Javadoc)
-//	 * @see world.Path#subPath(int, double, int, double)
-//	 */
-//	@Override
-//	public ArcTimePath subPath(
-//		int startIndexInclusive,
-//		double startAlpha,
-//		int finishIndexExclusive,
-//		double finishAlpha)
-//	{
-//		return (ArcTimePath) super.subPath(
-//			startIndexInclusive,
-//			startAlpha,
-//			finishIndexExclusive,
-//			finishAlpha);
-//	}
 
 }

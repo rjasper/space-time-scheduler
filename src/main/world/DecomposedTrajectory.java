@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.function.Function;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
@@ -399,82 +398,24 @@ public class DecomposedTrajectory implements Trajectory {
 		return getComposedTrajectory().concat(other);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see world.Path#subPath(double, double)
+	 */
 	@Override
-	public Path<Vertex, Segment> subPath(
-		Function<? super Vertex, Double> positionMapper,
-		double startPosition, double finishPosition)
-	{
-		// XXX implement
-		// TODO Auto-generated method stub
-		return null;
+	public Trajectory subPath(double startPosition, double finishPosition) {
+		// TODO decomposed trajectory might be better
+		return getComposedTrajectory().subPath(startPosition, finishPosition);
 	}
 
-//	/*
-//	 * (non-Javadoc)
-//	 * @see world.Trajectory#subTrajectory(java.time.LocalDateTime, java.time.LocalDateTime)
-//	 */
-//	@Override
-//	public DecomposedTrajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
-//		// check empty cases
-//		
-//		// if trajectory is empty
-//		if (isEmpty())
-//			return this; // empty
-//		
-//		ArcTimePath st = getArcTimePathComponent();
-//		int n = st.size();
-//		double t0 = st.getPoint(0).getY(), tEnd = st.getPoint(n-1).getY();
-//		double tStart = inSeconds(Duration.between(baseTime, startTime));
-//		double tFinish = inSeconds(Duration.between(baseTime, finishTime));
-//		
-//		// if the interval is empty or does not intersect
-//		if (tStart >= tEnd || tStart >= tEnd || tFinish <= t0)
-//			return empty();
-//		
-//		// at this point it is is guaranteed that the trajectory intersects with the interval
-//		
-//		// if identical
-//		if (tStart <= t0 && tFinish >= tEnd)
-//			return this;
-//		
-//		int startIndex = 0, finishIndex = n;
-//		double startAlpha = 0.0, finishAlpha = 0.0;
-//		
-//		double t1 = t0;
-//		
-//		// determine times of the sub trajectory and determine start and finish
-//		// indices to calculate the spatial path
-//		for (int i = 1; i < n; ++i) {
-//			double t2 = st.getPoint(i).getY();
-//			
-//			// t1 <= startTime < t2
-//			if (tStart >= t1 && tStart < t2) {
-//				startIndex = i-1;
-//				startAlpha = (tStart - t1) / (t2 - t1);
-//			}
-//			// t1 <= finishTime < t2
-//			if (tFinish >= t1 && tFinish < t2) {
-//				finishIndex = i;
-//				finishAlpha = (tFinish - t1) / (t2 - t1);
-//				break;
-//			}
-//			
-//			t1 = t2;
-//		}
-//		
-//		// XXX fix it
-//		
-////		ArcTimePath subArcTimePath = st.subPath(startIndex, startAlpha, finishIndex, finishAlpha);
-//		
-////		return new DecomposedTrajectory(getBaseTime(), getSpatialPathComponent(), subArcTimePath);
-//		return null;
-//	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see world.Trajectory#subPath(java.time.LocalDateTime, java.time.LocalDateTime)
+	 */
 	@Override
-	public Trajectory subTrajectory(LocalDateTime startTime, LocalDateTime finishTime) {
-		// XXX implement
-		// TODO Auto-generated method stub
-		return null;
+	public Trajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
+		// TODO decomposed trajectory might be better
+		return getComposedTrajectory().subPath(startTime, finishTime);
 	}
 
 	/*
