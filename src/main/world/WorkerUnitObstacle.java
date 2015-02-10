@@ -104,7 +104,7 @@ public abstract class WorkerUnitObstacle extends DynamicObstacle {
 			throw new IllegalArgumentException("evasion already present");
 	}
 
-	// TODO this method is never called. Someone should do this :P
+	// FIXME this method is never called. Someone should do this :P
 	/**
 	 * Removes a registered evasion which was evading this one.
 	 *
