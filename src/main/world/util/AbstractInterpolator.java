@@ -5,7 +5,12 @@ import java.util.Objects;
 import world.util.Seeker.SeekResult;
 
 // TODO document
-public abstract class AbstractInterpolator<P, I, T> implements Interpolator<P, T> {
+public abstract class AbstractInterpolator<
+	P extends Comparable<? super P>,
+	I,
+	T>
+implements Interpolator<P, T>
+{
 	
 	private final Seeker<P, ? extends I> seeker;
 	
@@ -20,7 +25,7 @@ public abstract class AbstractInterpolator<P, I, T> implements Interpolator<P, T
 		P p1 = res1.getPosition();
 		I v1 = res1.getInterpolation();
 		
-		if (res1.getPosition() == position)
+		if (res1.getPosition().compareTo(position) == 0)
 			return InterpolationResult.onSpot(res1.getIndex(), onSpot(idx1, p1, v1));
 		
 		SeekResult<P, ? extends I> res2 = seeker.seekCeiling(position);

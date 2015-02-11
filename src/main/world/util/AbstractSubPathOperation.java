@@ -1,6 +1,5 @@
 package world.util;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Function;
@@ -24,7 +23,7 @@ public abstract class AbstractSubPathOperation<
 	V extends Path.Vertex,
 	S extends Path.Segment<? extends V>,
 	P extends Path<V, S>,
-	Q,
+	Q extends Comparable<? super Q>,
 	I>
 implements SubPathOperation<P, Q>
 {
@@ -35,30 +34,26 @@ implements SubPathOperation<P, Q>
 	
 	private final TriFunction<Q, Q, Q, Double> relator;
 	
-	private final Comparator<Q> comparator;
-
 	public AbstractSubPathOperation(
 		P path,
 		Function<? super V, Q> positionMapper,
-		TriFunction<Q, Q, Q, Double> relator,
-		Comparator<Q> comparator)
+		TriFunction<Q, Q, Q, Double> relator)
 	{
 		this.path = Objects.requireNonNull(path, "path");
 		this.positionMapper = Objects.requireNonNull(positionMapper, "positionMapper");
 		this.relator = Objects.requireNonNull(relator, "relator");
-		this.comparator = Objects.requireNonNull(comparator, "comparator");
 	}
 	
 	@Override
 	public P subPath(Q startPosition, Q finishPosition) {
-		if (comparator.compare(startPosition, finishPosition) >= 0)
+		if (startPosition.compareTo(finishPosition) >= 0)
 			throw new IllegalArgumentException("invalid position interval");
 		
 		Q minPosition = positionMapper.apply(path.getFirstVertex());
 		Q maxPosition = positionMapper.apply(path.getLastVertex ());
 		
-		if (comparator.compare(startPosition , minPosition) == 0 &&
-			comparator.compare(finishPosition, maxPosition) == 0)
+		if (startPosition .compareTo(minPosition) == 0 &&
+			finishPosition.compareTo(maxPosition) == 0)
 		{
 			return path;
 		}
@@ -68,7 +63,6 @@ implements SubPathOperation<P, Q>
 		Seeker<Q, V> seeker = new BinarySearchSeeker<Q, V>(
 			path::getVertex,
 			positionMapper,
-			comparator,
 			path.size());
 		Interpolator<Q, I> interpolator = getInterpolator(seeker, relator);
 		
@@ -77,7 +71,7 @@ implements SubPathOperation<P, Q>
 		InterpolationResult<I> res1 =
 			interpolator.interpolate(startPosition);
 		InterpolationResult<I> res2 =
-			interpolator.interpolate(startPosition);
+			interpolator.interpolate(finishPosition);
 		
 		Iterable<V> innerVertices = () -> 
 			new VertexIterator(res1.getStartIndex()+1, res2.getFinishIndex());

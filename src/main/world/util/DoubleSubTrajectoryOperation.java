@@ -28,8 +28,7 @@ extends SubTrajectoryOperation<Double>
 		super(
 			trajectory,
 			positionMapper,
-			(p, p1, p2) -> (p - p1) / (p2 - p1),
-			(d1, d2) -> Double.compare(d1, d2));
+			(p, p1, p2) -> (p - p1) / (p2 - p1));
 	}
 
 }

@@ -1,20 +1,18 @@
 package world.util;
 
-import java.util.Comparator;
 import java.util.function.Function;
 
 // TODO document
-public class BinarySearchSeeker<P, T>
+public class BinarySearchSeeker<P extends Comparable<? super P>, T>
 extends AbstractSeeker<P, T>
 {
 	
 	public BinarySearchSeeker(
 		Function<Integer, ? extends T> accessor,
 		Function<? super T, ? extends P> positionMapper,
-		Comparator<? super P> comparator,
 		int size)
 	{
-		super(accessor, positionMapper, comparator, size);
+		super(accessor, positionMapper, size);
 	}
 
 	@Override
@@ -44,9 +42,9 @@ extends AbstractSeeker<P, T>
 				int mid = (low + high) / 2;
 				P testPos = position(mid);
 				
-				if (compare(testPos, position) < 0) {
+				if (testPos.compareTo(position) < 0) {
 					low = mid+1;
-				} else if (compare(testPos, position) > 0) {
+				} else if (testPos.compareTo(position) > 0) {
 					high = mid-1;
 				} else { // testPos == position
 					low = mid;

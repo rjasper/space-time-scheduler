@@ -1,7 +1,6 @@
 package world.util;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.function.Function;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -16,7 +15,7 @@ import world.Trajectory.Vertex;
 import world.util.TrajectoryInterpolator;
 
 // TODO document
-public class SubTrajectoryOperation<Q>
+public class SubTrajectoryOperation<Q extends Comparable<? super Q>>
 extends AbstractSubPathOperation<
 Trajectory.Vertex,
 Trajectory.Segment,
@@ -28,10 +27,9 @@ TrajectoryInterpolator.Interpolation>
 	public SubTrajectoryOperation(
 		Trajectory path,
 		Function<? super Vertex, Q> positionMapper,
-		TriFunction<Q, Q, Q, Double> relator,
-		Comparator<Q> comparator)
+		TriFunction<Q, Q, Q, Double> relator)
 	{
-		super(path, positionMapper, relator, comparator);
+		super(path, positionMapper, relator);
 	}
 
 	@Override

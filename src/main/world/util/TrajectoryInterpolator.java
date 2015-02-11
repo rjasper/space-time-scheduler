@@ -13,7 +13,8 @@ import world.Trajectory;
 import world.Trajectory.Vertex;
 
 // TODO document
-public class TrajectoryInterpolator<P> extends AbstractInterpolator<
+public class TrajectoryInterpolator<P extends Comparable<? super P>>
+extends AbstractInterpolator<
 	P,
 	Trajectory.Vertex,
 	TrajectoryInterpolator.Interpolation>

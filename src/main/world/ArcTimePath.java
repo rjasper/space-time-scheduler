@@ -221,7 +221,6 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Vertex::getY,
-			(d1, d2) -> Double.compare(d1, d2),
 			size());
 		Interpolator<Double, Double> interpolator =
 			new ArcTimePathInterpolator(seeker);

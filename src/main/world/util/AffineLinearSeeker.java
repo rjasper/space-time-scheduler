@@ -1,10 +1,13 @@
 package world.util;
 
-import java.util.Comparator;
 import java.util.function.Function;
 
 // TODO document
-public class AffineLinearSeeker<P, T> extends AbstractSeeker<P, T> {
+public class AffineLinearSeeker<
+	P extends Comparable<? super P>,
+	T>
+extends AbstractSeeker<P, T>
+{
 	
 	private int lastIndex = 0;
 	
@@ -13,10 +16,9 @@ public class AffineLinearSeeker<P, T> extends AbstractSeeker<P, T> {
 	public AffineLinearSeeker(
 		Function<Integer, ? extends T> accessor,
 		Function<? super T, ? extends P> positionMapper,
-		Comparator<? super P> comparator,
 		int size)
 	{
-		super(accessor, positionMapper, comparator, size);
+		super(accessor, positionMapper, size);
 	}
 
 	@Override
@@ -40,13 +42,13 @@ public class AffineLinearSeeker<P, T> extends AbstractSeeker<P, T> {
 		P currPosition = position(currIndex);
 		
 		// seek backward
-		if (compare(position, currPosition) < 0) {
+		if (position.compareTo(currPosition) < 0) {
 			do {
 				if (currIndex == 0)
 					throw new IllegalArgumentException("position too small");
 				
 				currPosition = position(--currIndex);
-			} while (compare(position, currPosition) < 0);
+			} while (position.compareTo(currPosition) < 0);
 			
 			// position >= currPosition
 			
@@ -56,13 +58,13 @@ public class AffineLinearSeeker<P, T> extends AbstractSeeker<P, T> {
 			int n = size();
 			
 			do {
-				if (compare(currPosition, position) == 0)
+				if (currPosition.compareTo(position) == 0)
 					return currIndex;
 				if (currIndex == n-1)
 					throw new IllegalArgumentException("position too big");
 				
 				currPosition = position(++currIndex);
-			} while (compare(position, currPosition) >= 0);
+			} while (position.compareTo(currPosition) >= 0);
 			
 			// position < currPosition
 			

@@ -189,7 +189,6 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Vertex::getArc,
-			(d1, d2) -> Double.compare(d1, d2),
 			size());
 		Interpolator<Double, ImmutablePoint> interpolator =
 			new PointPathInterpolator<>(seeker);

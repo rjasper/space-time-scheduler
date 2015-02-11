@@ -1,25 +1,24 @@
 package world.util;
 
-import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
 
 // TODO document
-public abstract class AbstractSeeker<P, T> implements Seeker<P, T> {
+public abstract class AbstractSeeker<
+	P extends Comparable<? super P>,
+	T>
+implements Seeker<P, T> {
 	
 	private final Function<Integer, ? extends T> accessor;
 	
 	private final Function<? super T, ? extends P> positionMapper;
-	
-	private final Comparator<? super P> comparator;
 	
 	private final int size;
 
 	public AbstractSeeker(
 		Function<Integer, ? extends T> accessor,
 		Function<? super T, ? extends P> positionMapper,
-		Comparator<? super P> comparator,
 		int size)
 	{
 		if (size < 0)
@@ -27,7 +26,6 @@ public abstract class AbstractSeeker<P, T> implements Seeker<P, T> {
 		
 		this.accessor = Objects.requireNonNull(accessor, "accessor");
 		this.positionMapper = Objects.requireNonNull(positionMapper, "positionMapper");
-		this.comparator = Objects.requireNonNull(comparator, "comparator");
 		this.size = size;
 	}
 	
@@ -43,10 +41,6 @@ public abstract class AbstractSeeker<P, T> implements Seeker<P, T> {
 		return position(get(index));
 	}
 	
-	protected int compare(P lhs, P rhs) {
-		return comparator.compare(lhs, rhs);
-	}
-
 	public int size() {
 		return size;
 	}
@@ -56,9 +50,9 @@ public abstract class AbstractSeeker<P, T> implements Seeker<P, T> {
 		
 		if (size() == 0)
 			throw new NoSuchElementException("accessable is empty");
-		if (compare(position, position(0)) < 0)
+		if (position.compareTo(position(0)) < 0)
 			throw new IllegalArgumentException("position too small");
-		if (compare(position, position(size()-1)) > 0)
+		if (position.compareTo(position(size()-1)) > 0)
 			throw new IllegalArgumentException("position too big");
 	}
 

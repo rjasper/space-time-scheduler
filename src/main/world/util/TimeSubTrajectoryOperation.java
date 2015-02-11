@@ -33,8 +33,7 @@ extends SubTrajectoryOperation<LocalDateTime>
 				double d12 = inSeconds(Duration.between(t1, t2));
 				
 				return d1 / d12;
-			},
-			(t1, t2) -> t1.compareTo(t2));
+			});
 	}
 
 }

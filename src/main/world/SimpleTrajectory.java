@@ -296,7 +296,6 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		Seeker<LocalDateTime, LocalDateTime> timeSeeker = new BinarySearchSeeker<>(
 			this.getTimes()::get,
 			Function.identity(),
-			(t1, t2) -> t1.compareTo(t2),
 			size());
 		Interpolator<LocalDateTime, Double> indexInterpolator = new TimeSubIndexInterpolator(timeSeeker);
 		
