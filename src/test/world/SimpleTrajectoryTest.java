@@ -19,9 +19,6 @@ public class SimpleTrajectoryTest {
 		Trajectory t = SimpleTrajectory.empty();
 		
 		t.subPath(LocalDateTime.MIN, LocalDateTime.MAX);
-		
-//		assertThat("sub-trajectory is not empty",
-//			sub, equalTo(SimpleTrajectory.empty()));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -31,9 +28,6 @@ public class SimpleTrajectoryTest {
 			ImmutableList.of(atSecond(1), atSecond(2)));
 		
 		t.subPath(atSecond(2), atSecond(1));
-		
-//		assertThat("sub-trajectory is not empty",
-//			sub, equalTo(SimpleTrajectory.empty()));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -42,21 +36,7 @@ public class SimpleTrajectoryTest {
 			spatialPath(-1, 1, 1, -1),
 			ImmutableList.of(atSecond(1), atSecond(2)));
 		t.subPath(atSecond(2), atSecond(3));
-		
-//		assertThat("sub-trajectory is not empty",
-//			sub, equalTo(SimpleTrajectory.empty()));
 	}
-	
-//	@Test
-//	public void testSubTrajectoryIdentical() {
-//		Trajectory t = new SimpleTrajectory(
-//			spatialPath(-1, 1, 1, -1),
-//			ImmutableList.of(atSecond(1), atSecond(2)));
-//		Trajectory sub = t.subPath(LocalDateTime.MIN, LocalDateTime.MAX);
-//
-//		assertThat("sub-trajectory is not identical",
-//			sub, equalTo(t));
-//	}
 	
 	@Test
 	public void testSubTrajectoryIdenticalTight() {

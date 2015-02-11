@@ -17,11 +17,11 @@ import world.util.TrajectoryInterpolator;
 // TODO document
 public class SubTrajectoryOperation<Q extends Comparable<? super Q>>
 extends AbstractSubPathOperation<
-Trajectory.Vertex,
-Trajectory.Segment,
-Trajectory,
-Q,
-TrajectoryInterpolator.Interpolation>
+	Trajectory.Vertex,
+	Trajectory.Segment,
+	Trajectory,
+	Q,
+	TrajectoryInterpolator.Interpolation>
 {
 
 	public SubTrajectoryOperation(
