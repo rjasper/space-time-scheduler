@@ -96,6 +96,30 @@ public class DecomposedTrajectory implements Trajectory {
 		ArcTimePath arcTimePathComponent)
 	{
 		Objects.requireNonNull(baseTime, "baseTime");
+		
+		checkComponents(spatialPathComponent, arcTimePathComponent);
+//		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
+//		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
+//		
+//		// both components must either be empty or non-empty
+//		if (spatialPathComponent.isEmpty() != arcTimePathComponent.isEmpty())
+//			throw new IllegalArgumentException("incompatible path components sizes");
+//		
+//		if (!arcTimePathComponent.isEmpty()) {
+//			// TODO no tolerance might be too strict
+//			if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
+//				throw new IllegalArgumentException("arcTimePath includes arcs larger than spatialPath");
+//		}
+		
+		this.baseTime = baseTime;
+		this.spatialPathComponent = spatialPathComponent;
+		this.arcTimePathComponent = arcTimePathComponent;
+	}
+	
+	public static void checkComponents(
+		SpatialPath spatialPathComponent,
+		ArcTimePath arcTimePathComponent)
+	{
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 		
@@ -108,10 +132,6 @@ public class DecomposedTrajectory implements Trajectory {
 			if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
 				throw new IllegalArgumentException("arcTimePath includes arcs larger than spatialPath");
 		}
-		
-		this.baseTime = baseTime;
-		this.spatialPathComponent = spatialPathComponent;
-		this.arcTimePathComponent = arcTimePathComponent;
 	}
 
 	@Override
