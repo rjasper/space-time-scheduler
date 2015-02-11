@@ -7,6 +7,7 @@ import static util.DurationConv.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
@@ -87,7 +88,6 @@ public class DecomposedTrajectory implements Trajectory {
 	 * <ul>
 	 * <li>One of the components have the size "1".</li>
 	 * <li>The components don't have the same euclidean length.</li>
-	 * <li>The arcTimePathComponent is not causal (not increasing in time).</li>
 	 * </ul>
 	 */
 	public DecomposedTrajectory(
@@ -236,6 +236,8 @@ public class DecomposedTrajectory implements Trajectory {
 		if (startLocation == null) {
 			double s = getArcTimePathComponent().getFirstPoint().getX();
 			SpatialPath xy = getSpatialPathComponent();
+
+			// TODO don't interpolate if composed
 			
 			startLocation = s == 0.0
 				? xy.getFirstPoint()
@@ -263,6 +265,8 @@ public class DecomposedTrajectory implements Trajectory {
 			ArcTimePath st = getArcTimePathComponent();
 			SpatialPath xy = getSpatialPathComponent();
 			double s = getArcTimePathComponent().getLastPoint().getX();
+			
+			// TODO don't interpolate if composed
 			
 			finishLocation = s == st.maxArc()
 				? xy.getLastPoint()
@@ -399,8 +403,12 @@ public class DecomposedTrajectory implements Trajectory {
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
 		
+		if (isEmpty())
+			throw new NoSuchElementException("trajectory is empty");
 		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
 			throw new IllegalArgumentException("time must be covered by this trajectory");
+		
+		// TODO short cut if time is start or finish time
 		
 		if (isComposed()) {
 			return getComposedTrajectory().interpolateLocation(time);
@@ -438,6 +446,20 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public DecomposedTrajectory subPath(LocalDateTime startTime, LocalDateTime finishTime) {
+		Objects.requireNonNull(startTime, "startTime");
+		Objects.requireNonNull(finishTime, "finishTimei");
+		
+		if (isEmpty())
+			throw new NoSuchElementException("trajectory is empty");
+		if (startTime.compareTo(finishTime) >= 0)
+			throw new IllegalArgumentException("invalid time interval");
+		
+		if (startTime .compareTo(getStartTime ()) == 0 &&
+			finishTime.compareTo(getFinishTime()) == 0)
+		{
+			return this;
+		}
+		
 		LocalDateTime baseTime = getBaseTime();
 		double t1 = inSeconds(Duration.between(baseTime, startTime ));
 		double t2 = inSeconds(Duration.between(baseTime, finishTime));

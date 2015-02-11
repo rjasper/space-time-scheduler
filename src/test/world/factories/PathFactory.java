@@ -10,14 +10,14 @@ import com.google.common.collect.ImmutableList;
 public final class PathFactory {
 	
 	public static SpatialPath spatialPath(double... ordinates) {
-		return new SpatialPath(vertices(ordinates));
+		return new SpatialPath(points(ordinates));
 	}
 	
 	public static ArcTimePath arcTimePath(double... ordinates) {
-		return new ArcTimePath(vertices(ordinates));
+		return new ArcTimePath(points(ordinates));
 	}
 	
-	private static ImmutableList<ImmutablePoint> vertices(double... ordinates) {
+	public static ImmutableList<ImmutablePoint> points(double... ordinates) {
 		if (ordinates.length % 2 != 0)
 			throw new IllegalArgumentException("invalid number of ordinates");
 		

@@ -209,26 +209,6 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	}
 
 	/**
-	 * Interpolates the arc value of the given time.
-	 * 
-	 * @param time
-	 * @return the arc value.
-	 * @throws IllegalArgumentException
-	 *             if the time is not within the range [{@link #minArc()},
-	 *             {@link #maxArc()}].
-	 */
-	public double interpolateArc(double time) {
-		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
-			this::getVertex,
-			Vertex::getY,
-			size());
-		Interpolator<Double, Double> interpolator =
-			new ArcTimePathInterpolator(seeker);
-		
-		return interpolator.interpolate(time).getInterpolation();
-	}
-
-	/**
 	 * @return the minimum arc.
 	 */
 	public double minArc() {
@@ -293,6 +273,26 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		}
 		
 		return duration;
+	}
+
+	/**
+	 * Interpolates the arc value of the given time.
+	 * 
+	 * @param time
+	 * @return the arc value.
+	 * @throws IllegalArgumentException
+	 *             if the time is not within the range [{@link #minArc()},
+	 *             {@link #maxArc()}].
+	 */
+	public double interpolateArc(double time) {
+		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
+			this::getVertex,
+			Vertex::getY,
+			size());
+		Interpolator<Double, Double> interpolator =
+			new ArcTimePathInterpolator(seeker);
+		
+		return interpolator.interpolate(time).getInterpolation();
 	}
 
 	/*

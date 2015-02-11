@@ -1,5 +1,6 @@
 package world;
 
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.TimeFactory.*;
@@ -8,11 +9,46 @@ import static world.factories.PathFactory.*;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
+import jts.geom.immutable.ImmutablePoint;
+
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
 public class SimpleTrajectoryTest {
+	
+	@Test(expected = NoSuchElementException.class)
+	public void testInterpolateLocationEmpty() {
+		Trajectory t = SimpleTrajectory.empty();
+		
+		t.interpolateLocation(atSecond(0));
+	}
+	
+	@Test
+	public void testInterpolateLocationOnSpot() {
+		Trajectory t = new SimpleTrajectory(
+			spatialPath(-1, 1, 1, -1),
+			ImmutableList.of(atSecond(1), atSecond(2)));
+		
+		ImmutablePoint location = t.interpolateLocation(atSecond(1));
+		ImmutablePoint expected = immutablePoint(-1, 1);
+		
+		assertThat("unexpected interpolated location",
+			location, equalTo(expected));
+	}
+	
+	@Test
+	public void testInterpolateLocationInBetween() {
+		Trajectory t = new SimpleTrajectory(
+			spatialPath(-1, 1, 1, -1),
+			ImmutableList.of(atSecond(1), atSecond(2)));
+		
+		ImmutablePoint location = t.interpolateLocation(atSecond(1.5));
+		ImmutablePoint expected = immutablePoint(0, 0);
+		
+		assertThat("unexpected interpolated location",
+			location, equalTo(expected));
+	}
 	
 	@Test(expected = NoSuchElementException.class)
 	public void testSubTrajectoryEmptyTrajectory() {
@@ -35,11 +71,12 @@ public class SimpleTrajectoryTest {
 		Trajectory t = new SimpleTrajectory(
 			spatialPath(-1, 1, 1, -1),
 			ImmutableList.of(atSecond(1), atSecond(2)));
+		
 		t.subPath(atSecond(2), atSecond(3));
 	}
 	
 	@Test
-	public void testSubTrajectoryIdenticalTight() {
+	public void testSubTrajectoryIdentical() {
 		Trajectory t = new SimpleTrajectory(
 			spatialPath(-1, 1, 1, -1),
 			ImmutableList.of(atSecond(1), atSecond(2)));

@@ -5,7 +5,11 @@ import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
 
-public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segment<? extends V>> extends Path<V, S> {
+public interface PointPath<
+	V extends PointPath.Vertex,
+	S extends PointPath.Segment<? extends V>>
+extends Path<V, S>
+{
 
 	/**
 	 * The vertex of a {@code Path}. Stores additional information about the
@@ -208,6 +212,9 @@ public interface PointPath<V extends PointPath.Vertex, S extends PointPath.Segme
 		else
 			return getPoint(size()-1);
 	}
+
+	@Override
+	public abstract PointPath<V, S> subPath(double startSubIndex, double finishSubIndex);
 
 	/**
 	 * Calculates the trace of this path. The trace is a {@code LineString}

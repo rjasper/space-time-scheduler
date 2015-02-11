@@ -180,6 +180,13 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	}
 
 	/**
+	 * @return the length of the path.
+	 */
+	public double length() {
+		return isEmpty() ? 0.0 : arcs[size()-1];
+	}
+
+	/**
 	 * Interpolates the location of the given arc.
 	 * 
 	 * @param arc
@@ -194,13 +201,6 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 			new PointPathInterpolator<>(seeker);
 		
 		return interpolator.interpolate(arc).getInterpolation();
-	}
-	
-	/**
-	 * @return the length of the path.
-	 */
-	public double length() {
-		return isEmpty() ? 0.0 : arcs[size()-1];
 	}
 
 	/*

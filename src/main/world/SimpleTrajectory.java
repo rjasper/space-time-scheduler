@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -288,8 +289,12 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
 		
+		if (isEmpty())
+			throw new NoSuchElementException("trajectory is empty");
 		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
 			throw new IllegalArgumentException("time must be covered by this trajectory");
+		
+		// TODO short cut if time is start or finish time
 		
 		// first step is to calculate the sub index of the given time
 		
