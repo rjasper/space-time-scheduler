@@ -1,357 +1,150 @@
 package world.util;
 
-import static common.collect.ImmutablesCollectors.*;
-import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static util.DurationConv.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import util.DurationConv;
-import world.ArcTimePath;
-import world.SimpleTrajectory;
-import world.SpatialPath;
 
 import com.google.common.collect.ImmutableList;
-import com.vividsolutions.jts.geom.Point;
 
-/**
- * Composes a {@link SimpleTrajectory} from a provided spatial path and arc time
- * path component.
- * 
- * @author Rico
- */
+import world.ArcTimePath;
+import world.DecomposedTrajectory;
+import world.SimpleTrajectory;
+import world.SpatialPath;
+import world.util.Interpolator.InterpolationResult;
+
 public class TrajectoryComposer {
-
-	/**
-	 * The base time.
-	 */
-	private LocalDateTime baseTime = null;
-
-	/**
-	 * The spatial x-ordinates.
-	 */
-	private double[] xSpatial = null;
-
-	/**
-	 * The spatial y-ordinates.
-	 */
-	private double[] ySpatial = null;
-
-	/**
-	 * The spatial s-ordinates (arc).
-	 */
-	private double[] sSpatial = null;
-
-	/**
-	 * The arc-time s-ordindates (arc).
-	 */
-	private double[] sArcTime = null;
-
-	/**
-	 * The arc-time t-ordinates.
-	 */
-	private double[] tArcTime = null;
-
-	/**
-	 * The composed trajectory.
-	 */
-	private SimpleTrajectory resultTrajectory = null;
-
-	/**
-	 * Sets the base time of the arc-time component.
-	 * 
-	 * @param baseTime
-	 * @throws NullPointerException
-	 *             if {@code baseTime} is {@code null}.
-	 */
-	public void setBaseTime(LocalDateTime baseTime) {
-		this.baseTime = Objects.requireNonNull(baseTime, "baseTime");
-	}
-
-	/**
-	 * Sets the spatial path component (x-y).
-	 * 
-	 * @param spatialPathComponent
-	 */
-	public void setSpatialPathComponent(SpatialPath spatialPathComponent) {
-		int nSpatial = spatialPathComponent.size();
-
-		xSpatial = new double[nSpatial];
-		ySpatial = new double[nSpatial];
-		sSpatial = new double[nSpatial];
-
-		Iterator<SpatialPath.Vertex> it = spatialPathComponent.vertexIterator();
-
-		for (int i = 0; i < nSpatial; ++i) {
-			SpatialPath.Vertex v = it.next();
-
-			xSpatial[i] = v.getX();
-			ySpatial[i] = v.getY();
-			sSpatial[i] = v.getArc();
-		}
-	}
-
-	/**
-	 * Sets the arc time component (s-t).
-	 * 
-	 * @param arcTimePathComponent
-	 */
-	public void setArcTimePathComponent(ArcTimePath arcTimePathComponent) {
-		int nArcTime = arcTimePathComponent.size();
-
-		Iterator<ImmutablePoint> it = arcTimePathComponent.getPoints().iterator();
-
-		sArcTime = new double[nArcTime];
-		tArcTime = new double[nArcTime];
-
-		for (int i = 0; i < nArcTime; ++i) {
-			Point p = it.next();
-
-			sArcTime[i] = p.getX();
-			tArcTime[i] = p.getY();
-		}
-	}
-
-	/**
-	 * @return the length of the spatial path component.
-	 */
-	private int getSpatialPathSize() {
-		// equivalent to xSpatial.length or ySpatial.legnth
-		return sSpatial.length;
-	}
-
-	/**
-	 * @return the length of the arc-time path component
-	 */
-	private int getArcTimePathSize() {
-		// equivalent to tSpatial.length
-		return sArcTime.length;
-	}
-
-	/**
-	 * @return the composed trajectory.
-	 */
-	public SimpleTrajectory getResultTrajectory() {
-		return resultTrajectory;
-	}
-
-	/**
-	 * Sets the composed trajectory.
-	 * 
-	 * @param resultTrajectory
-	 */
-	private void setResultTrajectory(SimpleTrajectory resultTrajectory) {
-		this.resultTrajectory = resultTrajectory;
-	}
-
-	/**
-	 * Checks if parameters are validly set.
-	 * 
-	 * @throws NullPointerException
-	 *             if any parameter is {@code null}.
-	 * @throws IllegalStateException
-	 *             if one component is empty while the other is not.
-	 */
-	private void checkParameters() {
-		Objects.requireNonNull(baseTime, "baseTime");
-		Objects.requireNonNull(xSpatial, "xSpatial");
-		Objects.requireNonNull(sArcTime, "sArcTime");
+	
+	public static SimpleTrajectory compose(DecomposedTrajectory trajectory) {
+		TrajectoryComposer composer = new TrajectoryComposer(trajectory);
 		
-		if ((getSpatialPathSize() == 0) ^ (getArcTimePathSize() == 0))
-			throw new IllegalStateException("inconsistent array lengths");
+		return composer.compose();
+	}
+	
+	private final DecomposedTrajectory trajectory;
+	
+	private SpatialPath xyComponent;
+	private ArcTimePath stComponent;
+	
+	private Seeker<Double, SpatialPath.Vertex> xySeeker;
+	private Interpolator<Double, ImmutablePoint> xyInterpolator;
+	private Seeker<Double, ArcTimePath.Vertex> stSeeker;
+	private Interpolator<Double, ImmutablePoint> stInterpolator;
+	
+	private ImmutableList.Builder<ImmutablePoint> locationsBuilder;
+	private ImmutableList.Builder<LocalDateTime> timesBuilder;
+
+	public TrajectoryComposer(DecomposedTrajectory trajectory) {
+		this.trajectory = Objects.requireNonNull(trajectory, "trajectory");
+		
+		init();
 	}
 
-	/**
-	 * Composes the trajectory from the provided spatial and arc-time path
-	 * components.
-	 */
-	public void compose() {
-		checkParameters();
+	private void init() {
+		xyComponent = trajectory.getSpatialPathComponent();
+		stComponent = trajectory.getArcTimePathComponent();
 		
-		int nSpatial = getSpatialPathSize();
-		int nArcTime = getArcTimePathSize();
-
-		// FIXME tXY interpolation only works with bijective arc-time mapping
-		// interpolate tXY
-		double[] tSpatial = new double[nSpatial];
-
-		interpolateSpatialTime(tSpatial);
-
-		// interpolate xyST
-		double[] xArcTime = new double[nArcTime];
-		double[] yArcTime = new double[nArcTime];
-
-		interpolateArcTimePoints(xArcTime, yArcTime);
-
-		// merge
-		int nMax = nSpatial + nArcTime - 2; // maximum number of vertices
-		double[] x = new double[nMax];
-		double[] y = new double[nMax];
-		double[] t = new double[nMax];
-
-		// n = actual number of vertices
-		int n = mergePaths(tSpatial, xArcTime, yArcTime, x, y, t);
-
-		// build trajectory
-
-		// build path
-		ImmutableList.Builder<ImmutablePoint> builder = ImmutableList.builder();
-		for (int i = 0; i < n; ++i)
-			builder.add(immutablePoint(x[i], y[i]));
-		SpatialPath path = new SpatialPath(builder.build());
+		// seeks arcs
+		this.xySeeker = new AffineLinearSeeker<>(
+			xyComponent::getVertex,
+			SpatialPath.Vertex::getArc,
+			xyComponent.size());
+		this.xyInterpolator =
+			new PointPathInterpolator<SpatialPath.Vertex>(xySeeker);
 		
-		Duration minDuration = Duration.between(baseTime, LocalDateTime.MIN);
-		Duration maxDuration = Duration.between(baseTime, LocalDateTime.MAX);
-		
-		// build times
-		ImmutableList<LocalDateTime> times = Arrays.stream(t, 0, n)
-			.mapToObj(DurationConv::ofSeconds)
-			.map(d -> {
-				// double inaccuracy might lead to overflow
-				if (d.compareTo(minDuration) < 0)
-					return LocalDateTime.MIN;
-				if (d.compareTo(maxDuration) > 0)
-					return LocalDateTime.MAX;
-				
-				return baseTime.plus(d);
-			})
-			.collect(toImmutableList());
-		
-		setResultTrajectory(new SimpleTrajectory(path, times));
+		// seeks sub-index
+		this.stSeeker = new IndexSeeker<>(
+			stComponent::getVertex,
+			stComponent.size());
+		this.stInterpolator =
+			new PointPathInterpolator<ArcTimePath.Vertex>(stSeeker);
 	}
 
-	/**
-	 * Interpolates the time values of the spatial path vertices. The result is
-	 * stored in the provided array.
-	 * 
-	 * @param tSpatial
-	 *            the interpolated time values.
-	 */
-	private void interpolateSpatialTime(double[] tSpatial) {
-		int nSpatial = getSpatialPathSize();
-		int nArcTime = getArcTimePathSize();
+	private void checkParameter() {
+		if (trajectory == null)
+			throw new IllegalStateException("trajectory has not been set");
+	}
+	
+	public SimpleTrajectory compose() {
+		checkParameter();
+		
+		if (trajectory.isEmpty())
+			return SimpleTrajectory.empty();
+		
+		// preparations
+		
+		locationsBuilder = ImmutableList.builder();
+		timesBuilder     = ImmutableList.builder();
+		
+		Iterable<ArcTimePath.Vertex> stVertices =
+			() -> stComponent.vertexIterator();
+		
+		InterpolationResult<ImmutablePoint> lastXyRes = null;
+		double lastArc = Double.NaN;
+		
+		// computes all vertices from spatial and arc-time components
+		for (ArcTimePath.Vertex stVertex : stVertices) {
+			int stIndex = stVertex.getIndex();
+			double arc = stVertex.getX();
+			double t = stVertex.getY();
+			LocalDateTime time = makeTime(t);
+			
+			// interpolate location of current arc
+			InterpolationResult<ImmutablePoint> xyRes = xyInterpolator.interpolate(arc);
 
-		for (int i = 0, j = 0; i < nSpatial; ++i) {
-			while (j < nArcTime - 1 && sSpatial[i] > sArcTime[j])
-				++j;
-
-			if (sSpatial[i] == sArcTime[j]) {
-				tSpatial[i] = tArcTime[j];
-			} else { // sArcTime[j-1] < sSpatial[i] < sArcTime[j]
-				// linear interpolation of time
-
-				double s = sSpatial[i];
-				double s1 = sArcTime[j - 1];
-				double s2 = sArcTime[j];
-				double t1 = tArcTime[j - 1];
-				double t2 = tArcTime[j];
-
-				double alpha = (s - s1) / (s2 - s1);
-				tSpatial[i] = t1 + alpha * (t2 - t1);
+			// collect all spatial vertices between the last and current arc
+			if (stIndex > 0) {
+				if (arc >= lastArc) {
+					// go forward
+					int start  = lastXyRes.getStartIndex()  + 1;
+					int finish = xyRes    .getFinishIndex() - 1;
+					for (int i = start; i <= finish; ++i)
+						addSpatialVertices(i, stIndex-1, lastArc, arc);
+				} else { // arc < lastArc
+					// go backward
+					int start  = lastXyRes.getFinishIndex() - 1;
+					int finish = xyRes    .getStartIndex()  + 1;
+					for (int i = start; i >= finish; --i)
+						addSpatialVertices(i, stIndex-1, arc, lastArc);
+				}
 			}
+			
+			// add vertex of the current arc
+			locationsBuilder.add(xyRes.getInterpolation());
+			timesBuilder.add(time);
+			
+			lastArc = arc;
+			lastXyRes = xyRes;
 		}
+		
+		ImmutableList<ImmutablePoint> locations = locationsBuilder.build();
+		ImmutableList<LocalDateTime> times = timesBuilder.build();
+		
+		return new SimpleTrajectory(new SpatialPath(locations), times);
 	}
-
-	/**
-	 * Interpolates the spatial values of the arc-time vertices. The result is
-	 * stored in the provided arrays.
-	 * 
-	 * @param xArcTime
-	 *            the interpolated x-values.
-	 * @param yArcTime
-	 *            the interpolated y-values.
-	 */
-	private void interpolateArcTimePoints(double[] xArcTime, double[] yArcTime) {
-		int nSpatial = getSpatialPathSize();
-		int nArcTime = getArcTimePathSize();
-
-		for (int i = 0, j = 0; i < nArcTime; ++i) {
-			while (j < nSpatial - 1 && sArcTime[i] > sSpatial[j])
-				++j;
-
-			if (sArcTime[i] == sSpatial[j]) {
-				xArcTime[i] = xSpatial[j];
-				yArcTime[i] = ySpatial[j];
-			} else { // sSpatial[j-1] < sArcTime[i] < sSpatial[j]
-				// linear interpolation of spatial coordinates
-
-				double s = sArcTime[i];
-				double s1 = sSpatial[j - 1];
-				double s2 = sSpatial[j];
-				double x1 = xSpatial[j - 1];
-				double x2 = xSpatial[j];
-				double y1 = ySpatial[j - 1];
-				double y2 = ySpatial[j];
-
-				double alpha = (s - s1) / (s2 - s1);
-				xArcTime[i] = x1 + alpha * (x2 - x1);
-				yArcTime[i] = y1 + alpha * (y2 - y1);
-			}
-		}
+	
+	private LocalDateTime makeTime(double t) {
+		return trajectory.getBaseTime().plus(ofSeconds(t));
 	}
-
-	/**
-	 * Merges the spatial and arc-time path components to a 3-dimensional vertex
-	 * vector.
-	 * 
-	 * @param tSpatial
-	 *            spatial time-values.
-	 * @param xArcTime
-	 *            arc-time x-values.
-	 * @param yArcTime
-	 *            arc-time y-values.
-	 * @param x
-	 *            the merged x-values.
-	 * @param y
-	 *            the merged y-values.
-	 * @param t
-	 *            the merged t-values.
-	 * @return number of 3-dimensional vertices.
-	 */
-	private int mergePaths(
-		double[] tSpatial,
-		double[] xArcTime,
-		double[] yArcTime,
-		double[] x,
-		double[] y,
-		double[] t)
-	{
-		int nSpatial = getSpatialPathSize();
-		int nArcTime = getArcTimePathSize();
-
-		int k = 0;
-
-		// merge and sort by arc
-		for (int i = 0, j = 0; i < nSpatial && j < nArcTime;) {
-			if (sSpatial[i] == sArcTime[j]) {
-				x[k] = xSpatial[i];
-				y[k] = ySpatial[i];
-				t[k] = tArcTime[j];
-
-				++i;
-				++j;
-			} else if (sSpatial[i] < sArcTime[j]) {
-				x[k] = xSpatial[i];
-				y[k] = ySpatial[i];
-				t[k] = tSpatial[i];
-
-				++i;
-			} else { // sSpatial[i] > sArcTime[j]
-				x[k] = xArcTime[j];
-				y[k] = yArcTime[j];
-				t[k] = tArcTime[j];
-
-				++j;
-			}
-
-			++k;
-		}
-
-		return k;
+	
+	private void addSpatialVertices(int xyIndex, int stIndex, double lowArc, double highArc) {
+		SpatialPath.Vertex xyVertex = xyComponent.getVertex(xyIndex);
+		double xyArc = xyVertex.getArc();
+		double stSubIndex = stIndex + (xyArc - lowArc) / (highArc - lowArc);
+		
+		InterpolationResult<ImmutablePoint> stRes = stInterpolator.interpolate(stSubIndex);
+		ImmutablePoint stPoint = stRes.getInterpolation();
+		
+		ImmutablePoint location = xyVertex.getPoint();
+		double t = stPoint.getY();
+		
+		// TODO remove
+		assert stPoint.getX() == xyArc;
+		
+		locationsBuilder.add(location);
+		timesBuilder.add(makeTime(t));
 	}
-
+	
 }

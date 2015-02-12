@@ -1,5 +1,6 @@
 package world;
 
+import static util.TimeFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -7,7 +8,6 @@ import static world.factories.TrajectoryFactory.*;
 
 import org.junit.Test;
 
-import util.TimeFactory;
 import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
@@ -32,15 +32,10 @@ public class TrajectoryComposerTest {
 			immutablePoint(8., 10.),
 			immutablePoint(11., 13.)));
 		
-		TrajectoryComposer composer = new TrajectoryComposer();
+		DecomposedTrajectory decomposed =
+			new DecomposedTrajectory(atSecond(0), spatialPath, arcTimePath);
 		
-		composer.setBaseTime(TimeFactory.BASE_TIME);
-		composer.setSpatialPathComponent(spatialPath);
-		composer.setArcTimePathComponent(arcTimePath);
-		
-		composer.compose();
-		
-		SimpleTrajectory trajectory = composer.getResultTrajectory();
+		SimpleTrajectory trajectory = TrajectoryComposer.compose(decomposed);
 		
 		SimpleTrajectory expected = trajectory(
 			0, 1, 2, 2, 2  , 3, 4, 5,  5,  5,

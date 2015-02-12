@@ -175,7 +175,7 @@ public class DecomposedTrajectoryTest {
 		DecomposedTrajectory sub = t.subPath(atSecond(5), atSecond(10));
 		
 		Trajectory expected = new SimpleTrajectory(
-			spatialPath(4, -3, 0, 0),
+			spatialPath(0, 0, 4, -3),
 			ImmutableList.of(atSecond(5), atSecond(10)));
 
 		assertThat("sub-trajectory not as expected",
@@ -192,7 +192,7 @@ public class DecomposedTrajectoryTest {
 		DecomposedTrajectory sub = t.subPath(atSecond(2.5), atSecond(7.5));
 		
 		Trajectory expected = new SimpleTrajectory(
-			spatialPath(2, -1.5, 2, -1.5),
+			spatialPath(-2, 1.5, 2, -1.5),
 			ImmutableList.of(atSecond(2.5), atSecond(7.5)));
 
 		assertThat("sub-trajectory not as expected",

@@ -157,7 +157,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * @param finishSubIndex
 	 * @return the sub path.
 	 */
-	public Path<V, S> subPath(double startSubIndex, double finishSubIndex);
+	public abstract Path<V, S> subPath(double startSubIndex, double finishSubIndex);
 
 	/**
 	 * @return a {@code VertexIterator}
