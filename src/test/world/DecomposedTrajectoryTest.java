@@ -22,7 +22,7 @@ public class DecomposedTrajectoryTest {
 		DecomposedTrajectory t = DecomposedTrajectory.empty();
 		
 		assertThat("composition did not produce empty trajectory",
-			t.getComposedTrajectory(), equalTo(SimpleTrajectory.empty()));
+			t.composed(), equalTo(SimpleTrajectory.empty()));
 	}
 	
 	@Test
@@ -36,7 +36,7 @@ public class DecomposedTrajectoryTest {
 			ImmutableList.of(atSecond(0), atSecond(10)));
 		
 		assertThat("composition did not produce empty trajectory",
-			t.getComposedTrajectory(), equalTo(expected));
+			t.composed(), equalTo(expected));
 	}
 	
 	@Test
@@ -57,7 +57,7 @@ public class DecomposedTrajectoryTest {
 				atSecond(15)));
 		
 		assertThat("composition did not produce empty trajectory",
-			t.getComposedTrajectory(), equalTo(expected));
+			t.composed(), equalTo(expected));
 	}
 	
 	@Test
@@ -71,7 +71,7 @@ public class DecomposedTrajectoryTest {
 			ImmutableList.of(atSecond(0), atSecond(5)));
 		
 		assertThat("composition did not produce empty trajectory",
-			t.getComposedTrajectory(), equalTo(expected));
+			t.composed(), equalTo(expected));
 	}
 	
 	@Test(expected = NoSuchElementException.class)
@@ -145,7 +145,7 @@ public class DecomposedTrajectoryTest {
 		DecomposedTrajectory sub = t.subPath(atSecond(0), atSecond(10));
 		
 		assertThat("sub-trajectory is not identical",
-			sub.getComposedTrajectory(), equalTo(t.getComposedTrajectory()));
+			sub.composed(), equalTo(t.composed()));
 	}
 	
 	@Test
@@ -162,7 +162,7 @@ public class DecomposedTrajectoryTest {
 			ImmutableList.of(atSecond(0), atSecond(5)));
 
 		assertThat("sub-trajectory not as expected",
-			sub.getComposedTrajectory(), equalTo(expected));
+			sub.composed(), equalTo(expected));
 	}
 	
 	@Test
@@ -179,7 +179,7 @@ public class DecomposedTrajectoryTest {
 			ImmutableList.of(atSecond(5), atSecond(10)));
 
 		assertThat("sub-trajectory not as expected",
-			sub.getComposedTrajectory(), equalTo(expected));
+			sub.composed(), equalTo(expected));
 	}
 	
 	@Test
@@ -196,7 +196,7 @@ public class DecomposedTrajectoryTest {
 			ImmutableList.of(atSecond(2.5), atSecond(7.5)));
 
 		assertThat("sub-trajectory not as expected",
-			sub.getComposedTrajectory(), equalTo(expected));
+			sub.composed(), equalTo(expected));
 	}
 
 }

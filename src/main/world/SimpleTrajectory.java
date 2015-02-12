@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import jts.geom.immutable.ImmutablePoint;
+import util.SmartArrayCache;
 import world.util.BinarySearchSeeker;
 import world.util.DoubleSubTrajectoryOperation;
 import world.util.IndexSeeker;
@@ -67,11 +68,6 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	private final ImmutableList<LocalDateTime> times;
 
 	/**
-	 * Caches the duration of this trajectory.
-	 */
-	private transient Duration duration = null;
-
-	/**
 	 * Constructs a new SimpleTrajectory using the provided ordinates.
 	 *
 	 * @param spatialPath
@@ -125,47 +121,37 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		return new Trajectory.Segment(start, finish, spatialSegment);
 	}
+	
+	/**
+	 * Caches the trajectory's vertices.
+	 */
+	private transient SmartArrayCache<Trajectory.Vertex> verticesCache = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
+	/* (non-Javadoc)
+	 * @see world.AbstractPath#getVertex(int)
 	 */
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-			+ ((spatialPath == null) ? 0 : spatialPath.hashCode());
-		result = prime * result + ((times == null) ? 0 : times.hashCode());
-		return result;
+	public Trajectory.Vertex getVertex(int index) {
+		if (verticesCache == null)
+			verticesCache = new SmartArrayCache<>(super::getVertex, size());
+		
+		return verticesCache.get(index);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Caches the trajectory's segments.
+	 */
+	private transient SmartArrayCache<Trajectory.Segment> segmentsCache = null;
+
+	/* (non-Javadoc)
+	 * @see world.AbstractPath#getSegment(int)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SimpleTrajectory other = (SimpleTrajectory) obj;
-		if (spatialPath == null) {
-			if (other.spatialPath != null)
-				return false;
-		} else if (!spatialPath.equals(other.spatialPath))
-			return false;
-		if (times == null) {
-			if (other.times != null)
-				return false;
-		} else if (!times.equals(other.times))
-			return false;
-		return true;
+	public Trajectory.Segment getSegment(int index) {
+		if (segmentsCache == null)
+			segmentsCache = new SmartArrayCache<>(super::getSegment, size());
+		
+		return segmentsCache.get(index);
 	}
 
 	/*
@@ -243,6 +229,11 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		return times.get(n - 1);
 	};
 
+	/**
+	 * Caches the duration of this trajectory.
+	 */
+	private transient Duration duration = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -257,6 +248,48 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		}
 
 		return duration;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+			+ ((spatialPath == null) ? 0 : spatialPath.hashCode());
+		result = prime * result + ((times == null) ? 0 : times.hashCode());
+		return result;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SimpleTrajectory other = (SimpleTrajectory) obj;
+		if (spatialPath == null) {
+			if (other.spatialPath != null)
+				return false;
+		} else if (!spatialPath.equals(other.spatialPath))
+			return false;
+		if (times == null) {
+			if (other.times != null)
+				return false;
+		} else if (!times.equals(other.times))
+			return false;
+		return true;
 	}
 
 	/**

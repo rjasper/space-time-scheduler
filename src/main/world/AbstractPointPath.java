@@ -3,18 +3,20 @@ package world;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static jts.geom.util.GeometrySequencer.*;
 
+import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
+import util.SmartArrayCache;
 import world.util.DoubleSubPointPathOperation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -35,11 +37,6 @@ implements PointPath<V, S>
 	 * The points of the path.
 	 */
 	private final ImmutableList<ImmutablePoint> points;
-	
-	/**
-	 * Caches the trace of the path.
-	 */
-	private transient ImmutableLineString trace = null;
 	
 	/**
 	 * Constructs a path of the given points.
@@ -126,6 +123,47 @@ implements PointPath<V, S>
 	}
 
 	/* (non-Javadoc)
+	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
+	 */
+	@Override
+	protected S makeSegment(V start, V finish) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/**
+	 * Caches the point path's vertices.
+	 */
+	private transient SmartArrayCache<V> verticesCache = null;
+
+	/* (non-Javadoc)
+	 * @see world.AbstractPath#getVertex(int)
+	 */
+	@Override
+	public V getVertex(int index) {
+		if (verticesCache == null)
+			verticesCache = new SmartArrayCache<>(super::getVertex, size());
+		
+		return verticesCache.get(index);
+	}
+
+	/**
+	 * Caches the point path's segments.
+	 */
+	private transient SmartArrayCache<S> segmentsCache = null;
+
+	/* (non-Javadoc)
+	 * @see world.AbstractPath#getSegment(int)
+	 */
+	@Override
+	public S getSegment(int index) {
+		if (segmentsCache == null)
+			segmentsCache = new SmartArrayCache<>(super::getSegment, size());
+		
+		return segmentsCache.get(index);
+	}
+
+	/* (non-Javadoc)
 	 * @see world.Path#get(int)
 	 */
 	@Override
@@ -162,11 +200,24 @@ implements PointPath<V, S>
 		return true;
 	}
 	
+	/**
+	 * Caches the trace of the path.
+	 */
+	private transient SoftReference<Geometry> traceCache = null;
+
 	/* (non-Javadoc)
 	 * @see world.Path#trace()
 	 */
 	@Override
-	public ImmutableLineString trace() {
+	public Geometry trace() {
+		if (isEmpty())
+			return immutableLineString();
+		
+		Geometry trace = null;
+		
+		if (traceCache != null)
+			trace = traceCache.get();
+		
 		if (trace == null) {
 			List<ImmutablePoint> points = new LinkedList<>(getPoints());
 			Iterator<ImmutablePoint> it = points.iterator();
@@ -184,14 +235,12 @@ implements PointPath<V, S>
 	
 			// construct LineString
 			
-			if (points.size() == 1) {
-				ImmutablePoint point = points.get(0);
-				
-				trace = immutableLineString(sequence(point, point));
-			} else {
+			if (points.size() == 1)
+				trace = points.get(0);
+			else
 				trace = immutableLineString(sequence(points));
-			}
 	
+			traceCache = new SoftReference<>(trace);
 		}
 		
 		return trace;

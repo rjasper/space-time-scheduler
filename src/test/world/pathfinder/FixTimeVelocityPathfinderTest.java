@@ -74,7 +74,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		
 		assertTrue(validPath);
 		
-		SimpleTrajectory trajectory = pf.getResultTrajectory().getComposedTrajectory();
+		SimpleTrajectory trajectory = pf.getResultTrajectory().composed();
 		
 		SimpleTrajectory expected = trajectory(
 			1, 2,      4,      4, 3,  1,

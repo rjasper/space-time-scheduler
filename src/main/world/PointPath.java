@@ -4,6 +4,7 @@ import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.Geometry;
 
 public interface PointPath<
 	V extends PointPath.Vertex,
@@ -217,11 +218,12 @@ extends Path<V, S>
 	public abstract PointPath<V, S> subPath(double startSubIndex, double finishSubIndex);
 
 	/**
-	 * Calculates the trace of this path. The trace is a {@code LineString}
-	 * containing all points visited by the path.
+	 * Calculates the trace of this path. The trace is either an
+	 * {@link ImmutablePoint} or an {@link ImmutableLineString}. containing all
+	 * points visited by the path.
 	 * 
-	 * @return the line string.
+	 * @return the trace.
 	 */
-	public abstract ImmutableLineString trace();
+	public abstract Geometry trace();
 
 }

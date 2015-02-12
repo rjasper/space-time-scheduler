@@ -4,6 +4,7 @@ import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static util.DurationConv.*;
 
+import java.lang.ref.SoftReference;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -115,24 +116,6 @@ public class DecomposedTrajectory implements Trajectory {
 		this.spatialPathComponent = spatialPathComponent;
 		this.arcTimePathComponent = arcTimePathComponent;
 	}
-	
-//	public static void checkComponents(
-//		SpatialPath spatialPathComponent,
-//		ArcTimePath arcTimePathComponent)
-//	{
-//		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
-//		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
-//		
-//		// both components must either be empty or non-empty
-//		if (spatialPathComponent.isEmpty() != arcTimePathComponent.isEmpty())
-//			throw new IllegalArgumentException("incompatible path components sizes");
-//		
-//		if (!arcTimePathComponent.isEmpty()) {
-//			// TODO no tolerance might be too strict
-//			if (spatialPathComponent.length() < arcTimePathComponent.maxArc())
-//				throw new IllegalArgumentException("arcTimePath includes arcs larger than spatialPath");
-//		}
-//	}
 
 	@Override
 	public boolean isEmpty() {
@@ -143,35 +126,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 * @return {@code true} iff a composed trajectory is cached.
 	 */
 	public boolean isComposed() {
-		return composedTrajectory != null;
-	}
-
-	/**
-	 * The cached composed trajectory.
-	 */
-	private transient SimpleTrajectory composedTrajectory = null;
-
-	/**
-	 * Calculates the composed trajectory.
-	 *
-	 * @return the composed trajectory.
-	 */
-	private SimpleTrajectory compose() {
-//		SpatialPath spatialPath = getSpatialPathComponent();
-//		ArcTimePath arcTimePath = getArcTimePathComponent();
-//		LocalDateTime baseTime = getBaseTime();
-//	
-//		TrajectoryComposer builder = new TrajectoryComposer();
-//	
-//		builder.setSpatialPathComponent(spatialPath);
-//		builder.setArcTimePathComponent(arcTimePath);
-//		builder.setBaseTime(baseTime);
-//	
-//		builder.compose();
-//	
-//		return builder.getResultTrajectory();
-		
-		return TrajectoryComposer.compose(this);
+		return composedTrajectoryCache != null;
 	}
 
 	/*
@@ -180,7 +135,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Vertex getVertex(int index) {
-		return getComposedTrajectory().getVertex(index);
+		return composed().getVertex(index);
 	}
 
 	/*
@@ -189,17 +144,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Segment getSegment(int index) {
-		return getComposedTrajectory().getSegment(index);
-	}
-
-	/**
-	 * @return the composed trajectory.
-	 */
-	public SimpleTrajectory getComposedTrajectory() {
-		if (composedTrajectory == null)
-			composedTrajectory = compose();
-	
-		return composedTrajectory;
+		return composed().getSegment(index);
 	}
 
 	/**
@@ -229,7 +174,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public SpatialPath getSpatialPath() {
-		return getComposedTrajectory().getSpatialPath();
+		return composed().getSpatialPath();
 	}
 
 	/*
@@ -238,7 +183,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public ImmutableList<LocalDateTime> getTimes() {
-		return getComposedTrajectory().getTimes();
+		return composed().getTimes();
 	}
 	
 	/**
@@ -307,7 +252,7 @@ public class DecomposedTrajectory implements Trajectory {
 		if (isEmpty())
 			return null;
 		if (isComposed())
-			return getComposedTrajectory().getStartTime();
+			return composed().getStartTime();
 
 		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
@@ -327,7 +272,7 @@ public class DecomposedTrajectory implements Trajectory {
 		if (isEmpty())
 			return null;
 		if (isComposed())
-			return getComposedTrajectory().getFinishTime();
+			return composed().getFinishTime();
 
 		ArcTimePath arcTimePath = getArcTimePathComponent();
 		LocalDateTime baseTime = getBaseTime();
@@ -354,7 +299,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Iterator<Vertex> vertexIterator() {
-		return getComposedTrajectory().vertexIterator();
+		return composed().vertexIterator();
 	}
 
 	/*
@@ -363,7 +308,29 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Iterator<Segment> segmentIterator() {
-		return getComposedTrajectory().segmentIterator();
+		return composed().segmentIterator();
+	}
+
+	/**
+	 * The cached composed trajectory.
+	 */
+	private transient SoftReference<SimpleTrajectory> composedTrajectoryCache = null;
+
+	/**
+	 * @return the composed trajectory.
+	 */
+	public SimpleTrajectory composed() {
+		SimpleTrajectory composed = null;
+		
+		if (composedTrajectoryCache != null)
+			composed = composedTrajectoryCache.get();
+		
+		if (composed == null) {
+			composed = TrajectoryComposer.compose(this);
+			composedTrajectoryCache = new SoftReference<SimpleTrajectory>(composed);
+		}
+	
+		return composed;
 	}
 
 	/**
@@ -372,7 +339,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public int size() {
-		return getComposedTrajectory().size();
+		return composed().size();
 	}
 
 	/*
@@ -384,7 +351,10 @@ public class DecomposedTrajectory implements Trajectory {
 		return getArcTimePathComponent().length();
 	}
 	
-	private transient Geometry trace = null;
+	/**
+	 * Caches the trace.
+	 */
+	private transient SoftReference<Geometry> traceCache = null;
 
 	/*
 	 * (non-Javadoc)
@@ -395,23 +365,34 @@ public class DecomposedTrajectory implements Trajectory {
 		if (isEmpty())
 			return immutableLineString();
 		
+		Geometry trace = null;
+		
+		if (traceCache != null)
+			trace = traceCache.get();
+		
 		if (trace == null) {
-			ArcTimePath stComponent = getArcTimePathComponent();
-			SpatialPath xyComponent = getSpatialPathComponent();
-			
-			if (stComponent.minArc() == 0.0 &&
-				stComponent.maxArc() == xyComponent.length())
-			{
-				trace = xyComponent.trace();
+			if (isComposed()) {
+				trace = composed().trace();
 			} else {
-				SpatialPath subXyComponent = DoubleSubPointPathOperation.subPath(
-					xyComponent,
-					SpatialPath.Vertex::getArc,
-					SpatialPath::new,
-					stComponent.minArc(), stComponent.maxArc());
+				ArcTimePath stComponent = getArcTimePathComponent();
+				SpatialPath xyComponent = getSpatialPathComponent();
 				
-				trace = subXyComponent.trace();
+				if (stComponent.minArc() == 0.0 &&
+					stComponent.maxArc() == xyComponent.length())
+				{
+					trace = xyComponent.trace();
+				} else {
+					SpatialPath subXyComponent = DoubleSubPointPathOperation.subPath(
+						xyComponent,
+						SpatialPath.Vertex::getArc,
+						SpatialPath::new,
+						stComponent.minArc(), stComponent.maxArc());
+					
+					trace = subXyComponent.trace();
+				}
 			}
+			
+			traceCache = new SoftReference<>(trace);
 		}
 		
 		return trace;
@@ -433,7 +414,7 @@ public class DecomposedTrajectory implements Trajectory {
 		// TODO short cut if time is start or finish time
 		
 		if (isComposed()) {
-			return getComposedTrajectory().interpolateLocation(time);
+			return composed().interpolateLocation(time);
 		} else {
 			double t = inSeconds(Duration.between(getBaseTime(), time));
 			double s = getArcTimePathComponent().interpolateArc(t);
@@ -448,7 +429,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public Trajectory concat(Path<? extends Vertex, ? extends Segment> other) {
-		return getComposedTrajectory().concat(other);
+		return composed().concat(other);
 	}
 
 	/*
@@ -459,7 +440,7 @@ public class DecomposedTrajectory implements Trajectory {
 	public SimpleTrajectory subPath(double startPosition, double finishPosition) {
 		// TODO decompose trajectory
 		
-		return getComposedTrajectory().subPath(startPosition, finishPosition);
+		return composed().subPath(startPosition, finishPosition);
 	}
 
 	/*
@@ -524,7 +505,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 */
 	@Override
 	public String toString() {
-		return getComposedTrajectory().toString();
+		return composed().toString();
 	}
 
 }
