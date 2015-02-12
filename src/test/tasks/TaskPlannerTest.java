@@ -119,6 +119,8 @@ public class TaskPlannerTest {
 			w, not(workerCollidesWith(obstacle)));
 	}
 
+	// TODO also test the other way around where w2 changes its route
+	
 	@Test
 	public void testObsoleteEvasions() {
 		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
@@ -178,7 +180,7 @@ public class TaskPlannerTest {
 	}
 	
 	@Test
-	public void testTightTask1() {
+	public void testTightPlan1() {
 		WorkerUnit w = wFact.createWorkerUnit(
 			"w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 	

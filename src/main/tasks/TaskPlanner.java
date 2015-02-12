@@ -57,12 +57,12 @@ import com.vividsolutions.jts.geom.Point;
  * a velocity profile to evade dynamic obstacles. Since the old path which
  * the worker was previously planned to follow will be obsolete other workers
  * might be affected. Workers which were previously evading the now obsolete
- * path segment should update their affected path segments with a new
+ * path section should update their affected path sections with a new
  * velocity profile.</p>
  *
  * <p>The TaskPlanner creates a job queue to calculate the new velocity profile
  * for the new spatial paths of the designated worker and all other affected
- * path segments of other workers. The jobs are sorted by the
+ * path sections of other workers. The jobs are sorted by the
  * {@link Job#laxity()} to give priority to workers in a hurry.</p>
  *
  * @author Rico Jasper
@@ -213,28 +213,28 @@ public class TaskPlanner {
 
 	/**
 	 * @return the worker obstacles currently of interest. This also includes
-	 *         already planned path segments of workers.
+	 *         already planned path sections of workers.
 	 */
 	private Collection<WorkerUnitObstacle> getWorkerObstacles() {
 		return workerObstacles;
 	}
 
 	/**
-	 * Adds a path segment of a worker to the worker obstacles of interests.
+	 * Adds a path section of a worker to the worker obstacles of interests.
 	 *
-	 * @param segment
+	 * @param section
 	 */
-	private void addWorkerUnitObstacle(WorkerUnitObstacle segment) {
-		workerObstacles.add(segment);
+	private void addWorkerUnitObstacle(WorkerUnitObstacle section) {
+		workerObstacles.add(section);
 	}
 
 	/**
 	 * Adds multiple worker obstacles to the ones of interest.
 	 *
-	 * @param segments
+	 * @param sections
 	 */
-	private void addAllWorkerObstacles(Collection<WorkerUnitObstacle> segments) {
-		workerObstacles.addAll(segments);
+	private void addAllWorkerObstacles(Collection<WorkerUnitObstacle> sections) {
+		workerObstacles.addAll(sections);
 	}
 
 	/**
@@ -452,13 +452,13 @@ public class TaskPlanner {
 	}
 	
 	/**
-	 * <p>Plans new path segments of the current worker to the new task and
-	 * the following one. The old segment is replaced by the new ones.</p>
+	 * <p>Plans new path sections of the current worker to the new task and
+	 * the following one. The old section is replaced by the new ones.</p>
 	 *
 	 * <p>Other workers might also be affected. If a worker was previously
-	 * evading the current worker while on a segment which now has been removed,
+	 * evading the current worker while on a section which now has been removed,
 	 * then the evading worker's velocity profile will be recalculated. Affected
-	 * workers might also trigger the recalculation of segments of other
+	 * workers might also trigger the recalculation of sections of other
 	 * workers recursively.</p>
 	 *
 	 * @return {@code true} if the task has been successfully planned.
@@ -488,32 +488,32 @@ public class TaskPlanner {
 	private boolean planImpl() {
 		WorkerUnit worker = getWorkerUnit();
 
-		// the segment to be replaced by two segment to and form the new task
-		WorkerUnitObstacle segment = worker.getObstacleSegment( getEarliestStartTime() );
+		// the section to be replaced by two section to and form the new task
+		WorkerUnitObstacle section = worker.getObstacleSection( getEarliestStartTime() );
 
 		Point taskLocation = getLocation();
-		Point segmentStartLocation = segment.getStartLocation();
-		Point segmentFinishLocation = segment instanceof IdlingWorkerUnitObstacle
+		Point sectionStartLocation = section.getStartLocation();
+		Point sectionFinishLocation = section instanceof IdlingWorkerUnitObstacle
 			? taskLocation
-			: segment.getFinishLocation();
+			: section.getFinishLocation();
 
 		// calculate the path to the new task
-		SpatialPath toTask = calculateSpatialPath(segmentStartLocation, taskLocation);
+		SpatialPath toTask = calculateSpatialPath(sectionStartLocation, taskLocation);
 		if (toTask == null)
 			return false;
 		// calculate the path from the new task
-		SpatialPath fromTask = calculateSpatialPath(taskLocation, segmentFinishLocation);
+		SpatialPath fromTask = calculateSpatialPath(taskLocation, sectionFinishLocation);
 		if (fromTask == null)
 			return false;
 
-		// determine the path segments to be recalculated
-		Collection<MovingWorkerUnitObstacle> evasions = buildEvasions(segment);
+		// determine the path sections to be recalculated
+		Collection<MovingWorkerUnitObstacle> evasions = buildEvasions(section);
 
 		// prepare worker obstacles
-		addAllWorkerObstacles( buildWorkerPoolSegments(evasions, segment) );
+		addAllWorkerObstacles( buildWorkerPoolSegments(evasions, section) );
 
 		// make jobs
-		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, segment));
+		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, section));
 		Stream<Job> updateJobs = evasions.stream().map(UpdateJob::new);
 
 		// sort jobs
@@ -559,7 +559,7 @@ public class TaskPlanner {
 
 	/**
 	 * A abstract Job to first calculate a velocity profile and then to apply
-	 * it existing path segment of workers. It also has the property to
+	 * it existing path section of workers. It also has the property to
 	 * calculate a laxity to order jobs by importance.
 	 */
 	private static abstract class Job implements Comparable<Job> {
@@ -613,16 +613,16 @@ public class TaskPlanner {
 		public abstract double calcLaxity();
 
 		/**
-		 * Calculates the new path segments but does not change any workers
+		 * Calculates the new path sections but does not change any workers
 		 * directly or indirectly. The calculation might be unsuccessful if
 		 * a worker is unable to reach its destination in time.
 		 *
-		 * @return {@code true} if valid path segments could be calculated.
+		 * @return {@code true} if valid path sections could be calculated.
 		 */
 		public abstract boolean calculate();
 
 		/**
-		 * Commits the calculated path segments and replaces the old ones. One
+		 * Commits the calculated path sections and replaces the old ones. One
 		 * can assume that calculate is always called before commit.
 		 */
 		public abstract void commit();
@@ -639,7 +639,7 @@ public class TaskPlanner {
 	 * A CreateJob calculates the velocity profile for the current worker
 	 * to the new task and to the following task. It calculates three entirely
 	 * new trajectories (toTask, atTask, fromTask) which will replace the
-	 * old segment of the current worker.
+	 * old section of the current worker.
 	 */
 	private class CreateJob extends Job {
 
@@ -662,9 +662,9 @@ public class TaskPlanner {
 		private final SpatialPath fromTask;
 
 		/**
-		 * The path segment to be replaced.
+		 * The path section to be replaced.
 		 */
-		private final WorkerUnitObstacle segment;
+		private final WorkerUnitObstacle section;
 
 		// dynamicObstacles is set in the very beginning of calculate
 		// and is used by calculateTrajectoryToTask and
@@ -679,7 +679,7 @@ public class TaskPlanner {
 		// result. trajToTask is needed to create the new task.
 
 		/**
-		 * The evaded path segments to the new task.
+		 * The evaded path sections to the new task.
 		 */
 		private Collection<WorkerUnitObstacle> evadedToTask;
 
@@ -700,7 +700,7 @@ public class TaskPlanner {
 		// called after the task is created.
 
 		/**
-		 * The evaded path segments from the new task to the next one.
+		 * The evaded path sections from the new task to the next one.
 		 */
 		private Collection<WorkerUnitObstacle> evadedFromTask;
 
@@ -709,41 +709,41 @@ public class TaskPlanner {
 		 */
 		private DecomposedTrajectory trajFromTask;
 
-		// After both trajectories are calculated, the three segments which
-		// will replace the old segment are created. They are needed by
+		// After both trajectories are calculated, the three sections which
+		// will replace the old section are created. They are needed by
 		// the commit operation which is called externally.
 
 		/**
-		 * The path segment to the new task.
+		 * The path section to the new task.
 		 */
-		private MovingWorkerUnitObstacle segmentToTask;
+		private MovingWorkerUnitObstacle sectionToTask;
 
 		/**
-		 * The path segment at the new task.
+		 * The path section at the new task.
 		 */
-		private OccupiedWorkerUnitObstacle segmentAtTask;
+		private OccupiedWorkerUnitObstacle sectionAtTask;
 
 		/**
-		 * The path segment form the new task to the next one.
+		 * The path section form the new task to the next one.
 		 */
-		private WorkerUnitObstacle segmentFromTask;
+		private WorkerUnitObstacle sectionFromTask;
 
 		/**
 		 * Constructs a CreateJob using the spatial path to the new task and to
-		 * the one after and the segment to be replaced.
+		 * the one after and the section to be replaced.
 		 *
 		 * @param toTask
 		 * @param fromTask
-		 * @param segment
+		 * @param section
 		 */
-		public CreateJob(SpatialPath toTask, SpatialPath fromTask, WorkerUnitObstacle segment) {
+		public CreateJob(SpatialPath toTask, SpatialPath fromTask, WorkerUnitObstacle section) {
 			// doesn't check inputs since class is private
 
-			super(segment.getDuration());
+			super(section.getDuration());
 
 			this.toTask = toTask;
 			this.fromTask = fromTask;
-			this.segment = segment;
+			this.section = section;
 		}
 
 		/*
@@ -797,33 +797,33 @@ public class TaskPlanner {
 			if (!status)
 				return false;
 
-			// create segments
+			// create sections
 
 			// don't introduce trajectories without duration
-			segmentToTask = trajToTask.getDuration().isZero() ?
+			sectionToTask = trajToTask.getDuration().isZero() ?
 				null : new MovingWorkerUnitObstacle(worker, trajToTask, task);
-			segmentAtTask = new OccupiedWorkerUnitObstacle(worker, task);
+			sectionAtTask = new OccupiedWorkerUnitObstacle(worker, task);
 
-			if (segment instanceof MovingWorkerUnitObstacle) {
-				Task nextTask = ((MovingWorkerUnitObstacle) segment).getGoal();
+			if (section instanceof MovingWorkerUnitObstacle) {
+				Task nextTask = ((MovingWorkerUnitObstacle) section).getGoal();
 				
 				// don't introduce trajectories without duration
-				segmentFromTask = trajFromTask.getDuration().isZero() ?
+				sectionFromTask = trajFromTask.getDuration().isZero() ?
 					null : new MovingWorkerUnitObstacle(worker, trajFromTask, nextTask);
-			} else if (segment instanceof IdlingWorkerUnitObstacle) {
+			} else if (section instanceof IdlingWorkerUnitObstacle) {
 				LocalDateTime taskFinishTime = task.getFinishTime();
-				segmentFromTask = new IdlingWorkerUnitObstacle(worker, taskLocation, taskFinishTime);
+				sectionFromTask = new IdlingWorkerUnitObstacle(worker, taskLocation, taskFinishTime);
 			} else {
 				throw new RuntimeException("unexpected WorkerUnitObstacle");
 			}
 
-			// add segments to current dynamic obstacles
+			// add sections to current dynamic obstacles
 
-			if (segmentToTask != null)
-				addWorkerUnitObstacle(segmentToTask);
-			addWorkerUnitObstacle(segmentAtTask);
-			if (segmentFromTask != null)
-				addWorkerUnitObstacle(segmentFromTask);
+			if (sectionToTask != null)
+				addWorkerUnitObstacle(sectionToTask);
+			addWorkerUnitObstacle(sectionAtTask);
+			if (sectionFromTask != null)
+				addWorkerUnitObstacle(sectionFromTask);
 
 			return true;
 		}
@@ -836,7 +836,7 @@ public class TaskPlanner {
 		 * the code more concise since this is only an inner helper class.</p>
 		 *
 		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
-		 * and {@link #segment} are already set. It sets {@link #evadedToTask}
+		 * and {@link #section} are already set. It sets {@link #evadedToTask}
 		 * and {@link #trajToTask} if the path calculation was successful.</p>
 		 *
 		 * @return {@code true} if a trajectory to the new task could be calculated.
@@ -851,7 +851,7 @@ public class TaskPlanner {
 			pf.setMinArc            ( 0.0                    );
 			pf.setMaxArc            ( toTask.length()        );
 			pf.setMaxSpeed          ( getWorkerUnit().getMaxSpeed() );
-			pf.setStartTime         ( segment.getStartTime() );
+			pf.setStartTime         ( section.getStartTime() );
 			pf.setEarliestFinishTime( getEarliestStartTime() );
 			pf.setLatestFinishTime  ( getLatestStartTime()   );
 			pf.setBufferDuration    ( getDuration()          );
@@ -875,7 +875,7 @@ public class TaskPlanner {
 		 * the code more concise since this is only an inner helper class.</p>
 		 *
 		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
-		 * {@link #task}, and {@link #segment} are already set. It sets
+		 * {@link #task}, and {@link #section} are already set. It sets
 		 * {@link #evadedFromTask} and {@link #trajFromTask} if the path
 		 * calculation was successful.</p>
 		 *
@@ -893,7 +893,7 @@ public class TaskPlanner {
 			pf.setMaxArc          ( fromTask.length()       );
 			pf.setMaxSpeed        ( getWorkerUnit().getMaxSpeed() );
 			pf.setStartTime       ( task.getFinishTime()    );
-			pf.setFinishTime      ( segment.getFinishTime() );
+			pf.setFinishTime      ( section.getFinishTime() );
 
 			boolean status = pf.calculate();
 
@@ -909,8 +909,8 @@ public class TaskPlanner {
 		/*
 		 * (non-Javadoc)
 		 *
-		 * commit needs segment, evadedToTask, evadedFromTask, segmentToTask,
-		 * segmentAtTask, segmentFromTask, and task to be set. It expects
+		 * commit needs section, evadedToTask, evadedFromTask, sectionToTask,
+		 * sectionAtTask, sectionFromTask, and task to be set. It expects
 		 * that calculate was called before.
 		 *
 		 * @see tasks.TaskPlanner.Job#commit()
@@ -918,29 +918,29 @@ public class TaskPlanner {
 		@Override
 		public void commit() {
 			// register evasions
-			if (segmentToTask != null) {
+			if (sectionToTask != null) {
 				for (WorkerUnitObstacle e : evadedToTask)
-					e.addEvasion(segmentToTask);
+					registerEvasion(sectionToTask, e);
 			}
 
-			if (segmentFromTask instanceof MovingWorkerUnitObstacle) {
+			if (sectionFromTask instanceof MovingWorkerUnitObstacle) {
 				for (WorkerUnitObstacle e : evadedFromTask)
-					e.addEvasion((MovingWorkerUnitObstacle) segmentFromTask);
+					registerEvasion((MovingWorkerUnitObstacle) sectionFromTask, e);
 			}
 
-			// add obstacle segments and task
+			// add obstacle sections and task
 			WorkerUnit worker = getWorkerUnit();
-			worker.removeObstacleSegment(segment);
-			if (segmentToTask != null) {
-				worker.addObstacleSegment(segmentToTask);
+			silenceSection(section);
+			if (sectionToTask != null) {
+				worker.addObstacleSection(sectionToTask);
 				addTrajectoryUpdate(trajToTask, worker);
 			}
 			
-			worker.addObstacleSegment(segmentAtTask);
-			addTrajectoryUpdate(segmentAtTask.getTrajectory(), worker);
+			worker.addObstacleSection(sectionAtTask);
+			addTrajectoryUpdate(sectionAtTask.getTrajectory(), worker);
 			
-			if (segmentFromTask != null) {
-				worker.addObstacleSegment(segmentFromTask);
+			if (sectionFromTask != null) {
+				worker.addObstacleSection(sectionFromTask);
 				addTrajectoryUpdate(trajFromTask, worker);
 			}
 			
@@ -952,47 +952,47 @@ public class TaskPlanner {
 
 	/**
 	 * An UpdateJob recalculates the existing velocity profile of a path
-	 * segment of a worker directly or indirectly affected by the new spatial
+	 * section of a worker directly or indirectly affected by the new spatial
 	 * path of the current worker.
 	 */
 	private class UpdateJob extends Job {
 
 		/**
-		 * The path segment to be updated.
+		 * The path section to be updated.
 		 */
-		private final MovingWorkerUnitObstacle segment;
+		private final MovingWorkerUnitObstacle section;
 
 		// The next two fields are set by calculate.
 
 		/**
-		 * The resulting updated path segment.
+		 * The resulting updated path section.
 		 */
 		private MovingWorkerUnitObstacle updatedSegment;
 
 		/**
-		 * Evaded obstacles by the updated path segment.
+		 * Evaded obstacles by the updated path section.
 		 */
 		private Collection<WorkerUnitObstacle> evaded;
 
 		/**
 		 * Constructs a UpdateJob which updates the velocity profile of the
-		 * given path segment.
+		 * given path section.
 		 *
-		 * @param segment
+		 * @param section
 		 */
-		public UpdateJob(MovingWorkerUnitObstacle segment) {
+		public UpdateJob(MovingWorkerUnitObstacle section) {
 			// doesn't check inputs since class is private
 
-			super(Duration.between(segment.getStartTime(), segment.getFinishTime()));
+			super(Duration.between(section.getStartTime(), section.getFinishTime()));
 
-			this.segment = segment;
+			this.section = section;
 		}
 
 		@Override
 		public double calcLaxity() {
-			WorkerUnit worker = segment.getWorkerUnit();
+			WorkerUnit worker = section.getWorkerUnit();
 			double maxSpeed = worker.getMaxSpeed();
-			double length = segment.getTrajectory().length();
+			double length = section.getTrajectory().length();
 			double maxDuration = inSeconds( getJobDuration() );
 
 			return maxDuration/length - 1./maxSpeed;
@@ -1007,20 +1007,20 @@ public class TaskPlanner {
 		 */
 		@Override
 		public boolean calculate() {
-			WorkerUnit worker = segment.getWorkerUnit();
+			WorkerUnit worker = section.getWorkerUnit();
 			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 			
-			ArcTimePath st = segment.getArcTimePathComponent();
+			ArcTimePath st = section.getArcTimePathComponent();
 
 			pf.setDynamicObstacles( buildDynamicObstaclesFor(worker)  );
-			pf.setSpatialPath     ( segment.getSpatialPathComponent() );
+			pf.setSpatialPath     ( section.getSpatialPathComponent() );
 			pf.setMinArc          ( st.minArc()                       );
 			pf.setMaxArc          ( st.maxArc()                       );
 			pf.setStartArc        ( st.getStartPoint().getX()              );
 			pf.setFinishArc       ( st.getFinishPoint().getX()               );
 			pf.setMaxSpeed        ( worker.getMaxSpeed()              );
-			pf.setStartTime       ( segment.getStartTime()            );
-			pf.setFinishTime      ( segment.getFinishTime()           );
+			pf.setStartTime       ( section.getStartTime()            );
+			pf.setFinishTime      ( section.getFinishTime()           );
 
 			boolean status = pf.calculate();
 
@@ -1029,7 +1029,7 @@ public class TaskPlanner {
 
 			evaded = onlyWorkerUnitObstacles( pf.getResultEvadedObstacles() );
 			updatedSegment = new MovingWorkerUnitObstacle(
-				worker, pf.getResultTrajectory(), segment.getGoal());
+				worker, pf.getResultTrajectory(), section.getGoal());
 
 			addWorkerUnitObstacle(updatedSegment);
 
@@ -1047,12 +1047,12 @@ public class TaskPlanner {
 		public void commit() {
 			// register evasions
 			for (WorkerUnitObstacle e : evaded)
-				e.addEvasion(updatedSegment);
+				registerEvasion(updatedSegment, e);
 
-			// update obstacle segment
-			WorkerUnit worker = segment.getWorkerUnit();
-			worker.removeObstacleSegment(segment);
-			worker.addObstacleSegment(updatedSegment);
+			// update obstacle section
+			WorkerUnit worker = section.getWorkerUnit();
+			silenceSection(section);
+			worker.addObstacleSection(updatedSegment);
 			addTrajectoryUpdate(updatedSegment.getTrajectory(), worker);
 		}
 
@@ -1073,21 +1073,21 @@ public class TaskPlanner {
 	}
 
 	/**
-	 * Builds a collection of all potentially affected path segments when
-	 * removing the original path segment of the current worker.
+	 * Builds a collection of all potentially affected path sections when
+	 * removing the original path section of the current worker.
 	 *
-	 * @param obstacleSegment the original path segment to be removed
-	 * @return the potentially affected path segments
+	 * @param obstacleSegment the original path section to be removed
+	 * @return the potentially affected path sections
 	 */
 	private static Collection<MovingWorkerUnitObstacle> buildEvasions(WorkerUnitObstacle obstacleSegment) {
-		return obstacleSegment.getEvasions().stream()
+		return obstacleSegment.getEvaders().stream()
 			.flatMap(TaskPlanner::buildEvasionsStream)
 			.collect(toList());
 	}
 
 	/**
 	 * Helps building a collection of affected evasions. Builds a stream
-	 * all ancestor evasions of the given segment and the segment itself.
+	 * all ancestor evasions of the given section and the section itself.
 	 *
 	 * @param obstacleSegment
 	 * @return
@@ -1095,7 +1095,7 @@ public class TaskPlanner {
 	 */
 	private static Stream<MovingWorkerUnitObstacle> buildEvasionsStream(MovingWorkerUnitObstacle obstacleSegment) {
 		Stream<MovingWorkerUnitObstacle> self = Stream.of(obstacleSegment);
-		Stream<MovingWorkerUnitObstacle> ancestors = obstacleSegment.getEvasions().stream()
+		Stream<MovingWorkerUnitObstacle> ancestors = obstacleSegment.getEvaders().stream()
 			.flatMap(TaskPlanner::buildEvasionsStream);
 
 		return Stream.concat(self, ancestors);
@@ -1103,7 +1103,7 @@ public class TaskPlanner {
 
 	/**
 	 * Builds a collection of worker obstacles using the {@link #workerPool}.
-	 * Exculdes all path segments given by exclusions and the obsolete segment
+	 * Exculdes all path sections given by exclusions and the obsolete section
 	 * to be removed.
 	 *
 	 * @param exclusions
@@ -1116,9 +1116,9 @@ public class TaskPlanner {
 	{
 		Collection<WorkerUnit> pool = getWorkerPool();
 
-		// TODO only use relevant segments
+		// TODO only use relevant sections
 		return pool.stream()
-			.flatMap(w -> w.getObstacleSegments().stream())
+			.flatMap(w -> w.getObstacleSections().stream())
 			.filter(o -> !exclusions.contains(o) && !o.equals(obsoleteSegment))
 			.collect(toList());
 	}
@@ -1126,7 +1126,7 @@ public class TaskPlanner {
 	/**
 	 * Builds the the given worker's perspective on the dynamic obstacles.
 	 * It buffers all {@link #workerObstacles obstacles of interests}
-	 * by the worker's radius and excludes the path segments of the worker
+	 * by the worker's radius and excludes the path sections of the worker
 	 * itself.
 	 *
 	 * @param worker to build the perspective for
@@ -1151,6 +1151,43 @@ public class TaskPlanner {
 
 		return Stream.concat(worldObstacles, workerObstacles)
 			.collect(toList());
+	}
+	
+	/**
+	 * Registers an evasion between the given sections.
+	 * 
+	 * @param evader
+	 * @param evadee
+	 */
+	private static void registerEvasion(MovingWorkerUnitObstacle evader, WorkerUnitObstacle evadee) {
+		// TODO kinda hacky
+		WorkerUnitObstacle actualEvadee = evadee.getWorkerUnit()
+			.getObstacleSection(evadee.getStartTime());
+		
+		evader.addEvadee(actualEvadee);
+		actualEvadee.addEvader(evader);
+	}
+	
+	/**
+	 * Silences the given section. The section will be removed from its worker
+	 * and will unregister any evasions which it is involved in.
+	 * 
+	 * @param section
+	 */
+	private static void silenceSection(WorkerUnitObstacle section) {
+		section.getWorkerUnit().removeObstacleSection(section);
+		
+		for (MovingWorkerUnitObstacle e : section.getEvaders())
+			e.removeEvadee(section);
+		
+		if (section instanceof MovingWorkerUnitObstacle) {
+			MovingWorkerUnitObstacle msection = (MovingWorkerUnitObstacle) section;
+			
+			for (WorkerUnitObstacle e : msection.getEvadees())
+				e.removeEvader(msection);
+		}
+		
+		section.clearEvasions();
 	}
 
 }

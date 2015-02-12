@@ -1,6 +1,10 @@
 package world;
 
+import static java.util.Collections.*;
+
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import tasks.Task;
 import tasks.WorkerUnit;
@@ -20,6 +24,16 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 * The destination of this path segment.
 	 */
 	private final Task goal;
+	
+	/**
+	 * Stores the path sections which were evaded by this one.
+	 */
+	private final Set<WorkerUnitObstacle> evadees = new HashSet<>();
+	
+	/**
+	 * Stores an unmodifiable view on {@link #evadees}.
+	 */
+	private final Set<WorkerUnitObstacle> unmodifiableEvadees = unmodifiableSet(evadees);
 	
 	/**
 	 * Constructs a new {@code MovingWorkerUnitObstacle} of a worker along a
@@ -90,6 +104,55 @@ public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
 	 */
 	public ArcTimePath getArcTimePathComponent() {
 		return getTrajectory().getArcTimePathComponent();
+	}
+
+	/**
+	 * @return other worker's path sections which were evaded by this obstacle.
+	 */
+	public Set<WorkerUnitObstacle> getEvadees() {
+		return unmodifiableEvadees;
+	}
+
+	/**
+	 * Registers a path section which were evaded by this one.
+	 *
+	 * @param evadee the section which were evaded.
+	 * @throws NullPointerException if the {@code evadee} is {@code null}.
+	 * @throws IllegalArgumentException if the {@code evadee} was already registered.
+	 */
+	public void addEvadee(WorkerUnitObstacle evadee) {
+		Objects.requireNonNull(evadee, "evadee");
+
+		boolean status = evadees.add(evadee);
+
+		if (!status)
+			throw new IllegalArgumentException("evadee already present");
+	}
+
+	/**
+	 * Removes a registered {@code evadee} which evaded by this one.
+	 *
+	 * @param evader to be unregistered
+	 * @throws NullPointerException if the {@code evadee} is {@code null}.
+	 * @throws IllegalArgumentException if the {@code evadee} was not registered.
+	 */
+	public void removeEvadee(WorkerUnitObstacle evadee) {
+		Objects.requireNonNull(evadee, "evadee");
+
+		boolean status = evadees.remove(evadee);
+
+		if (!status)
+			throw new IllegalArgumentException("unknown evadee");
+	}
+
+	/* (non-Javadoc)
+	 * @see world.WorkerUnitObstacle#silence()
+	 */
+	@Override
+	public void clearEvasions() {
+		super.clearEvasions();
+		
+		evadees.clear();
 	}
 
 }

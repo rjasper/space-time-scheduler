@@ -34,8 +34,8 @@ import com.vividsolutions.jts.geom.Polygon;
  *
  * <p>An object of this class is not meant to be used by any scheduler unrelated
  * class since it would expose critical methods, such as
- * {@link #addObstacleSegment(WorkerUnitObstacle)} or
- * {@link #removeObstacleSegment(WorkerUnitObstacle)} which don't check for
+ * {@link #addObstacleSection(WorkerUnitObstacle)} or
+ * {@link #removeObstacleSection(WorkerUnitObstacle)} which don't check for
  * overall consistency.</p>
  *
  * @author Rico Jasper
@@ -89,15 +89,15 @@ public class WorkerUnit {
 		= unmodifiableNavigableMap(tasks);
 
 	/**
-	 * All obstacle segments of this worker.
+	 * All obstacle sections of this worker.
 	 */
-	private NavigableMap<LocalDateTime, WorkerUnitObstacle> obstacleSegments = new TreeMap<>();
+	private NavigableMap<LocalDateTime, WorkerUnitObstacle> obstacleSections = new TreeMap<>();
 
 	/**
-	 * An unmodifiable view on {@link #obstacleSegments}.
+	 * An unmodifiable view on {@link #obstacleSections}.
 	 */
 	private NavigableMap<LocalDateTime, WorkerUnitObstacle> unmodifiableObstacleSegments =
-		unmodifiableNavigableMap(obstacleSegments);
+		unmodifiableNavigableMap(obstacleSections);
 
 	/**
 	 * Constructs a worker defining its shape, maximum velocity, initial
@@ -119,7 +119,7 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * Initializes the {@link #obstacleSegments} with an
+	 * Initializes the {@link #obstacleSections} with an
 	 * {@link IdlingWorkerUnitObstacle} at its initial location and initial
 	 * time.
 	 */
@@ -127,9 +127,9 @@ public class WorkerUnit {
 		ImmutablePoint initialLocation = getInitialLocation();
 		LocalDateTime initialTime = getInitialTime();
 
-		WorkerUnitObstacle segment = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);
+		WorkerUnitObstacle section = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);
 
-		putObstacleSegment(segment);
+		putObstacleSection(section);
 	}
 
 	/**
@@ -227,76 +227,76 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * @return the obstacle segments of this worker.
+	 * @return the obstacle sections of this worker.
 	 */
-	public Collection<WorkerUnitObstacle> getObstacleSegments() {
+	public Collection<WorkerUnitObstacle> getObstacleSections() {
 		return unmodifiableObstacleSegments.values();
 	}
 	
 	/**
-	 * @return an unmodifiable view on the time ordered map of obstacle segments.
+	 * @return an unmodifiable view on the time ordered map of obstacle sections.
 	 */
 	public NavigableMap<LocalDateTime, WorkerUnitObstacle> getNavigableObstacleSegments() {
 		return unmodifiableObstacleSegments;
 	}
 
 	/**
-	 * Returns the obstacle segment of the given time. The time interval of
-	 * returned segment will include the given time. If no such obstacle exists
+	 * Returns the obstacle section of the given time. The time interval of
+	 * returned section will include the given time. If no such obstacle exists
 	 * (e.g., before the worker was initialized) then {@code null} is returned.
 	 *
 	 * @param time
-	 * @return the obstacle segment or {@code null} if no such segment exists.
+	 * @return the obstacle section or {@code null} if no such section exists.
 	 */
-	public WorkerUnitObstacle getObstacleSegment(LocalDateTime time) {
+	public WorkerUnitObstacle getObstacleSection(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
 
-		Entry<LocalDateTime, WorkerUnitObstacle> entry = obstacleSegments.floorEntry(time);
+		Entry<LocalDateTime, WorkerUnitObstacle> entry = obstacleSections.floorEntry(time);
 
 		return entry == null ? null : entry.getValue();
 	}
 
 	/**
-	 * Adds an obstacle segment.
+	 * Adds an obstacle section.
 	 *
-	 * @param segment
-	 * @throws NullPointerException if segment is null
+	 * @param section
+	 * @throws NullPointerException if section is null
 	 */
-	public void addObstacleSegment(WorkerUnitObstacle segment) {
-		Objects.requireNonNull(segment, "segment");
+	public void addObstacleSection(WorkerUnitObstacle section) {
+		Objects.requireNonNull(section, "section");
 
-		putObstacleSegment(segment);
+		putObstacleSection(section);
 	}
 
 	/**
-	 * Puts an obstacle segment into the map of {@link #obstacleSegments}.
+	 * Puts an obstacle section into the map of {@link #obstacleSections}.
 	 *
-	 * @param segment
+	 * @param section
 	 */
-	private void putObstacleSegment(WorkerUnitObstacle segment) {
-		obstacleSegments.put(segment.getStartTime(), segment);
+	private void putObstacleSection(WorkerUnitObstacle section) {
+		obstacleSections.put(section.getStartTime(), section);
 	}
 
 	/**
-	 * Removes an obstacle segment.
+	 * Removes an obstacle section.
 	 *
-	 * @param segment
+	 * @param section
 	 * @throws NullPointerException
-	 *             if segment is null
+	 *             if section is null
 	 * @throws IllegalArgumentException
-	 *             if segment is unknown (e.g. not a segment of this worker)
+	 *             if section is unknown (e.g. not a section of this worker)
 	 */
-	public void removeObstacleSegment(WorkerUnitObstacle segment) {
-		Objects.requireNonNull(segment, "segment");
+	public void removeObstacleSection(WorkerUnitObstacle section) {
+		Objects.requireNonNull(section, "section");
 
-		boolean status = obstacleSegments.remove(segment.getStartTime(), segment);
+		boolean status = obstacleSections.remove(section.getStartTime(), section);
 
 		if (!status)
-			throw new IllegalArgumentException("unknown obstacle segment");
+			throw new IllegalArgumentException("unknown obstacle section");
 	}
 
 	/**
-	 * Creates a set of idle slots which represent segments of the worker
+	 * Creates a set of idle slots which represent sections of the worker
 	 * while idling during a given time period.
 	 *
 	 * @param from the beginning of the time period
@@ -312,17 +312,17 @@ public class WorkerUnit {
 		if (from.compareTo(to) > 0)
 			throw new IllegalArgumentException("from is after to");
 
-		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = obstacleSegments.lowerEntry(from);
-		Collection<WorkerUnitObstacle> segmentsSubSet =
-			obstacleSegments.subMap(from, true, to, true).values();
+		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = obstacleSections.lowerEntry(from);
+		Collection<WorkerUnitObstacle> sectionsSubSet =
+			obstacleSections.subMap(from, true, to, true).values();
 
-		// first segment might not exist
+		// first section might not exist
 		Stream<WorkerUnitObstacle> first =
 			firstEntry == null ? Stream.empty() : Stream.of(firstEntry.getValue());
-		Stream<WorkerUnitObstacle> tail = segmentsSubSet.stream();
+		Stream<WorkerUnitObstacle> tail = sectionsSubSet.stream();
 
 		return Stream.concat(first, tail)
-			// filter 'idle' (non-occupied) segments
+			// filter 'idle' (non-occupied) sections
 			.filter(s -> s instanceof MovingWorkerUnitObstacle
 				|| s instanceof IdlingWorkerUnitObstacle)
 			// filter non-zero
@@ -337,12 +337,12 @@ public class WorkerUnit {
 	}
 
 	/**
-	 * Calculates a trajectory from all obstacle segments concatenated together.
+	 * Calculates a trajectory from all obstacle sections concatenated together.
 	 *
 	 * @return the merged trajectory.
 	 */
 	public Trajectory calcTrajectory() {
-		return obstacleSegments.values().stream()
+		return obstacleSections.values().stream()
 			.map(DynamicObstacle::getTrajectory)
 			.reduce((u, v) -> u.concat(v))
 			.orElse(SimpleTrajectory.empty());

@@ -18,7 +18,7 @@ public class WorkerUnitCollidesWithWorkerUnit extends WorkerUnitCollidesWithDyna
 	private final WorkerUnit worker;
 	
 	public WorkerUnitCollidesWithWorkerUnit(WorkerUnit worker) {
-		super(worker.getObstacleSegments());
+		super(worker.getObstacleSections());
 		
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}

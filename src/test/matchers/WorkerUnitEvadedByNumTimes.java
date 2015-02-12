@@ -36,9 +36,9 @@ public class WorkerUnitEvadedByNumTimes extends TypeSafeDiagnosingMatcher<Iterab
 	@Override
 	protected boolean matchesSafely(Iterable<WorkerUnit> item, Description mismatchDescription) {
 		long actualTimes = StreamSupport.stream(item.spliterator(), false)
-			.map(WorkerUnit::getObstacleSegments)
+			.map(WorkerUnit::getObstacleSections)
 			.flatMap(Collection::stream)
-			.map(WorkerUnitObstacle::getEvasions)
+			.map(WorkerUnitObstacle::getEvaders)
 			.flatMap(Collection::stream)
 			.map(WorkerUnitObstacle::getWorkerUnit)
 			.filter(operand::equals)

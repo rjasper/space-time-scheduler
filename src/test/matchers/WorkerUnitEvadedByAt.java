@@ -30,7 +30,7 @@ public class WorkerUnitEvadedByAt extends TypeSafeDiagnosingMatcher<WorkerUnit> 
 
 	@Override
 	protected boolean matchesSafely(WorkerUnit item, Description mismatchDescription) {
-		WorkerUnitObstacle segment = item.getObstacleSegment(timeOfSegment);
+		WorkerUnitObstacle segment = item.getObstacleSection(timeOfSegment);
 		
 		mismatchDescription
 		.appendValue(item)
@@ -48,7 +48,7 @@ public class WorkerUnitEvadedByAt extends TypeSafeDiagnosingMatcher<WorkerUnit> 
 				.appendText(" moving along ")
 				.appendValue(segment);
 			
-			return segment.getEvasions().stream()
+			return segment.getEvaders().stream()
 				.map(WorkerUnitObstacle::getWorkerUnit)
 				.anyMatch(operand::equals);
 		}

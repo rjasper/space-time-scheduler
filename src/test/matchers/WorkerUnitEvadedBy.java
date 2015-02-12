@@ -24,8 +24,8 @@ public class WorkerUnitEvadedBy extends TypeSafeDiagnosingMatcher<WorkerUnit> {
 			.appendValue(operand);
 		
 		// true if item is evaded by the operand
-		return item.getObstacleSegments().stream()
-			.map(WorkerUnitObstacle::getEvasions)
+		return item.getObstacleSections().stream()
+			.map(WorkerUnitObstacle::getEvaders)
 			.flatMap(Collection::stream)
 			.map(WorkerUnitObstacle::getWorkerUnit)
 			.anyMatch(operand::equals);
