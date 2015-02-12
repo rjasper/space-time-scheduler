@@ -86,9 +86,6 @@ public class Scheduler {
 	 */
 	public Scheduler(World world) {
 		Objects.requireNonNull(world, "world");
-
-		// TODO check validity of world and workerPool
-		//      (e.g. no overlapping of obstacles)
 		
 		this.world = world;
 		// TODO use an envelope based cache
@@ -129,8 +126,12 @@ public class Scheduler {
 	 */
 	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
 		WorkerUnit worker = new WorkerUnit(spec);
+
+		// TODO check validity of worker placement
+		// don't overlap with static or dynamic obstacles or with other workers
+		// only allow after frozen horizon
 		
-		WorkerUnit previous = workerPool.putIfAbsent(worker.getId(), worker);
+		WorkerUnit previous = getWorkerPool().putIfAbsent(worker.getId(), worker);
 		
 		if (previous != null)
 			throw new IllegalArgumentException("worker id already assigned");
@@ -149,7 +150,7 @@ public class Scheduler {
 	 *             if worker ID is unassigned.
 	 */
 	public WorkerUnitReference getWorkerReference(String workerId) {
-		WorkerUnit worker = workerPool.get(
+		WorkerUnit worker = getWorkerPool().get(
 			Objects.requireNonNull(workerId, "workerId"));
 		
 		if (worker == null)
