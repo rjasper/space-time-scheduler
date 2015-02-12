@@ -28,9 +28,7 @@ public class TrajectoryComposer {
 	private SpatialPath xyComponent;
 	private ArcTimePath stComponent;
 	
-	private Seeker<Double, SpatialPath.Vertex> xySeeker;
 	private Interpolator<Double, ImmutablePoint> xyInterpolator;
-	private Seeker<Double, ArcTimePath.Vertex> stSeeker;
 	private Interpolator<Double, ImmutablePoint> stInterpolator;
 	
 	private ImmutableList.Builder<ImmutablePoint> locationsBuilder;
@@ -47,7 +45,7 @@ public class TrajectoryComposer {
 		stComponent = trajectory.getArcTimePathComponent();
 		
 		// seeks arcs
-		this.xySeeker = new AffineLinearSeeker<>(
+		Seeker<Double, SpatialPath.Vertex> xySeeker = new AffineLinearSeeker<>(
 			xyComponent::getVertex,
 			SpatialPath.Vertex::getArc,
 			xyComponent.size());
@@ -55,7 +53,7 @@ public class TrajectoryComposer {
 			new PointPathInterpolator<SpatialPath.Vertex>(xySeeker);
 		
 		// seeks sub-index
-		this.stSeeker = new IndexSeeker<>(
+		Seeker<Double, ArcTimePath.Vertex> stSeeker = new IndexSeeker<>(
 			stComponent::getVertex,
 			stComponent.size());
 		this.stInterpolator =
@@ -139,9 +137,6 @@ public class TrajectoryComposer {
 		
 		ImmutablePoint location = xyVertex.getPoint();
 		double t = stPoint.getY();
-		
-		// TODO remove
-		assert stPoint.getX() == xyArc;
 		
 		locationsBuilder.add(location);
 		timesBuilder.add(makeTime(t));
