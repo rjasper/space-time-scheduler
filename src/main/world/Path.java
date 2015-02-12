@@ -59,7 +59,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 		 * @return the finish vertex.
 		 */
 		public abstract V getFinishVertex();
-	
+
 	}
 
 	/**

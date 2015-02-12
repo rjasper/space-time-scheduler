@@ -135,6 +135,15 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 			return DurationConv.inSeconds(Duration.between(baseTime, time));
 		}
 		
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("<%.2f, %.2f, %s>", getX(), getY(), getTime());
+		}
+		
 	}
 
 	/**
@@ -301,6 +310,15 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 				seconds = DurationConv.inSeconds(duration());
 			
 			return seconds;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("(%s, %s)", getStartVertex(), getFinishVertex());
 		}
 		
 	}

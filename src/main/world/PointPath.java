@@ -102,6 +102,15 @@ extends Path<V, S>
 			return last;
 		}
 		
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("<%.2f, %.2f>", getX(), getY());
+		}
+		
 	}
 
 	/**
@@ -179,6 +188,15 @@ extends Path<V, S>
 		 */
 		public ImmutablePoint getFinishPoint() {
 			return finish.getPoint();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("(%s, %s)", getStartVertex(), getFinishVertex());
 		}
 		
 	}
