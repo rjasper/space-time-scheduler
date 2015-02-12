@@ -2,6 +2,7 @@ package world;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
@@ -317,23 +318,31 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	/**
 	 * @return the location of the first vertex. {@code null} if trajectory is
 	 *         empty.
+	 * @throws NoSuchElementException
+	 *             if the trajectory is empty.
 	 */
 	public abstract ImmutablePoint getStartLocation();
 
 	/**
 	 * @return the location of the last vertex. {@code null} if trajectory is
 	 *         empty.
+	 * @throws NoSuchElementException
+	 *             if the trajectory is empty.
 	 */
 	public abstract ImmutablePoint getFinishLocation();
 
 	/**
 	 * @return the time of the first vertex. {@code null} if trajectory is
 	 *         empty.
+	 * @throws NoSuchElementException
+	 *             if the trajectory is empty.
 	 */
 	public abstract LocalDateTime getStartTime();
 
 	/**
 	 * @return the time of the last vertex. {@code null} if trajectory is empty.
+	 * @throws NoSuchElementException
+	 *             if the trajectory is empty.
 	 */
 	public abstract LocalDateTime getFinishTime();
 
@@ -351,6 +360,8 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	 *             if {@code time} is {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code time} is not covered by the trajectory.
+	 * @throws NoSuchElementException
+	 *             if the trajectory is empty.
 	 */
 	public abstract ImmutablePoint interpolateLocation(LocalDateTime time);
 

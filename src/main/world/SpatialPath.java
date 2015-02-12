@@ -1,6 +1,7 @@
 package world;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 import world.util.BinarySearchSeeker;
@@ -191,8 +192,22 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * 
 	 * @param arc
 	 * @return the location.
+	 * @throws IllegalArgumentException
+	 *             if arc is not finite or not within the interval
+	 *             <i>[0.0,&nbsp;length()]</i>.
 	 */
 	public ImmutablePoint interpolateLocation(double arc) {
+		if (!Double.isFinite(arc) || arc < 0.0 || arc > length())
+			throw new IllegalArgumentException("invalid arc");
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		// short cut for first or last point
+		if (arc == 0.0)
+			return getStartPoint();
+		if (arc == length())
+			return getFinishPoint();
+		
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Vertex::getArc,

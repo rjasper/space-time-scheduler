@@ -91,7 +91,7 @@ implements PointPath<V, S>
 	 * @see world.AbstractPath#makeVertex(int, boolean, boolean)
 	 */
 	@Override
-	protected V makeVertex(int index, boolean first, boolean last) {
+	protected final V makeVertex(int index, boolean first, boolean last) {
 		return makeVertex(index, getPoint(index), first, last);
 	}
 	
@@ -122,15 +122,6 @@ implements PointPath<V, S>
 		return points.size();
 	}
 
-	/* (non-Javadoc)
-	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
-	 */
-	@Override
-	protected S makeSegment(V start, V finish) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	/**
 	 * Caches the point path's vertices.
 	 */

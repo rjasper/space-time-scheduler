@@ -1,13 +1,9 @@
 package world;
 
-import static java.util.Spliterator.*;
-
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 
@@ -47,11 +43,6 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * Caches the duration of the path.
 	 */
 	private transient Duration duration = null;
-	
-	/**
-	 * Caches the length of the path.
-	 */
-	private transient double length = Double.NaN;
 	
 	/**
 	 * Caches the minimum arc.
@@ -244,22 +235,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @return the length of the path.
 	 */
 	public double length() {
-		if (Double.isNaN(length)) {
-			if (isEmpty()) {
-				length = 0.0;
-			} else {
-				Stream<Segment> segments = StreamSupport.stream(Spliterators.spliterator(
-					segmentIterator(),
-					size()-1,
-					IMMUTABLE | SIZED | NONNULL), false);
-				
-				length = segments
-					.mapToDouble(Segment::length)
-					.sum();
-			}
-		}
-		
-		return length;
+		return isEmpty() ? 0.0 : getFinishPoint().getX();
 	}
 	
 	/**
@@ -267,12 +243,19 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 */
 	public Duration duration() {
 		if (duration == null) {
-			double seconds = getPoint(size()-1).getY();
+			double seconds = durationInSeconds();
 			
 			duration = DurationConv.ofSeconds(seconds);
 		}
 		
 		return duration;
+	}
+	
+	/**
+	 * @return the duration of the path in seconds.
+	 */
+	public double durationInSeconds() {
+		return isEmpty() ? 0.0 : getFinishPoint().getY();
 	}
 
 	/**
@@ -281,10 +264,20 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @param time
 	 * @return the arc value.
 	 * @throws IllegalArgumentException
-	 *             if the time is not within the range [{@link #minArc()},
-	 *             {@link #maxArc()}].
+	 *             if the time is not within the range <i>[0.0,&nbsp;durationInSeconds()]</i>.
 	 */
 	public double interpolateArc(double time) {
+		if (!Double.isFinite(time) || time < 0.0 || time > durationInSeconds())
+			throw new IllegalArgumentException("invalid time");
+		if (isEmpty())
+			throw new NoSuchElementException("path is empty");
+		
+		// short cut for start and finish time
+		if (time == 0.0)
+			return getStartPoint().getX();
+		if (time == durationInSeconds())
+			return getFinishPoint().getX();
+		
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Vertex::getY,

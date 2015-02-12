@@ -98,7 +98,6 @@ public class DecomposedTrajectory implements Trajectory {
 	{
 		Objects.requireNonNull(baseTime, "baseTime");
 		
-//		checkComponents(spatialPathComponent, arcTimePathComponent);
 		Objects.requireNonNull(spatialPathComponent, "spatialPathComponent");
 		Objects.requireNonNull(arcTimePathComponent, "arcTimePathComponent");
 		
@@ -198,17 +197,17 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public ImmutablePoint getStartLocation() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 		
 		if (startLocation == null) {
-			double s = getArcTimePathComponent().getFirstPoint().getX();
-			SpatialPath xy = getSpatialPathComponent();
-
-			// TODO don't interpolate if composed
-			
-			startLocation = s == 0.0
-				? xy.getFirstPoint()
-				: xy.interpolateLocation(s);
+			if (isComposed()) {
+				startLocation = composed().getStartLocation();
+			} else {
+				double s = getArcTimePathComponent().getStartPoint().getX();
+				SpatialPath xy = getSpatialPathComponent();
+	
+				startLocation = xy.interpolateLocation(s);
+			}
 		}
 		
 		return startLocation;
@@ -226,18 +225,17 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public ImmutablePoint getFinishLocation() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 		
 		if (finishLocation == null) {
-			ArcTimePath st = getArcTimePathComponent();
-			SpatialPath xy = getSpatialPathComponent();
-			double s = getArcTimePathComponent().getLastPoint().getX();
-			
-			// TODO don't interpolate if composed
-			
-			finishLocation = s == st.maxArc()
-				? xy.getLastPoint()
-				: xy.interpolateLocation(s);
+			if (isComposed()) {
+				finishLocation = composed().getFinishLocation();
+			} else {
+				SpatialPath xy = getSpatialPathComponent();
+				double s = getArcTimePathComponent().getFinishPoint().getX();
+				
+				finishLocation = xy.interpolateLocation(s);
+			}
 		}
 
 		return finishLocation;
@@ -250,7 +248,7 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public LocalDateTime getStartTime() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 		if (isComposed())
 			return composed().getStartTime();
 
@@ -270,7 +268,7 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public LocalDateTime getFinishTime() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 		if (isComposed())
 			return composed().getFinishTime();
 
@@ -408,10 +406,19 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		if (isEmpty())
 			throw new NoSuchElementException("trajectory is empty");
-		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
+		
+		int timeCmpStart = time.compareTo(getStartTime());
+		int timeCmpFinish = time.compareTo(getFinishTime());
+		
+		// time < getStartTime() || time > getFinishTime()
+		if (timeCmpStart < 0 || timeCmpFinish > 0)
 			throw new IllegalArgumentException("time must be covered by this trajectory");
 		
-		// TODO short cut if time is start or finish time
+		// short cut for start and finish time
+		if (timeCmpStart  == 0) // time == getStartTime()
+			return getStartLocation();
+		if (timeCmpFinish == 0) // time == getFinishTime()
+			return getFinishLocation();
 		
 		if (isComposed()) {
 			return composed().interpolateLocation(time);

@@ -1,5 +1,7 @@
 package world;
 
+import java.util.NoSuchElementException;
+
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 
@@ -196,22 +198,26 @@ extends Path<V, S>
 
 	/**
 	 * @return the first point.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
 	 */
-	public default ImmutablePoint getFirstPoint() {
+	public default ImmutablePoint getStartPoint() {
 		if (isEmpty())
-			return null;
-		else
-			return getPoint(0);
+			throw new NoSuchElementException("path is empty");
+		
+		return getPoint(0);
 	}
 
 	/**
 	 * @return the last point.
+	 * @throws NoSuchElementException
+	 *             if the path is empty.
 	 */
-	public default ImmutablePoint getLastPoint() {
+	public default ImmutablePoint getFinishPoint() {
 		if (isEmpty())
-			return null;
-		else
-			return getPoint(size()-1);
+			throw new NoSuchElementException("path is empty");
+		
+		return getPoint(size()-1);
 	}
 
 	@Override

@@ -182,9 +182,9 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public ImmutablePoint getStartLocation() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 
-		return getSpatialPath().getPoint(0);
+		return getSpatialPath().getStartPoint();
 	};
 
 	/*
@@ -195,9 +195,9 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public ImmutablePoint getFinishLocation() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 
-		return getSpatialPath().getPoint(size() - 1);
+		return getSpatialPath().getFinishPoint();
 	};
 
 	/*
@@ -208,7 +208,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public LocalDateTime getStartTime() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 
 		return getTimes().get(0);
 	};
@@ -221,12 +221,9 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public LocalDateTime getFinishTime() {
 		if (isEmpty())
-			return null;
+			throw new NoSuchElementException("trajectory is empty");
 
-		List<LocalDateTime> times = getTimes();
-		int n = times.size();
-
-		return times.get(n - 1);
+		return getTimes().get(size() - 1);
 	};
 
 	/**
@@ -297,7 +294,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 */
 	@Override
 	public int size() {
-		return spatialPath.size();
+		return getSpatialPath().size();
 	}
 
 	/*
@@ -306,7 +303,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 */
 	@Override
 	public double length() {
-		return spatialPath.length();
+		return getSpatialPath().length();
 	}
 
 	/*
@@ -315,7 +312,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 */
 	@Override
 	public Geometry trace() {
-		return spatialPath.trace();
+		return getSpatialPath().trace();
 	}
 	
 	@Override
@@ -324,10 +321,19 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		if (isEmpty())
 			throw new NoSuchElementException("trajectory is empty");
-		if (time.isBefore(getStartTime()) || time.isAfter(getFinishTime()))
+		
+		int timeCmpStart = time.compareTo(getStartTime());
+		int timeCmpFinish = time.compareTo(getFinishTime());
+		
+		// time < getStartTime() || time > getFinishTime()
+		if (timeCmpStart < 0 || timeCmpFinish > 0)
 			throw new IllegalArgumentException("time must be covered by this trajectory");
 		
-		// TODO short cut if time is start or finish time
+		// short cut for start and finish time
+		if (timeCmpStart  == 0) // time == getStartTime()
+			return getStartLocation();
+		if (timeCmpFinish == 0) // time == getFinishTime()
+			return getFinishLocation();
 		
 		// first step is to calculate the sub index of the given time
 		
@@ -339,7 +345,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		InterpolationResult<Double> indexResult = indexInterpolator.interpolate(time);
 		
-		double index = indexResult.getInterpolation();
+		double subIndex = indexResult.getInterpolation();
 		
 		// second step interpolates the location at the given sub index
 		
@@ -350,7 +356,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		Interpolator<Double, ImmutablePoint> locationInterpolator =
 			new PointPathInterpolator<SpatialPath.Vertex>(locationSeeker);
 		
-		InterpolationResult<ImmutablePoint> locationResult = locationInterpolator.interpolate(index);
+		InterpolationResult<ImmutablePoint> locationResult = locationInterpolator.interpolate(subIndex);
 		
 		return locationResult.getInterpolation();
 	}
@@ -435,7 +441,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		StringBuffer buf = new StringBuffer();
 		
-		buf.append("(");
+		buf.append('(');
 		
 		while (points.hasNext()) { // equivalent to times.hasNext()
 			buf.append(points.next());
@@ -446,7 +452,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 				buf.append(", ");
 		}
 		
-		buf.append(")");
+		buf.append(')');
 		
 		return buf.toString();
 	}
