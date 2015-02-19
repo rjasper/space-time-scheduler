@@ -149,7 +149,7 @@ implements PointPath<V, S>
 	@Override
 	public S getSegment(int index) {
 		if (segmentsCache == null)
-			segmentsCache = new SmartArrayCache<>(super::getSegment, size());
+			segmentsCache = new SmartArrayCache<>(super::getSegment, size()-1);
 		
 		return segmentsCache.get(index);
 	}

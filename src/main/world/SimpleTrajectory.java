@@ -149,7 +149,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public Trajectory.Segment getSegment(int index) {
 		if (segmentsCache == null)
-			segmentsCache = new SmartArrayCache<>(super::getSegment, size());
+			segmentsCache = new SmartArrayCache<>(super::getSegment, size()-1);
 		
 		return segmentsCache.get(index);
 	}
