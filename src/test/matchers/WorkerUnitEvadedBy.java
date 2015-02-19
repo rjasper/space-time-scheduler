@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import world.WorkerUnitObstacle;
 
 public class WorkerUnitEvadedBy extends TypeSafeDiagnosingMatcher<WorkerUnit> {

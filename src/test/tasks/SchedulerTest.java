@@ -14,6 +14,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import scheduler.ScheduleResult;
+import scheduler.Scheduler;
+import scheduler.TaskSpecification;
+import scheduler.WorkerUnitReference;
+import scheduler.WorkerUnitSpecification;
 import tasks.factories.WorkerUnitFactory;
 import world.StaticObstacle;
 import world.World;

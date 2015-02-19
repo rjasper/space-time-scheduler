@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import tasks.Task;
-import tasks.WorkerUnit;
+import scheduler.Task;
+import scheduler.WorkerUnit;
 
 import com.vividsolutions.jts.geom.Point;
 

@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
@@ -17,7 +17,7 @@ import org.apache.commons.collections4.iterators.IteratorIterable;
 import pickers.LocationIterator;
 import pickers.WorkerUnitSlotIterator;
 import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
-import tasks.ScheduleResult.TrajectoryUpdate;
+import scheduler.ScheduleResult.TrajectoryUpdate;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
 import world.WorldPerspective;

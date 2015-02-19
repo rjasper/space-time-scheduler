@@ -13,7 +13,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import tasks.fixtures.WorkerUnitFixtures;
 
 import com.vividsolutions.jts.geom.Point;

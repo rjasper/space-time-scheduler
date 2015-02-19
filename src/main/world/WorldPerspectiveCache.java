@@ -3,7 +3,7 @@ package world;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import world.pathfinder.SpatialPathfinder;
 
 /**

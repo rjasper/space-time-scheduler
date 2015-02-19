@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import static java.util.Collections.*;
 import static java.util.function.Function.*;

@@ -2,9 +2,9 @@ package matchers;
 
 import org.hamcrest.Matcher;
 
-import tasks.Task;
+import scheduler.Task;
+import scheduler.TaskSpecification;
 import tasks.TaskSatisfiesSpecification;
-import tasks.TaskSpecification;
 
 public final class TaskMatchers {
 	

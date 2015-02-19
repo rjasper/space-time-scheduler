@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
-import tasks.TaskPlanner;
-import tasks.WorkerUnit;
-import tasks.WorkerUnitSpecification;
+import scheduler.TaskPlanner;
+import scheduler.WorkerUnit;
+import scheduler.WorkerUnitSpecification;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
 import world.WorldPerspectiveCache;

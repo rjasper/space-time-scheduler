@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
-import tasks.ScheduleResult.TrajectoryUpdate;
+import scheduler.ScheduleResult.TrajectoryUpdate;
 import util.CollectionsRequire;
 import world.ArcTimePath;
 import world.DecomposedTrajectory;

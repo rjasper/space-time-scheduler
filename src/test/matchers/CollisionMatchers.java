@@ -6,8 +6,8 @@ import java.util.Collection;
 
 import org.hamcrest.Matcher;
 
-import tasks.WorkerUnit;
-import tasks.WorkerUnitReference;
+import scheduler.WorkerUnit;
+import scheduler.WorkerUnitReference;
 import world.DynamicObstacle;
 import world.StaticObstacle;
 

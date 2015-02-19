@@ -6,7 +6,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import tasks.WorkerUnitReference;
+import scheduler.WorkerUnitReference;
 import world.DynamicObstacle;
 
 public class WorkerRefCollidesWithWorkerRef

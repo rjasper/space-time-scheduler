@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 
 import com.google.common.collect.ImmutableList;
 

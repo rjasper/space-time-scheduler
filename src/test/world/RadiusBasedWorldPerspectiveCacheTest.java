@@ -13,7 +13,7 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import tasks.factories.WorkerUnitFactory;
 import world.pathfinder.SpatialPathfinder;
 import world.pathfinder.StraightEdgePathfinder;

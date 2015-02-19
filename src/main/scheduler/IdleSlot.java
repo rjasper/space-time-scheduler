@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

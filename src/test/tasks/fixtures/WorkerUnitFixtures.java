@@ -1,7 +1,7 @@
 package tasks.fixtures;
 
 import static util.UUIDFactory.*;
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import tasks.factories.WorkerUnitFactory;
 
 public final class WorkerUnitFixtures {

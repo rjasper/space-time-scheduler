@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import tasks.Task;
-import tasks.WorkerUnit;
+import scheduler.Task;
+import scheduler.WorkerUnit;
 
 import com.google.common.collect.ImmutableList;
 

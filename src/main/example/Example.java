@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
-import tasks.ScheduleResult;
-import tasks.Scheduler;
-import tasks.TaskSpecification;
-import tasks.WorkerUnitReference;
-import tasks.WorkerUnitSpecification;
+import scheduler.ScheduleResult;
+import scheduler.Scheduler;
+import scheduler.TaskSpecification;
+import scheduler.WorkerUnitReference;
+import scheduler.WorkerUnitSpecification;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;

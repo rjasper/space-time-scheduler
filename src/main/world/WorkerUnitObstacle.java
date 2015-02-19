@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import jts.geom.immutable.ImmutablePolygon;
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 
 /**
  * <p>A {@code WorkerUnitObstacle} is a path section of a worker represented as a

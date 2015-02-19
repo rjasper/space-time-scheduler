@@ -10,6 +10,8 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import scheduler.IdleSlot;
+import scheduler.WorkerUnit;
 import tasks.fixtures.WorkerUnitFixtures;
 
 public class WorkerUnitTest {

@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
-import tasks.IdleSlot;
-import tasks.WorkerUnit;
+import scheduler.IdleSlot;
+import scheduler.WorkerUnit;
 
 import com.vividsolutions.jts.geom.Point;
 

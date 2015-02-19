@@ -8,7 +8,7 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Geometry;

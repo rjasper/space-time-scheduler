@@ -23,6 +23,8 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
+import scheduler.TaskPlanner;
+import scheduler.WorkerUnit;
 import tasks.factories.WorkerUnitFactory;
 import world.DynamicObstacle;
 import world.RadiusBasedWorldPerspectiveCache;

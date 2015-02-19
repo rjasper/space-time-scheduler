@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-import tasks.WorkerUnit;
+import scheduler.WorkerUnit;
 import world.WorkerUnitObstacle;
 
 public class WorkerUnitEvadedByAt extends TypeSafeDiagnosingMatcher<WorkerUnit> {

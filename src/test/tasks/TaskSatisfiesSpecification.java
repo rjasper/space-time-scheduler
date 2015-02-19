@@ -5,6 +5,9 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import scheduler.Task;
+import scheduler.TaskSpecification;
+
 public class TaskSatisfiesSpecification extends TypeSafeMatcher<Task> {
 	
 	@Factory
