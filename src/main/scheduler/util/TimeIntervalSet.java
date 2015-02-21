@@ -1,6 +1,7 @@
 package scheduler.util;
 
 import static util.Comparables.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map.Entry;
@@ -37,6 +38,12 @@ public class TimeIntervalSet implements Cloneable {
 
 	private TreeMap<LocalDateTime, LocalDateTime> intervals = new TreeMap<>();
 	
+	private boolean sealed = false;
+	
+	public boolean isSealed() {
+		return sealed;
+	}
+	
 	public boolean isEmpty() {
 		return intervals.isEmpty();
 	}
@@ -64,11 +71,7 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public boolean intersects(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
-		Objects.requireNonNull(fromInclusive, "fromInclusive");
-		Objects.requireNonNull(toExclusive, "toExclusive");
-
-		if (!fromInclusive.isBefore(toExclusive))
-			throw new IllegalArgumentException("invalid interval");
+		checkInterval(fromInclusive, toExclusive);
 		
 		// short cut if intervals don't overlap
 		if (!overlaps(fromInclusive, toExclusive))
@@ -80,6 +83,8 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public boolean intersects(TimeIntervalSet other) {
+		Objects.requireNonNull(other, "other");
+		
 		// short cut if intervals don't overlap
 		if (!overlaps(other))
 			return false;
@@ -96,13 +101,23 @@ public class TimeIntervalSet implements Cloneable {
 			.anyMatch(e -> intersects(e.getKey(), e.getValue()));
 	}
 	
-	public void add(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
-		Objects.requireNonNull(fromInclusive, "fromInclusive");
-		Objects.requireNonNull(toExclusive, "toExclusive");
+	public void clear() {
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
 		
-		if (!fromInclusive.isBefore(toExclusive))
-			throw new IllegalArgumentException("invalid interval");
-
+		intervals.clear();
+	}
+	
+	public void add(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
+		
+		checkInterval(fromInclusive, toExclusive);
+		
+		addImpl(fromInclusive, toExclusive);
+	}
+	
+	private void addImpl(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
 		// short cut if this interval doesn't overlap non-strictly
 		if (!overlapsNonStrict(fromInclusive, toExclusive)) {
 			intervals.put(fromInclusive, toExclusive);
@@ -171,19 +186,27 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public void add(TimeIntervalSet other) {
+		Objects.requireNonNull(other, "other");
+		
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
+		
 		if (other == this)
 			return;
 		else
-			other.intervals.forEach(this::add);
+			other.intervals.forEach(this::addImpl);
 	}
 	
 	public void remove(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
-		Objects.requireNonNull(fromInclusive, "fromInclusive");
-		Objects.requireNonNull(toExclusive, "toExclusive");
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
 		
-		if (!fromInclusive.isBefore(toExclusive))
-			throw new IllegalArgumentException("invalid interval");
+		checkInterval(fromInclusive, toExclusive);
 		
+		removeImpl(fromInclusive, toExclusive);
+	}
+	
+	private void removeImpl(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
 		// short cut if this interval doesn't overlap
 		if (!overlaps(fromInclusive, toExclusive))
 			return;
@@ -205,6 +228,11 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public void remove(TimeIntervalSet other) {
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
+		
+		Objects.requireNonNull(other, "other");
+		
 		if (other == this) {
 			intervals.clear();
 		} else {
@@ -217,17 +245,20 @@ public class TimeIntervalSet implements Cloneable {
 				floorMin = min;
 			
 			other.intervals.subMap(floorMin, max)
-				.forEach(this::remove);
+				.forEach(this::removeImpl);
 		}
 	}
-	
-	public void intersect(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
-		Objects.requireNonNull(fromInclusive, "fromInclusive");
-		Objects.requireNonNull(toExclusive, "toExclusive");
-		
-		if (!fromInclusive.isBefore(toExclusive))
-			throw new IllegalArgumentException("invalid interval");
 
+	public void intersect(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
+		
+		checkInterval(fromInclusive, toExclusive);
+		
+		intersectImpl(fromInclusive, toExclusive);
+	}
+	
+	public void intersectImpl(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
 		// short cut if this interval doesn't overlap
 		if (!overlaps(fromInclusive, toExclusive)) {
 			intervals.clear();
@@ -275,6 +306,9 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public void intersect(TimeIntervalSet other) {
+		if (isSealed())
+			throw new IllegalStateException("interval is sealed");
+		
 		// short cut if other is this
 		if (other == this)
 			return;
@@ -282,7 +316,16 @@ public class TimeIntervalSet implements Cloneable {
 		intervals = intersection(other).intervals;
 	}
 	
+	public void seal() {
+		if (isSealed())
+			throw new IllegalStateException("interval already sealed");
+		
+		sealed = true;
+	}
+	
 	public TimeIntervalSet union(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		// no checks since it delegates to public method
+		
 		TimeIntervalSet clone = this.clone();
 		clone.add(fromInclusive, toExclusive);
 		
@@ -290,6 +333,8 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public TimeIntervalSet union(TimeIntervalSet other) {
+		// no checks since it delegates to public method
+		
 		TimeIntervalSet clone = this.clone();
 		
 		// short cut if other is this
@@ -302,6 +347,8 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public TimeIntervalSet difference(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		// no checks since it delegates to public method
+		
 		TimeIntervalSet clone = this.clone();
 		clone.remove(fromInclusive, toExclusive);
 		
@@ -309,6 +356,8 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public TimeIntervalSet difference(TimeIntervalSet other) {
+		// no checks since it delegates to public method
+		
 		TimeIntervalSet clone = this.clone();
 		clone.remove(other);
 		
@@ -316,11 +365,7 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public TimeIntervalSet intersection(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
-		Objects.requireNonNull(fromInclusive, "fromInclusive");
-		Objects.requireNonNull(toExclusive, "toExclusive");
-		
-		if (!fromInclusive.isBefore(toExclusive))
-			throw new IllegalArgumentException("invalid interval");
+		checkInterval(fromInclusive, toExclusive);
 
 		// short cut if this interval doesn't overlap
 		if (!overlaps(fromInclusive, toExclusive))
@@ -349,6 +394,8 @@ public class TimeIntervalSet implements Cloneable {
 	}
 	
 	public TimeIntervalSet intersection(TimeIntervalSet other) {
+		Objects.requireNonNull(other, "other");
+		
 		// short cut if intervals don't overlap
 		if (!overlaps(other))
 			return new TimeIntervalSet();
@@ -365,6 +412,14 @@ public class TimeIntervalSet implements Cloneable {
 			.map(e -> intersection(e.getKey(), e.getValue()))
 			.reduce((lhs, rhs) -> { lhs.add(rhs); return lhs; })
 			.orElse(new TimeIntervalSet());
+	}
+	
+	private void checkInterval(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		Objects.requireNonNull(fromInclusive, "fromInclusive");
+		Objects.requireNonNull(toExclusive, "toExclusive");
+		
+		if (!fromInclusive.isBefore(toExclusive))
+			throw new IllegalArgumentException("invalid interval");
 	}
 	
 	private boolean overlapsNonStrict(LocalDateTime fromInclusive, LocalDateTime toInclusive) {

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
@@ -15,12 +16,18 @@ public class ScheduleAlternative {
 //	
 //	private final ImmutableSortedMap<LocalDateTime, Task> taskRemovals;
 	
-	private final ImmutableMap<WorkerUnit, WorkerUnitScheduleUpdate> updates;
+//	private final ImmutableMap<WorkerUnit, WorkerUnitScheduleUpdate> updates;
+	
+	private final ImmutableList<WorkerUnitScheduleUpdate> updates;
 
 	public ScheduleAlternative(
-		ImmutableMap<WorkerUnit, WorkerUnitScheduleUpdate> updates)
+		ImmutableList<WorkerUnitScheduleUpdate> updates)
 	{
 		this.updates = Objects.requireNonNull(updates, "updates");
+	}
+
+	public ImmutableList<WorkerUnitScheduleUpdate> getUpdates() {
+		return updates;
 	}
 
 //	public static class Builder {

@@ -1,48 +1,80 @@
 package scheduler;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
+import scheduler.util.TimeIntervalSet;
 import world.Trajectory;
 
-import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableList;
 
 public class WorkerUnitScheduleUpdate {
 	
 	private final WorkerUnit worker;
 	
-	private final ImmutableSortedMap<LocalDateTime, Trajectory> trajectories;
+	private final ImmutableList<Trajectory> trajectories;
 	
-	private final ImmutableSortedMap<LocalDateTime, Task> tasks;
+	private final ImmutableList<Task> tasks;
 	
-	private final ImmutableSortedMap<LocalDateTime, Task> taskRemovals;
+	private final ImmutableList<Task> taskRemovals;
+	
+	private final TimeIntervalSet trajectoriesLock = new TimeIntervalSet();
+	
+	private final TimeIntervalSet tasksLock = new TimeIntervalSet();
 
 	public WorkerUnitScheduleUpdate(
 		WorkerUnit worker,
-		ImmutableSortedMap<LocalDateTime, Trajectory> trajectories,
-		ImmutableSortedMap<LocalDateTime, Task> tasks,
-		ImmutableSortedMap<LocalDateTime, Task> taskRemovals)
+		ImmutableList<Trajectory> trajectories,
+		ImmutableList<Task> tasks,
+		ImmutableList<Task> taskRemovals)
 	{
 		this.worker       = Objects.requireNonNull(worker      , "worker"      );
 		this.trajectories = Objects.requireNonNull(trajectories, "trajectories");
 		this.tasks        = Objects.requireNonNull(tasks       , "tasks"       );
 		this.taskRemovals = Objects.requireNonNull(taskRemovals, "taskRemovals");
+		
+		// TODO updates should not predate initialTime
+		
+		// TODO check tasks
+		// tasks should not overlap
+		
+		// TODO check trajectories
+		// consecutive trajectories should touch
+		// trajectories if present should lead to tasks
+
+		// lock new tasks
+		for (Task t : tasks)
+			tasksLock.add(t.getStartTime(), t.getFinishTime());
+		tasksLock.seal();
+		// lock trajectory updates
+		for (Trajectory t : trajectories)
+			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
+		// lock fixated trajectories
+		trajectoriesLock.add(tasksLock);
+		trajectoriesLock.seal();
 	}
 
 	public WorkerUnit getWorker() {
 		return worker;
 	}
 
-	public ImmutableSortedMap<LocalDateTime, Trajectory> getTrajectories() {
+	public ImmutableList<Trajectory> getTrajectories() {
 		return trajectories;
 	}
 
-	public ImmutableSortedMap<LocalDateTime, Task> getTasks() {
+	public ImmutableList<Task> getTasks() {
 		return tasks;
 	}
 
-	public ImmutableSortedMap<LocalDateTime, Task> getTaskRemovals() {
+	public ImmutableList<Task> getTaskRemovals() {
 		return taskRemovals;
+	}
+
+	public TimeIntervalSet getTrajectoriesLock() {
+		return trajectoriesLock;
+	}
+
+	public TimeIntervalSet getTasksLock() {
+		return tasksLock;
 	}
 
 }

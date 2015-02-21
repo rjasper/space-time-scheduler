@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import scheduler.util.TimeIntervalSet;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import world.DynamicObstacle;
@@ -218,12 +219,48 @@ public class WorkerUnit {
 	 * Assigns a new task to this worker.
 	 *
 	 * @param task
-	 * @throws NullPointerException if task is null
+	 * @throws NullPointerException
+	 *             if {@code task} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code task} is not assigned to this worker.
 	 */
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
+		
+		if (task.getAssignedWorker().getActual() != this)
+			throw new IllegalArgumentException("task not assigned to this worker");
 
 		tasks.put(task.getStartTime(), task);
+	}
+	
+	/**
+	 * Removes a task from this worker.
+	 * 
+	 * @param task
+	 * @throws NullPointerException
+	 *             if {@code task} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code task} is not assigned to this worker.
+	 */
+	public void removeTask(Task task) {
+		Objects.requireNonNull(task, "task");
+		
+		boolean status = tasks.remove(task.getStartTime(), task);
+		
+		if (!status)
+			throw new IllegalArgumentException("unknown task");
+	}
+
+	/**
+	 * Updates the given trajectory.
+	 * 
+	 * @param trajectory
+	 * @throws NullPointerException if {@code trajectory} is {@code null}.
+	 */
+	public void updateTrajectory(Trajectory trajectory) {
+		// TODO implement
+		
+		throw new RuntimeException("nyi");
 	}
 
 	/**
@@ -239,7 +276,7 @@ public class WorkerUnit {
 	public NavigableMap<LocalDateTime, WorkerUnitObstacle> getNavigableObstacleSegments() {
 		return unmodifiableObstacleSegments;
 	}
-
+	
 	/**
 	 * Returns the obstacle section of the given time. The time interval of
 	 * returned section will include the given time. If no such obstacle exists

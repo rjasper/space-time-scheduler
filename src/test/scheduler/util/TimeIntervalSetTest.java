@@ -175,6 +175,16 @@ public class TimeIntervalSetTest {
 	}
 	
 	@Test
+	public void testClear() {
+		TimeIntervalSet set = new TimeIntervalSet();
+	
+		set.add(atSecond(0), atSecond(1));
+		set.clear();
+		
+		assertThat(set.isEmpty(), is(true));
+	}
+	
+	@Test
 	public void testAddSelf() {
 		TimeIntervalSet set = new TimeIntervalSet();
 	
@@ -333,7 +343,7 @@ public class TimeIntervalSetTest {
 	public void testIntersectEmpty() {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
-		set.intersect(atSecond(0), atSecond(1));
+		set.intersectImpl(atSecond(0), atSecond(1));
 		
 		assertThat(set.isEmpty(), is(true));
 	}
@@ -343,7 +353,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(-1), atSecond(-0.5));
+		set.intersectImpl(atSecond(-1), atSecond(-0.5));
 
 		assertThat(set.isEmpty(), is(true));
 	}
@@ -353,7 +363,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(1.5), atSecond(2));
+		set.intersectImpl(atSecond(1.5), atSecond(2));
 
 		assertThat(set.isEmpty(), is(true));
 	}
@@ -363,7 +373,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(-1), atSecond(0));
+		set.intersectImpl(atSecond(-1), atSecond(0));
 		
 		assertThat(set.isEmpty(), is(true));
 	}
@@ -373,7 +383,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(1), atSecond(2));
+		set.intersectImpl(atSecond(1), atSecond(2));
 
 		assertThat(set.isEmpty(), is(true));
 	}
@@ -383,7 +393,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(-1), atSecond(0.5));
+		set.intersectImpl(atSecond(-1), atSecond(0.5));
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0), atSecond(0.5)));
@@ -394,7 +404,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(0.5), atSecond(2));
+		set.intersectImpl(atSecond(0.5), atSecond(2));
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0.5), atSecond(1)));
@@ -405,7 +415,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(0.25), atSecond(0.75));
+		set.intersectImpl(atSecond(0.25), atSecond(0.75));
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0.25), atSecond(0.75)));
@@ -416,7 +426,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(-1), atSecond(2));
+		set.intersectImpl(atSecond(-1), atSecond(2));
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0), atSecond(1)));
@@ -426,7 +436,7 @@ public class TimeIntervalSetTest {
 		TimeIntervalSet set = new TimeIntervalSet();
 		
 		set.add(atSecond(0), atSecond(1));
-		set.intersect(atSecond(0), atSecond(1));
+		set.intersectImpl(atSecond(0), atSecond(1));
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0), atSecond(1)));
@@ -459,6 +469,71 @@ public class TimeIntervalSetTest {
 		
 		assertThat(set, equalToIntervals(
 			atSecond(0), atSecond(1)));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealAddSimple() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		set.seal();
+		
+		set.add(atSecond(0), atSecond(1));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealAddSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		set1.seal();
+
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		set2.add(atSecond(0), atSecond(1));
+		
+		set1.add(set2);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealRemoveSimple() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		set.seal();
+		
+		set.remove(atSecond(0), atSecond(1));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealRemoveSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		set1.seal();
+
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		set2.add(atSecond(0), atSecond(1));
+		
+		set1.remove(set2);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealIntersectSimple() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		set.seal();
+		
+		set.intersect(atSecond(0), atSecond(1));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealIntsectSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		set1.seal();
+
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		set2.add(atSecond(0), atSecond(1));
+		
+		set1.intersect(set2);
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testSealClear() {
+		TimeIntervalSet set = new TimeIntervalSet();
+	
+		set.seal();
+		set.clear();
 	}
 	
 	@Test

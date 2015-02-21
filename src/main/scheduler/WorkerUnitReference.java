@@ -37,6 +37,13 @@ public class WorkerUnitReference  {
 	public String getId() {
 		return worker.getId();
 	}
+	
+	/**
+	 * @return the actual worker.
+	 */
+	WorkerUnit getActual() {
+		return worker;
+	}
 
 	/**
 	 * @return the physical shape of the worker.
