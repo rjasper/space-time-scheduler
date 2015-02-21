@@ -2,7 +2,7 @@ package scheduler;
 
 import java.util.Objects;
 
-import scheduler.util.TimeIntervalSet;
+import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
 
 import com.google.common.collect.ImmutableList;
@@ -17,9 +17,9 @@ public class WorkerUnitScheduleUpdate {
 	
 	private final ImmutableList<Task> taskRemovals;
 	
-	private final TimeIntervalSet trajectoriesLock = new TimeIntervalSet();
+	private final SimpleIntervalSet trajectoriesLock = new SimpleIntervalSet();
 	
-	private final TimeIntervalSet tasksLock = new TimeIntervalSet();
+	private final SimpleIntervalSet tasksLock = new SimpleIntervalSet();
 
 	public WorkerUnitScheduleUpdate(
 		WorkerUnit worker,
@@ -69,11 +69,11 @@ public class WorkerUnitScheduleUpdate {
 		return taskRemovals;
 	}
 
-	public TimeIntervalSet getTrajectoriesLock() {
+	public SimpleIntervalSet getTrajectoriesLock() {
 		return trajectoriesLock;
 	}
 
-	public TimeIntervalSet getTasksLock() {
+	public SimpleIntervalSet getTasksLock() {
 		return tasksLock;
 	}
 

@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 
 
-import scheduler.util.TimeIntervalSet;
+import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
 
 
@@ -26,9 +26,9 @@ public class Schedule {
 	
 	private static class WorkerUnitLocks {
 		
-		public final TimeIntervalSet trajectoriesLock = new TimeIntervalSet();
+		public final SimpleIntervalSet trajectoriesLock = new SimpleIntervalSet();
 		
-		public final TimeIntervalSet tasksLock = new TimeIntervalSet();
+		public final SimpleIntervalSet tasksLock = new SimpleIntervalSet();
 		
 		public final Set<Task> taskRemovalsLock = new HashSet<>();
 		
