@@ -1,5 +1,6 @@
 package scheduler.util;
 
+import static util.Comparables.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map.Entry;
@@ -8,7 +9,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-public class TimeIntervalSet {
+public class TimeIntervalSet implements Cloneable {
 	
 	public static class TimeInterval {
 		
@@ -65,6 +66,13 @@ public class TimeIntervalSet {
 	public boolean intersects(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
 		Objects.requireNonNull(fromInclusive, "fromInclusive");
 		Objects.requireNonNull(toExclusive, "toExclusive");
+
+		if (!fromInclusive.isBefore(toExclusive))
+			throw new IllegalArgumentException("invalid interval");
+		
+		// short cut if intervals don't overlap
+		if (!overlaps(fromInclusive, toExclusive))
+			return false;
 		
 		Entry<LocalDateTime, LocalDateTime> entry = intervals.lowerEntry(toExclusive);
 		
@@ -72,21 +80,13 @@ public class TimeIntervalSet {
 	}
 	
 	public boolean intersects(TimeIntervalSet other) {
-		// short cut if one set is empty
-		if (isEmpty() || other.isEmpty())
+		// short cut if intervals don't overlap
+		if (!overlaps(other))
 			return false;
-		
-		LocalDateTime min = minValue(), max = maxValue();
-		
-		// short cut if sets don't overlap
-		if (!other.minValue().isBefore(max) || // other.min >= this.max
-			!other.maxValue().isAfter(min))    // other.max <= this.min
-		{
-			return false;
-		}
 		
 		// checks only relevant segments
 		
+		LocalDateTime min = minValue(), max = maxValue();
 		LocalDateTime floorMin = other.intervals.floorKey(min);
 		
 		if (floorMin == null)
@@ -102,6 +102,19 @@ public class TimeIntervalSet {
 		
 		if (!fromInclusive.isBefore(toExclusive))
 			throw new IllegalArgumentException("invalid interval");
+
+		// short cut if this interval doesn't overlap non-strictly
+		if (!overlapsNonStrict(fromInclusive, toExclusive)) {
+			intervals.put(fromInclusive, toExclusive);
+			return;
+		}
+		
+		// short cut if [from, to] includes this interval
+		if (includedBy(fromInclusive, toExclusive)) {
+			intervals.clear();
+			intervals.put(fromInclusive, toExclusive);
+			return;
+		}
 		
 		// from <= core.from <= to
 		NavigableMap<LocalDateTime, LocalDateTime> core =
@@ -170,21 +183,77 @@ public class TimeIntervalSet {
 		
 		if (!fromInclusive.isBefore(toExclusive))
 			throw new IllegalArgumentException("invalid interval");
-
-		// from <= core.from < to
-		NavigableMap<LocalDateTime, LocalDateTime> core =
-			intervals.subMap(fromInclusive, true, toExclusive, false);
 		
+		// short cut if this interval doesn't overlap
+		if (!overlaps(fromInclusive, toExclusive))
+			return;
+		
+		RelevantEntries re = determineRelevantEntries(fromInclusive, toExclusive);
+		
+		// remove core
+		
+		re.core.clear();
+		
+		// add cut left and right neighbors
+		
+		if (re.leftNeighbor != null)
+			// (leftNeighbor.from, from)
+			intervals.put(re.leftNeighbor.getKey(), fromInclusive);
+		if (re.rightNeighbor != null)
+			// (to, last.to)
+			intervals.put(toExclusive, re.rightNeighbor.getValue());
+	}
+	
+	public void remove(TimeIntervalSet other) {
+		if (other == this) {
+			intervals.clear();
+		} else {
+			// only regard relevant intervals
+			
+			LocalDateTime min = minValue(), max = maxValue();
+			LocalDateTime floorMin = other.intervals.floorKey(min);
+			
+			if (floorMin == null)
+				floorMin = min;
+			
+			other.intervals.subMap(floorMin, max)
+				.forEach(this::remove);
+		}
+	}
+	
+	public void intersect(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		Objects.requireNonNull(fromInclusive, "fromInclusive");
+		Objects.requireNonNull(toExclusive, "toExclusive");
+		
+		if (!fromInclusive.isBefore(toExclusive))
+			throw new IllegalArgumentException("invalid interval");
+
+		// short cut if this interval doesn't overlap
+		if (!overlaps(fromInclusive, toExclusive)) {
+			intervals.clear();
+			return;
+		}
+		
+		// short cut if this interval is included
+		if (includedBy(fromInclusive, toExclusive))
+			return;
+		
+		// leftMap.from < from
+		NavigableMap<LocalDateTime, LocalDateTime> leftMap =
+			intervals.subMap(LocalDateTime.MIN, true, fromInclusive, false);
+		// rightMap.from >= to
+		NavigableMap<LocalDateTime, LocalDateTime> rightMap =
+			intervals.subMap(toExclusive, true, LocalDateTime.MAX, true);
+
 		// leftNeighbor.from < from
 		Entry<LocalDateTime, LocalDateTime> leftNeighborEntry =
-			intervals.lowerEntry(fromInclusive);
+			leftMap.lastEntry();
 		// lastEntry.from < to
-		Entry<LocalDateTime, LocalDateTime> lastEntry = core.isEmpty()
-			? leftNeighborEntry
-			: core.lastEntry();
+		Entry<LocalDateTime, LocalDateTime> lastEntry =
+			intervals.lowerEntry(toExclusive);
 
 		// leftNeighbor.to > from
-		boolean cutLeftNeighbor =
+		boolean includeLeftNeighbor =
 			leftNeighborEntry != null &&
 			leftNeighborEntry.getValue().isAfter(fromInclusive);
 		// last.to > to
@@ -192,33 +261,193 @@ public class TimeIntervalSet {
 			lastEntry != null &&
 			lastEntry.getValue().isAfter(toExclusive);
 		
-		// remove core
+		// remove non-intersecting regions
 		
-		core.clear();
+		leftMap.clear();
+		rightMap.clear();
 		
-		// add cut left and right neighbors
+		// include or cut neighbors if necessary
 		
-		if (cutLeftNeighbor)
-			// (leftNeighbor.from, from)
-			intervals.put(leftNeighborEntry.getKey(), fromInclusive);
+		if (includeLeftNeighbor)
+			intervals.put(fromInclusive, min(leftNeighborEntry.getValue(), toExclusive));
 		if (cutRightNeighbor)
-			// (to, last.to)
-			intervals.put(toExclusive, lastEntry.getValue());
+			intervals.put(max(lastEntry.getKey(), fromInclusive), toExclusive);
 	}
 	
-	public void remove(TimeIntervalSet other) {
+	public void intersect(TimeIntervalSet other) {
+		// short cut if other is this
 		if (other == this)
-			intervals.clear();
-		else
-			other.intervals.forEach(this::remove);
+			return;
+		
+		intervals = intersection(other).intervals;
+	}
+	
+	public TimeIntervalSet union(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		TimeIntervalSet clone = this.clone();
+		clone.add(fromInclusive, toExclusive);
+		
+		return clone;
+	}
+	
+	public TimeIntervalSet union(TimeIntervalSet other) {
+		TimeIntervalSet clone = this.clone();
+		
+		// short cut if other is this
+		if (other == this)
+			return clone;
+		
+		clone.add(other);
+		
+		return clone;
+	}
+	
+	public TimeIntervalSet difference(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		TimeIntervalSet clone = this.clone();
+		clone.remove(fromInclusive, toExclusive);
+		
+		return clone;
+	}
+	
+	public TimeIntervalSet difference(TimeIntervalSet other) {
+		TimeIntervalSet clone = this.clone();
+		clone.remove(other);
+		
+		return clone;
+	}
+	
+	public TimeIntervalSet intersection(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		Objects.requireNonNull(fromInclusive, "fromInclusive");
+		Objects.requireNonNull(toExclusive, "toExclusive");
+		
+		if (!fromInclusive.isBefore(toExclusive))
+			throw new IllegalArgumentException("invalid interval");
+
+		// short cut if this interval doesn't overlap
+		if (!overlaps(fromInclusive, toExclusive))
+			return new TimeIntervalSet();
+		
+		// short cut if this interval is included
+		if (includedBy(fromInclusive, toExclusive))
+			return clone();
+		
+		RelevantEntries re = determineRelevantEntries(fromInclusive, toExclusive);
+		
+		TimeIntervalSet intersection = new TimeIntervalSet();
+		
+		// include core
+		intersection.intervals.putAll(re.core);
+		
+		// include left neighbor or cut right neighbor if necessary
+		if (re.leftNeighbor != null)
+			intersection.intervals.put(
+				fromInclusive, min(re.leftNeighbor.getValue(), toExclusive));
+		if (re.rightNeighbor != null)
+			intersection.intervals.put(
+				max(re.rightNeighbor.getKey(), fromInclusive), toExclusive);
+		
+		return intersection;
+	}
+	
+	public TimeIntervalSet intersection(TimeIntervalSet other) {
+		// short cut if intervals don't overlap
+		if (!overlaps(other))
+			return new TimeIntervalSet();
+
+		// regard only relevant intervals
+		
+		LocalDateTime min = minValue(), max = maxValue();
+		LocalDateTime floorMin = other.intervals.floorKey(min);
+		
+		if (floorMin == null)
+			floorMin = min;
+		
+		return other.intervals.subMap(floorMin, max).entrySet().stream()
+			.map(e -> intersection(e.getKey(), e.getValue()))
+			.reduce((lhs, rhs) -> { lhs.add(rhs); return lhs; })
+			.orElse(new TimeIntervalSet());
+	}
+	
+	private boolean overlapsNonStrict(LocalDateTime fromInclusive, LocalDateTime toInclusive) {
+		return !isEmpty() &&
+			!fromInclusive.isAfter(maxValue()) && // from <= max
+			!toInclusive.isBefore(minValue());    // to   >= min
+	}
+	
+	private boolean overlaps(LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+		return !isEmpty() &&
+			fromInclusive.isBefore(maxValue()) && // from < max
+			toExclusive.isAfter(minValue());      // to   > min
+	}
+	
+	private boolean overlaps(TimeIntervalSet other) {
+		return !isEmpty() && !other.isEmpty() &&
+			other.minValue().isBefore(maxValue()) && // min2 < max1
+			other.maxValue().isAfter(minValue());    // max2 > min2
+	}
+	
+	private boolean includedBy(LocalDateTime fromInclusive, LocalDateTime toInclusive) {
+		return isEmpty() || (
+			!fromInclusive.isAfter(minValue()) && // from <= min
+			!toInclusive.isBefore(maxValue()));   // to   >= max
+	}
+	
+	private static class RelevantEntries {
+		public final Entry<LocalDateTime, LocalDateTime> leftNeighbor;
+		public final Entry<LocalDateTime, LocalDateTime> rightNeighbor;
+		public final NavigableMap<LocalDateTime, LocalDateTime> core;
+		
+		private RelevantEntries(
+			Entry<LocalDateTime, LocalDateTime> leftNeighbor,
+			Entry<LocalDateTime, LocalDateTime> rightNeighbor,
+			NavigableMap<LocalDateTime, LocalDateTime> core)
+		{
+			this.leftNeighbor = leftNeighbor;
+			this.rightNeighbor = rightNeighbor;
+			this.core = core;
+		}
+	}
+	
+	private RelevantEntries determineRelevantEntries(
+		LocalDateTime fromInclusive, LocalDateTime toExclusive)
+	{
+		// from <= core.from < to
+		NavigableMap<LocalDateTime, LocalDateTime> core =
+			intervals.subMap(fromInclusive, true, toExclusive, false);
+
+		// leftNeighbor.from < from
+		Entry<LocalDateTime, LocalDateTime> leftNeighbor =
+			intervals.lowerEntry(fromInclusive);
+		// lastEntry.from < to
+		Entry<LocalDateTime, LocalDateTime> rightNeighbor = core.isEmpty()
+			? leftNeighbor
+			: core.lastEntry();
+
+		// leftNeighbor.to > from
+		boolean includeLeftNeighbor =
+			leftNeighbor != null &&
+			leftNeighbor.getValue().isAfter(fromInclusive);
+		// last.to > to
+		boolean includeRightNeighbor =
+			rightNeighbor != null &&
+			rightNeighbor.getValue().isAfter(toExclusive);
+		
+		return new RelevantEntries(
+			includeLeftNeighbor  ? leftNeighbor  : null,
+			includeRightNeighbor ? rightNeighbor : null,
+			core);
 	}
 
 	@Override
 	public int hashCode() {
+		if (isEmpty())
+			return 1;
+		
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-			+ ((intervals == null) ? 0 : intervals.hashCode());
+		
+		result = prime * result + minValue().hashCode();
+		result = prime * result + maxValue().hashCode();
+		
 		return result;
 	}
 
@@ -237,6 +466,21 @@ public class TimeIntervalSet {
 		} else if (!intervals.equals(other.intervals))
 			return false;
 		return true;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public TimeIntervalSet clone() {
+		TimeIntervalSet clone;
+		try {
+			clone = (TimeIntervalSet) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException();
+		}
+		
+		clone.intervals = (TreeMap<LocalDateTime, LocalDateTime>) intervals.clone();
+		
+		return clone;
 	}
 	
 	public List<TimeInterval> toList() {

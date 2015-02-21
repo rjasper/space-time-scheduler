@@ -329,6 +329,566 @@ public class TimeIntervalSetTest {
 		assertThat(set.isEmpty(), is(true));
 	}
 	
+	@Test
+	public void testIntersectEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.intersect(atSecond(0), atSecond(1));
+		
+		assertThat(set.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectLeftEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(-1), atSecond(-0.5));
+
+		assertThat(set.isEmpty(), is(true));
+	}
+
+	@Test
+	public void testIntersectRightEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(1.5), atSecond(2));
+
+		assertThat(set.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectLeftTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(-1), atSecond(0));
+		
+		assertThat(set.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectRightTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(1), atSecond(2));
+
+		assertThat(set.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectLeftOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(-1), atSecond(0.5));
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0), atSecond(0.5)));
+	}
+
+	@Test
+	public void testIntersectRightOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(0.5), atSecond(2));
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0.5), atSecond(1)));
+	}
+	
+	@Test
+	public void testIntersectSmall() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(0.25), atSecond(0.75));
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0.25), atSecond(0.75)));
+	}
+	
+	@Test
+	public void testIntersectBig() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(-1), atSecond(2));
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+	
+	public void testIntesectIdentical() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(atSecond(0), atSecond(1));
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+	
+	@Test
+	public void testIntersectSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		
+		set1.add(atSecond(0), atSecond(2));
+		set1.add(atSecond(3), atSecond(5));
+		set2.add(atSecond(1), atSecond(4));
+		set2.add(atSecond(6), atSecond(7));
+		
+		set1.intersect(set2);
+		
+		assertThat(set1, equalToIntervals(
+			atSecond(1), atSecond(2),
+			atSecond(3), atSecond(4)
+		));
+	}
+	
+	@Test
+	public void testIntersectSelf() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		set.intersect(set);
+		
+		assertThat(set, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+	
+	@Test
+	public void testUnion() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		TimeIntervalSet res = set.union(atSecond(0), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionLeft() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.union(atSecond(-2), atSecond(-1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(-1),
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionRight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(-2), atSecond(-1));
+		TimeIntervalSet res = set.union(atSecond(0), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(-1),
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionLeftTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.union(atSecond(-2), atSecond(0));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionRightTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(-2), atSecond(0));
+		TimeIntervalSet res = set.union(atSecond(0), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionLeftOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(-1), atSecond(1));
+		TimeIntervalSet res = set.union(atSecond(-2), atSecond(0));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionRightOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(-2), atSecond(0));
+		TimeIntervalSet res = set.union(atSecond(-1), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(-2), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testUnionSmall() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(0), atSecond(10));
+		TimeIntervalSet res = set.union(atSecond(2), atSecond(8));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(10)
+		));
+	}
+	
+	@Test
+	public void testUnionBig() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(2), atSecond(8));
+		TimeIntervalSet res = set.union(atSecond(0), atSecond(10));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(10)
+		));
+	}
+
+	@Test
+	public void testUnionIdentical() {
+		TimeIntervalSet set = new TimeIntervalSet();
+
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.union(atSecond(0), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+
+	@Test
+	public void testUnionSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		
+		set1.add(atSecond(0), atSecond(1));
+		set1.add(atSecond(4), atSecond(5));
+		set2.add(atSecond(2), atSecond(3));
+		set2.add(atSecond(6), atSecond(7));
+		
+		TimeIntervalSet res = set1.union(set2);
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1),
+			atSecond(2), atSecond(3),
+			atSecond(4), atSecond(5),
+			atSecond(6), atSecond(7)
+		));
+	}
+	
+	@Test
+	public void testUnionSelf() {
+		TimeIntervalSet set = new TimeIntervalSet();
+	
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.union(set);
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+
+	@Test
+	public void testDifferenceEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		TimeIntervalSet res = set.difference(atSecond(0), atSecond(1));
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testDifferenceLeft() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(-2), atSecond(-1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceRight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(2), atSecond(3));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceLeftTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(-2), atSecond(0));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceRightTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(1), atSecond(3));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceLeftOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(-2), atSecond(0.5));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0.5), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceRightOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(0.5), atSecond(3));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(0.5)
+		));
+	}
+	
+	@Test
+	public void testDifferenceSmall() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(0.25), atSecond(0.75));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(0.25),
+			atSecond(0.75), atSecond(1)
+		));
+	}
+	
+	@Test
+	public void testDifferenceBig() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(-1), atSecond(2));
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testDifferenceIdentical() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.difference(atSecond(0), atSecond(1));
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testDifferenceSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		
+		set1.add(atSecond(0), atSecond(2));
+		set1.add(atSecond(3), atSecond(5));
+		set2.add(atSecond(1), atSecond(4));
+		set2.add(atSecond(6), atSecond(7));
+		
+		TimeIntervalSet res = set1.difference(set2);
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1),
+			atSecond(4), atSecond(5)
+		));
+	}
+	
+	@Test
+	public void testDifferenceSelf() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		
+		TimeIntervalSet res = set.difference(set);
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectionEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		TimeIntervalSet res = set.intersection(atSecond(0), atSecond(1));
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectionLeftEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(-1), atSecond(-0.5));
+
+		assertThat(res.isEmpty(), is(true));
+	}
+
+	@Test
+	public void testIntersectionRightEmpty() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(1.5), atSecond(2));
+
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectionLeftTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(-1), atSecond(0));
+		
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectionRightTight() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(1), atSecond(2));
+
+		assertThat(res.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIntersectionLeftOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(-1), atSecond(0.5));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(0.5)));
+	}
+
+	@Test
+	public void testIntersectionRightOverlap() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(0.5), atSecond(2));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0.5), atSecond(1)));
+	}
+	
+	@Test
+	public void testIntersectionSmall() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(0.25), atSecond(0.75));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0.25), atSecond(0.75)));
+	}
+	
+	@Test
+	public void testIntersectionBig() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(-1), atSecond(2));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+	
+	public void testIntesectionIdentical() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(atSecond(0), atSecond(1));
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+	
+	@Test
+	public void testIntersectionSet() {
+		TimeIntervalSet set1 = new TimeIntervalSet();
+		TimeIntervalSet set2 = new TimeIntervalSet();
+		
+		set1.add(atSecond(0), atSecond(2));
+		set1.add(atSecond(3), atSecond(5));
+		set2.add(atSecond(1), atSecond(4));
+		set2.add(atSecond(6), atSecond(7));
+		
+		TimeIntervalSet res = set1.intersection(set2);
+		
+		assertThat(res, equalToIntervals(
+			atSecond(1), atSecond(2),
+			atSecond(3), atSecond(4)
+		));
+	}
+	
+	@Test
+	public void testIntersectionSelf() {
+		TimeIntervalSet set = new TimeIntervalSet();
+		
+		set.add(atSecond(0), atSecond(1));
+		TimeIntervalSet res = set.intersection(set);
+		
+		assertThat(res, equalToIntervals(
+			atSecond(0), atSecond(1)));
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void testMinValueEmpty() {
 		TimeIntervalSet set = new TimeIntervalSet();
