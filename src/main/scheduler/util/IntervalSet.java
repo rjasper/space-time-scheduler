@@ -1,5 +1,7 @@
 package scheduler.util;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public interface IntervalSet<T extends Comparable<? super T>>
@@ -18,8 +20,8 @@ extends Iterable<IntervalSet.Interval<T>>
 			T fromInclusive,
 			T toExclusive)
 		{
-			this.fromInclusive = fromInclusive;
-			this.toExclusive = toExclusive;
+			this.fromInclusive = Objects.requireNonNull(fromInclusive, "fromInclusive");
+			this.toExclusive = Objects.requireNonNull(toExclusive, "toExclusive");
 		}
 	
 		public T getFromInclusive() {
@@ -44,10 +46,52 @@ extends Iterable<IntervalSet.Interval<T>>
 			else
 				return fromCmp;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			
+			result = prime * result + fromInclusive.hashCode();
+			result = prime * result + toExclusive.hashCode();
+			
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			
+			Interval<?> other = (Interval<?>) obj;
+			
+			if (!fromInclusive.equals(other.fromInclusive))
+				return false;
+			if (!toExclusive.equals(other.toExclusive))
+				return false;
+			
+			return true;
+		}
 		
 	}
 
 	public abstract boolean isEmpty();
+	
+	public abstract Interval<T> minInterval();
+	
+	public abstract Interval<T> maxInterval();
+	
+	public abstract Interval<T> floorInterval(T obj);
+	
+	public abstract Interval<T> ceilingInterval(T obj);
+	
+	public abstract Interval<T> lowerInterval(T obj);
+	
+	public abstract Interval<T> higherInterval(T obj);
 
 	public abstract T minValue();
 
@@ -56,6 +100,14 @@ extends Iterable<IntervalSet.Interval<T>>
 	public abstract boolean contains(T obj);
 
 	public abstract boolean intersects(T fromInclusive, T toExclusive);
+
+	public abstract boolean includedBy(T fromInclusive, T toInclusive);
+
+	public abstract boolean overlaps(T fromInclusive, T toExclusive);
+
+	public abstract boolean overlapsNonStrict(T fromInclusive, T toInclusive);
+
+	public abstract boolean overlaps(IntervalSet<T> other);
 
 	public abstract boolean intersects(IntervalSet<T> other);
 
@@ -75,14 +127,8 @@ extends Iterable<IntervalSet.Interval<T>>
 	// fromInclusive and toExclusive.
 	public abstract IntervalSet<T> subSet(T fromInclusive, T toExclusive);
 	
-	public abstract Interval<T> floorInterval(T obj);
-	
-	public abstract Interval<T> ceilingInterval(T obj);
-	
-	public abstract Interval<T> lowerInterval(T obj);
-	
-	public abstract Interval<T> higherInterval(T obj);
-	
 	public abstract Stream<Interval<T>> stream();
+	
+	public List<Interval<T>> toList();
 
 }

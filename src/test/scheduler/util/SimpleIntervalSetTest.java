@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import scheduler.util.IntervalSet.Interval;
 
-public class TimeIntervalSetTest {
+public class SimpleIntervalSetTest {
 	
 	@Test
 	public void testIsEmptyPositive() {

@@ -3,14 +3,12 @@ package scheduler.util;
 import static util.Comparables.*;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleIntervalSet<T extends Comparable<? super T>>
@@ -18,11 +16,13 @@ extends AbstractIntervalSet<T>
 implements ModifiableIntervalSet<T>
 {
 	
-	protected NavigableMap<T, Interval<T>> intervals = new TreeMap<>();
+	protected NavigableMap<T, Interval<T>> intervals;
 	
-	protected boolean sealed = false;
+	protected boolean sealed;
 	
-	public SimpleIntervalSet() {}
+	public SimpleIntervalSet() {
+		this(new TreeMap<>(), false);
+	}
 	
 	private SimpleIntervalSet(NavigableMap<T, Interval<T>> intervals, boolean sealed) {
 		this.intervals = intervals;
@@ -41,40 +41,16 @@ implements ModifiableIntervalSet<T>
 		return intervals.isEmpty();
 	}
 	
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#contains(T)
-	 */
 	@Override
-	public boolean contains(T obj) {
-		Objects.requireNonNull(obj, "obj");
-		
-		Entry<T, Interval<T>> entry = intervals.floorEntry(obj);
-		
-		return entry != null && entry.getValue().getToExclusive().compareTo(obj) > 0;
+	public Interval<T> minInterval() {
+		return isEmpty() ? null : intervals.firstEntry().getValue();
 	}
 
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#minValue()
-	 */
 	@Override
-	public T minValue() {
-		if (isEmpty())
-			throw new IllegalStateException("set is empty");
-		
-		return intervals.firstKey();
+	public Interval<T> maxInterval() {
+		return isEmpty() ? null : intervals.lastEntry().getValue();
 	}
-	
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#maxValue()
-	 */
-	@Override
-	public T maxValue() {
-		if (isEmpty())
-			throw new IllegalStateException("set is empty");
-		
-		return intervals.lastEntry().getValue().getToExclusive();
-	}
-	
+
 	@Override
 	public Interval<T> floorInterval(T obj) {
 		Entry<T, Interval<T>> entry = intervals.floorEntry(obj);
@@ -128,17 +104,18 @@ implements ModifiableIntervalSet<T>
 		public SubSet(T fromInclusive, T toExclusive) {
 			super(
 				makeSubMap(SimpleIntervalSet.this, fromInclusive, toExclusive),
-				SimpleIntervalSet.this.sealed);
+				SimpleIntervalSet.this.isSealed());
 		}
 
 		@Override
 		public boolean isSealed() {
-			return SimpleIntervalSet.this.sealed || this.sealed;
+			return this.sealed || SimpleIntervalSet.this.isSealed();
 		}
 		
 	}
 	
-	private static <T extends Comparable<? super T>> NavigableMap<T, Interval<T>> makeSubMap(
+	private static <T extends Comparable<? super T>>
+	NavigableMap<T, Interval<T>> makeSubMap(
 		SimpleIntervalSet<T> self,
 		T fromInclusive, T toExclusive)
 	{
@@ -164,6 +141,17 @@ implements ModifiableIntervalSet<T>
 		intervals.clear();
 	}
 	
+	/* (non-Javadoc)
+	 * @see scheduler.util.ModifiableIntervalSet#seal()
+	 */
+	@Override
+	public void seal() {
+		if (isSealed())
+			throw new IllegalStateException("interval already sealed");
+		
+		sealed = true;
+	}
+
 	private void put(T fromInclusive, T toExclusive) {
 		intervals.put(fromInclusive, new Interval<>(fromInclusive, toExclusive));
 	}
@@ -409,17 +397,6 @@ implements ModifiableIntervalSet<T>
 			intervals.clear();
 	}
 	
-	/* (non-Javadoc)
-	 * @see scheduler.util.ModifiableIntervalSet#seal()
-	 */
-	@Override
-	public void seal() {
-		if (isSealed())
-			throw new IllegalStateException("interval already sealed");
-		
-		sealed = true;
-	}
-	
 	private static class RelevantEntries<T extends Comparable<? super T>> {
 		public final Entry<T, Interval<T>> leftNeighbor;
 		public final Entry<T, Interval<T>> rightNeighbor;
@@ -464,17 +441,6 @@ implements ModifiableIntervalSet<T>
 			includeLeftNeighbor  ? leftNeighbor  : null,
 			includeRightNeighbor ? rightNeighbor : null,
 			core);
-	}
-	
-	public List<Interval<T>> toList() {
-		return this.intervals.entrySet().stream()
-			.map(e -> new Interval<>(e.getKey(), e.getValue().getToExclusive()))
-			.collect(Collectors.toList());
-	}
-	
-	@Override
-	public String toString() {
-		return intervals.toString();
 	}
 
 }

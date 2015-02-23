@@ -1,12 +1,44 @@
 package scheduler.util;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public abstract class AbstractIntervalSet<T extends Comparable<? super T>>
 implements IntervalSet<T>
 {
+
+	@Override
+	public T minValue() {
+		if (isEmpty())
+			throw new IllegalStateException("set is empty");
+		
+		return minInterval().getFromInclusive();
+	}
+
+	@Override
+	public T maxValue() {
+		if (isEmpty())
+			throw new IllegalStateException("set is empty");
+		
+		return maxInterval().getToExclusive();
+	}
+	
+	/* (non-Javadoc)
+	 * @see scheduler.util.IntervalSet#contains(T)
+	 */
+	@Override
+	public boolean contains(T obj) {
+		Objects.requireNonNull(obj, "obj");
+		
+		Interval<T> interval = floorInterval(obj);
+		
+		return interval != null && interval.getToExclusive().compareTo(obj) > 0;
+	}
 
 	/* (non-Javadoc)
 	 * @see scheduler.util.IntervalSet#intersects(C, C)
@@ -162,10 +194,97 @@ implements IntervalSet<T>
 		return set;
 	}
 	
-	protected IntervalSet<T> makeOverlappingSubSet(IntervalSet<T> other) {
-		return other.subSet(minValue(), maxValue());
+	@Override
+	public boolean overlapsNonStrict(T fromInclusive, T toInclusive) {
+		return !isEmpty() &&
+			fromInclusive.compareTo(maxValue()) <= 0 && // from <= max
+			toInclusive  .compareTo(minValue()) >= 0;   // to   >= min
 	}
 	
+	@Override
+	public boolean overlaps(T fromInclusive, T toExclusive) {
+		return !isEmpty() &&
+			fromInclusive.compareTo(maxValue()) < 0 && // from < max
+			toExclusive  .compareTo(minValue()) > 0;   // to   > min
+	}
+	
+	@Override
+	public boolean overlaps(IntervalSet<T> other) {
+		return !isEmpty() && !other.isEmpty() &&
+			other.minValue().compareTo(maxValue()) < 0 && // min2 < max1
+			other.maxValue().compareTo(minValue()) > 0;   // max2 > min2
+	}
+	
+	@Override
+	public boolean includedBy(T fromInclusive, T toInclusive) {
+		return isEmpty() || (
+			fromInclusive.compareTo(minValue()) <= 0 && // from <= min
+			toInclusive  .compareTo(maxValue()) >= 0);  // to   >= max
+	}
+
+	protected static class IntervalIterator<T extends Comparable<? super T>>
+	implements Iterator<Interval<T>>
+	{
+		
+		private final Iterator<Interval<T>> iterator;
+		
+		private Interval<T> peek = null;
+		
+		public IntervalIterator(Iterator<Interval<T>> iterator) {
+			this.iterator = Objects.requireNonNull(iterator, "iterator");
+			this.peek = iterator.hasNext() ? iterator.next() : null;
+		}
+	
+		@Override
+		public boolean hasNext() {
+			return peek != null;
+		}
+	
+		@Override
+		public Interval<T> next() {
+			if (peek == null)
+				throw new NoSuchElementException("no next element");
+			
+			Interval<T> first = peek;
+			Interval<T> last = first;
+			
+			boolean noBreak = true;
+			while (iterator.hasNext()) {
+				peek = iterator.next();
+				
+				T lastTo = last.getToExclusive();
+				T peekFrom = peek.getFromInclusive();
+				
+				if (peekFrom.compareTo(lastTo) > 0) {
+					noBreak = false;
+					break;
+				}
+				
+				last = peek;
+			}
+			
+			// !iterator.hasNext() || peek.from != last.to
+			
+			// if while-loop finished ordinarily
+			// indicates that there are no more intervals to iterate over
+			if (noBreak)
+				peek = null;
+			
+			if (last == first)
+				return first; // reuse interval
+			else
+				return new Interval<>(
+					first.getFromInclusive(),
+					last.getToExclusive());
+		}
+		
+	}
+
+	@Override
+	public Stream<Interval<T>> stream() {
+		return StreamSupport.stream(spliterator(), false);
+	}
+
 	protected void checkInterval(T fromInclusive, T toExclusive) {
 		Objects.requireNonNull(fromInclusive, "fromInclusive");
 		Objects.requireNonNull(toExclusive, "toExclusive");
@@ -174,28 +293,12 @@ implements IntervalSet<T>
 			throw new IllegalArgumentException("invalid interval");
 	}
 	
-	protected boolean overlapsNonStrict(T fromInclusive, T toInclusive) {
-		return !isEmpty() &&
-			fromInclusive.compareTo(maxValue()) <= 0 && // from <= max
-			toInclusive  .compareTo(minValue()) >= 0;   // to   >= min
+	protected Iterator<Interval<T>> makeIterator(Iterator<Interval<T>> it) {
+		return new IntervalIterator<>(it);
 	}
-	
-	protected boolean overlaps(T fromInclusive, T toExclusive) {
-		return !isEmpty() &&
-			fromInclusive.compareTo(maxValue()) < 0 && // from < max
-			toExclusive  .compareTo(minValue()) > 0;   // to   > min
-	}
-	
-	protected boolean overlaps(IntervalSet<T> other) {
-		return !isEmpty() && !other.isEmpty() &&
-			other.minValue().compareTo(maxValue()) < 0 && // min2 < max1
-			other.maxValue().compareTo(minValue()) > 0;   // max2 > min2
-	}
-	
-	protected boolean includedBy(T fromInclusive, T toInclusive) {
-		return isEmpty() || (
-			fromInclusive.compareTo(minValue()) <= 0 && // from <= min
-			toInclusive  .compareTo(maxValue()) >= 0);  // to   >= max
+
+	protected IntervalSet<T> makeOverlappingSubSet(IntervalSet<T> other) {
+		return other.subSet(minValue(), maxValue());
 	}
 
 	@Override
@@ -240,59 +343,11 @@ implements IntervalSet<T>
 		return true;
 	}
 	
-	protected static class IntervalIterator<T extends Comparable<? super T>>
-	implements Iterator<Interval<T>>
-	{
-		
-		private final Iterator<Interval<T>> iterator;
-		
-		private Interval<T> peek = null;
-		
-		public IntervalIterator(Iterator<Interval<T>> iterator) {
-			this.iterator = Objects.requireNonNull(iterator, "iterator");
-			this.peek = iterator.hasNext() ? iterator.next() : null;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return iterator.hasNext();
-		}
-
-		@Override
-		public Interval<T> next() {
-			if (peek == null)
-				throw new NoSuchElementException("no next element");
-			
-			Interval<T> first = peek;
-			Interval<T> last = first;
-			
-			while (iterator.hasNext()) {
-				peek = iterator.next();
-				
-				T lastTo = last.getToExclusive();
-				T peekFrom = peek.getFromInclusive();
-				
-				if (!peekFrom.equals(lastTo))
-					break;
-				
-				last = peek;
-			}
-			
-			// !iterator.hasNext() || peek.from != last.to
-			
-			if (!iterator.hasNext())
-				peek = null;
-			
-			if (last == first)
-				return first;
-			else
-				return new Interval<>(
-					first.getFromInclusive(),
-					last.getToExclusive());
-		}
-		
+	@Override
+	public List<Interval<T>> toList() {
+		return stream().collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();

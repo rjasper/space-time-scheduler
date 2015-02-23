@@ -3,18 +3,14 @@ package scheduler.util;
 import static java.util.Spliterator.*;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-public class MappedIntervalSet<U, T extends Comparable<? super T>>
+public class MappedIntervalSet<T extends Comparable<? super T>, U>
 extends AbstractIntervalSet<T>
 {
 	
@@ -30,27 +26,11 @@ extends AbstractIntervalSet<T>
 		this.intervalMapper = Objects.requireNonNull(intervalMapper, "intervalMapper");
 	}
 	
-	protected T to(Entry<T, U> entry) {
-		return to(entry.getValue());
+	private Interval<T> interval(Entry<T, U> entry) {
+		return entry == null ? null : intervalMapper.apply(entry.getValue());
 	}
 	
-	protected T from(Entry<T, U> entry) {
-		return from(entry.getValue());
-	}
-	
-	protected T from(U obj) {
-		return interval(obj).getFromInclusive();
-	}
-	
-	protected T to(U obj) {
-		return interval(obj).getToExclusive();
-	}
-	
-	protected Interval<T> interval(Entry<T, U> entry) {
-		return entry == null ? null : interval(entry.getValue());
-	}
-	
-	protected Interval<T> interval(U obj) {
+	private Interval<T> interval(U obj) {
 		return obj == null ? null : intervalMapper.apply(obj);
 	}
 	
@@ -62,45 +42,19 @@ extends AbstractIntervalSet<T>
 		return map.isEmpty();
 	}
 	
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#contains(C)
-	 */
 	@Override
-	public boolean contains(T obj) {
-		Objects.requireNonNull(obj, "obj");
-		
-		Entry<T, U> entry = map.floorEntry(obj);
-		
-		return entry != null && to(entry).compareTo(obj) > 0;
+	public scheduler.util.IntervalSet.Interval<T> minInterval() {
+		return interval( map.firstEntry() );
 	}
 
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#minValue()
-	 */
 	@Override
-	public T minValue() {
-		if (isEmpty())
-			throw new IllegalStateException("set is empty");
-		
-		return map.firstKey();
+	public scheduler.util.IntervalSet.Interval<T> maxInterval() {
+		return interval( map.lastEntry() );
 	}
-	
-	/* (non-Javadoc)
-	 * @see scheduler.util.IntervalSet#maxValue()
-	 */
-	@Override
-	public T maxValue() {
-		if (isEmpty())
-			throw new IllegalStateException("set is empty");
-		
-		return to(map.lastEntry());
-	}
-	
+
 	@Override
 	public Interval<T> floorInterval(T obj) {
-		Entry<T, U> entry = map.floorEntry(obj);
-		
-		return interval(entry);
+		return interval( map.floorEntry(obj) );
 	}
 
 	@Override
@@ -123,7 +77,7 @@ extends AbstractIntervalSet<T>
 		return new SubSet(fromInclusive, toExclusive);
 	}
 	
-	private class SubSet extends MappedIntervalSet<U, T> {
+	private class SubSet extends MappedIntervalSet<T, U> {
 		
 		public SubSet(T fromInclusive, T toExclusive) {
 			super(
@@ -133,8 +87,9 @@ extends AbstractIntervalSet<T>
 		
 	}
 	
-	private static <U, T extends Comparable<? super T>> NavigableMap<T, U> makeSubMap(
-		MappedIntervalSet<U, T> self,
+	private static <U, T extends Comparable<? super T>>
+	NavigableMap<T, U> makeSubMap(
+		MappedIntervalSet<T, U> self,
 		T fromInclusive, T toExclusive)
 	{
 		Interval<T> lowerInterval = self.lowerInterval(fromInclusive);
@@ -154,23 +109,12 @@ extends AbstractIntervalSet<T>
 			.map(this::interval)
 			.iterator();
 		
-		return new IntervalIterator<>(it);
+		return makeIterator(it);
 	}
 
 	@Override
 	public Spliterator<Interval<T>> spliterator() {
 		return Spliterators.spliteratorUnknownSize(iterator(), DISTINCT | NONNULL | ORDERED | SORTED);
-	}
-
-	@Override
-	public Stream<Interval<T>> stream() {
-		return StreamSupport.stream(spliterator(), false);
-	}
-
-	public List<Interval<T>> toList() {
-		return this.map.values().stream()
-			.map(this::interval)
-			.collect(Collectors.toList());
 	}
 	
 }
