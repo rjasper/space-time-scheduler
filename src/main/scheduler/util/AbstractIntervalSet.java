@@ -248,6 +248,7 @@ implements IntervalSet<T>
 			Interval<T> first = peek;
 			Interval<T> last = first;
 			
+			// seek last interval which is not consecutive or overlapping
 			boolean noBreak = true;
 			while (iterator.hasNext()) {
 				peek = iterator.next();
@@ -303,16 +304,7 @@ implements IntervalSet<T>
 
 	@Override
 	public int hashCode() {
-		if (isEmpty())
-			return 1;
-		
-		final int prime = 31;
-		int result = 1;
-		
-		result = prime * result + minValue().hashCode();
-		result = prime * result + maxValue().hashCode();
-		
-		return result;
+		return isEmpty() ? 1 : minValue().hashCode() ^ maxValue().hashCode();
 	}
 
 	@Override
@@ -336,7 +328,7 @@ implements IntervalSet<T>
 		
 		// !it1.hasNext() || !it2.hasNext()
 		
-		// equal sets' iterators should be at end of iteration
+		// equal sets' iterators should be at the end of iteration
 		if (it1.hasNext() || it2.hasNext())
 			return false;
 		

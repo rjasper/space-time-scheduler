@@ -123,8 +123,7 @@ extends Iterable<IntervalSet.Interval<T>>
 
 	public abstract IntervalSet<T> intersection(IntervalSet<T> other);
 	
-	// includes the intervals where fromInclusive lies within the given
-	// fromInclusive and toExclusive.
+	// includes all original intervals which overlap with [fromInclusive, toExclusive]
 	public abstract IntervalSet<T> subSet(T fromInclusive, T toExclusive);
 	
 	public abstract Stream<Interval<T>> stream();

@@ -170,13 +170,13 @@ implements ModifiableIntervalSet<T>
 	}
 	
 	protected void addImpl(T fromInclusive, T toExclusive) {
-		// short cut if this interval doesn't overlap non-strictly
+		// short cut
 		if (!overlapsNonStrict(fromInclusive, toExclusive)) {
 			put(fromInclusive, toExclusive);
 			return;
 		}
 		
-		// short cut if [from, to] includes this interval
+		// short cut
 		if (includedBy(fromInclusive, toExclusive)) {
 			intervals.clear();
 			put(fromInclusive, toExclusive);
@@ -189,11 +189,11 @@ implements ModifiableIntervalSet<T>
 
 		// short cut if interval is already included
 		if (core.size() == 1) {
-			Entry<T, Interval<T>> coreOnly = core.firstEntry();
+			Interval<T> coreOnly = core.firstEntry().getValue();
 			
-			// tailOnly.from == from && tailOnly.to == to
-			if (coreOnly.getKey()  .compareTo(fromInclusive) == 0 &&
-				coreOnly.getValue().getToExclusive().compareTo(toExclusive) == 0)
+			// coreOnly.from == from && coreOnly.to == to
+			if (coreOnly.getFromInclusive().compareTo(fromInclusive) == 0 &&
+				coreOnly.getToExclusive  ().compareTo(toExclusive  ) == 0)
 			{
 				return;
 			}
@@ -271,20 +271,39 @@ implements ModifiableIntervalSet<T>
 		if (!overlaps(fromInclusive, toExclusive))
 			return;
 		
-		RelevantEntries<T> re = determineRelevantEntries(fromInclusive, toExclusive);
+		// from <= core.from < to
+		NavigableMap<T, Interval<T>> core =
+			intervals.subMap(fromInclusive, true, toExclusive, false);
+
+		// leftNeighbor.from < from
+		Entry<T, Interval<T>> leftNeighbor =
+			intervals.lowerEntry(fromInclusive);
+		// lastEntry.from < to
+		Entry<T, Interval<T>> rightNeighbor = core.isEmpty()
+			? leftNeighbor
+			: core.lastEntry();
+
+		// leftNeighbor.to > from
+		boolean includeLeftNeighbor =
+			leftNeighbor != null &&
+			leftNeighbor.getValue().getToExclusive().compareTo(fromInclusive) > 0;
+		// last.to > to
+		boolean includeRightNeighbor =
+			rightNeighbor != null &&
+			rightNeighbor.getValue().getToExclusive().compareTo(toExclusive) > 0;
 		
 		// remove core
 		
-		re.core.clear();
+		core.clear();
 		
 		// add cut left and right neighbors
 		
-		if (re.leftNeighbor != null)
+		if (includeLeftNeighbor)
 			// (leftNeighbor.from, from)
-			put(re.leftNeighbor.getKey(), fromInclusive);
-		if (re.rightNeighbor != null)
+			put(leftNeighbor.getKey(), fromInclusive);
+		if (includeRightNeighbor)
 			// (to, last.to)
-			put(toExclusive, re.rightNeighbor.getValue().getToExclusive());
+			put(toExclusive, rightNeighbor.getValue().getToExclusive());
 	}
 	
 	/* (non-Javadoc)
@@ -300,10 +319,8 @@ implements ModifiableIntervalSet<T>
 		if (other == this) {
 			intervals.clear();
 		} else {
-			// only regard relevant intervals
-
-			makeOverlappingSubSet(other)
-				.forEach(i -> removeImpl(i.getFromInclusive(), i.getToExclusive()));
+			makeOverlappingSubSet(other).forEach(i ->
+				removeImpl(i.getFromInclusive(), i.getToExclusive()));
 		}
 	}
 
@@ -395,52 +412,6 @@ implements ModifiableIntervalSet<T>
 			intervals = option.get().intervals;
 		else
 			intervals.clear();
-	}
-	
-	private static class RelevantEntries<T extends Comparable<? super T>> {
-		public final Entry<T, Interval<T>> leftNeighbor;
-		public final Entry<T, Interval<T>> rightNeighbor;
-		public final NavigableMap<T, Interval<T>> core;
-		
-		private RelevantEntries(
-			Entry<T, Interval<T>> leftNeighbor,
-			Entry<T, Interval<T>> rightNeighbor,
-			NavigableMap<T, Interval<T>> core)
-		{
-			this.leftNeighbor = leftNeighbor;
-			this.rightNeighbor = rightNeighbor;
-			this.core = core;
-		}
-	}
-	
-	private RelevantEntries<T> determineRelevantEntries(
-		T fromInclusive, T toExclusive)
-	{
-		// from <= core.from < to
-		NavigableMap<T, Interval<T>> core =
-			intervals.subMap(fromInclusive, true, toExclusive, false);
-
-		// leftNeighbor.from < from
-		Entry<T, Interval<T>> leftNeighbor =
-			intervals.lowerEntry(fromInclusive);
-		// lastEntry.from < to
-		Entry<T, Interval<T>> rightNeighbor = core.isEmpty()
-			? leftNeighbor
-			: core.lastEntry();
-
-		// leftNeighbor.to > from
-		boolean includeLeftNeighbor =
-			leftNeighbor != null &&
-			leftNeighbor.getValue().getToExclusive().compareTo(fromInclusive) > 0;
-		// last.to > to
-		boolean includeRightNeighbor =
-			rightNeighbor != null &&
-			rightNeighbor.getValue().getToExclusive().compareTo(toExclusive) > 0;
-		
-		return new RelevantEntries<>(
-			includeLeftNeighbor  ? leftNeighbor  : null,
-			includeRightNeighbor ? rightNeighbor : null,
-			core);
 	}
 
 }
