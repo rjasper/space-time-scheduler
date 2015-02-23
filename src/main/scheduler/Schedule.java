@@ -67,11 +67,11 @@ public class Schedule {
 	public boolean addAlternative(ScheduleAlternative alternative) {
 		Objects.requireNonNull(alternative, "alternative");
 		
-		boolean compatible = checkAlternativeCompatibility(alternative);
+		boolean compatible = checkCompatibility(alternative);
 		
 		if (compatible) {
 			alternatives.add(alternative);
-			applyAlternativeLocks(alternative);
+			applyLocks(alternative);
 		}
 		
 		return compatible;
@@ -85,7 +85,7 @@ public class Schedule {
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 		
-		releaseAlternativeLocks(alternative);
+		releaseLocks(alternative);
 
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnit worker = u.getWorker();
@@ -107,10 +107,10 @@ public class Schedule {
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 
-		releaseAlternativeLocks(alternative);
+		releaseLocks(alternative);
 	}
 	
-	private boolean checkAlternativeCompatibility(ScheduleAlternative alternative) {
+	private boolean checkCompatibility(ScheduleAlternative alternative) {
 		// TODO also check frozen horizon?
 		
 		// TODO check trajectories
@@ -142,7 +142,7 @@ public class Schedule {
 			});
 	}
 	
-	private void applyAlternativeLocks(ScheduleAlternative alternative) {
+	private void applyLocks(ScheduleAlternative alternative) {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
@@ -152,7 +152,7 @@ public class Schedule {
 		}
 	}
 	
-	private void releaseAlternativeLocks(ScheduleAlternative alternative) {
+	private void releaseLocks(ScheduleAlternative alternative) {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
