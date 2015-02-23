@@ -1,5 +1,6 @@
 package scheduler;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -9,12 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
-
-
-import com.vividsolutions.jts.awt.IdentityPointTransformation;
 
 public class Schedule {
 	
@@ -26,15 +23,17 @@ public class Schedule {
 	
 	private static class WorkerUnitLocks {
 		
-		public final SimpleIntervalSet trajectoriesLock = new SimpleIntervalSet();
+		public final SimpleIntervalSet<LocalDateTime> trajectoriesLock = new SimpleIntervalSet<>();
 		
-		public final SimpleIntervalSet tasksLock = new SimpleIntervalSet();
+		public final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
 		
 		public final Set<Task> taskRemovalsLock = new HashSet<>();
 		
 	}
 	
 	public void addWorkerUnit(WorkerUnit worker) {
+		Objects.requireNonNull(worker, "worker");
+		
 		WorkerUnit previous = workerUnits.putIfAbsent(worker.getId(), worker);
 		
 		if (previous != null)
@@ -44,8 +43,9 @@ public class Schedule {
 	}
 	
 	public WorkerUnit getWorkerUnit(String workerId) {
-		WorkerUnit worker = workerUnits.get(
-			Objects.requireNonNull(workerId, "workerId"));
+		Objects.requireNonNull(workerId, "workerId");
+		
+		WorkerUnit worker = workerUnits.get(workerId);
 		
 		if (worker == null)
 			throw new IllegalArgumentException("unknown worker id");
@@ -54,6 +54,8 @@ public class Schedule {
 	}
 	
 	public void removeWorkerUnit(String workerId) {
+		Objects.requireNonNull(workerId, "workerId");
+		
 		WorkerUnit worker = workerUnits.remove(workerId);
 		
 		if (worker == null)
@@ -76,12 +78,12 @@ public class Schedule {
 	}
 	
 	public void integrate(ScheduleAlternative alternative) {
+		Objects.requireNonNull(alternative, "alternative");
+		
 		boolean status = alternatives.remove(alternative);
 		
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
-		
-		// TODO implement actual integration process
 		
 		releaseAlternativeLocks(alternative);
 
@@ -98,6 +100,8 @@ public class Schedule {
 	}
 	
 	public void eliminate(ScheduleAlternative alternative) {
+		Objects.requireNonNull(alternative, "alternative");
+		
 		boolean status = alternatives.remove(alternative);
 		
 		if (!status)

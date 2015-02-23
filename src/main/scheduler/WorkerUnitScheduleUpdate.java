@@ -1,5 +1,6 @@
 package scheduler;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import scheduler.util.SimpleIntervalSet;
@@ -17,9 +18,9 @@ public class WorkerUnitScheduleUpdate {
 	
 	private final ImmutableList<Task> taskRemovals;
 	
-	private final SimpleIntervalSet trajectoriesLock = new SimpleIntervalSet();
+	private final SimpleIntervalSet<LocalDateTime> trajectoriesLock = new SimpleIntervalSet<>();
 	
-	private final SimpleIntervalSet tasksLock = new SimpleIntervalSet();
+	private final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
 
 	public WorkerUnitScheduleUpdate(
 		WorkerUnit worker,
@@ -45,6 +46,7 @@ public class WorkerUnitScheduleUpdate {
 		for (Task t : tasks)
 			tasksLock.add(t.getStartTime(), t.getFinishTime());
 		tasksLock.seal();
+		
 		// lock trajectory updates
 		for (Trajectory t : trajectories)
 			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
@@ -69,11 +71,11 @@ public class WorkerUnitScheduleUpdate {
 		return taskRemovals;
 	}
 
-	public SimpleIntervalSet getTrajectoriesLock() {
+	public SimpleIntervalSet<LocalDateTime> getTrajectoriesLock() {
 		return trajectoriesLock;
 	}
 
-	public SimpleIntervalSet getTasksLock() {
+	public SimpleIntervalSet<LocalDateTime> getTasksLock() {
 		return tasksLock;
 	}
 

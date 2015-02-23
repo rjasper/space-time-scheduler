@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
-import scheduler.util.SimpleIntervalSet;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import world.DynamicObstacle;
