@@ -159,6 +159,8 @@ public class Scheduler {
 		return worker.getReference();
 	}
 	
+	// TODO when removing workers, also remove from perspective cache
+	
 	/**
 	 * @return the present time
 	 */
