@@ -1,11 +1,14 @@
 package scheduler.util;
 
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public interface IntervalSet<T extends Comparable<? super T>> {
+public interface IntervalSet<T extends Comparable<? super T>>
+extends Iterable<IntervalSet.Interval<T>>
+{
 
-	public static class Interval<T> {
+	public static class Interval<T extends Comparable<? super T>>
+	implements Comparable<Interval<T>>
+	{
 		
 		private final T fromInclusive;
 		
@@ -25,6 +28,21 @@ public interface IntervalSet<T extends Comparable<? super T>> {
 	
 		public T getToExclusive() {
 			return toExclusive;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("[%s, %s]", fromInclusive, toExclusive);
+		}
+
+		@Override
+		public int compareTo(Interval<T> o) {
+			int fromCmp = fromInclusive.compareTo(o.fromInclusive);
+			
+			if (fromCmp == 0)
+				return toExclusive.compareTo(o.toExclusive);
+			else
+				return fromCmp;
 		}
 		
 	}
@@ -52,8 +70,6 @@ public interface IntervalSet<T extends Comparable<? super T>> {
 	public abstract IntervalSet<T> intersection(T fromInclusive, T toExclusive);
 
 	public abstract IntervalSet<T> intersection(IntervalSet<T> other);
-
-	public abstract void forEach(Consumer<Interval<T>> consumer);
 	
 	// includes the intervals where fromInclusive lies within the given
 	// fromInclusive and toExclusive.
@@ -62,6 +78,10 @@ public interface IntervalSet<T extends Comparable<? super T>> {
 	public abstract Interval<T> floorInterval(T obj);
 	
 	public abstract Interval<T> ceilingInterval(T obj);
+	
+	public abstract Interval<T> lowerInterval(T obj);
+	
+	public abstract Interval<T> higherInterval(T obj);
 	
 	public abstract Stream<Interval<T>> stream();
 
