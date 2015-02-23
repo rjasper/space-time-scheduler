@@ -120,6 +120,7 @@ public class Schedule {
 		
 		// TODO check tasks
 		// if updated trajectory not present original ones should lead to task
+		// task locks should not overlap with scheduled task unless removed
 		
 		return alternative.getUpdates().stream()
 			.allMatch(u -> {
