@@ -87,8 +87,8 @@ public class WorkerUnit {
 	/**
 	 * An unmodifiable view on {@link #tasks}.
 	 */
-	private NavigableMap<LocalDateTime, Task> unmodifiableTasks
-		= unmodifiableNavigableMap(tasks);
+	private NavigableMap<LocalDateTime, Task> unmodifiableTasks =
+		unmodifiableNavigableMap(tasks);
 
 	/**
 	 * All obstacle sections of this worker.

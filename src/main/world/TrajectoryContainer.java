@@ -1,6 +1,7 @@
 package world;
 
 import static java.util.Collections.*;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -82,6 +83,7 @@ public class TrajectoryContainer {
 			if (!trajectory.getStartLocation().equals(leftLocation))
 				throw new IllegalArgumentException("incompatible start location");
 		}
+		// FIXME tail should be modifiable
 		if (right != null) {
 			Point rightLocation = right.interpolateLocation(finishTime);
 			
