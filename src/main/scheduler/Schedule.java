@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+
+import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
 
@@ -25,7 +27,7 @@ public class Schedule {
 		
 		public final SimpleIntervalSet<LocalDateTime> trajectoriesLock = new SimpleIntervalSet<>();
 		
-		public final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
+//		public final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
 		
 		public final Set<Task> taskRemovalsLock = new HashSet<>();
 		
@@ -115,29 +117,42 @@ public class Schedule {
 		
 		// TODO check trajectories
 		// non-consecutive trajectories should touch original
-		// trajectories should not update fixated original ones unless fixation
-		// got released
 		
 		// TODO check tasks
 		// if updated trajectory not present original ones should lead to task
-		// task locks should not overlap with scheduled task unless removed
 		
 		return alternative.getUpdates().stream()
 			.allMatch(u -> {
-				WorkerUnitLocks workerLocks = locks.get(u.getWorker());
+				WorkerUnit worker = u.getWorker();
+				WorkerUnitLocks workerLocks = locks.get(worker);
 				
 				if (workerLocks == null)
 					throw new IllegalArgumentException("unknown worker");
+
+				IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
+				IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
+				SimpleIntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
+				
+				List<Task> removals = u.getTaskRemovals();
 				
 				return
-					// no mutual task locks
-					!u.getTasksLock()
-						.intersects(workerLocks.tasksLock) &&
-					// no mutual trajectory locks
-					!u.getTrajectoriesLock()
-						.intersects(workerLocks.trajectoriesLock) &&
+//					// no mutual task locks
+//					!u.getTasksLock()
+//						.intersects(workerLocks.tasksLock) &&
+//					// no mutual trajectory locks
+//					!u.getTrajectoriesLock()
+//						.intersects(workerLocks.trajectoriesLock) &&
+					
+					// no mutual trajectory fixations with origin disregarding removed tasks
+					trajLockIntervals.intersection(originTasksIntervals)
+						.remove(removalsIntervals).isEmpty() &&
+					// no mutual trajectory fixations with other alternatives
+					!trajLockIntervals.intersects(workerLocks.trajectoriesLock) &&
+					// no unknown task removals
+					removals.stream()
+						.allMatch(worker::hasTask) &&
 					// no mutual task removals
-					!u.getTaskRemovals().stream()
+					!removals.stream()
 						.anyMatch(workerLocks.taskRemovalsLock::contains);
 			});
 	}
@@ -146,7 +161,7 @@ public class Schedule {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
-			workerLocks.tasksLock       .add   ( u.getTasksLock()        );
+//			workerLocks.tasksLock       .add   ( u.getTasksLock()        );
 			workerLocks.trajectoriesLock.add   ( u.getTrajectoriesLock() );
 			workerLocks.taskRemovalsLock.addAll( u.getTaskRemovals()     );
 		}
@@ -156,7 +171,7 @@ public class Schedule {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
-			workerLocks.tasksLock       .remove   ( u.getTasksLock()        );
+//			workerLocks.tasksLock       .remove   ( u.getTasksLock()        );
 			workerLocks.trajectoriesLock.remove   ( u.getTrajectoriesLock() );
 			workerLocks.taskRemovalsLock.removeAll( u.getTaskRemovals()     );
 		}

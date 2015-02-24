@@ -1016,8 +1016,8 @@ public class TaskPlanner {
 			pf.setSpatialPath     ( section.getSpatialPathComponent() );
 			pf.setMinArc          ( st.minArc()                       );
 			pf.setMaxArc          ( st.maxArc()                       );
-			pf.setStartArc        ( st.getStartPoint().getX()              );
-			pf.setFinishArc       ( st.getFinishPoint().getX()               );
+			pf.setStartArc        ( st.getStartPoint().getX()         );
+			pf.setFinishArc       ( st.getFinishPoint().getX()        );
 			pf.setMaxSpeed        ( worker.getMaxSpeed()              );
 			pf.setStartTime       ( section.getStartTime()            );
 			pf.setFinishTime      ( section.getFinishTime()           );

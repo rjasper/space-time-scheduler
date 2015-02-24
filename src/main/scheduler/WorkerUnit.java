@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import scheduler.util.IntervalSet.Interval;
+import scheduler.util.MappedIntervalSet;
 import world.DynamicObstacle;
 import world.IdlingWorkerUnitObstacle;
 import world.MovingWorkerUnitObstacle;
@@ -80,7 +82,7 @@ public class WorkerUnit {
 	/**
 	 * All tasks which were assigned to this worker.
 	 */
-	private NavigableMap<LocalDateTime, Task> tasks = new TreeMap<>();
+	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 
 	/**
 	 * An unmodifiable view on {@link #tasks}.
@@ -205,6 +207,12 @@ public class WorkerUnit {
 	public Collection<Task> getTasks() {
 		return unmodifiableTasks.values();
 	}
+	
+	public boolean hasTask(Task task) {
+		Task retrieval = tasks.get(task.getStartTime());
+		
+		return retrieval != null && retrieval.equals(task);
+	}
 
 	/**
 	 * @return an unmodifiable view on the time ordered map of tasks assigned to
@@ -212,6 +220,14 @@ public class WorkerUnit {
 	 */
 	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
 		return unmodifiableTasks;
+	}
+	
+	/**
+	 * @return a view on the tasks as a time interval set.
+	 */
+	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
+		return new MappedIntervalSet<LocalDateTime, Task>(tasks,
+			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
 
 	/**

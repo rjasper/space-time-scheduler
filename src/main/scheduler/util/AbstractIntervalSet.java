@@ -248,7 +248,7 @@ implements IntervalSet<T>
 			Interval<T> first = peek;
 			Interval<T> last = first;
 			
-			// seek last interval which is not consecutive or overlapping
+			// seek last non-consecutive interval
 			boolean noBreak = true;
 			while (iterator.hasNext()) {
 				peek = iterator.next();
@@ -256,7 +256,7 @@ implements IntervalSet<T>
 				T lastTo = last.getToExclusive();
 				T peekFrom = peek.getFromInclusive();
 				
-				if (peekFrom.compareTo(lastTo) > 0) {
+				if (!peekFrom.equals(lastTo)) {
 					noBreak = false;
 					break;
 				}

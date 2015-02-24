@@ -20,7 +20,9 @@ public class WorkerUnitScheduleUpdate {
 	
 	private final SimpleIntervalSet<LocalDateTime> trajectoriesLock = new SimpleIntervalSet<>();
 	
-	private final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
+//	private final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
+	
+	private final SimpleIntervalSet<LocalDateTime> taskRemovalIntervals = new SimpleIntervalSet<>();
 
 	public WorkerUnitScheduleUpdate(
 		WorkerUnit worker,
@@ -41,18 +43,28 @@ public class WorkerUnitScheduleUpdate {
 		// TODO check trajectories
 		// consecutive trajectories should touch
 		// trajectories if present should lead to tasks
+		
+		// TODO check task removals
+		// removals should not overlap
 
-		// lock new tasks
-		for (Task t : tasks)
-			tasksLock.add(t.getStartTime(), t.getFinishTime());
-		tasksLock.seal();
+//		// lock new tasks
+//		for (Task t : tasks)
+//			tasksLock.add(t.getStartTime(), t.getFinishTime());
+//		tasksLock.seal();
 		
 		// lock trajectory updates
 		for (Trajectory t : trajectories)
 			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
 		// lock fixated trajectories
-		trajectoriesLock.add(tasksLock);
+//		trajectoriesLock.add(tasksLock);
+		for (Task t : tasks)
+			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
 		trajectoriesLock.seal();
+		
+		// add removal intervals
+		for (Task t : taskRemovals)
+			taskRemovalIntervals.add(t.getStartTime(), t.getFinishTime());
+		taskRemovalIntervals.seal();
 	}
 
 	public WorkerUnit getWorker() {
@@ -75,8 +87,12 @@ public class WorkerUnitScheduleUpdate {
 		return trajectoriesLock;
 	}
 
-	public SimpleIntervalSet<LocalDateTime> getTasksLock() {
-		return tasksLock;
+	public SimpleIntervalSet<LocalDateTime> getTaskRemovalIntervals() {
+		return taskRemovalIntervals;
 	}
+
+//	public SimpleIntervalSet<LocalDateTime> getTasksLock() {
+//		return tasksLock;
+//	}
 
 }

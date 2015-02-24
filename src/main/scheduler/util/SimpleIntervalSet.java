@@ -134,22 +134,26 @@ implements ModifiableIntervalSet<T>
 	 * @see scheduler.util.ModifiableIntervalSet#clear()
 	 */
 	@Override
-	public void clear() {
+	public SimpleIntervalSet<T> clear() {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
 		intervals.clear();
+		
+		return this;
 	}
 	
 	/* (non-Javadoc)
 	 * @see scheduler.util.ModifiableIntervalSet#seal()
 	 */
 	@Override
-	public void seal() {
+	public SimpleIntervalSet<T> seal() {
 		if (isSealed())
 			throw new IllegalStateException("interval already sealed");
 		
 		sealed = true;
+		
+		return this;
 	}
 
 	private void put(T fromInclusive, T toExclusive) {
@@ -160,13 +164,15 @@ implements ModifiableIntervalSet<T>
 	 * @see scheduler.util.ModifiableIntervalSet#add(T, T)
 	 */
 	@Override
-	public void add(T fromInclusive, T toExclusive) {
+	public SimpleIntervalSet<T> add(T fromInclusive, T toExclusive) {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
 		checkInterval(fromInclusive, toExclusive);
 		
 		addImpl(fromInclusive, toExclusive);
+		
+		return this;
 	}
 	
 	protected void addImpl(T fromInclusive, T toExclusive) {
@@ -241,29 +247,31 @@ implements ModifiableIntervalSet<T>
 	 * @see scheduler.util.ModifiableIntervalSet#add(scheduler.util.IntervalSet)
 	 */
 	@Override
-	public void add(IntervalSet<T> other) {
+	public SimpleIntervalSet<T> add(IntervalSet<T> other) {
 		Objects.requireNonNull(other, "other");
 		
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
-		if (other == this)
-			return;
-		else
+		if (other != this)
 			other.forEach(i -> addImpl(i.getFromInclusive(), i.getToExclusive()));
+		
+		return this;
 	}
 	
 	/* (non-Javadoc)
 	 * @see scheduler.util.ModifiableIntervalSet#remove(T, T)
 	 */
 	@Override
-	public void remove(T fromInclusive, T toExclusive) {
+	public SimpleIntervalSet<T> remove(T fromInclusive, T toExclusive) {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
 		checkInterval(fromInclusive, toExclusive);
 		
 		removeImpl(fromInclusive, toExclusive);
+		
+		return this;
 	}
 	
 	protected void removeImpl(T fromInclusive, T toExclusive) {
@@ -310,7 +318,7 @@ implements ModifiableIntervalSet<T>
 	 * @see scheduler.util.ModifiableIntervalSet#remove(scheduler.util.IntervalSet)
 	 */
 	@Override
-	public void remove(IntervalSet<T> other) {
+	public SimpleIntervalSet<T> remove(IntervalSet<T> other) {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
@@ -322,19 +330,23 @@ implements ModifiableIntervalSet<T>
 			makeOverlappingSubSet(other).forEach(i ->
 				removeImpl(i.getFromInclusive(), i.getToExclusive()));
 		}
+		
+		return this;
 	}
 
 	/* (non-Javadoc)
 	 * @see scheduler.util.ModifiableIntervalSet#intersect(T, T)
 	 */
 	@Override
-	public void intersect(T fromInclusive, T toExclusive) {
+	public SimpleIntervalSet<T> intersect(T fromInclusive, T toExclusive) {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
 		checkInterval(fromInclusive, toExclusive);
 		
 		intersectImpl(fromInclusive, toExclusive);
+		
+		return this;
 	}
 	
 	protected void intersectImpl(T fromInclusive, T toExclusive) {
@@ -386,13 +398,13 @@ implements ModifiableIntervalSet<T>
 	 * @see scheduler.util.ModifiableIntervalSet#intersect(scheduler.util.IntervalSet)
 	 */
 	@Override
-	public void intersect(IntervalSet<T> other) {
+	public SimpleIntervalSet<T> intersect(IntervalSet<T> other) {
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
 		// short cut if other is this
 		if (other == this)
-			return;
+			return this;
 		
 		Optional<SimpleIntervalSet<T>> option = makeOverlappingSubSet(other).stream()
 			.map(i -> {
@@ -412,6 +424,8 @@ implements ModifiableIntervalSet<T>
 			intervals = option.get().intervals;
 		else
 			intervals.clear();
+		
+		return this;
 	}
 
 }

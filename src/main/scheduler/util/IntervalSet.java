@@ -16,12 +16,18 @@ extends Iterable<IntervalSet.Interval<T>>
 		
 		private final T toExclusive;
 	
-		protected Interval(
+		public Interval(
 			T fromInclusive,
 			T toExclusive)
 		{
-			this.fromInclusive = Objects.requireNonNull(fromInclusive, "fromInclusive");
-			this.toExclusive = Objects.requireNonNull(toExclusive, "toExclusive");
+			Objects.requireNonNull(fromInclusive, "fromInclusive");
+			Objects.requireNonNull(toExclusive, "toExclusive");
+			
+			if (fromInclusive.compareTo(toExclusive) >= 0)
+				throw new IllegalArgumentException("invalid interval");
+			
+			this.fromInclusive = fromInclusive;
+			this.toExclusive = toExclusive;
 		}
 	
 		public T getFromInclusive() {
