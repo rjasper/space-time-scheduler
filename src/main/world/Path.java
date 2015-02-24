@@ -12,6 +12,7 @@ import java.util.stream.StreamSupport;
 // TODO document
 public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>> {
 
+	// TODO should belong to the path (non-static)
 	public static interface Vertex {
 	
 		/**
@@ -31,6 +32,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	
 	}
 
+	// TODO should belong to the path (non-static)
 	public static interface Segment<V extends Vertex> {
 
 		/**
@@ -153,11 +155,11 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	/**
 	 * Returns a sub path from the given start sub-index to the finish sub-index.
 	 * 
-	 * @param startSubIndex
-	 * @param finishSubIndex
+	 * @param fromSubIndex
+	 * @param toSubIndex
 	 * @return the sub path.
 	 */
-	public abstract Path<V, S> subPath(double startSubIndex, double finishSubIndex);
+	public abstract Path<V, S> subPath(double fromSubIndex, double toSubIndex);
 
 	/**
 	 * @return a {@code VertexIterator}

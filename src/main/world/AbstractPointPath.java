@@ -262,11 +262,11 @@ implements PointPath<V, S>
 	 * @see world.Path#subPath(java.util.function.Function, double, double)
 	 */
 	@Override
-	public PointPath<V, S> subPath(double startPosition, double finishPosition) {
+	public PointPath<V, S> subPath(double fromSubIndex, double toSubIndex) {
 		return DoubleSubPointPathOperation.subPath(this,
 			v -> (double) v.getIndex(),
 			points -> create(points),
-			startPosition, finishPosition);
+			fromSubIndex, toSubIndex);
 	}
 
 	/*
