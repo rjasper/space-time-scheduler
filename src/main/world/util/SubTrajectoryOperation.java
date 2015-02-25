@@ -21,7 +21,7 @@ extends AbstractSubPathOperation<
 	Trajectory.Segment,
 	Trajectory,
 	Q,
-	TrajectoryInterpolator.Interpolation>
+	TrajectoryInterpolator.TrajectoryInterpolation>
 {
 
 	public SubTrajectoryOperation(
@@ -33,7 +33,7 @@ extends AbstractSubPathOperation<
 	}
 
 	@Override
-	protected Interpolator<Q, TrajectoryInterpolator.Interpolation> getInterpolator(
+	protected Interpolator<Q, TrajectoryInterpolator.TrajectoryInterpolation> getInterpolator(
 		Seeker<Q, Vertex> seeker,
 		TriFunction<Q, Q, Q, Double> relator)
 	{
@@ -42,9 +42,9 @@ extends AbstractSubPathOperation<
 
 	@Override
 	protected SimpleTrajectory construct(
-		TrajectoryInterpolator.Interpolation start,
+		TrajectoryInterpolator.TrajectoryInterpolation start,
 		Iterable<Vertex> innerVertices,
-		TrajectoryInterpolator.Interpolation finish)
+		TrajectoryInterpolator.TrajectoryInterpolation finish)
 	{
 		ImmutableList.Builder<ImmutablePoint> locationsBuilder = ImmutableList.builder();
 		ImmutableList.Builder<LocalDateTime> timesBuilder = ImmutableList.builder();

@@ -58,11 +58,11 @@ public class ScheduleResult {
 		}
 	}
 	
-	private static final ScheduleResult ERROR_SCHEDULE_RESULT =
+	private static final ScheduleResult ERRONEOUS_SCHEDULE_RESULT =
 		new ScheduleResult(true, emptyList(), emptyList());
 	
 	public static ScheduleResult error() {
-		return ERROR_SCHEDULE_RESULT;
+		return ERRONEOUS_SCHEDULE_RESULT;
 	}
 	
 	public static ScheduleResult success(List<Task> tasks, List<TrajectoryUpdate> trajectories) {

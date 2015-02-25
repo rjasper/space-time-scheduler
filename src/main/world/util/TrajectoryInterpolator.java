@@ -17,16 +17,26 @@ public class TrajectoryInterpolator<P extends Comparable<? super P>>
 extends AbstractInterpolator<
 	P,
 	Trajectory.Vertex,
-	TrajectoryInterpolator.Interpolation>
+	TrajectoryInterpolator.TrajectoryInterpolation>
 {
 
-	public static class Interpolation {
+	// TODO central location for common relators
+	public static final
+	TriFunction<LocalDateTime, LocalDateTime, LocalDateTime, Double> TIME_RELATOR =
+		(t, t1, t2) -> {
+			double d1 = inSeconds(Duration.between(t1, t));
+			double d12 = inSeconds(Duration.between(t1, t2));
+			
+			return d1 / d12;
+		};
+
+	public static class TrajectoryInterpolation {
 		
 		private final double subIndex;
 		private final ImmutablePoint location;
 		private final LocalDateTime time;
 		
-		public Interpolation(double subIndex, ImmutablePoint location, LocalDateTime time) {
+		public TrajectoryInterpolation(double subIndex, ImmutablePoint location, LocalDateTime time) {
 			this.subIndex = subIndex;
 			this.location = location;
 			this.time = time;
@@ -67,7 +77,7 @@ extends AbstractInterpolator<
 	}
 
 	@Override
-	protected Interpolation interpolate(P position, int idx1, P p1, Vertex v1, int idx2, P p2, Vertex v2) {
+	protected TrajectoryInterpolation interpolate(P position, int idx1, P p1, Vertex v1, int idx2, P p2, Vertex v2) {
 		double alpha = relator.apply(position, p1, p2);
 		
 		double subIndex = idx1 + alpha;
@@ -82,12 +92,12 @@ extends AbstractInterpolator<
 		
 		LocalDateTime time = t1.plus(ofSeconds(d1));
 		
-		return new Interpolation(subIndex, location, time);
+		return new TrajectoryInterpolation(subIndex, location, time);
 	}
 
 	@Override
-	protected Interpolation onSpot(int index, P position, Vertex vertex) {
-		return new Interpolation(index, vertex.getLocation(), vertex.getTime());
+	protected TrajectoryInterpolation onSpot(int index, P position, Vertex vertex) {
+		return new TrajectoryInterpolation(index, vertex.getLocation(), vertex.getTime());
 	}
 	
 }

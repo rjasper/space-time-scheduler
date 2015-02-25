@@ -1,5 +1,6 @@
 package world;
 
+import static java.lang.Math.*;
 import static common.collect.ImmutablesCollectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static util.DurationConv.*;
@@ -13,7 +14,12 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.DurationConv;
+import world.util.BinarySearchSeeker;
 import world.util.DoubleSubPointPathOperation;
+import world.util.Interpolator;
+import world.util.Interpolator.InterpolationResult;
+import world.util.PointPathInterpolator;
+import world.util.Seeker;
 import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
@@ -289,6 +295,79 @@ public class DecomposedTrajectory implements Trajectory {
 	@Override
 	public Duration getDuration() {
 		return getArcTimePathComponent().duration();
+	}
+
+	@Override
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		// short cut
+		if (isComposed())
+			return composed().isStationary(from, to);
+
+		Objects.requireNonNull(from, "from");
+		Objects.requireNonNull(to  , "to"  );
+		
+		if (!from.isBefore(to))
+			throw new IllegalArgumentException("invalid interval");
+		
+		// TODO short cut if from == start and to == finish
+		
+		// determine min and max arc between 'from' and 'to'
+		
+		double fromD = inSeconds(Duration.between(baseTime, from));
+		double toD   = inSeconds(Duration.between(baseTime, to  ));
+		
+		Seeker<Double, ArcTimePath.Vertex> timeSeeker = new BinarySearchSeeker<>(
+			arcTimePathComponent::getVertex,
+			PointPath.Vertex::getY,
+			arcTimePathComponent.size());
+		Interpolator<Double, ImmutablePoint> stInterpolator =
+			new PointPathInterpolator<>(timeSeeker);
+		
+		// interpolate arc at 'from' and 'to'
+		InterpolationResult<ImmutablePoint> stStart  = stInterpolator.interpolate(fromD);
+		InterpolationResult<ImmutablePoint> stFinish = stInterpolator.interpolate(toD);
+		
+		double minArc = stStart .getInterpolation().getX();
+		double maxArc = stFinish.getInterpolation().getX();
+		
+		// determine if there are even lower/greater arc values than at from/to
+		for (int i = stStart.getStartIndex()+1; i < stFinish.getFinishIndex()-1; ++i) {
+			double arc = arcTimePathComponent.getPoint(i).getX();
+			
+			minArc = min(minArc, arc);
+			maxArc = max(maxArc, arc);
+		}
+		
+		// interpolate min and max arc locations
+
+		Seeker<Double, SpatialPath.Vertex> arcSeeker = new BinarySearchSeeker<>(
+			spatialPathComponent::getVertex,
+			SpatialPath.Vertex::getArc,
+			spatialPathComponent.size());
+		Interpolator<Double, ImmutablePoint> xyInterpolator =
+			new PointPathInterpolator<>(arcSeeker);
+
+		InterpolationResult<ImmutablePoint> xyStart = xyInterpolator.interpolate(minArc);
+		InterpolationResult<ImmutablePoint> xyFinish = xyInterpolator.interpolate(maxArc);
+		
+		ImmutablePoint minArcLocation = xyStart.getInterpolation();
+		ImmutablePoint maxArcLocation = xyFinish.getInterpolation();
+
+		// check location at 'minArc' and 'maxArc'
+		
+		if (!minArcLocation.equals(maxArcLocation))
+			return false;
+		
+		// check locations between 'minArc' and 'maxArc'
+		
+		for (int i = xyStart.getStartIndex()+1; i < xyFinish.getFinishIndex()-1; ++i) {
+			ImmutablePoint location = spatialPathComponent.getPoint(i);
+			
+			if (!location.equals(minArcLocation))
+				return false;
+		}
+		
+		return true;
 	}
 
 	/*

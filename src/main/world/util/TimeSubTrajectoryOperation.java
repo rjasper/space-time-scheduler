@@ -28,6 +28,7 @@ extends SubTrajectoryOperation<LocalDateTime>
 		super(
 			trajectory,
 			v -> v.getTime(),
+			// TODO central location for common relators
 			(t, t1, t2) -> {
 				double d1 = inSeconds(Duration.between(t1, t));
 				double d12 = inSeconds(Duration.between(t1, t2));

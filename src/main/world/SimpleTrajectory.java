@@ -22,10 +22,13 @@ import world.util.PointPathInterpolator;
 import world.util.Seeker;
 import world.util.TimeSubIndexInterpolator;
 import world.util.TimeSubTrajectoryOperation;
+import world.util.TrajectoryInterpolator;
+import world.util.TrajectoryInterpolator.TrajectoryInterpolation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>
@@ -245,6 +248,46 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		}
 
 		return duration;
+	}
+
+	@Override
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		Objects.requireNonNull(from, "from");
+		Objects.requireNonNull(to  , "to"  );
+		
+		if (!from.isBefore(to))
+			throw new IllegalArgumentException("invalid interval");
+		
+		// TODO short cut if from == start and to == finish
+		
+		Seeker<LocalDateTime, Trajectory.Vertex> timeSeeker = new BinarySearchSeeker<>(
+			this::getVertex,
+			Trajectory.Vertex::getTime,
+			size());
+		Interpolator<LocalDateTime, TrajectoryInterpolation> interpolator =
+			new TrajectoryInterpolator<>(timeSeeker, TrajectoryInterpolator.TIME_RELATOR);
+		
+		InterpolationResult<TrajectoryInterpolation> start  = interpolator.interpolate(from);
+		InterpolationResult<TrajectoryInterpolation> finish = interpolator.interpolate(to);
+		
+		// check location at 'from' and 'to'
+		
+		Point fromLocation = start.getInterpolation().getLocation();
+		Point toLocation   = finish.getInterpolation().getLocation();
+		
+		if (!toLocation.equals( fromLocation ))
+			return false;
+		
+		// check locations between 'from' and 'to'
+		
+		for (int i = start.getStartIndex()+1; i < finish.getFinishIndex()-1; ++i) {
+			Point location = getVertex(i).getLocation();
+			
+			if (!location.equals(fromLocation))
+				return false;
+		}
+		
+		return true;
 	}
 
 	/*

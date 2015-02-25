@@ -1,5 +1,6 @@
 package world;
 
+import static util.Comparables.*;
 import static java.util.Collections.*;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import com.vividsolutions.jts.geom.Point;
+import jts.geom.immutable.ImmutablePoint;
 
 public class TrajectoryContainer {
 	
@@ -42,6 +43,15 @@ public class TrajectoryContainer {
 	}
 	
 	public Trajectory getTrajectory(LocalDateTime time) {
+		Trajectory trajectory = getTrajectoryOrNull(time);
+		
+		if (trajectory == null)
+			throw new IllegalArgumentException("invalid time");
+		
+		return trajectory;
+	}
+	
+	public Trajectory getTrajectoryOrNull(LocalDateTime time) {
 		Entry<LocalDateTime, Trajectory> entry = trajectories.floorEntry(time);
 		
 		if (entry == null) {
@@ -56,6 +66,32 @@ public class TrajectoryContainer {
 		}
 	}
 	
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		Trajectory trajectory = getTrajectory(time);
+		
+		return trajectory.interpolateLocation(time);
+	}
+	
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		if (isEmpty())
+			throw new IllegalStateException("container is empty");
+		
+		if (!from.isBefore( to              ) ||
+			!from.isBefore( getFinishTime() ) ||
+			!to  .isAfter ( getStartTime () ))
+		{
+			throw new IllegalArgumentException("invalid time interval");
+		}
+		
+		return overlappingTrajectories(from, to).stream()
+			.allMatch(t -> {
+				LocalDateTime start  = max(from, t.getStartTime ());
+				LocalDateTime finish = min(to  , t.getFinishTime());
+				
+				return t.isStationary(start, finish);
+			});
+	}
+	
 	public void update(Trajectory trajectory) {
 		Objects.requireNonNull(trajectory, "trajectory");
 		
@@ -65,6 +101,7 @@ public class TrajectoryContainer {
 		LocalDateTime startTime = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
+		// don't allow empty regions
 		if (!isEmpty() && (
 			startTime .isAfter ( getFinishTime() ) ||
 			finishTime.isBefore( getStartTime () )))
@@ -73,23 +110,24 @@ public class TrajectoryContainer {
 		}
 		
 		// examine left and right neighbors
-		Trajectory left  = getTrajectory(startTime);
-		Trajectory right = getTrajectory(finishTime);
+		Trajectory left  = getTrajectoryOrNull(startTime);
+		Trajectory right = getTrajectoryOrNull(finishTime);
 		
-		// check locations
-		if (left != null) {
-			Point leftLocation = left.interpolateLocation(startTime);
-			
-			if (!trajectory.getStartLocation().equals(leftLocation))
-				throw new IllegalArgumentException("incompatible start location");
-		}
-		// FIXME tail should be modifiable
-		if (right != null) {
-			Point rightLocation = right.interpolateLocation(finishTime);
-			
-			if (!trajectory.getFinishLocation().equals(rightLocation))
-				throw new IllegalArgumentException("incompatible finish location");
-		}
+		// no location check
+//		// check locations
+//		if (left != null) {
+//			Point leftLocation = left.interpolateLocation(startTime);
+//			
+//			if (!trajectory.getStartLocation().equals(leftLocation))
+//				throw new IllegalArgumentException("incompatible start location");
+//		}
+//		// FIXME tail should be modifiable
+//		if (right != null) {
+//			Point rightLocation = right.interpolateLocation(finishTime);
+//			
+//			if (!trajectory.getFinishLocation().equals(rightLocation))
+//				throw new IllegalArgumentException("incompatible finish location");
+//		}
 		
 		// determine necessary cuts
 		// left.finish > trajectory.start
@@ -149,6 +187,12 @@ public class TrajectoryContainer {
 			lowerEntry.getValue().getFinishTime().isAfter(time);
 		
 		return includeLower ? lowerEntry.getKey() : time;
+	}
+	
+	public Trajectory calcTrajectory() {
+		return trajectories.values().stream()
+			.reduce((u, v) -> u.concat(v))
+			.orElse(SimpleTrajectory.empty());
 	}
 
 }

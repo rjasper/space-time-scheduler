@@ -368,6 +368,22 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	 * @return the time difference between the first and last vertex.
 	 */
 	public abstract Duration getDuration();
+
+	/**
+	 * Determines whether this trajectory is stationary in space during the
+	 * given time interval [{@code from}, {@code to}].
+	 * 
+	 * @param from
+	 * @param to
+	 * @return {@code true} if the trajectory is stationary.
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code from} &gt;= {@code to} or
+	 *             [{@code from}, {@code to}] is not included within
+	 *             [{@link #getStartTime()}, {@link #getFinishTime()}].
+	 */
+	public abstract boolean isStationary(LocalDateTime from, LocalDateTime to);
 	
 	/**
 	 * Interpolates the location at the given time.
