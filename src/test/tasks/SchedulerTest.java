@@ -72,6 +72,7 @@ public class SchedulerTest {
 		ScheduleResult result;
 		
 		result = sc.schedule(ts1);
+		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule task",
 			result.isSuccess(), equalTo(true));
@@ -121,6 +122,7 @@ public class SchedulerTest {
 		ScheduleResult result;
 	
 		result = sc.schedule(s1);
+		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule s1",
 			result.isSuccess(), equalTo(true));
@@ -130,6 +132,7 @@ public class SchedulerTest {
 			w1, not(workerCollidesWith(w2)));
 		
 		result = sc.schedule(s2);
+		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule s2",
 			result.isSuccess(), equalTo(true));
@@ -139,6 +142,7 @@ public class SchedulerTest {
 			w1, not(workerCollidesWith(w2)));
 		
 		result = sc.schedule(s3);
+		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule s3",
 			result.isSuccess(), equalTo(true));
@@ -148,6 +152,7 @@ public class SchedulerTest {
 			w1, not(workerCollidesWith(w2)));
 		
 		result = sc.schedule(s4);
+		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule s4",
 			result.isSuccess(), equalTo(true));

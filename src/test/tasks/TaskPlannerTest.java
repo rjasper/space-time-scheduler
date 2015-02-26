@@ -103,18 +103,8 @@ public class TaskPlannerTest {
 			immutableBox(30., 10., 40., 40.));
 		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
 
-//		setNameFor(w, "w");
-		
 		Schedule schedule = makeSchedule(w);
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
-		
-//		WorldPerspectiveCache perspectiveCache =
-//			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-
-//		TaskPlanner tp = new TaskPlanner();
-//
-//		tp.setWorkerPool(singleton(w));
-//		tp.setPerspectiveCache(perspectiveCache);
 		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planTask(world, schedule,
@@ -143,14 +133,6 @@ public class TaskPlannerTest {
 		Schedule schedule = makeSchedule(w);
 		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
 		
-//		WorldPerspectiveCache perspectiveCache =
-//			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-//
-//		TaskPlanner tp = new TaskPlanner();
-//
-//		tp.setWorkerPool(singleton(w));
-//		tp.setPerspectiveCache(perspectiveCache);
-		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planTask(world, schedule,
 			w,
@@ -174,15 +156,6 @@ public class TaskPlannerTest {
 //		Schedule schedule = makeSchedule(w1, w2);
 //		World world = new World();
 //		
-////		WorldPerspectiveCache perspectiveCache =
-////			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-////		Collection<WorkerUnit> workers = Arrays.asList(w1, w2);
-////	
-////		TaskPlanner tp = new TaskPlanner();
-////	
-////		tp.setWorkerPool(workers);
-////		tp.setPerspectiveCache(perspectiveCache);
-//	
 //		boolean status;
 //	
 //		// w = w1, P = (3, 1), t = 10, d = 2
@@ -239,11 +212,6 @@ public class TaskPlannerTest {
 		World world = new World();
 		Schedule schedule = makeSchedule(w);
 		
-//		TaskPlanner tp = new TaskPlanner();
-//	
-//		tp.setWorkerPool(singleton(w));
-//		tp.setPerspectiveCache(emptyPerspectiveCache());
-		
 		boolean status = planTask(world, schedule,
 			w,
 			uuid("task"),
@@ -262,11 +230,6 @@ public class TaskPlannerTest {
 
 		World world = new World();
 		Schedule schedule = makeSchedule(w);
-		
-//		TaskPlanner tp = new TaskPlanner();
-//	
-//		tp.setWorkerPool(singleton(w));
-//		tp.setPerspectiveCache(emptyPerspectiveCache());
 		
 		boolean status;
 
@@ -300,11 +263,6 @@ public class TaskPlannerTest {
 
 		World world = new World();
 		Schedule schedule = makeSchedule(w);
-		
-//		TaskPlanner tp = new TaskPlanner();
-//	
-//		tp.setWorkerPool(singleton(w));
-//		tp.setPerspectiveCache(emptyPerspectiveCache());
 		
 		boolean status;
 

@@ -21,7 +21,6 @@ import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.Trajectory;
 import world.TrajectoryContainer;
-import world.WorkerUnitObstacle;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Coordinate;

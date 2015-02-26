@@ -102,6 +102,8 @@ public final class Example {
 		
 		ScheduleResult result = scheduler.schedule(spec);
 		
+		scheduler.commit(result.getTransactionId());
+		
 		System.out.println(result);
 		System.out.println(workerRef.calcTrajectory());
 	}

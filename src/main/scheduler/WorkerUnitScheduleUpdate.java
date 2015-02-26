@@ -19,8 +19,6 @@ public class WorkerUnitScheduleUpdate {
 	
 	private final WorkerUnit worker;
 	
-//	private final List<Trajectory> trajectories = new LinkedList<>();
-	
 	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 	
 	private final Set<Task> tasks = new HashSet<>();
@@ -35,43 +33,8 @@ public class WorkerUnitScheduleUpdate {
 	
 	private boolean sealed = false;
 
-	public WorkerUnitScheduleUpdate(WorkerUnit worker)
-	{
-		this.worker       = Objects.requireNonNull(worker      , "worker"      );
-//		this.trajectories = Objects.requireNonNull(trajectories, "trajectories");
-//		this.tasks        = Objects.requireNonNull(tasks       , "tasks"       );
-//		this.taskRemovals = Objects.requireNonNull(taskRemovals, "taskRemovals");
-//		
-//		// TODO updates should not predate initialTime
-//		
-//		// TODO check tasks
-//		// tasks should not overlap
-//		
-//		// TODO check trajectories
-//		// consecutive trajectories should touch
-//		// trajectories if present should lead to tasks
-//		
-//		// TODO check task removals
-//		// removals should not overlap
-//
-//		// lock new tasks
-//		for (Task t : tasks)
-//			tasksLock.add(t.getStartTime(), t.getFinishTime());
-//		tasksLock.seal();
-//		
-//		// lock trajectory updates
-//		for (Trajectory t : trajectories)
-//			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
-//		// lock fixated trajectories
-////		trajectoriesLock.add(tasksLock);
-//		for (Task t : tasks)
-//			trajectoriesLock.add(t.getStartTime(), t.getFinishTime());
-//		trajectoriesLock.seal();
-//		
-//		// add removal intervals
-//		for (Task t : taskRemovals)
-//			taskRemovalIntervals.add(t.getStartTime(), t.getFinishTime());
-//		taskRemovalIntervals.seal();
+	public WorkerUnitScheduleUpdate(WorkerUnit worker) {
+		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 	
 	public boolean isSealed() {
@@ -108,10 +71,6 @@ public class WorkerUnitScheduleUpdate {
 		return taskRemovalIntervals;
 	}
 
-//	public SimpleIntervalSet<LocalDateTime> getTasksLock() {
-//		return taskLock;
-//	}
-
 	public void updateTrajectory(Trajectory trajectory) {
 		Objects.requireNonNull(trajectory, "trajectory");
 		
@@ -121,6 +80,11 @@ public class WorkerUnitScheduleUpdate {
 		LocalDateTime startTime  = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
+		// TODO updates should not predate initialTime
+		
+		// TODO may remove
+		// consider multiple tasks
+		// trajectory should lead to new tasks
 		checkTrajectoryLock(startTime, finishTime);
 		
 		trajectoryLock.add(startTime, finishTime);
@@ -141,7 +105,8 @@ public class WorkerUnitScheduleUpdate {
 		LocalDateTime startTime  = task.getStartTime();
 		LocalDateTime finishTime = task.getFinishTime();
 		
-//		checkTrajectoryLock(task.getStartTime(), task.getFinishTime());
+		// TODO updates should not predate initialTime
+		
 		checkTaskLock(startTime, finishTime);
 		checkTask(task);
 		checkTaskLocation(task);
@@ -163,12 +128,6 @@ public class WorkerUnitScheduleUpdate {
 			throw new IllegalArgumentException("task lock violation");
 	}
 	
-//	public boolean verify() {
-//		// TODO implement
-//		
-//		return false;
-//	}
-
 	private void checkTaskLocation(Task task) {
 		Point location = task.getLocation();
 		LocalDateTime taskStart = task.getStartTime();
@@ -212,11 +171,6 @@ public class WorkerUnitScheduleUpdate {
 		taskRemovals.add(task);
 	}
 	
-//	private void checkTaskRemoval(Task task) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 	public void seal() {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");

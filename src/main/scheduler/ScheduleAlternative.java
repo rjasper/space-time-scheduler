@@ -11,19 +11,11 @@ import world.Trajectory;
 
 public class ScheduleAlternative {
 	
-//	private final ImmutableList<WorkerUnitScheduleUpdate> updates;
-	
 	private final Map<WorkerUnit, WorkerUnitScheduleUpdate> updates =
 		new IdentityHashMap<>();
 	
 	private boolean sealed = false;
 
-//	public ScheduleAlternative(
-//		ImmutableList<WorkerUnitScheduleUpdate> updates)
-//	{
-//		this.updates = Objects.requireNonNull(updates, "updates");
-//	}
-	
 	public boolean isSealed() {
 		return sealed;
 	}
