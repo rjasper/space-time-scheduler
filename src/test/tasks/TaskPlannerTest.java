@@ -50,7 +50,6 @@ public class TaskPlannerTest {
 	}
 	
 	private static boolean planTask(
-//		TaskPlanner taskPlanner,
 		World world,
 		Schedule schedule,
 		WorkerUnit worker,
@@ -84,7 +83,7 @@ public class TaskPlannerTest {
 		tp.setWorldPerspective(perspective);
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);
-		tp.setFixedEnd(ceilTime.isEqual(Scheduler.END_OF_TIME));
+		tp.setFixedEnd(!ceilTime.isEqual(Scheduler.END_OF_TIME));
 
 		boolean status = tp.plan();
 
@@ -123,7 +122,7 @@ public class TaskPlannerTest {
 			uuid("task"),
 			point(60., 20.),
 			atSecond(120.),
-			secondsToDuration(30.));
+			secondsToDurationSafe(30.));
 		
 		assertThat("unable to plan task",
 			status, equalTo(true));
@@ -158,7 +157,7 @@ public class TaskPlannerTest {
 			uuid("task"),
 			point(50., 20.),
 			atSecond(60.),
-			secondsToDuration(30.));
+			secondsToDurationSafe(30.));
 		
 		assertThat("unable to plan task",
 			status, equalTo(true));
@@ -250,7 +249,7 @@ public class TaskPlannerTest {
 			uuid("task"),
 			point(0, 0),
 			atSecond(0),
-			secondsToDuration(10));
+			secondsToDurationSafe(10));
 		
 		assertThat("unable to schedule tight task",
 			status, equalTo(true));
@@ -277,7 +276,7 @@ public class TaskPlannerTest {
 			uuid("task1"),
 			point(3, 1),
 			atSecond(2),
-			secondsToDuration(1));
+			secondsToDurationSafe(1));
 
 		assertThat("unable to plan task",
 			status, equalTo(true));
@@ -288,7 +287,7 @@ public class TaskPlannerTest {
 			uuid("task2"),
 			point(3, 1),
 			atSecond(3),
-			secondsToDuration(1));
+			secondsToDurationSafe(1));
 
 		assertThat("unable to plan task",
 			status, equalTo(true));
@@ -315,7 +314,7 @@ public class TaskPlannerTest {
 			uuid("task1"),
 			point(3, 1),
 			atSecond(3),
-			secondsToDuration(1));
+			secondsToDurationSafe(1));
 
 		assertThat("unable to plan task",
 			status, equalTo(true));
@@ -326,7 +325,7 @@ public class TaskPlannerTest {
 			uuid("task2"),
 			point(3, 1),
 			atSecond(2),
-			secondsToDuration(1));
+			secondsToDurationSafe(1));
 
 		assertThat("unable to plan task",
 			status, equalTo(true));

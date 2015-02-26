@@ -4,7 +4,6 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -406,9 +405,8 @@ public abstract class VelocityPathfinder {
 	 * @return the seconds.
 	 */
 	protected double inSeconds(LocalDateTime time) {
-		Duration duration = Duration.between(getBaseTime(), time);
-		
-		return TimeConv.durationToSeconds(duration);
+//		return TimeConv.timeToSecondsExact(time, getBaseTime());
+		return TimeConv.timeToSeconds(time, getBaseTime());
 	}
 	
 }

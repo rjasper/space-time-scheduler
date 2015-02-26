@@ -255,9 +255,9 @@ public class TaskPlanner {
 	}
 	
 	private boolean planImpl() {
-		Point taskLocation = location;
-		Point slotStartLocation = idleSlot.getStartLocation();
-		Point slotFinishLocation = fixedEnd
+		ImmutablePoint taskLocation = location;
+		ImmutablePoint slotStartLocation = idleSlot.getStartLocation();
+		ImmutablePoint slotFinishLocation = fixedEnd
 			? idleSlot.getFinishLocation()
 			: taskLocation;
 		
@@ -273,12 +273,20 @@ public class TaskPlanner {
 		Trajectory trajToTask = calculateTrajectoryToTask(spatialToTask);
 		if (trajToTask.isEmpty())
 			return false;
-
-		Task task = new Task(taskId, worker.getReference(), location, trajToTask.getFinishTime(), duration);
 		
-		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, task.getFinishTime());
+		LocalDateTime taskStartTime = trajToTask.getFinishTime();
+		Task task = new Task(taskId, worker.getReference(), location, taskStartTime, duration);
+		LocalDateTime taskFinishTime = task.getFinishTime();
+		
+		// FIXME if no fixed end don't use decomposed trajectories
+		
+		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, taskFinishTime);
 		if (trajFromTask.isEmpty())
 			return false;
+		
+		// in case of an open end don't use calculated trajectory since it is inaccurate
+		if (!fixedEnd)
+			trajFromTask = makeFinalTrajectory(slotFinishLocation, taskFinishTime);
 		
 		Trajectory trajAtTask = makeTrajectoryAtTask(task);
 		
@@ -414,6 +422,12 @@ public class TaskPlanner {
 		return new SimpleTrajectory(
 			new SpatialPath(ImmutableList.of(location, location)),
 			ImmutableList.of(task.getStartTime(), task.getFinishTime()));
+	}
+	
+	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {
+		return new SimpleTrajectory(
+			new SpatialPath(ImmutableList.of(location, location)),
+			ImmutableList.of(startTime, idleSlot.getFinishTime()));
 	}
 	
 }

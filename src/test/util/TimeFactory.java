@@ -11,13 +11,13 @@ public final class TimeFactory {
 	private TimeFactory() {}
 	
 	public static LocalDateTime atSecond(double second) {
-		Duration offset = TimeConv.secondsToDuration(second);
+		Duration offset = TimeConv.secondsToDurationSafe(second);
 		
 		return BASE_TIME.plus(offset);
 	}
 	
 	public static LocalDateTime atHour(double hour) {
-		Duration offset = TimeConv.secondsToDuration(hour * 3600.);
+		Duration offset = TimeConv.secondsToDurationSafe(hour * 3600.);
 		
 		return BASE_TIME.plus(offset);
 	}

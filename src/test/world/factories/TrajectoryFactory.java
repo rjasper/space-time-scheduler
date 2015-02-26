@@ -36,7 +36,7 @@ public class TrajectoryFactory {
 		SpatialPath path = new SpatialPath(builder.build());
 		
 		ImmutableList<LocalDateTime> times = Arrays.stream(ordinates, tOffset, ordinates.length)
-			.mapToObj(TimeConv::secondsToDuration)
+			.mapToObj(TimeConv::secondsToDurationSafe)
 			.map(TimeFactory.BASE_TIME::plus)
 			.collect(toImmutableList());
 		

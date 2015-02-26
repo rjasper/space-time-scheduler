@@ -150,7 +150,7 @@ public class WorkerUnitFactory {
 		tp.setWorldPerspective(perspective);
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);
-		tp.setFixedEnd(ceilTime.isEqual(Scheduler.END_OF_TIME));
+		tp.setFixedEnd(!ceilTime.isEqual(Scheduler.END_OF_TIME));
 
 		boolean status = tp.plan();
 

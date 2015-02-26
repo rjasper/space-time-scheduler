@@ -107,7 +107,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(5),
 			atSecond(6),
-			secondsToDuration(0));
+			secondsToDurationSafe(0));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -133,7 +133,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(10),
 			atSecond(10),
-			secondsToDuration(10));
+			secondsToDurationSafe(10));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -158,7 +158,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(10),
 			atSecond(10),
-			secondsToDuration(1.25));
+			secondsToDurationSafe(1.25));
 
 		assertThat("no path found",
 			status, equalTo(true));
