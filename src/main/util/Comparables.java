@@ -1,5 +1,7 @@
 package util;
 
+import java.util.Arrays;
+
 /**
  * {@code Comparables} provides static utility functions for {@link Comparable}
  * types.
@@ -24,6 +26,21 @@ public final class Comparables {
 	}
 
 	/**
+	 * Determines the minimum value of the given values.
+	 * 
+	 * @param values
+	 * @return the minimum value.
+	 */
+	public static <T extends Comparable<? super T>> T min(T... values) {
+		if (values.length == 0)
+			throw new IllegalArgumentException("no values");
+		
+		return Arrays.stream(values)
+			.min((u, v) -> u.compareTo(v))
+			.get();
+	}
+
+	/**
 	 * @param lhs
 	 *            the left hand side
 	 * @param rhs
@@ -34,6 +51,21 @@ public final class Comparables {
 	 */
 	public static <T extends Comparable<? super T>> T max(T lhs, T rhs) {
 		return lhs.compareTo(rhs) >= 0 ? lhs : rhs;
+	}
+
+	/**
+	 * Determines the maximum value of the given values.
+	 * 
+	 * @param values
+	 * @return the maximum value.
+	 */
+	public static <T extends Comparable<? super T>> T max(T... values) {
+		if (values.length == 0)
+			throw new IllegalArgumentException("no values");
+		
+		return Arrays.stream(values)
+			.max((u, v) -> u.compareTo(v))
+			.get();
 	}
 
 }

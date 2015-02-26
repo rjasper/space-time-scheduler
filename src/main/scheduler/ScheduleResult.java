@@ -1,10 +1,8 @@
 package scheduler;
 
 import static java.util.Collections.*;
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,11 +14,15 @@ import world.Trajectory;
 
 public class ScheduleResult {
 	
-	private final boolean error;
+//	private final boolean error;
+	
+	private final UUID transactionId;
 	
 	private final Map<UUID, Task> tasks;
 	
-	private final List<TrajectoryUpdate> trajectories;
+	private final Map<UUID, Task> taskRemovals;
+	
+	private final Collection<TrajectoryUpdate> trajectories;
 	
 	public static class TrajectoryUpdate {
 		
@@ -59,34 +61,54 @@ public class ScheduleResult {
 	}
 	
 	private static final ScheduleResult ERRONEOUS_SCHEDULE_RESULT =
-		new ScheduleResult(true, emptyList(), emptyList());
+		new ScheduleResult(null, emptyMap(), emptyMap(), emptyList());
 	
 	public static ScheduleResult error() {
 		return ERRONEOUS_SCHEDULE_RESULT;
 	}
 	
-	public static ScheduleResult success(List<Task> tasks, List<TrajectoryUpdate> trajectories) {
-		return new ScheduleResult(false, tasks, trajectories);
+	public static ScheduleResult success(
+		UUID transactionId,
+		Map<UUID, Task> tasks,
+		Map<UUID, Task> removals,
+		Collection<TrajectoryUpdate> trajectories)
+	{
+		Objects.requireNonNull(transactionId, "transactionId");
+		Objects.requireNonNull(tasks, "tasks");
+		Objects.requireNonNull(removals, "removals");
+		CollectionsRequire.requireNonNull(trajectories, "trajectories");
+		
+		return new ScheduleResult(transactionId, tasks, removals, trajectories);
 	}
 
-	private ScheduleResult(boolean error, List<Task> tasks, List<TrajectoryUpdate> trajectories) {
-		this.error = error;
-		this.tasks = tasks.stream().collect(toMap(Task::getId, identity()));
-		this.trajectories = CollectionsRequire.requireContainsNonNull(trajectories, "trajectories");
+	private ScheduleResult(
+		UUID transactionId,
+		Map<UUID, Task> tasks,
+		Map<UUID, Task> removals,
+		Collection<TrajectoryUpdate> trajectories)
+	{
+		this.transactionId = transactionId;
+		this.tasks         = tasks;
+		this.taskRemovals  = removals;
+		this.trajectories  = trajectories;
 	}
 
 	/**
 	 * @return {@code true} if the scheduling was unsuccessful.
 	 */
 	public boolean isError() {
-		return error;
+		return transactionId == null;
 	}
 	
 	/**
 	 * @return {@code true} if the scheduling was successful.
 	 */
 	public boolean isSuccess() {
-		return !error;
+		return transactionId != null;
+	}
+
+	public UUID getTransactionId() {
+		return transactionId;
 	}
 
 	/**
@@ -96,10 +118,14 @@ public class ScheduleResult {
 		return tasks;
 	}
 
+	public Map<UUID, Task> getTaskRemovals() {
+		return taskRemovals;
+	}
+
 	/**
 	 * @return the updated trajectories.
 	 */
-	public List<TrajectoryUpdate> getTrajectories() {
+	public Collection<TrajectoryUpdate> getTrajectories() {
 		return trajectories;
 	}
 

@@ -55,7 +55,7 @@ public abstract class SpatialPathfinder {
 	 *             if staticObstacles is {@code null}.
 	 */
 	public void setStaticObstacles(Collection<StaticObstacle> staticObstacles) {
-		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
+		CollectionsRequire.requireNonNull(staticObstacles, "staticObstacles");
 		
 		this.staticObstacles = unmodifiableCollection(staticObstacles);
 	}

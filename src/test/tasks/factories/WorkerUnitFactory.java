@@ -125,7 +125,7 @@ public class WorkerUnitFactory {
 		LocalDateTime time = atSecond(t);
 		Duration duration = Duration.ofSeconds(d);
 
-		tp.setWorkerUnit(worker);
+		tp.setWorker(worker);
 		tp.setTaskId(taskId);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);

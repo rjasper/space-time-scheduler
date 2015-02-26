@@ -5,14 +5,13 @@ import static java.util.Collections.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
+import world.TrajectoryContainer;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -20,7 +19,9 @@ public class WorkerUnitScheduleUpdate {
 	
 	private final WorkerUnit worker;
 	
-	private final List<Trajectory> trajectories = new LinkedList<>();
+//	private final List<Trajectory> trajectories = new LinkedList<>();
+	
+	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 	
 	private final Set<Task> tasks = new HashSet<>();
 	
@@ -82,7 +83,7 @@ public class WorkerUnitScheduleUpdate {
 	}
 
 	public Collection<Trajectory> getTrajectories() {
-		return unmodifiableCollection(trajectories);
+		return trajectoryContainer.getTrajectories();
 	}
 
 	public Collection<Task> getTasks() {
@@ -111,7 +112,7 @@ public class WorkerUnitScheduleUpdate {
 //		return taskLock;
 //	}
 
-	public void addTrajectory(Trajectory trajectory) {
+	public void updateTrajectory(Trajectory trajectory) {
 		Objects.requireNonNull(trajectory, "trajectory");
 		
 		if (isSealed())
@@ -122,10 +123,8 @@ public class WorkerUnitScheduleUpdate {
 		
 		checkTrajectoryLock(startTime, finishTime);
 		
-		// TODO implement
 		trajectoryLock.add(startTime, finishTime);
-		
-		trajectories.add(trajectory);
+		trajectoryContainer.update(trajectory);
 	}
 	
 	private void checkTrajectoryLock(LocalDateTime from, LocalDateTime to) {
@@ -179,7 +178,7 @@ public class WorkerUnitScheduleUpdate {
 		
 		// check if relevant alternative trajectory sections are stationary
 		if (trajectoryLock.intersects(taskStart, taskFinish)) {
-			valid = trajectories.stream()
+			valid = trajectoryContainer.getTrajectories().stream()
 				.allMatch(t -> {
 					IntervalSet<LocalDateTime> intersection = new SimpleIntervalSet<LocalDateTime>()
 						.add(t.getStartTime(), t.getFinishTime())

@@ -1,6 +1,7 @@
 package pickers;
 
 import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
+import static util.Comparables.*;
 import static util.DurationConv.*;
 
 import java.time.Duration;
@@ -9,6 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
+import jts.geom.util.GeometriesRequire;
 import scheduler.IdleSlot;
 import scheduler.WorkerUnit;
 
@@ -66,6 +68,9 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		}
 
 	}
+	
+	// TODO document
+	private final LocalDateTime frozenHorizonTime;
 
 	/**
 	 * The location of the task specification.
@@ -137,25 +142,30 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 */
 	public WorkerUnitSlotIterator(
 		Iterable<WorkerUnit> workers,
+		LocalDateTime frozenHorizonTime,
 		Point location,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
 		Objects.requireNonNull(workers, "workers");
+		Objects.requireNonNull(frozenHorizonTime, "frozenHorizon");
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
+		
+		GeometriesRequire.requireValid2DPoint(location, "location");
 
-		if (location.isEmpty() || !location.isValid())
-			throw new IllegalArgumentException("illegal location");
+//		if (location.isEmpty() || !location.isValid())
+//			throw new IllegalArgumentException("illegal location");
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalArgumentException("earliestStartTime is after latestStartTime");
 		if (duration.isNegative())
 			throw new IllegalArgumentException("duration is negative");
 
 		this.workerIterator = workers.iterator();
+		this.frozenHorizonTime = frozenHorizonTime;
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
@@ -170,82 +180,83 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 
 	@Override
 	public boolean hasNext() {
-		return getNextWorker() != null;
+//		return getNextWorker() != null;
+		return nextWorker != null;
 	}
 
-	/**
-	 * @return the location of the task specification.
-	 */
-	private Point getLocation() {
-		return location;
-	}
-
-	/**
-	 * @return the earliest time to execute the task.
-	 */
-	private LocalDateTime getEarliestStartTime() {
-		return earliestStartTime;
-	}
-
-	/**
-	 * @return the latest time to execute the task.
-	 */
-	private LocalDateTime getLatestStartTime() {
-		return latestStartTime;
-	}
-
-	/**
-	 * @return the duration of the task execution.
-	 */
-	private Duration getDuration() {
-		return duration;
-	}
-
-	/**
-	 * @return the iterator over the workers to be considered.
-	 */
-	private Iterator<WorkerUnit> getWorkerIterator() {
-		return workerIterator;
-	}
-
-	/**
-	 * @return the next worker to be returned as current worker.
-	 */
-	private WorkerUnit getNextWorker() {
-		return nextWorker;
-	}
-
-	/**
-	 * Sets the next worker to be returned as current worker.
-	 *
-	 * @param nextWorker
-	 */
-	private void setNextWorker(WorkerUnit nextWorker) {
-		this.nextWorker = nextWorker;
-	}
-
-	/**
-	 * @return the next slot to be returned as current slot.
-	 */
-	private IdleSlot getNextSlot() {
-		return nextSlot;
-	}
-
-	/**
-	 * Sets The next slot to be returned as current slot.
-	 *
-	 * @param nextSlot
-	 */
-	private void setNextSlot(IdleSlot nextSlot) {
-		this.nextSlot = nextSlot;
-	}
-
-	/**
-	 * @return the iterator over the idle slots of the current worker.
-	 */
-	private Iterator<IdleSlot> getSlotIterator() {
-		return slotIterator;
-	}
+//	/**
+//	 * @return the location of the task specification.
+//	 */
+//	private Point getLocation() {
+//		return location;
+//	}
+//
+//	/**
+//	 * @return the earliest time to execute the task.
+//	 */
+//	private LocalDateTime getEarliestStartTime() {
+//		return earliestStartTime;
+//	}
+//
+//	/**
+//	 * @return the latest time to execute the task.
+//	 */
+//	private LocalDateTime getLatestStartTime() {
+//		return latestStartTime;
+//	}
+//
+//	/**
+//	 * @return the duration of the task execution.
+//	 */
+//	private Duration getDuration() {
+//		return duration;
+//	}
+//
+//	/**
+//	 * @return the iterator over the workers to be considered.
+//	 */
+//	private Iterator<WorkerUnit> getWorkerIterator() {
+//		return workerIterator;
+//	}
+//
+//	/**
+//	 * @return the next worker to be returned as current worker.
+//	 */
+//	private WorkerUnit getNextWorker() {
+//		return nextWorker;
+//	}
+//
+//	/**
+//	 * Sets the next worker to be returned as current worker.
+//	 *
+//	 * @param nextWorker
+//	 */
+//	private void setNextWorker(WorkerUnit nextWorker) {
+//		this.nextWorker = nextWorker;
+//	}
+//
+//	/**
+//	 * @return the next slot to be returned as current slot.
+//	 */
+//	private IdleSlot getNextSlot() {
+//		return nextSlot;
+//	}
+//
+//	/**
+//	 * Sets The next slot to be returned as current slot.
+//	 *
+//	 * @param nextSlot
+//	 */
+//	private void setNextSlot(IdleSlot nextSlot) {
+//		this.nextSlot = nextSlot;
+//	}
+//
+//	/**
+//	 * @return the iterator over the idle slots of the current worker.
+//	 */
+//	private Iterator<IdleSlot> getSlotIterator() {
+//		return slotIterator;
+//	}
 
 	/**
 	 * Sets the iterator over the idle slots of the current worker.
@@ -263,14 +274,14 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		return currentWorker;
 	}
 
-	/**
-	 * Sets the current worker of the iteration.
-	 *
-	 * @param currentWorker
-	 */
-	private void setCurrentWorker(WorkerUnit currentWorker) {
-		this.currentWorker = currentWorker;
-	}
+//	/**
+//	 * Sets the current worker of the iteration.
+//	 *
+//	 * @param currentWorker
+//	 */
+//	private void setCurrentWorker(WorkerUnit currentWorker) {
+//		this.currentWorker = currentWorker;
+//	}
 
 	/**
 	 * @return the current slot of the iteration.
@@ -278,15 +289,23 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	public IdleSlot getCurrentSlot() {
 		return currentSlot;
 	}
-
-	/**
-	 * Sets the current slot of the iteration.
-	 *
-	 * @param currentSlot
-	 */
-	private void setCurrentSlot(IdleSlot currentSlot) {
-		this.currentSlot = currentSlot;
+	
+	private LocalDateTime earliestStartTime() {
+		return max(earliestStartTime, frozenHorizonTime);
 	}
+	
+	private LocalDateTime latestStartTime() {
+		return latestStartTime;
+	}
+
+//	/**
+//	 * Sets the current slot of the iteration.
+//	 *
+//	 * @param currentSlot
+//	 */
+//	private void setCurrentSlot(IdleSlot currentSlot) {
+//		this.currentSlot = currentSlot;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -294,8 +313,11 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 */
 	@Override
 	public WorkerUnitSlot next() {
-		setCurrentWorker(getNextWorker());
-		setCurrentSlot(getNextSlot());
+//		setCurrentWorker(getNextWorker());
+//		setCurrentSlot(getNextSlot());
+		
+		currentWorker = nextWorker;
+		currentSlot = nextSlot;
 
 		nextSlot();
 
@@ -310,14 +332,23 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	private WorkerUnit nextWorker() {
 		// sets the next worker and initializes an new idle slot iterator
 
-		LocalDateTime earliest = getEarliestStartTime();
-		LocalDateTime latest = getLatestStartTime();
+//		LocalDateTime earliest = getEarliestStartTime();
+//		LocalDateTime latest = getLatestStartTime();
 
-		Iterator<WorkerUnit> it = getWorkerIterator();
-		WorkerUnit worker = it.next();
-		Collection<IdleSlot> slots = worker.idleSlots(earliest, latest);
+//		Iterator<WorkerUnit> it = getWorkerIterator();
+		WorkerUnit worker = workerIterator.next();
+		
+		LocalDateTime earliest = earliestStartTime();
+		LocalDateTime latest = latestStartTime();
+		LocalDateTime floorIdle = worker.floorIdleTimeOrNull(earliest);
+		LocalDateTime ceilIdle = worker.ceilingIdleTimeOrNull(latest);
+		
+		Collection<IdleSlot> slots = worker.idleSlots(
+			floorIdle != null ? floorIdle : earliest,
+			ceilIdle  != null ? ceilIdle  : latest);
 
-		setNextWorker(worker);
+//		setNextWorker(worker);
+		nextWorker = worker;
 		setSlotIterator(slots.iterator());
 
 		return worker;
@@ -329,23 +360,24 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 * @return the next idle slot.
 	 */
 	private IdleSlot nextSlot() {
-		Iterator<WorkerUnit> wit = getWorkerIterator();
-		Iterator<IdleSlot> sit = getSlotIterator();
+//		Iterator<WorkerUnit> wit = getWorkerIterator();
+//		Iterator<IdleSlot> sit = getSlotIterator();
 
-		WorkerUnit worker = getNextWorker();
+//		WorkerUnit worker = getNextWorker();
+		WorkerUnit worker = nextWorker;
 		IdleSlot slot = null;
 
 		// iterates over the remaining idle slots of the remaining workers
 		// until a valid slot was found
-		while (wit.hasNext() || sit.hasNext()) {
+		while (workerIterator.hasNext() || slotIterator.hasNext()) {
 			// if there are no more idle slots of the current worker
 			// then get the next one
-			if (!sit.hasNext()) {
+			if (!slotIterator.hasNext()) {
 				worker = nextWorker();
-				sit = getSlotIterator();
+//				sit = getSlotIterator();
 			// otherwise check the next idle slot
 			} else {
-				IdleSlot candidate = sit.next();
+				IdleSlot candidate = slotIterator.next();
 
 				// break if the current idle slot is accepted
 				if (check(worker, candidate)) {
@@ -358,9 +390,11 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		// if there are no more valid idle slots
 		if (slot == null)
 			// #hasNext checks if #nextWorker is null
-			setNextWorker(null);
+//			setNextWorker(null);
+			nextWorker = null;
 
-		setNextSlot(slot);
+//		setNextSlot(slot);
+		nextSlot = slot;
 
 		return slot;
 	}
@@ -376,36 +410,36 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 	 * @return {@code true} iff worker can potentially execute the task in time.
 	 */
 	private boolean check(WorkerUnit worker, IdleSlot slot) {
-		Duration d = getDuration();
+//		Duration d = getDuration();
 		double vInv = 1. / worker.getMaxSpeed();
-		Point p = getLocation();
-		LocalDateTime earliest = getEarliestStartTime();
-		LocalDateTime latest = getLatestStartTime();
+//		Point p = getLocation();
+//		LocalDateTime earliest = getEarliestStartTime();
+//		LocalDateTime latest = getLatestStartTime();
 		LocalDateTime t1 = slot.getStartTime();
 		LocalDateTime t2 = slot.getFinishTime();
 		Point p1 = slot.getStartLocation();
 		Point p2 = slot.getFinishLocation();
-		double l1 = distance(p1, p);
-		double l2 = p2 == null ? 0. : distance(p, p2);
+		double l1 = distance(p1, location);
+		double l2 = p2 == null ? 0. : distance(location, p2);
 
 		// task can be started in time
 		// t_max - t1 < l1 / v_max
-		if (Duration.between(t1, latest).compareTo(
+		if (Duration.between(t1, latestStartTime()).compareTo(
 			ofSeconds(vInv * l1)) < 0)
 		{
 			return false;
 		}
 		// task can be finished in time
 		// t2 - t_min < l2 / v_max + d
-		if (Duration.between(earliest, t2).compareTo(
-			ofSeconds(vInv * l2).plus(d)) < 0)
+		if (Duration.between(earliestStartTime(), t2).compareTo(
+			ofSeconds(vInv * l2).plus(duration)) < 0)
 		{
 			return false;
 		}
 		// enough time to complete task
 		// t2 - t1 < (l1 + l2) / v_max + d
 		if (Duration.between(t1, t2).compareTo(
-			ofSeconds(vInv * (l1 + l2)).plus(d)) < 0)
+			ofSeconds(vInv * (l1 + l2)).plus(duration)) < 0)
 		{
 			return false;
 		}

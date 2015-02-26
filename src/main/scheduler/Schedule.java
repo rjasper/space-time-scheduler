@@ -1,22 +1,21 @@
 package scheduler;
 
 import static java.util.Collections.*;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vividsolutions.jts.geom.Point;
-
 import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class Schedule {
 	

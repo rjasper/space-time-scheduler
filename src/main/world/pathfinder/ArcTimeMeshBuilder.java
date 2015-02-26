@@ -105,7 +105,7 @@ public abstract class ArcTimeMeshBuilder {
 	 *             if forbiddenRegions is or contains {@code null}.
 	 */
 	public void setForbiddenRegions(Collection<ForbiddenRegion> forbiddenRegions) {
-		CollectionsRequire.requireContainsNonNull(forbiddenRegions, "forbiddenRegions");
+		CollectionsRequire.requireNonNull(forbiddenRegions, "forbiddenRegions");
 		
 		this.forbiddenRegions = unmodifiableCollection( forbiddenRegions );
 		

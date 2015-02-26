@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
+import scheduler.Scheduler;
 import scheduler.WorkerUnit;
 
 import com.google.common.collect.ImmutableList;
@@ -52,7 +53,7 @@ public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
 		GeometriesRequire.requireValid2DPoint(location, "location");
 		
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(location, location));
-		ImmutableList<LocalDateTime> times = ImmutableList.of(startTime, LocalDateTime.MAX);
+		ImmutableList<LocalDateTime> times = ImmutableList.of(startTime, Scheduler.END_OF_TIME);
 
 		return new SimpleTrajectory(spatialPath, times);
 	}

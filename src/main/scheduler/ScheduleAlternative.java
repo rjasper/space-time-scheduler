@@ -50,7 +50,7 @@ public class ScheduleAlternative {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");
 		
-		getUpdate(worker).addTrajectory(trajectory);
+		getUpdate(worker).updateTrajectory(trajectory);
 	}
 	
 	public Collection<WorkerUnit> getWorkers() {

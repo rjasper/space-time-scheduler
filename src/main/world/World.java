@@ -60,8 +60,8 @@ public class World {
 		ImmutableCollection<StaticObstacle> staticObstacles,
 		ImmutableCollection<DynamicObstacle> dynamicObstacles)
 	{
-		CollectionsRequire.requireContainsNonNull(staticObstacles, "staticObstacles");
-		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
+		CollectionsRequire.requireNonNull(staticObstacles, "staticObstacles");
+		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
 		
 		this.staticObstacles = immutable(staticObstacles);
 		this.dynamicObstacles = immutable(dynamicObstacles);

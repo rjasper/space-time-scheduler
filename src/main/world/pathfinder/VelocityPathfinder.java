@@ -193,7 +193,7 @@ public abstract class VelocityPathfinder {
 	 *             if dynamicObstacles is {@code null}.
 	 */
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
-		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
+		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
 		
 		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}

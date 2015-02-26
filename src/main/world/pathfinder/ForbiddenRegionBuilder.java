@@ -87,7 +87,7 @@ public class ForbiddenRegionBuilder {
 	 *             {@code null}.
 	 */
 	public void setDynamicObstacles(Collection<? extends DynamicObstacle> dynamicObstacles) {
-		CollectionsRequire.requireContainsNonNull(dynamicObstacles, "dynamicObstacles");
+		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
 		
 		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}

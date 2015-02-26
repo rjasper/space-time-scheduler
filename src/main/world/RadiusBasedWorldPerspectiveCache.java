@@ -253,7 +253,8 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 		WorldPerspectiveReference reference = lookUpByPerceiver(perceiver);
 
 		if (reference == null)
-			throw new IllegalArgumentException("perceiver unknown");
+//			throw new IllegalArgumentException("perceiver unknown");
+			return;
 
 		removePerceiverReference(perceiver);
 

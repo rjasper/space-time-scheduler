@@ -20,6 +20,10 @@ public class TrajectoryContainer {
 		return trajectories.isEmpty();
 	}
 	
+	public Collection<Trajectory> getTrajectories() {
+		return unmodifiableCollection(trajectories.values());
+	}
+	
 	public Trajectory getFirstTrajectory() {
 		if (isEmpty())
 			throw new NoSuchElementException("container is empty");
@@ -34,14 +38,6 @@ public class TrajectoryContainer {
 		return trajectories.lastEntry().getValue();
 	}
 	
-	public LocalDateTime getStartTime() {
-		return getFirstTrajectory().getStartTime();
-	}
-	
-	public LocalDateTime getFinishTime() {
-		return getLastTrajectory().getFinishTime();
-	}
-	
 	public Trajectory getTrajectory(LocalDateTime time) {
 		Trajectory trajectory = getTrajectoryOrNull(time);
 		
@@ -50,7 +46,7 @@ public class TrajectoryContainer {
 		
 		return trajectory;
 	}
-	
+
 	public Trajectory getTrajectoryOrNull(LocalDateTime time) {
 		Entry<LocalDateTime, Trajectory> entry = trajectories.floorEntry(time);
 		
@@ -65,6 +61,14 @@ public class TrajectoryContainer {
 				return null;
 		}
 	}
+
+	public LocalDateTime getStartTime() {
+		return getFirstTrajectory().getStartTime();
+	}
+	
+	public LocalDateTime getFinishTime() {
+		return getLastTrajectory().getFinishTime();
+	}
 	
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
 		Trajectory trajectory = getTrajectory(time);
@@ -73,6 +77,8 @@ public class TrajectoryContainer {
 	}
 	
 	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		// FIXME empty regions are not considered
+		
 		if (isEmpty())
 			throw new IllegalStateException("container is empty");
 		
@@ -101,13 +107,14 @@ public class TrajectoryContainer {
 		LocalDateTime startTime = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
-		// don't allow empty regions
-		if (!isEmpty() && (
-			startTime .isAfter ( getFinishTime() ) ||
-			finishTime.isBefore( getStartTime () )))
-		{
-			throw new IllegalArgumentException("incompatible trajectory");
-		}
+		// allow empty regions (WorkerUnitScheduleUpdate)
+//		// don't allow empty regions
+//		if (!isEmpty() && (
+//			startTime .isAfter ( getFinishTime() ) ||
+//			finishTime.isBefore( getStartTime () )))
+//		{
+//			throw new IllegalArgumentException("incompatible trajectory");
+//		}
 		
 		// examine left and right neighbors
 		Trajectory left  = getTrajectoryOrNull(startTime);
@@ -121,7 +128,7 @@ public class TrajectoryContainer {
 //			if (!trajectory.getStartLocation().equals(leftLocation))
 //				throw new IllegalArgumentException("incompatible start location");
 //		}
-//		// FIXME tail should be modifiable
+//		// fIXME tail should be modifiable
 //		if (right != null) {
 //			Point rightLocation = right.interpolateLocation(finishTime);
 //			
@@ -190,6 +197,7 @@ public class TrajectoryContainer {
 	}
 	
 	public Trajectory calcTrajectory() {
+		// FIXME empty regions will mess this up
 		return trajectories.values().stream()
 			.reduce((u, v) -> u.concat(v))
 			.orElse(SimpleTrajectory.empty());

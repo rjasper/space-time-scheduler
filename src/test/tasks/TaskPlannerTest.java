@@ -49,7 +49,7 @@ public class TaskPlannerTest {
 		LocalDateTime startTime,
 		Duration duration)
 	{
-		taskPlanner.setWorkerUnit(worker);
+		taskPlanner.setWorker(worker);
 		taskPlanner.setLocation(location);
 		taskPlanner.setTaskId(taskId);
 		taskPlanner.setEarliestStartTime(startTime);

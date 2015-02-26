@@ -3,11 +3,11 @@ package scheduler;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
+import static util.Maps.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -135,7 +135,7 @@ public class WorkerUnit {
 		SpatialPath spatialPath = new SpatialPath(
 			ImmutableList.of(initialLocation, initialLocation));
 		ImmutableList<LocalDateTime> times = ImmutableList.of(
-			initialTime, LocalDateTime.MAX);
+			initialTime, Scheduler.END_OF_TIME);
 		Trajectory initialTrajectory = new SimpleTrajectory(spatialPath, times);
 		
 		trajectories.update(initialTrajectory);
@@ -235,6 +235,90 @@ public class WorkerUnit {
 	}
 	
 	/**
+	 * Determines whether the worker is idle for the given entire interval.
+	 * 
+	 * @param from
+	 * @param to
+	 * @return {@code true} if the worker is idle.
+	 */
+	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
+		return !getTaskIntervals().intersects(from, to);
+	}
+	
+	// TODO document
+	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
+		if (time.isBefore(initialTime))
+			return null;
+		
+		Task lowerTask = value(tasks.lowerEntry(time));
+		LocalDateTime lowerFinish = lowerTask == null
+			? Scheduler.BEGIN_OF_TIME
+			: lowerTask.getFinishTime();
+		
+		// lower.start < time
+		
+		int lowerFinishCmpTime = lowerFinish.compareTo(time);
+		
+		if (lowerFinishCmpTime > 0)
+			// time < lower.finish
+			return null;
+		else if (lowerFinishCmpTime == 0) {
+			// time == lower.finish
+			Task ceilTask = value(tasks.ceilingEntry(time));
+			LocalDateTime ceilStart = ceilTask == null
+				? Scheduler.END_OF_TIME
+				: ceilTask.getStartTime();
+
+			// if floorTask and ceilTask touch
+			if (ceilStart.equals(time))
+				// lower.finish == time == ceil.start
+				return null;
+		}
+		
+		// lower.finish <= time <= ceil.start
+		// lower.finish < ceil.start
+		
+		return lowerFinish;
+	}
+	
+	// TODO document
+	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
+		if (time.isBefore(initialTime))
+			return null;
+		
+		Task lowerTask = value(tasks.lowerEntry(time));
+		LocalDateTime lowerFinish = lowerTask == null
+			? Scheduler.BEGIN_OF_TIME
+			: lowerTask.getFinishTime();
+		
+		// lower.start < time
+		
+		// if lowerTask intersects with time
+		if (lowerFinish.compareTo(time) > 0)
+			// lower.start < time < lower.finish
+			return null;
+		
+		// lower.finish <= time
+		
+		Task ceilTask = value(tasks.ceilingEntry(time));
+		LocalDateTime ceilStart = ceilTask == null
+			? Scheduler.END_OF_TIME
+			: ceilTask.getStartTime();
+		
+		// time <= ceil.start
+		
+		// if floorTask and ceilTask touch
+		if (lowerFinish.equals(ceilStart))
+			// lower.finish == time == ceil.start
+			return null;
+		
+		// lower.finish <= time <= ceil.start
+		// lower.finish < ceil.start
+		
+		return ceilStart;
+	}
+	
+	/**
 	 * Interpolates the location of the worker at the given time.
 	 * 
 	 * @param time
@@ -315,6 +399,10 @@ public class WorkerUnit {
 		
 		if (!status)
 			throw new IllegalArgumentException("unknown task");
+	}
+	
+	public Collection<Trajectory> getTrajectories() {
+		return trajectories.getTrajectories();
 	}
 	
 	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
