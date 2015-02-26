@@ -57,7 +57,7 @@ public final class TimeConv {
 			throw new IllegalArgumentException("seconds exceeds Duration range");
 
 		double floorSeconds = Math.floor(seconds);
-		double nano = 1e9 * (seconds - floorSeconds);
+		double nano = Math.round(1e9 * (seconds - floorSeconds));
 
 		return Duration.ofSeconds((long) floorSeconds, (long) nano);
 	}
