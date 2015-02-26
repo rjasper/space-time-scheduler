@@ -4,15 +4,13 @@ import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import jts.geom.immutable.ImmutablePoint;
-
-import com.google.common.collect.ImmutableList;
-
 import util.TriFunction;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.Trajectory;
 import world.Trajectory.Vertex;
-import world.util.TrajectoryInterpolator;
+
+import com.google.common.collect.ImmutableList;
 
 // TODO document
 public class SubTrajectoryOperation<Q extends Comparable<? super Q>>

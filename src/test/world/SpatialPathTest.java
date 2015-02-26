@@ -1,9 +1,9 @@
 package world;
 
-import static org.hamcrest.CoreMatchers.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static world.factories.PathFactory.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static world.factories.PathFactory.*;
 
 import java.util.NoSuchElementException;
 

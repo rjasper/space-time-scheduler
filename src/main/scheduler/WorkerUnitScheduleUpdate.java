@@ -186,12 +186,14 @@ public class WorkerUnitScheduleUpdate {
 					
 					// intersection is either empty or continuous [min, max]
 					
+					if (intersection.isEmpty())
+						return true;
+					
 					LocalDateTime start = intersection.minValue();
 					LocalDateTime finish = intersection.maxValue();
 					
-					return intersection.isEmpty() || (
-						t.isStationary(start, finish) &&
-						t.interpolateLocation(start).equals(location));
+					return t.isStationary(start, finish)
+						&& t.interpolateLocation(start).equals(location);
 				});
 		}
 		

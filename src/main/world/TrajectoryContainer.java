@@ -1,7 +1,7 @@
 package world;
 
-import static util.Comparables.*;
 import static java.util.Collections.*;
+import static util.Comparables.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

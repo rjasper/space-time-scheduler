@@ -9,7 +9,7 @@ import jts.geom.immutable.ImmutablePoint;
 
 import org.apache.commons.collections4.iterators.IteratorIterable;
 
-import util.DurationConv;
+import util.TimeConv;
 import world.util.ArcTimePathInterpolator;
 import world.util.BinarySearchSeeker;
 import world.util.Interpolator;
@@ -169,7 +169,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		 * @return the duration.
 		 */
 		public Duration duration() {
-			return DurationConv.ofSeconds(durationInSeconds());
+			return TimeConv.secondsToDuration(durationInSeconds());
 		}
 
 		/**
@@ -245,7 +245,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		if (duration == null) {
 			double seconds = durationInSeconds();
 			
-			duration = DurationConv.ofSeconds(seconds);
+			duration = TimeConv.secondsToDuration(seconds);
 		}
 		
 		return duration;

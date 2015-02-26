@@ -1,7 +1,7 @@
 package scheduler;
 
-import static util.Comparables.*;
 import static jts.geom.immutable.ImmutableGeometries.*;
+import static util.Comparables.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -142,6 +142,10 @@ public class TaskPlanner {
 
 	public void setWorldPerspective(WorldPerspective worldPerspective) {
 		this.worldPerspective = Objects.requireNonNull(worldPerspective, "worldPerspective");
+	}
+
+	public void setSchedule(Schedule schedule) {
+		this.schedule = Objects.requireNonNull(schedule, "schedule");
 	}
 
 	public void setScheduleAlternative(ScheduleAlternative alternative) {
@@ -339,7 +343,7 @@ public class TaskPlanner {
 		double radius = this.worker.getRadius();
 		
 		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(worker, w ->
-			(ImmutablePolygon) w.getShape().buffer(radius));
+			(ImmutablePolygon) immutable(w.getShape().buffer(radius)));
 		
 		return new DynamicObstacle(shape, trajectory);
 	}
@@ -356,6 +360,8 @@ public class TaskPlanner {
 	
 		pf.setStartLocation(startLocation);
 		pf.setFinishLocation(finishLocation);
+		
+		pf.calculate();
 	
 		return pf.getResultSpatialPath();
 	}
@@ -378,6 +384,8 @@ public class TaskPlanner {
 		pf.setLatestFinishTime  ( latestStartTime()       );
 		pf.setBufferDuration    ( duration                );
 		
+		pf.calculate();
+		
 		return pf.getResultTrajectory();
 	}
 
@@ -396,6 +404,8 @@ public class TaskPlanner {
 		pf.setMaxSpeed        ( worker.getMaxSpeed()     );
 		pf.setStartTime       ( startTime                );
 		pf.setFinishTime      ( idleSlot.getFinishTime() );
+		
+		pf.calculate();
 
 		return pf.getResultTrajectory();
 	}

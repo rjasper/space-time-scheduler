@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
-import util.DurationConv;
+import util.TimeConv;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
@@ -132,7 +132,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @return the time in seconds.
 		 */
 		public double getTimeInSeconds(LocalDateTime baseTime) {
-			return DurationConv.inSeconds(Duration.between(baseTime, time));
+			return TimeConv.durationToSeconds(Duration.between(baseTime, time));
 		}
 		
 		/*
@@ -307,7 +307,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 */
 		public double durationInSeconds() {
 			if (Double.isNaN(seconds))
-				seconds = DurationConv.inSeconds(duration());
+				seconds = TimeConv.durationToSeconds(duration());
 			
 			return seconds;
 		}

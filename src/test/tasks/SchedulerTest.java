@@ -5,7 +5,7 @@ import static matchers.CollisionMatchers.*;
 import static matchers.TaskMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static util.DurationConv.*;
+import static util.TimeConv.*;
 import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
 import jts.geom.immutable.ImmutablePolygon;
@@ -47,7 +47,7 @@ public class SchedulerTest {
 			uuid("spec"),
 			immutableBox(12, 12, 18, 18),
 			atSecond(0),
-			atSecond(60), ofSeconds(10));
+			atSecond(60), secondsToDuration(10));
 		
 		ScheduleResult result = sc.schedule(spec);
 		
@@ -67,7 +67,7 @@ public class SchedulerTest {
 			uuid("ts1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
-			atSecond(10), ofSeconds(60));
+			atSecond(10), secondsToDuration(60));
 		
 		ScheduleResult result;
 		
@@ -82,7 +82,7 @@ public class SchedulerTest {
 			uuid("ts2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
-			atSecond(30), ofSeconds(10));
+			atSecond(30), secondsToDuration(10));
 		
 		result = sc.schedule(ts2);
 		
@@ -103,16 +103,16 @@ public class SchedulerTest {
 	
 		// top right
 		TaskSpecification s1 = new TaskSpecification(
-			uuid("s1"), immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), ofSeconds(30));
+			uuid("s1"), immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), secondsToDuration(30));
 		// bottom left
 		TaskSpecification s2 = new TaskSpecification(
-			uuid("s2"), immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), ofSeconds(30));
+			uuid("s2"), immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), secondsToDuration(30));
 		// bottom right
 		TaskSpecification s3 = new TaskSpecification(
-			uuid("s3"), immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), ofSeconds(30));
+			uuid("s3"), immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), secondsToDuration(30));
 		// top left
 		TaskSpecification s4 = new TaskSpecification(
-			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), ofSeconds(30));
+			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), secondsToDuration(30));
 		
 		Scheduler sc = new Scheduler(world);
 		WorkerUnitReference w1 = sc.addWorker(ws1);
@@ -193,7 +193,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		
 		sc.setPresentTime(atSecond(0));
-		sc.setFrozenHorizonDuration(ofSeconds(1));
+		sc.setFrozenHorizonDuration(secondsToDuration(1));
 		
 		assertThat("horizon was not set",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(1) ));
@@ -209,12 +209,12 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		
 		sc.setPresentTime(atSecond(0));
-		sc.setFrozenHorizonDuration(ofSeconds(1));
+		sc.setFrozenHorizonDuration(secondsToDuration(1));
 		
 		assertThat("horizon was not set",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(1) ));
 		
-		sc.setFrozenHorizonDuration(ofSeconds(2));
+		sc.setFrozenHorizonDuration(secondsToDuration(2));
 
 		assertThat("horizon was not increased",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
@@ -225,12 +225,12 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		
 		sc.setPresentTime(atSecond(0));
-		sc.setFrozenHorizonDuration(ofSeconds(2));
+		sc.setFrozenHorizonDuration(secondsToDuration(2));
 		
 		assertThat("horizon was not set",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));
 		
-		sc.setFrozenHorizonDuration(ofSeconds(1));
+		sc.setFrozenHorizonDuration(secondsToDuration(1));
 
 		assertThat("horizon was modified",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(2) ));

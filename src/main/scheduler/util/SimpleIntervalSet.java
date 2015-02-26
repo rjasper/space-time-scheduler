@@ -326,7 +326,7 @@ implements ModifiableIntervalSet<T>
 		
 		if (other == this) {
 			intervals.clear();
-		} else {
+		} else if (!other.isEmpty()){
 			makeOverlappingSubSet(other).forEach(i ->
 				removeImpl(i.getFromInclusive(), i.getToExclusive()));
 		}

@@ -14,7 +14,7 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.traverse.ClosestFirstIterator;
 
-import util.DurationConv;
+import util.TimeConv;
 import world.ArcTimePath;
 
 import com.google.common.collect.ImmutableList;
@@ -116,7 +116,7 @@ public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfi
 		double minArc = getMinArc();
 		double maxArc = getMaxArc();
 		double finishArc = getFinishArc();
-		double bufferDuration = DurationConv.inSeconds( getBufferDuration() );
+		double bufferDuration = TimeConv.durationToSeconds( getBufferDuration() );
 		Point startPoint = getArcTimeStartPoint();
 		double earliest = inSeconds( getEarliestFinishTime() );
 		double latest = inSeconds( getLatestFinishTime() );

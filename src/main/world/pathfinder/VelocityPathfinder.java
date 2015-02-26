@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import jts.geom.immutable.ImmutablePoint;
 import util.CollectionsRequire;
-import util.DurationConv;
+import util.TimeConv;
 import world.ArcTimePath;
 import world.DecomposedTrajectory;
 import world.DynamicObstacle;
@@ -408,7 +408,7 @@ public abstract class VelocityPathfinder {
 	protected double inSeconds(LocalDateTime time) {
 		Duration duration = Duration.between(getBaseTime(), time);
 		
-		return DurationConv.inSeconds(duration);
+		return TimeConv.durationToSeconds(duration);
 	}
 	
 }

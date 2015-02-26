@@ -2,7 +2,7 @@ package pickers;
 
 import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
 import static util.Comparables.*;
-import static util.DurationConv.*;
+import static util.TimeConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -344,7 +344,7 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		LocalDateTime ceilIdle = worker.ceilingIdleTimeOrNull(latest);
 		
 		Collection<IdleSlot> slots = worker.idleSlots(
-			floorIdle != null ? floorIdle : earliest,
+			max(floorIdle != null ? floorIdle : earliest, frozenHorizonTime),
 			ceilIdle  != null ? ceilIdle  : latest);
 
 //		setNextWorker(worker);
@@ -425,21 +425,21 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 		// task can be started in time
 		// t_max - t1 < l1 / v_max
 		if (Duration.between(t1, latestStartTime()).compareTo(
-			ofSeconds(vInv * l1)) < 0)
+			secondsToDuration(vInv * l1)) < 0)
 		{
 			return false;
 		}
 		// task can be finished in time
 		// t2 - t_min < l2 / v_max + d
 		if (Duration.between(earliestStartTime(), t2).compareTo(
-			ofSeconds(vInv * l2).plus(duration)) < 0)
+			secondsToDuration(vInv * l2).plus(duration)) < 0)
 		{
 			return false;
 		}
 		// enough time to complete task
 		// t2 - t1 < (l1 + l2) / v_max + d
 		if (Duration.between(t1, t2).compareTo(
-			ofSeconds(vInv * (l1 + l2)).plus(duration)) < 0)
+			secondsToDuration(vInv * (l1 + l2)).plus(duration)) < 0)
 		{
 			return false;
 		}

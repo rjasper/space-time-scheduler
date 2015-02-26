@@ -3,11 +3,11 @@ package world.util;
 import java.util.Objects;
 import java.util.function.Function;
 
-import com.google.common.collect.ImmutableList;
-
 import jts.geom.immutable.ImmutablePoint;
 import util.TriFunction;
 import world.PointPath;
+
+import com.google.common.collect.ImmutableList;
 
 public class DoubleSubPointPathOperation<
 	V extends PointPath.Vertex,

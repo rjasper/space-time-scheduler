@@ -1,7 +1,7 @@
 package world.util;
 
-import static util.DurationConv.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static util.TimeConv.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,8 +24,8 @@ extends AbstractInterpolator<
 	public static final
 	TriFunction<LocalDateTime, LocalDateTime, LocalDateTime, Double> TIME_RELATOR =
 		(t, t1, t2) -> {
-			double d1 = inSeconds(Duration.between(t1, t));
-			double d12 = inSeconds(Duration.between(t1, t2));
+			double d1 = durationToSeconds(Duration.between(t1, t));
+			double d12 = durationToSeconds(Duration.between(t1, t2));
 			
 			return d1 / d12;
 		};
@@ -87,10 +87,10 @@ extends AbstractInterpolator<
 		
 		LocalDateTime t1 = v1.getTime();
 		LocalDateTime t2 = v2.getTime();
-		double d = inSeconds(Duration.between(t1, t2));
+		double d = durationToSeconds(Duration.between(t1, t2));
 		double d1 = alpha * d;
 		
-		LocalDateTime time = t1.plus(ofSeconds(d1));
+		LocalDateTime time = t1.plus(secondsToDuration(d1));
 		
 		return new TrajectoryInterpolation(subIndex, location, time);
 	}

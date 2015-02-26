@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import util.DurationConv;
+import util.TimeConv;
 import world.ArcTimePath;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -210,7 +210,7 @@ public class TrajectoryComposer {
 		
 		// build times
 		ImmutableList<LocalDateTime> times = Arrays.stream(t, 0, n)
-			.mapToObj(DurationConv::ofSeconds)
+			.mapToObj(TimeConv::secondsToDuration)
 			.map(d -> {
 				// double inaccuracy might lead to overflow
 				if (d.compareTo(minDuration) < 0)

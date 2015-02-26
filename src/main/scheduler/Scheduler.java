@@ -281,6 +281,8 @@ public class Scheduler {
 
 //		tp.setWorkerPool(pool);
 //		tp.setPerspectiveCache(perspectiveCache);
+		tp.setSchedule(schedule);
+		tp.setScheduleAlternative(alternative);
 		tp.setTaskId(taskId);
 		tp.setDuration(duration);
 
@@ -316,6 +318,7 @@ public class Scheduler {
 //				LocalDateTime slotFinishTime = s.getFinishTime();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
 
+				tp.setFixedEnd(!s.getFinishTime().isBefore(END_OF_TIME));
 				tp.setWorldPerspective(perspective);
 				tp.setWorker(w);
 				tp.setIdleSlot(s);

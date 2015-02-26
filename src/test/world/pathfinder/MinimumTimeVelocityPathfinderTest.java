@@ -4,7 +4,7 @@ import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static util.DurationConv.*;
+import static util.TimeConv.*;
 import static util.TimeFactory.*;
 import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
@@ -107,7 +107,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(5),
 			atSecond(6),
-			ofSeconds(0));
+			secondsToDuration(0));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -133,7 +133,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(10),
 			atSecond(10),
-			ofSeconds(10));
+			secondsToDuration(10));
 
 		assertThat("path found when it shouldn't",
 			status, equalTo(false));
@@ -158,7 +158,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 			atSecond(0),
 			atSecond(10),
 			atSecond(10),
-			ofSeconds(1.25));
+			secondsToDuration(1.25));
 
 		assertThat("no path found",
 			status, equalTo(true));

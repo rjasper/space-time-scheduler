@@ -270,7 +270,7 @@ public class WorkerUnit {
 				: ceilTask.getStartTime();
 
 			// if floorTask and ceilTask touch
-			if (ceilStart.equals(time))
+			if (ceilStart.isEqual(time))
 				// lower.finish == time == ceil.start
 				return null;
 		}
@@ -308,7 +308,7 @@ public class WorkerUnit {
 		// time <= ceil.start
 		
 		// if floorTask and ceilTask touch
-		if (lowerFinish.equals(ceilStart))
+		if (lowerFinish.isEqual(ceilStart))
 			// lower.finish == time == ceil.start
 			return null;
 		

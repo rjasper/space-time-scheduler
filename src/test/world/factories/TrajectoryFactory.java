@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import util.DurationConv;
+import util.TimeConv;
 import util.TimeFactory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -36,7 +36,7 @@ public class TrajectoryFactory {
 		SpatialPath path = new SpatialPath(builder.build());
 		
 		ImmutableList<LocalDateTime> times = Arrays.stream(ordinates, tOffset, ordinates.length)
-			.mapToObj(DurationConv::ofSeconds)
+			.mapToObj(TimeConv::secondsToDuration)
 			.map(TimeFactory.BASE_TIME::plus)
 			.collect(toImmutableList());
 		

@@ -1,9 +1,9 @@
 package world;
 
-import static java.lang.Math.*;
 import static common.collect.ImmutablesCollectors.*;
+import static java.lang.Math.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static util.DurationConv.*;
+import static util.TimeConv.*;
 
 import java.lang.ref.SoftReference;
 import java.time.Duration;
@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import util.DurationConv;
+import util.TimeConv;
 import world.util.BinarySearchSeeker;
 import world.util.DoubleSubPointPathOperation;
 import world.util.Interpolator;
@@ -262,9 +262,8 @@ public class DecomposedTrajectory implements Trajectory {
 		LocalDateTime baseTime = getBaseTime();
 
 		double t = arcTimePath.getPoint(0).getY();
-		Duration duration = DurationConv.ofSeconds(t);
 
-		return baseTime.plus(duration);
+		return TimeConv.secondsToTime(t, baseTime);
 	}
 
 	/*
@@ -283,9 +282,8 @@ public class DecomposedTrajectory implements Trajectory {
 
 		int n = arcTimePath.size();
 		double t = arcTimePath.getPoint(n-1).getY();
-		Duration duration = DurationConv.ofSeconds(t);
-
-		return baseTime.plus(duration);
+		
+		return TimeConv.secondsToTime(t, baseTime);
 	}
 
 	/*
@@ -313,8 +311,8 @@ public class DecomposedTrajectory implements Trajectory {
 		
 		// determine min and max arc between 'from' and 'to'
 		
-		double fromD = inSeconds(Duration.between(baseTime, from));
-		double toD   = inSeconds(Duration.between(baseTime, to  ));
+		double fromD = durationToSeconds(Duration.between(baseTime, from));
+		double toD   = durationToSeconds(Duration.between(baseTime, to  ));
 		
 		Seeker<Double, ArcTimePath.Vertex> timeSeeker = new BinarySearchSeeker<>(
 			arcTimePathComponent::getVertex,
@@ -502,7 +500,7 @@ public class DecomposedTrajectory implements Trajectory {
 		if (isComposed()) {
 			return composed().interpolateLocation(time);
 		} else {
-			double t = inSeconds(Duration.between(getBaseTime(), time));
+			double t = durationToSeconds(Duration.between(getBaseTime(), time));
 			double s = getArcTimePathComponent().interpolateArc(t);
 			
 			return getSpatialPathComponent().interpolateLocation(s);
@@ -550,8 +548,8 @@ public class DecomposedTrajectory implements Trajectory {
 		}
 		
 		LocalDateTime baseTime = getBaseTime();
-		double t1 = inSeconds(Duration.between(baseTime, startTime ));
-		double t2 = inSeconds(Duration.between(baseTime, finishTime));
+		double t1 = durationToSeconds(Duration.between(baseTime, startTime ));
+		double t2 = durationToSeconds(Duration.between(baseTime, finishTime));
 		
 		SpatialPath xyComponent = getSpatialPathComponent();
 		ArcTimePath stComponent = getArcTimePathComponent();
@@ -576,7 +574,7 @@ public class DecomposedTrajectory implements Trajectory {
 		if (baseTime.equals(ownBaseTime))
 			return arcTimePathComponent;
 		
-		double offset = inSeconds( Duration.between(baseTime, ownBaseTime) );
+		double offset = durationToSeconds( Duration.between(baseTime, ownBaseTime) );
 		
 		ImmutableList<ImmutablePoint> vertices = arcTimePathComponent.getPoints().stream()
 			.map(p -> immutablePoint(p.getX(), p.getY() + offset))

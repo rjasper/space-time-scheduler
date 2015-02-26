@@ -31,6 +31,7 @@ public final class Comparables {
 	 * @param values
 	 * @return the minimum value.
 	 */
+	@SafeVarargs
 	public static <T extends Comparable<? super T>> T min(T... values) {
 		if (values.length == 0)
 			throw new IllegalArgumentException("no values");
@@ -59,6 +60,7 @@ public final class Comparables {
 	 * @param values
 	 * @return the maximum value.
 	 */
+	@SafeVarargs
 	public static <T extends Comparable<? super T>> T max(T... values) {
 		if (values.length == 0)
 			throw new IllegalArgumentException("no values");

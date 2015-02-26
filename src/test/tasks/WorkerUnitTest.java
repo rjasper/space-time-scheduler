@@ -16,14 +16,15 @@ import tasks.fixtures.WorkerUnitFixtures;
 
 public class WorkerUnitTest {
 	
-
+	// TODO test idle slot interpolation
+	
 	@Test
 	public void testIdleSubSet() {
 		WorkerUnit worker = WorkerUnitFixtures.withThreeTasks();
 		
 		Collection<IdleSlot> slots = worker.idleSlots(
-			atHour( 3),
-			atHour(17)
+			atHour( 0),
+			atHour(18)
 		);
 		
 		Collection<IdleSlot> expected = Arrays.asList(

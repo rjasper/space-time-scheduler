@@ -318,11 +318,11 @@ implements IntervalSet<T>
 		
 		IntervalSet<?> other = (IntervalSet<?>) obj;
 		
-		Iterator<?> it1 = iterator();
+		Iterator<Interval<T>> it1 = iterator();
 		Iterator<?> it2 = other.iterator();
 		
 		while (it1.hasNext() && it2.hasNext()) {
-			if (!it1.next() .equals( it2.next() ))
+			if (!isEqual(it1.next(), it2.next())) // uses comparator
 				return false;
 		}
 		
@@ -333,6 +333,15 @@ implements IntervalSet<T>
 			return false;
 		
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> boolean isEqual(Comparable<? super T> lhs, Object rhs) {
+		try {
+			return lhs.compareTo((T) rhs) == 0;
+		} catch (ClassCastException e) {
+			return false;
+		}
 	}
 	
 	@Override

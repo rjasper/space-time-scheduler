@@ -3,6 +3,7 @@ package pickers;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static scheduler.Scheduler.*;
 import static util.TimeFactory.*;
 
 import java.time.Duration;
@@ -20,6 +21,8 @@ import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnitSlotIteratorTest {
 
+	// TODO test frozen horizon
+	
 	@Test
 	public void test() {
 		WorkerUnit w1 = WorkerUnitFixtures.withTwoTasks1();
@@ -32,7 +35,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(8.0);
 		Duration duration = Duration.ofHours(3L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
 		assertThat(picker.getCurrentWorker(), is(w2));
@@ -50,7 +54,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(6.5);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
 		assertThat(picker.getCurrentWorker(), is(w));
@@ -67,7 +72,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(5.5);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat(picker.hasNext(), is(false));
 	}
@@ -83,7 +89,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
 		assertThat(picker.getCurrentWorker(), is(w));
@@ -100,7 +107,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat(picker.hasNext(), is(false));
 	}
@@ -116,7 +124,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
 		assertThat(picker.getCurrentWorker(), is(w));
@@ -133,7 +142,8 @@ public class WorkerUnitSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(3L);
 		
-		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(workers, location, earliest, latest, duration);
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		assertThat(picker.hasNext(), is(false));
 	}

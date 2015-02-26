@@ -1,6 +1,5 @@
 package tasks.factories;
 
-import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static util.TimeFactory.*;
 
@@ -10,12 +9,15 @@ import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import scheduler.IdleSlot;
+import scheduler.Schedule;
+import scheduler.ScheduleAlternative;
+import scheduler.Scheduler;
 import scheduler.TaskPlanner;
 import scheduler.WorkerUnit;
 import scheduler.WorkerUnitSpecification;
-import world.RadiusBasedWorldPerspectiveCache;
 import world.World;
-import world.WorldPerspectiveCache;
+import world.WorldPerspective;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
@@ -52,12 +54,12 @@ public class WorkerUnitFactory {
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
 
-		World world = new World();
-		WorldPerspectiveCache perspectiveCache =
-			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
+//		World world = new World();
+//		WorldPerspectiveCache perspectiveCache =
+//			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 
-		taskPlanner.setPerspectiveCache(perspectiveCache);
-		taskPlanner.setWorkerPool(emptyList());
+//		taskPlanner.setPerspectiveCache(perspectiveCache);
+//		taskPlanner.setWorkerPool(emptyList());
 	}
 
 	public static WorkerUnitFactory getInstance() {
@@ -124,18 +126,40 @@ public class WorkerUnitFactory {
 		Point location = point(x, y);
 		LocalDateTime time = atSecond(t);
 		Duration duration = Duration.ofSeconds(d);
+		LocalDateTime floorTime = worker.floorIdleTimeOrNull(time);
+		LocalDateTime ceilTime = worker.ceilingIdleTimeOrNull(time);
+		
+		if (floorTime == null || ceilTime == null)
+			return false;
+		
+		IdleSlot idleSlot = worker.idleSlots(floorTime, ceilTime).iterator().next();
+		WorldPerspective perspective = new WorldPerspective(
+			new World(), new StraightEdgePathfinder());
+		Schedule schedule = new Schedule();
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		schedule.addWorker(worker);
 
-		tp.setWorker(worker);
 		tp.setTaskId(taskId);
+		tp.setWorker(worker);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);
 		tp.setLatestStartTime(time);
 		tp.setDuration(duration);
+		tp.setIdleSlot(idleSlot);
+		tp.setWorldPerspective(perspective);
+		tp.setSchedule(schedule);
+		tp.setScheduleAlternative(alternative);
+		tp.setFixedEnd(ceilTime.isEqual(Scheduler.END_OF_TIME));
 
 		boolean status = tp.plan();
 
 		if (!status)
 			return false;
+		
+		alternative.seal();
+		schedule.addAlternative(alternative);
+		schedule.integrate(alternative);
 
 		return true;
 	}

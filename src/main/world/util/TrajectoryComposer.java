@@ -1,19 +1,17 @@
 package world.util;
 
-import static util.DurationConv.*;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-
-import com.google.common.collect.ImmutableList;
-
+import util.TimeConv;
 import world.ArcTimePath;
 import world.DecomposedTrajectory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.util.Interpolator.InterpolationResult;
+
+import com.google.common.collect.ImmutableList;
 
 public class TrajectoryComposer {
 	
@@ -124,7 +122,7 @@ public class TrajectoryComposer {
 	}
 	
 	private LocalDateTime makeTime(double t) {
-		return trajectory.getBaseTime().plus(ofSeconds(t));
+		return TimeConv.secondsToTime(t, trajectory.getBaseTime());
 	}
 	
 	private void addSpatialVertices(int xyIndex, int stIndex, double lowArc, double highArc) {
