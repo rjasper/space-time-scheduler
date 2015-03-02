@@ -1,12 +1,15 @@
 package world;
 
+import static java.lang.Math.*;
 import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutableLineString;
 import jts.geom.immutable.ImmutablePoint;
 
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 public interface PointPath<
 	V extends PointPath.Vertex,
@@ -189,6 +192,13 @@ extends Path<V, S>
 		public ImmutablePoint getFinishPoint() {
 			return finish.getPoint();
 		}
+		
+		public Envelope getEnvelope() {
+			Point p1 = getStartPoint(), p2 = getFinishPoint();
+			double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
+			
+			return new Envelope(min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2));
+		}
 
 		/*
 		 * (non-Javadoc)
@@ -219,7 +229,7 @@ extends Path<V, S>
 	 * @throws NoSuchElementException
 	 *             if the path is empty.
 	 */
-	public default ImmutablePoint getStartPoint() {
+	public default ImmutablePoint getFirstPoint() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
 		
@@ -231,12 +241,17 @@ extends Path<V, S>
 	 * @throws NoSuchElementException
 	 *             if the path is empty.
 	 */
-	public default ImmutablePoint getFinishPoint() {
+	public default ImmutablePoint getLastPoint() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
 		
 		return getPoint(size()-1);
 	}
+	
+	/**
+	 * @return the envelope of this path.
+	 */
+	public abstract Envelope getEnvelope();
 
 	@Override
 	public abstract PointPath<V, S> subPath(double startSubIndex, double finishSubIndex);

@@ -278,8 +278,6 @@ public class TaskPlanner {
 		Task task = new Task(taskId, worker.getReference(), location, taskStartTime, duration);
 		LocalDateTime taskFinishTime = task.getFinishTime();
 		
-		// FIXME if no fixed end don't use decomposed trajectories
-		
 		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, taskFinishTime);
 		if (trajFromTask.isEmpty())
 			return false;

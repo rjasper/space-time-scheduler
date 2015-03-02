@@ -1,5 +1,6 @@
 package world;
 
+import static java.lang.Double.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static jts.geom.util.GeometrySequencer.*;
 
@@ -16,6 +17,7 @@ import world.util.DoubleSubPointPathOperation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -168,6 +170,42 @@ implements PointPath<V, S>
 	@Override
 	public ImmutableList<ImmutablePoint> getPoints() {
 		return points;
+	}
+	
+	/**
+	 * Caches the point path's envelope.
+	 */
+	private SoftReference<Envelope> envelopeCache = null;
+
+	@Override
+	public Envelope getEnvelope() {
+		if (isEmpty())
+			throw new IllegalStateException("path is empty");
+		
+		Envelope envelope = envelopeCache == null ? null : envelopeCache.get();
+		
+		if (envelope == null) {
+			double
+				minX = POSITIVE_INFINITY,
+				maxX = NEGATIVE_INFINITY,
+				minY = POSITIVE_INFINITY,
+				maxY = NEGATIVE_INFINITY;
+			
+			for (Point p : points) {
+				double x = p.getX(), y = p.getY();
+				
+				minX = min(minX, x);
+				maxX = max(maxX, x);
+				minY = min(minY, y);
+				maxY = max(maxY, y);
+			}
+			
+			envelope = new Envelope(minX, maxX, minY, maxY);
+			
+			envelopeCache = new SoftReference<>(envelope);
+		}
+		
+		return envelope;
 	}
 
 	/*

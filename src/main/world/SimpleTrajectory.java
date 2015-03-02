@@ -187,7 +187,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		if (isEmpty())
 			throw new NoSuchElementException("trajectory is empty");
 
-		return getSpatialPath().getStartPoint();
+		return getSpatialPath().getFirstPoint();
 	};
 
 	/*
@@ -200,7 +200,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		if (isEmpty())
 			throw new NoSuchElementException("trajectory is empty");
 
-		return getSpatialPath().getFinishPoint();
+		return getSpatialPath().getLastPoint();
 	};
 
 	/*

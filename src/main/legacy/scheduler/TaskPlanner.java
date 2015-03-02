@@ -4,7 +4,7 @@
 //import static java.util.stream.Collectors.*;
 //import static jts.geom.immutable.ImmutableGeometries.*;
 //import static util.Comparables.*;
-//import static util.DurationConv.*;
+//import static util.TimeConv.*;
 //
 //import java.time.Duration;
 //import java.time.LocalDateTime;
@@ -25,12 +25,12 @@
 //import world.ArcTimePath;
 //import world.DecomposedTrajectory;
 //import world.DynamicObstacle;
-//import world.IdlingWorkerUnitObstacle;
-//import world.MovingWorkerUnitObstacle;
-//import world.OccupiedWorkerUnitObstacle;
+//import legacy.world.IdlingWorkerUnitObstacle;
+//import legacy.world.MovingWorkerUnitObstacle;
+//import legacy.world.OccupiedWorkerUnitObstacle;
 //import world.SpatialPath;
 //import world.Trajectory;
-//import world.WorkerUnitObstacle;
+//import legacy.world.WorkerUnitObstacle;
 //import world.WorldPerspective;
 //import world.WorldPerspectiveCache;
 //import world.pathfinder.FixTimeVelocityPathfinder;
@@ -1119,7 +1119,7 @@
 //	{
 //		Collection<WorkerUnit> pool = getWorkerPool();
 //
-//		// TODO only use relevant sections
+//		// tODO only use relevant sections
 //		return pool.stream()
 //			.flatMap(w -> w.getObstacleSections().stream())
 //			.filter(o -> !exclusions.contains(o) && !o.equals(obsoleteSegment))
@@ -1163,7 +1163,7 @@
 //	 * @param evadee
 //	 */
 //	private static void registerEvasion(MovingWorkerUnitObstacle evader, WorkerUnitObstacle evadee) {
-//		// TODO kinda hacky
+//		// tODO kinda hacky
 //		WorkerUnitObstacle actualEvadee = evadee.getWorkerUnit()
 //			.getObstacleSection(evadee.getStartTime());
 //		

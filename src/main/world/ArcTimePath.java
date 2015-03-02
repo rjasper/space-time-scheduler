@@ -235,7 +235,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @return the length of the path.
 	 */
 	public double length() {
-		return isEmpty() ? 0.0 : getFinishPoint().getX();
+		return isEmpty() ? 0.0 : getLastPoint().getX();
 	}
 	
 	/**
@@ -255,7 +255,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @return the duration of the path in seconds.
 	 */
 	public double durationInSeconds() {
-		return isEmpty() ? 0.0 : getFinishPoint().getY();
+		return isEmpty() ? 0.0 : getLastPoint().getY();
 	}
 
 	/**
@@ -274,9 +274,9 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		
 		// short cut for start and finish time
 		if (time == 0.0)
-			return getStartPoint().getX();
+			return getFirstPoint().getX();
 		if (time == durationInSeconds())
-			return getFinishPoint().getX();
+			return getLastPoint().getX();
 		
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,

@@ -7,10 +7,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import jts.geom.immutable.ImmutablePoint;
 import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
@@ -28,8 +30,6 @@ public class Schedule {
 	private static class WorkerUnitLocks {
 		
 		public final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
-		
-//		public final SimpleIntervalSet<LocalDateTime> tasksLock = new SimpleIntervalSet<>();
 		
 		public final Set<Task> taskRemovalLock = new HashSet<>();
 		
@@ -76,20 +76,16 @@ public class Schedule {
 		return unmodifiableCollection(alternatives);
 	}
 	
-	public boolean addAlternative(ScheduleAlternative alternative) {
+	public void addAlternative(ScheduleAlternative alternative) {
 		Objects.requireNonNull(alternative, "alternative");
 		
 		if (!alternative.isSealed())
 			new IllegalArgumentException("alternative not sealed");
 		
-		boolean compatible = checkCompatibility(alternative);
+		checkCompatibility(alternative);
 		
-		if (compatible) {
-			alternatives.add(alternative);
-			applyLocks(alternative);
-		}
-		
-		return compatible;
+		alternatives.add(alternative);
+		applyLocks(alternative);
 	}
 	
 	public void integrate(ScheduleAlternative alternative) {
@@ -125,44 +121,45 @@ public class Schedule {
 		releaseLocks(alternative);
 	}
 	
-	private boolean checkCompatibility(ScheduleAlternative alternative) {
-		// TODO also check frozen horizon?
-		
-		// TODO check trajectories
-		// non-consecutive trajectories should touch original
-		
-		return alternative.getUpdates().stream()
-			.allMatch(u -> {
-				WorkerUnit worker = u.getWorker();
-				WorkerUnitLocks workerLocks = locks.get(worker);
-				
-				if (workerLocks == null)
-					throw new IllegalArgumentException("unknown worker");
+	private void checkCompatibility(ScheduleAlternative alternative) {
+		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
+			WorkerUnit worker = u.getWorker();
+			WorkerUnitLocks workerLocks = locks.get(worker);
+			
+			if (workerLocks == null)
+				throw new IllegalArgumentException("unknown worker");
 
-				IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
-				IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
-				SimpleIntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
-				
-				Collection<Task> tasks = u.getTasks();
-				Collection<Task> removals = u.getTaskRemovals();
-				
-				return
-//					// no mutual task locks
-//					!u.getTasksLock()
-//						.intersects(workerLocks.tasksLock) &&
+			IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
+			IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
+			SimpleIntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
+			
+			Collection<Task> tasks = u.getTasks();
+			Collection<Task> removals = u.getTaskRemovals();
+			
+			u.checkSelfConsistency();
 
-					// no mutual trajectory locks with origin disregarding removed tasks
-					trajLockIntervals.intersection(originTasksIntervals)
-						.remove(removalsIntervals).isEmpty() &&
-					// no mutual trajectory locks with other alternatives
-					!trajLockIntervals.intersects(workerLocks.trajectoryLock) &&
-					// non-updated original trajectories lead to tasks
-					tasks.stream().allMatch(t -> verifyTaskLocation(t, trajLockIntervals)) &&
-					// no unknown task removals
-					removals.stream().allMatch(worker::hasTask) &&
-					// no mutual task removals
-					!removals.stream().anyMatch(workerLocks.taskRemovalLock::contains);
-			});
+			// no mutual trajectory locks with origin disregarding removed tasks
+			if (!trajLockIntervals.intersection(originTasksIntervals)
+				.remove(removalsIntervals).isEmpty())
+			{
+				throw new IllegalArgumentException("trajectory lock violation");
+			}
+			// no mutual trajectory locks with other alternatives
+			if (trajLockIntervals.intersects(workerLocks.trajectoryLock))
+				throw new IllegalArgumentException("trajectory lock violation");
+			// continuous trajectories
+			if (!verifyTrajectoryContinuity(worker, u.getTrajectories()))
+				throw new IllegalArgumentException("trajectory continuity violation");
+			// non-updated original trajectories lead to tasks
+			if (!tasks.stream().allMatch(t -> verifyTaskLocation(t, trajLockIntervals)))
+				throw new IllegalArgumentException("task location violation");
+			// no unknown task removals
+			if (!removals.stream().allMatch(worker::hasTask))
+				throw new IllegalArgumentException("unknown task removal");
+			// no mutual task removals
+			if (removals.stream().anyMatch(workerLocks.taskRemovalLock::contains))
+				throw new IllegalArgumentException("task removal lock violation");
+		}
 	}
 
 	private boolean verifyTaskLocation(Task task, IntervalSet<LocalDateTime> trajectoryUpdates) {
@@ -188,12 +185,52 @@ public class Schedule {
 			});
 	}
 	
+	private boolean verifyTrajectoryContinuity(WorkerUnit worker, Collection<Trajectory> trajectories) {
+		if (trajectories.isEmpty())
+			return true;
+		
+		Iterator<Trajectory> it = trajectories.iterator();
+		
+		Trajectory first = it.next();
+		Trajectory last = first;
+		
+		if (!verifyWorkerLocation(worker, first.getStartLocation(), first.getStartTime()))
+			return false;
+		
+		while (it.hasNext()) {
+			Trajectory curr = it.next();
+
+			LocalDateTime finishTime = last.getFinishTime();
+			LocalDateTime startTime = curr.getStartTime();
+			
+			if (!startTime.equals(finishTime) && (
+				!verifyWorkerLocation(worker, last.getFinishLocation(), finishTime) ||
+				!verifyWorkerLocation(worker, curr.getStartLocation(), startTime)))
+			{
+				return false;
+			}
+			
+			last = curr;
+		}
+		
+		if (!verifyWorkerLocation(worker, last.getFinishLocation(), last.getFinishTime()))
+			return false;
+		
+		return true;
+	}
+	
+	private boolean verifyWorkerLocation(WorkerUnit worker, ImmutablePoint location, LocalDateTime time) {
+		if (time.equals(Scheduler.END_OF_TIME))
+			return true;
+		
+		return worker.interpolateLocation(time).equals(location);
+	}
+	
 	private void applyLocks(ScheduleAlternative alternative) {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
-//			workerLocks.tasksLock       .add   ( u.getTasksLock()        );
-			workerLocks.trajectoryLock.add   ( u.getTrajectoriesLock() );
+			workerLocks.trajectoryLock .add   ( u.getTrajectoriesLock() );
 			workerLocks.taskRemovalLock.addAll( u.getTaskRemovals()     );
 		}
 	}
@@ -202,8 +239,7 @@ public class Schedule {
 		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
-//			workerLocks.tasksLock       .remove   ( u.getTasksLock()        );
-			workerLocks.trajectoryLock.remove   ( u.getTrajectoriesLock() );
+			workerLocks.trajectoryLock .remove   ( u.getTrajectoriesLock() );
 			workerLocks.taskRemovalLock.removeAll( u.getTaskRemovals()     );
 		}
 	}

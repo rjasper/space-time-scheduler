@@ -26,6 +26,7 @@ import world.SpatialPath;
 import world.Trajectory;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -33,8 +34,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.LineStringExtracter;
 import com.vividsolutions.jts.operation.linemerge.LineMerger;
-
-// TODO does not consider start and finish arcs yet
 
 /**
  * The {@code ForbiddenRegion} calculates the forbidden regions for spatial
@@ -204,6 +203,9 @@ public class ForbiddenRegionBuilder {
 
 		// for each dynamic obstacle its forbidden region
 		for (DynamicObstacle obstacle : getDynamicObstacles()) {
+			if (!quickObstacleEnvelopeCheck(obstacle))
+				continue;
+			
 			Iterable<Trajectory.Segment> obstacleTrajectorySegments = () ->
 				obstacle.getTrajectory().segmentIterator();
 			
@@ -214,7 +216,13 @@ public class ForbiddenRegionBuilder {
 			List<Geometry> subregions = new LinkedList<>();
 			// for each trajectory segment and spatial path segment pair
 			for (Trajectory.Segment obstacleTrajectorySegment : obstacleTrajectorySegments) {
+				if (!quickObstacleTrajectorySegmentCheck(obstacle, obstacleTrajectorySegment))
+					continue;
+				
 				for (SpatialPath.Segment spatialPathSegment : spatialPathSegments) {
+					if (!quickSpatialPathSegmentCheck(obstacle, obstacleTrajectorySegment, spatialPathSegment))
+						continue;
+					
 					// The current spatial path segments unit vector.
 					// Also the direction and unit length of the arc dimension.
 					Vector arcUnitVector = makeUnitVector(
@@ -265,6 +273,63 @@ public class ForbiddenRegionBuilder {
 		setResultForbiddenRegions(forbiddenRegions);
 	}
 	
+	/**
+	 * Checks if the obstacle's envelope intersects with the spatial path's
+	 * envelope.
+	 * 
+	 * @param obstacle
+	 * @return {@code true} if the envelopes intersect.
+	 */
+	private boolean quickObstacleEnvelopeCheck(DynamicObstacle obstacle) {
+		Envelope obstacleTrajectoryEnvelope = obstacle.getSpatialPath().getEnvelope();
+		Envelope obstacleShapeEnvelope = obstacle.getShape().getEnvelopeInternal();
+		Envelope spatialPathEnvelope = getSpatialPath().getEnvelope();
+		
+		Envelope obstacleEnvelope = convolveEnvelope(
+			obstacleTrajectoryEnvelope, obstacleShapeEnvelope);
+		
+		return obstacleEnvelope.intersects(spatialPathEnvelope);
+	}
+
+	private boolean quickObstacleTrajectorySegmentCheck(
+		DynamicObstacle obstacle,
+		Trajectory.Segment obstacleTrajectorySegment)
+	{
+		Envelope obstacleSegmentEnvelope = obstacleTrajectorySegment
+			.getSpatialSegment().getEnvelope();
+		Envelope obstacleShapeEnvelope = obstacle.getShape().getEnvelopeInternal();
+		Envelope spatialPathEnvelope = getSpatialPath().getEnvelope();
+		
+		Envelope obstacleEnvelope = convolveEnvelope(
+			obstacleSegmentEnvelope, obstacleShapeEnvelope);
+
+		return obstacleEnvelope.intersects(spatialPathEnvelope);
+	}
+
+	private boolean quickSpatialPathSegmentCheck(
+		DynamicObstacle obstacle,
+		Trajectory.Segment obstacleTrajectorySegment,
+		SpatialPath.Segment spatialPathSegment)
+	{
+		Envelope obstacleSegmentEnvelope = obstacleTrajectorySegment
+			.getSpatialSegment().getEnvelope();
+		Envelope obstacleShapeEnvelope = obstacle.getShape().getEnvelopeInternal();
+		Envelope spatialPathSegmentEnvelope = spatialPathSegment.getEnvelope();
+
+		Envelope obstacleEnvelope = convolveEnvelope(
+			obstacleSegmentEnvelope, obstacleShapeEnvelope);
+
+		return obstacleEnvelope.intersects(spatialPathSegmentEnvelope);
+	}
+	
+	private static Envelope convolveEnvelope(Envelope lhs, Envelope rhs) {
+		return new Envelope(
+			lhs.getMinX() + rhs.getMinX(),
+			lhs.getMaxX() + rhs.getMaxX(),
+			lhs.getMinY() + rhs.getMinY(),
+			lhs.getMaxY() + rhs.getMaxY());
+	}
+
 	/**
 	 * The threshold used by {@link #isParallel(Matrix)}.
 	 */
@@ -326,40 +391,53 @@ public class ForbiddenRegionBuilder {
 		boolean last = spatialPathSegment.isLast();
 
 		// if there is no buffer necessary then return an empty polygon
-		if (obstacleTrajectorySegment.isStationary() || (!first && !last))
+		if (!first && !last)
 			return polygon();
-
-		LineString mask = makePointTraceMask(
-			spatialPathSegment,
-			obstacleTrajectorySegment);
 
 		Polygon moved = translateGeometry(
 			obstacleShape,
 			obstacleTrajectorySegment.getStartLocation());
-
-		// boundary is expected to be composed of 1-dimensional components
-		Geometry boundary = moved.getBoundary();
-
-		// calculate intersection with obstacle's interior
-
-		// A = mask, B = movedObstacleShape
-		// I* = A \cap int(B) = (A \cap B) \ (A \cap bdy(B))
-		// I = I* \wedge bdy(I*)
-
-		Geometry fullIntersection = moved.intersection(mask); // (A \cap B)
-		// JTS' difference operation can't handle general GeometryCollections
-		// therefore, remove points
-		Geometry boundaryIntersection = onlyLines( boundary.intersection(mask) ); // (A \cap bdy(B))
-		// JTS geometries always include own boundary
-		Geometry masked = fullIntersection.difference(boundaryIntersection); // I
-
-		if (masked.isEmpty())
-			return masked; // empty geometry
-
-		Geometry transformed = transformStationaryObstacle(
-			spatialPathSegment,
-			obstacleTrajectorySegment,
-			masked);
+		
+		Geometry transformed;
+		if (obstacleTrajectorySegment.isStationary()) {
+			// check if stationary location is within obstacle
+			if (!spatialPathSegment.getStartPoint().within(moved))
+				return polygon();
+			
+			transformed = lineString(
+				spatialPathSegment.getStartVertex().getArc(),
+				obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime()),
+				spatialPathSegment.getFinishVertex().getArc(),
+				obstacleTrajectorySegment.getFinishTimeInSeconds(getBaseTime()));
+		} else {
+			LineString mask = makePointTraceMask(
+				spatialPathSegment,
+				obstacleTrajectorySegment);
+	
+			// boundary is expected to be composed of 1-dimensional components
+			Geometry boundary = moved.getBoundary();
+	
+			// calculate intersection with obstacle's interior
+	
+			// A = mask, B = movedObstacleShape
+			// I* = A \cap int(B) = (A \cap B) \ (A \cap bdy(B))
+			// I = I* \wedge bdy(I*)
+	
+			Geometry fullIntersection = moved.intersection(mask); // (A \cap B)
+			// JTS' difference operation can't handle general GeometryCollections
+			// therefore, remove points
+			Geometry boundaryIntersection = onlyLines( boundary.intersection(mask) ); // (A \cap bdy(B))
+			// JTS geometries always include own boundary
+			Geometry masked = fullIntersection.difference(boundaryIntersection); // I
+	
+			if (masked.isEmpty())
+				return masked; // empty geometry
+	
+			transformed = transformStationaryObstacle(
+				spatialPathSegment,
+				obstacleTrajectorySegment,
+				masked);
+		}
 
 		Geometry buffered = bufferLineStrings(transformed, first, last);
 

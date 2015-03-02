@@ -24,6 +24,20 @@ public class TrajectoryContainer {
 		return unmodifiableCollection(trajectories.values());
 	}
 	
+	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
+		Objects.requireNonNull(from, "from");
+		Objects.requireNonNull(to, "to");
+		
+		if (from.isAfter(to))
+			throw new IllegalArgumentException("invalid time interval");
+		
+		Collection<Trajectory> overlapping = trajectories
+			.subMap(overlappingStartTime(from), to)
+			.values();
+		
+		return unmodifiableCollection(overlapping);
+	}
+
 	public Trajectory getFirstTrajectory() {
 		if (isEmpty())
 			throw new NoSuchElementException("container is empty");
@@ -89,7 +103,7 @@ public class TrajectoryContainer {
 			throw new IllegalArgumentException("invalid time interval");
 		}
 		
-		return overlappingTrajectories(from, to).stream()
+		return getTrajectories(from, to).stream()
 			.allMatch(t -> {
 				LocalDateTime start  = max(from, t.getStartTime ());
 				LocalDateTime finish = min(to  , t.getFinishTime());
@@ -107,34 +121,9 @@ public class TrajectoryContainer {
 		LocalDateTime startTime = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
-		// allow empty regions (WorkerUnitScheduleUpdate)
-//		// don't allow empty regions
-//		if (!isEmpty() && (
-//			startTime .isAfter ( getFinishTime() ) ||
-//			finishTime.isBefore( getStartTime () )))
-//		{
-//			throw new IllegalArgumentException("incompatible trajectory");
-//		}
-		
 		// examine left and right neighbors
 		Trajectory left  = getTrajectoryOrNull(startTime);
 		Trajectory right = getTrajectoryOrNull(finishTime);
-		
-		// no location check
-//		// check locations
-//		if (left != null) {
-//			Point leftLocation = left.interpolateLocation(startTime);
-//			
-//			if (!trajectory.getStartLocation().equals(leftLocation))
-//				throw new IllegalArgumentException("incompatible start location");
-//		}
-//		// fIXME tail should be modifiable
-//		if (right != null) {
-//			Point rightLocation = right.interpolateLocation(finishTime);
-//			
-//			if (!trajectory.getFinishLocation().equals(rightLocation))
-//				throw new IllegalArgumentException("incompatible finish location");
-//		}
 		
 		// determine necessary cuts
 		// left.finish > trajectory.start
@@ -171,20 +160,6 @@ public class TrajectoryContainer {
 		// remove trajectories not finishing after 'time'
 		trajectories.headMap(overlappingStartTime(time))
 			.clear();
-	}
-	
-	public Collection<Trajectory> overlappingTrajectories(LocalDateTime from, LocalDateTime to) {
-		Objects.requireNonNull(from, "from");
-		Objects.requireNonNull(to, "to");
-		
-		if (from.isAfter(to))
-			throw new IllegalArgumentException("invalid time interval");
-		
-		Collection<Trajectory> overlapping = trajectories
-			.subMap(overlappingStartTime(from), to)
-			.values();
-		
-		return unmodifiableCollection(overlapping);
 	}
 	
 	private LocalDateTime overlappingStartTime(LocalDateTime time) {

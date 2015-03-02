@@ -138,7 +138,8 @@ public abstract class ArcTimeMeshBuilder {
 			.map(ForbiddenRegion::getRegion)
 			.toArray(Geometry[]::new);
 		
-		Geometry regionMap = geometryCollection(regions).union();
+//		Geometry regionMap = geometryCollection(regions).union();
+		Geometry regionMap = geometryCollection(regions);
 		
 		setRegionMap(regionMap);
 	}

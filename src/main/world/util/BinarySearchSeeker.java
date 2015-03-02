@@ -38,7 +38,14 @@ extends AbstractSeeker<P, T>
 		private int high = size()-1;
 		
 		public void search(P position) {
-			while (low <= high) {
+			// short cut if left
+			if (position(low).compareTo(position) == 0)
+				high = low;
+			// short cut if right
+			else if (position(high).compareTo(position) == 0)
+				low = high;
+			// regular case
+			else while (low <= high) {
 				int mid = (low + high) / 2;
 				P testPos = position(mid);
 				

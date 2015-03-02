@@ -204,9 +204,9 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		
 		// short cut for first or last point
 		if (arc == 0.0)
-			return getStartPoint();
+			return getFirstPoint();
 		if (arc == length())
-			return getFinishPoint();
+			return getLastPoint();
 		
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,

@@ -5,6 +5,7 @@ import static java.util.Collections.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 
@@ -82,20 +83,10 @@ public class WorkerUnitScheduleUpdate {
 		
 		// TODO updates should not predate initialTime
 		
-		// TODO may remove
-		// consider multiple tasks
-		// trajectory should lead to new tasks
-		checkTrajectoryLock(startTime, finishTime);
-		
 		trajectoryLock.add(startTime, finishTime);
 		trajectoryContainer.update(trajectory);
 	}
 	
-	private void checkTrajectoryLock(LocalDateTime from, LocalDateTime to) {
-		if (trajectoryLock.intersects(from, to))
-			throw new IllegalArgumentException("trajectory lock violation");
-	}
-
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
 		
@@ -106,60 +97,16 @@ public class WorkerUnitScheduleUpdate {
 		LocalDateTime finishTime = task.getFinishTime();
 		
 		// TODO updates should not predate initialTime
-		
-		checkTaskLock(startTime, finishTime);
+
 		checkTask(task);
-		checkTaskLocation(task);
+		checkTaskLock(startTime, finishTime);
 		
-		// TODO implement
 		trajectoryLock.add(startTime, finishTime);
 		taskLock.add(startTime, finishTime);
 		
 		tasks.add(task);
 	}
 	
-	private void checkTask(Task task) {
-		if (task.getAssignedWorker().getActual() != worker) // identity comparision
-			throw new IllegalArgumentException("invalid assigned worker");
-	}
-	
-	private void checkTaskLock(LocalDateTime from, LocalDateTime to) {
-		if (taskLock.intersects(from, to))
-			throw new IllegalArgumentException("task lock violation");
-	}
-	
-	private void checkTaskLocation(Task task) {
-		Point location = task.getLocation();
-		LocalDateTime taskStart = task.getStartTime();
-		LocalDateTime taskFinish = task.getFinishTime();
-		
-		boolean valid = true;
-		
-		// check if relevant alternative trajectory sections are stationary
-		if (trajectoryLock.intersects(taskStart, taskFinish)) {
-			valid = trajectoryContainer.getTrajectories().stream()
-				.allMatch(t -> {
-					IntervalSet<LocalDateTime> intersection = new SimpleIntervalSet<LocalDateTime>()
-						.add(t.getStartTime(), t.getFinishTime())
-						.intersect(taskStart, taskFinish);
-					
-					// intersection is either empty or continuous [min, max]
-					
-					if (intersection.isEmpty())
-						return true;
-					
-					LocalDateTime start = intersection.minValue();
-					LocalDateTime finish = intersection.maxValue();
-					
-					return t.isStationary(start, finish)
-						&& t.interpolateLocation(start).equals(location);
-				});
-		}
-		
-		if (!valid)
-			throw new IllegalArgumentException("trajectory stationarity violated");
-	}
-
 	public void addTaskRemoval(Task task) {
 		Objects.requireNonNull(task, "task");
 		
@@ -170,7 +117,72 @@ public class WorkerUnitScheduleUpdate {
 		
 		taskRemovals.add(task);
 	}
+
+	private void checkTask(Task task) {
+		if (task.getAssignedWorker().getActual() != worker) // identity comparison
+			throw new IllegalArgumentException("invalid assigned worker");
+	}
 	
+	private void checkTaskLock(LocalDateTime from, LocalDateTime to) {
+		if (taskLock.intersects(from, to))
+			throw new IllegalArgumentException("task lock violation");
+	}
+	
+	public void checkSelfConsistency() {
+		if (!tasks.stream().allMatch(this::verifyTaskLocation))
+			throw new IllegalStateException("task location violation");
+		
+		if (!verifyTrajectoryContinuity())
+			throw new IllegalStateException("trajectory continuity violation");
+	}
+
+	private boolean verifyTaskLocation(Task task) {
+		Point location = task.getLocation();
+		LocalDateTime taskStart = task.getStartTime();
+		LocalDateTime taskFinish = task.getFinishTime();
+		
+		return trajectoryContainer.getTrajectories(taskStart, taskFinish).stream()
+			.allMatch(t -> {
+				IntervalSet<LocalDateTime> intersection = new SimpleIntervalSet<LocalDateTime>()
+					.add(t.getStartTime(), t.getFinishTime())
+					.intersect(taskStart, taskFinish);
+				
+				// intersection is either empty or continuous [min, max]
+				
+				if (intersection.isEmpty())
+					return true;
+				
+				LocalDateTime start = intersection.minValue();
+				LocalDateTime finish = intersection.maxValue();
+				
+				return t.isStationary(start, finish)
+					&& t.interpolateLocation(start).equals(location);
+			});
+	}
+	
+	private boolean verifyTrajectoryContinuity() {
+		if (trajectoryContainer.isEmpty())
+			return true;
+		
+		Iterator<Trajectory> it = trajectoryContainer.getTrajectories().iterator();
+		
+		Trajectory last = it.next();
+		
+		while (it.hasNext()) {
+			Trajectory curr = it.next();
+			
+			if (curr.getStartTime().equals(last.getFinishTime()) &&
+				!curr.getStartLocation().equals(last.getFinishLocation()))
+			{
+				return false;
+			}
+			
+			last = curr;
+		}
+		
+		return true;
+	}
+
 	public void seal() {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");

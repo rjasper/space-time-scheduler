@@ -62,11 +62,6 @@ public class Scheduler {
 	 */
 	private final WorldPerspectiveCache perspectiveCache;
 
-//	/**
-//	 * The workers managed by this scheduler.
-//	 */
-//	private final Map<String, WorkerUnit> workerPool = new HashMap<>();
-	
 	/**
 	 * The schedule managed by this scheduler.
 	 */
@@ -109,27 +104,6 @@ public class Scheduler {
 	}
 
 	/**
-	 * @return the physical outside world representation where the workers are located.
-	 */
-	private World getWorld() {
-		return world;
-	}
-
-	/**
-	 * @return the perspective cache.
-	 */
-	private WorldPerspectiveCache getPerspectiveCache() {
-		return perspectiveCache;
-	}
-
-//	/**
-//	 * @return the workers.
-//	 */
-//	private Map<String, WorkerUnit> getWorkerPool() {
-//		return schedule.getWorkers();
-//	}
-	
-	/**
 	 * Adds a new {@link WorkerUnit} to the scheduler. The given specification
 	 * is used to create the worker.
 	 * 
@@ -147,11 +121,6 @@ public class Scheduler {
 		// don't overlap with static or dynamic obstacles or with other workers
 		// only allow after frozen horizon
 		
-//		WorkerUnit previous = getWorkerPool().putIfAbsent(worker.getId(), worker);
-//		
-//		if (previous != null)
-//			throw new IllegalArgumentException("worker id already assigned");
-		
 		schedule.addWorker(worker);
 		
 		return worker.getReference();
@@ -168,12 +137,6 @@ public class Scheduler {
 	 *             if worker ID is unassigned.
 	 */
 	public WorkerUnitReference getWorkerReference(String workerId) {
-//		WorkerUnit worker = getWorkerPool().get(
-//			Objects.requireNonNull(workerId, "workerId"));
-//		
-//		if (worker == null)
-//			throw new IllegalArgumentException("unknown worker id");
-		
 		return schedule.getWorker(workerId).getReference();
 	}
 	
@@ -262,9 +225,6 @@ public class Scheduler {
 	public ScheduleResult schedule(TaskSpecification specification) {
 		Objects.requireNonNull(specification, "specification");
 
-		World world = getWorld();
-//		Collection<WorkerUnit> pool = schedule.getWorkers();
-		WorldPerspectiveCache perspectiveCache = getPerspectiveCache();
 		Geometry locationSpace = world.space(specification.getLocationSpace());
 		UUID taskId = specification.getTaskId();
 		LocalDateTime earliest = max(
@@ -279,8 +239,6 @@ public class Scheduler {
 
 		TaskPlanner tp = new TaskPlanner();
 
-//		tp.setWorkerPool(pool);
-//		tp.setPerspectiveCache(perspectiveCache);
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);
 		tp.setTaskId(taskId);
@@ -295,8 +253,8 @@ public class Scheduler {
 		Iterable<Point> locations = () -> new LocationIterator(
 			locationSpace, MAX_LOCATION_PICKS);
 
-		for (Point loc : locations) {
-			tp.setLocation(loc);
+		for (Point locaction : locations) {
+			tp.setLocation(locaction);
 
 			// iterate over possible worker time slots.
 
@@ -306,39 +264,28 @@ public class Scheduler {
 			
 			// TODO communicate frozen horizon
 			Iterable<WorkerUnitSlot> workerSlots = () -> new WorkerUnitSlotIterator(
-				filterByLocation(loc),
+				filterByLocation(locaction),
 				frozenHorizonTime,
-				loc,
+				locaction,
 				earliest, latest, duration);
 
 			for (WorkerUnitSlot ws : workerSlots) {
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
-//				LocalDateTime slotStartTime = s.getStartTime();
-//				LocalDateTime slotFinishTime = s.getFinishTime();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
 
-				tp.setFixedEnd(!s.getFinishTime().isBefore(END_OF_TIME));
+				tp.setFixedEnd(s.getFinishTime().isBefore(END_OF_TIME));
 				tp.setWorldPerspective(perspective);
 				tp.setWorker(w);
 				tp.setIdleSlot(s);
-				// don't exceed the slot's time window
-//				tp.setEarliestStartTime( max(earliest, slotStartTime ) );
-//				tp.setLatestStartTime  ( min(latest  , slotFinishTime) );
 				tp.setEarliestStartTime( earliest );
 				tp.setLatestStartTime  ( latest   );
 
 				// plan the routes of affected workers and schedule task
 				boolean status = tp.plan();
 
-				if (status) {
-//					List<Task> tasks = tp.getResultTasks();
-//					List<TrajectoryUpdate> trajectoryUpdates = tp.getResultTrajectoryUpdates();
-					
+				if (status)
 					return success(alternative);
-					
-//					return ScheduleResult.success(tasks, trajectoryUpdates);
-				}
 			}
 		}
 
@@ -429,8 +376,7 @@ public class Scheduler {
 	 * @return {@code true} iff worker is able to reach the location.
 	 */
 	private boolean checkLocationFor(Point location, WorkerUnit worker) {
-		WorldPerspectiveCache cache = getPerspectiveCache();
-		WorldPerspective perspective = cache.getPerspectiveFor(worker);
+		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
 		Geometry map = perspective.getView().getMap();
 
 		return !map.contains(location);

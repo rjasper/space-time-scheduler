@@ -405,7 +405,7 @@ public class WorkerUnit {
 	}
 	
 	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
-		return trajectories.overlappingTrajectories(from, to);
+		return trajectories.getTrajectories(from, to);
 	}
 
 	/**
