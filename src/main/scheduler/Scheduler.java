@@ -39,15 +39,9 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class Scheduler {
 
-	/**
-	 * The default amount of location picks tried by the scheduler before
-	 * giving up.
-	 */
-	private static final int MAX_LOCATION_PICKS = 10;
-
 	// TODO document
 	public static final LocalDateTime BEGIN_OF_TIME = LocalDateTime.MIN;
-	
+
 	// TODO document
 	public static final LocalDateTime END_OF_TIME = LocalDateTime.MAX;
 
@@ -214,6 +208,12 @@ public class Scheduler {
 		
 		updateFrozenHorizonTime();
 	}
+
+	/**
+	 * The default amount of location picks tried by the scheduler before
+	 * giving up.
+	 */
+	private static final int MAX_LOCATION_PICKS = 10;
 
 	/**
 	 * Tries to schedule a new task satisfying the given specification.
