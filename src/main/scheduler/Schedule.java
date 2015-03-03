@@ -98,7 +98,7 @@ public class Schedule {
 		
 		releaseLocks(alternative);
 
-		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
+		for (WorkerUnitUpdate u : alternative.getUpdates()) {
 			WorkerUnit worker = u.getWorker();
 			
 			for (Task t : u.getTaskRemovals())
@@ -122,7 +122,7 @@ public class Schedule {
 	}
 	
 	private void checkCompatibility(ScheduleAlternative alternative) {
-		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
+		for (WorkerUnitUpdate u : alternative.getUpdates()) {
 			WorkerUnit worker = u.getWorker();
 			WorkerUnitLocks workerLocks = locks.get(worker);
 			
@@ -131,16 +131,21 @@ public class Schedule {
 
 			IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
 			IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
-			SimpleIntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
+			IntervalSet<LocalDateTime> trajIntervals = u.getTrajectoryIntervals();
+			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
 			
 			Collection<Task> tasks = u.getTasks();
 			Collection<Task> removals = u.getTaskRemovals();
 			
-			u.checkSelfConsistency();
+			try {
+				u.checkSelfConsistency();
+			} catch (IllegalStateException e) {
+				throw new IllegalArgumentException(e);
+			}
 
 			// no mutual trajectory locks with origin disregarding removed tasks
 			if (!trajLockIntervals.intersection(originTasksIntervals)
-				.remove(removalsIntervals).isEmpty())
+				.difference(removalsIntervals).isEmpty())
 			{
 				throw new IllegalArgumentException("trajectory lock violation");
 			}
@@ -151,7 +156,7 @@ public class Schedule {
 			if (!verifyTrajectoryContinuity(worker, u.getTrajectories()))
 				throw new IllegalArgumentException("trajectory continuity violation");
 			// non-updated original trajectories lead to tasks
-			if (!tasks.stream().allMatch(t -> verifyTaskLocation(t, trajLockIntervals)))
+			if (!tasks.stream().allMatch(t -> verifyTaskLocation(t, trajIntervals)))
 				throw new IllegalArgumentException("task location violation");
 			// no unknown task removals
 			if (!removals.stream().allMatch(worker::hasTask))
@@ -227,7 +232,7 @@ public class Schedule {
 	}
 	
 	private void applyLocks(ScheduleAlternative alternative) {
-		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
+		for (WorkerUnitUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
 			workerLocks.trajectoryLock .add   ( u.getTrajectoriesLock() );
@@ -236,7 +241,7 @@ public class Schedule {
 	}
 	
 	private void releaseLocks(ScheduleAlternative alternative) {
-		for (WorkerUnitScheduleUpdate u : alternative.getUpdates()) {
+		for (WorkerUnitUpdate u : alternative.getUpdates()) {
 			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
 			
 			workerLocks.trajectoryLock .remove   ( u.getTrajectoriesLock() );

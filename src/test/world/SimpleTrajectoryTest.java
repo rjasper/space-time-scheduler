@@ -17,6 +17,58 @@ import com.google.common.collect.ImmutableList;
 
 public class SimpleTrajectoryTest {
 	
+	@Test(expected = IllegalStateException.class)
+	public void testIsStationaryEmpty() {
+		SimpleTrajectory traj = new SimpleTrajectory(SpatialPath.empty(), ImmutableList.of());
+		
+		traj.isStationary(atSecond(0), atSecond(1));
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testIsStationaryOutside() {
+		SimpleTrajectory traj = new SimpleTrajectory(
+			spatialPath(0, 0, 1, 1),
+			ImmutableList.of(atSecond(0), atSecond(1)));
+		
+		traj.isStationary(atSecond(1), atSecond(2));
+	}
+	
+	public void testIsStationaryPositiveSimple() {
+		SimpleTrajectory traj = new SimpleTrajectory(
+			spatialPath(0, 0, 0, 0),
+			ImmutableList.of(atSecond(0), atSecond(1)));
+		
+		
+		assertThat(traj.isStationary(atSecond(0), atSecond(1)), is(true));
+	}
+	
+	public void testIsStationaryNegativeSimple() {
+		SimpleTrajectory traj = new SimpleTrajectory(
+			spatialPath(0, 0, 1, 1),
+			ImmutableList.of(atSecond(0), atSecond(1)));
+		
+		
+		assertThat(traj.isStationary(atSecond(0), atSecond(1)), is(false));
+	}
+	
+	public void testIsStationaryPositiveAdvanced() {
+		SimpleTrajectory traj = new SimpleTrajectory(
+			spatialPath(0, 0, 0, 0, 1, 1),
+			ImmutableList.of(atSecond(0), atSecond(1), atSecond(2)));
+		
+		
+		assertThat(traj.isStationary(atSecond(0.25), atSecond(1.75)), is(true));
+	}
+	
+	public void testIsStationaryNegativeAdvanced() {
+		SimpleTrajectory traj = new SimpleTrajectory(
+			spatialPath(0, 0, 1, 1),
+			ImmutableList.of(atSecond(0), atSecond(1)));
+		
+		
+		assertThat(traj.isStationary(atSecond(0.25), atSecond(0.75)), is(false));
+	}
+	
 	@Test(expected = NoSuchElementException.class)
 	public void testInterpolateLocationEmpty() {
 		Trajectory t = SimpleTrajectory.empty();

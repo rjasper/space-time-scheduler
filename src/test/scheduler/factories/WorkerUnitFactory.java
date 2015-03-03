@@ -1,4 +1,4 @@
-package tasks.factories;
+package scheduler.factories;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static util.TimeFactory.*;
@@ -33,7 +33,7 @@ public class WorkerUnitFactory {
 
 	private static WorkerUnitFactory instance = null;
 
-	private TaskPlanner taskPlanner = new TaskPlanner();
+//	private TaskPlanner taskPlanner = new TaskPlanner();
 
 	private ImmutablePolygon shape;
 
@@ -53,13 +53,6 @@ public class WorkerUnitFactory {
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
-
-//		World world = new World();
-//		WorldPerspectiveCache perspectiveCache =
-//			new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
-
-//		taskPlanner.setPerspectiveCache(perspectiveCache);
-//		taskPlanner.setWorkerPool(emptyList());
 	}
 
 	public static WorkerUnitFactory getInstance() {
@@ -73,9 +66,9 @@ public class WorkerUnitFactory {
 		return shape;
 	}
 
-	private TaskPlanner getTaskPlanner() {
-		return taskPlanner;
-	}
+//	private TaskPlanner getTaskPlanner() {
+//		return taskPlanner;
+//	}
 
 	public void setShape(ImmutablePolygon shape) {
 		this.shape = shape;
@@ -121,7 +114,7 @@ public class WorkerUnitFactory {
 	}
 
 	public boolean addTaskWithDuration(WorkerUnit worker, UUID taskId, double x, double y, long t, long d) {
-		TaskPlanner tp = getTaskPlanner();
+		TaskPlanner tp = new TaskPlanner();
 
 		Point location = point(x, y);
 		LocalDateTime time = atSecond(t);

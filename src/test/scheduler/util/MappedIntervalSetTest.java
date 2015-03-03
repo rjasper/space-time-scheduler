@@ -16,8 +16,8 @@ import org.junit.Test;
 
 import scheduler.Task;
 import scheduler.WorkerUnit;
+import scheduler.factories.WorkerUnitFactory;
 import scheduler.util.IntervalSet.Interval;
-import tasks.factories.WorkerUnitFactory;
 import util.UUIDFactory;
 
 public class MappedIntervalSetTest {

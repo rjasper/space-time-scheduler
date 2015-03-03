@@ -23,7 +23,7 @@ implements Interpolator<P, T>
 		SeekResult<P, ? extends I> res1 = seeker.seekFloor(position);
 		int idx1 = res1.getIndex();
 		P p1 = res1.getPosition();
-		I v1 = res1.getInterpolation();
+		I v1 = res1.get();
 		
 		if (res1.getPosition().compareTo(position) == 0)
 			return InterpolationResult.onSpot(res1.getIndex(), onSpot(idx1, p1, v1));
@@ -31,7 +31,7 @@ implements Interpolator<P, T>
 		SeekResult<P, ? extends I> res2 = seeker.seekCeiling(position);
 		int idx2 = res1.getIndex();
 		P p2 = res2.getPosition();
-		I v2 = res2.getInterpolation();
+		I v2 = res2.get();
 		
 		return InterpolationResult.inbetween(
 			res1.getIndex(),

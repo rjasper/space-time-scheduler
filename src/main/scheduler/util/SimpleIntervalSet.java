@@ -326,7 +326,7 @@ implements ModifiableIntervalSet<T>
 		
 		if (other == this) {
 			intervals.clear();
-		} else if (!other.isEmpty()){
+		} else if (!isEmpty() && !other.isEmpty()){
 			makeOverlappingSubSet(other).forEach(i ->
 				removeImpl(i.getFromInclusive(), i.getToExclusive()));
 		}
@@ -402,9 +402,13 @@ implements ModifiableIntervalSet<T>
 		if (isSealed())
 			throw new IllegalStateException("interval is sealed");
 		
-		// short cut if other is this
+		// short cuts
 		if (other == this)
 			return this;
+		if (!overlaps(other)) {
+			intervals.clear();
+			return this;
+		}
 		
 		Optional<SimpleIntervalSet<T>> option = makeOverlappingSubSet(other).stream()
 			.map(i -> {

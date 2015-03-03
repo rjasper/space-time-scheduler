@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
@@ -19,7 +19,7 @@ import scheduler.Scheduler;
 import scheduler.TaskSpecification;
 import scheduler.WorkerUnitReference;
 import scheduler.WorkerUnitSpecification;
-import tasks.factories.WorkerUnitFactory;
+import scheduler.factories.WorkerUnitFactory;
 import world.StaticObstacle;
 import world.World;
 import world.fixtures.WorldFixtures;

@@ -1,15 +1,19 @@
 package world;
 
+import scheduler.util.IntervalSet.Interval;
 import static java.util.Collections.*;
 import static util.Comparables.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import scheduler.util.IntervalSet;
+import scheduler.util.MappedIntervalSet;
 import jts.geom.immutable.ImmutablePoint;
 
 public class TrajectoryContainer {
@@ -18,6 +22,28 @@ public class TrajectoryContainer {
 	
 	public boolean isEmpty() {
 		return trajectories.isEmpty();
+	}
+	
+	public boolean isContinuous() {
+		if (isEmpty())
+			return true;
+		
+		Iterator<Trajectory> it = trajectories.values().iterator();
+		
+		Trajectory last = it.next();
+		
+		while (it.hasNext()) {
+			Trajectory curr = it.next();
+			
+			if (!curr.getStartLocation().equals(last.getFinishLocation()))
+				return false;
+			if (!curr.getStartTime().equals(last.getFinishTime()))
+				return false;
+			
+			last = curr;
+		}
+		
+		return true;
 	}
 	
 	public Collection<Trajectory> getTrajectories() {
@@ -84,23 +110,22 @@ public class TrajectoryContainer {
 		return getLastTrajectory().getFinishTime();
 	}
 	
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		Trajectory trajectory = getTrajectory(time);
-		
-		return trajectory.interpolateLocation(time);
+	public IntervalSet<LocalDateTime> getTrajectoryIntervals() {
+		return new MappedIntervalSet<>(
+			trajectories,
+			t -> new Interval<>(t.getStartTime(), t.getFinishTime()));
 	}
 	
 	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
-		// FIXME empty regions are not considered
+		if (!from.isBefore(to))
+			throw new IllegalArgumentException("invalid time interval");
 		
-		if (isEmpty())
-			throw new IllegalStateException("container is empty");
-		
-		if (!from.isBefore( to              ) ||
+		// short cut if there is no overlapping interval
+		if (isEmpty()                         ||
 			!from.isBefore( getFinishTime() ) ||
 			!to  .isAfter ( getStartTime () ))
 		{
-			throw new IllegalArgumentException("invalid time interval");
+			return true;
 		}
 		
 		return getTrajectories(from, to).stream()
@@ -110,6 +135,12 @@ public class TrajectoryContainer {
 				
 				return t.isStationary(start, finish);
 			});
+	}
+
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		Trajectory trajectory = getTrajectory(time);
+		
+		return trajectory.interpolateLocation(time);
 	}
 	
 	public void update(Trajectory trajectory) {
@@ -140,12 +171,12 @@ public class TrajectoryContainer {
 		// startTime <= core.startTime < finishTime
 		trajectories.subMap(startTime, finishTime)
 			.clear();
-		// overwrites left neighbor
+		// overwrite left neighbor
 		if (cutLeft)
 			put( left.subPath(left.getStartTime(), startTime) );
-		// replaces core
+		// replace core
 		put(trajectory);
-		// adds new right neighbor
+		// add new right neighbor
 		if (cutRight)
 			put( right.subPath(finishTime, right.getFinishTime()) );
 	}
@@ -154,11 +185,24 @@ public class TrajectoryContainer {
 		trajectories.put(trajectory.getStartTime(), trajectory);
 	}
 	
-	public void deleteHead(LocalDateTime time) {
+	public void deleteBefore(LocalDateTime time) {
 		Objects.requireNonNull(time, "time");
 		
+		Entry<LocalDateTime, Trajectory> lowerEntry = trajectories.lowerEntry(time);
+		
+		// nothing to remove
+		if (lowerEntry == null)
+			return;
+		
+		LocalDateTime lowerTime = lowerEntry.getKey();
+		Trajectory lowerTraj = lowerEntry.getValue();
+		
+		LocalDateTime deleteTime = lowerTraj.getFinishTime().isAfter(time)
+			? lowerTime // keeps lower trajectory
+			: time;     // deletes lower trajectory
+		
 		// remove trajectories not finishing after 'time'
-		trajectories.headMap(overlappingStartTime(time))
+		trajectories.headMap(deleteTime)
 			.clear();
 	}
 	
@@ -172,7 +216,11 @@ public class TrajectoryContainer {
 	}
 	
 	public Trajectory calcTrajectory() {
-		// FIXME empty regions will mess this up
+		// TODO inefficient
+		if (!isContinuous())
+			throw new IllegalStateException("trajectory not continuous");
+
+		// TODO inefficient and inaccurate (concat does not connect properly)
 		return trajectories.values().stream()
 			.reduce((u, v) -> u.concat(v))
 			.orElse(SimpleTrajectory.empty());

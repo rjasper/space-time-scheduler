@@ -262,7 +262,6 @@ public class Scheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the workers are filtered by the location
 			
-			// TODO communicate frozen horizon
 			Iterable<WorkerUnitSlot> workerSlots = () -> new WorkerUnitSlotIterator(
 				filterByLocation(locaction),
 				frozenHorizonTime,
@@ -273,13 +272,14 @@ public class Scheduler {
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
+				boolean fixedEnd = s.getFinishTime().isBefore(END_OF_TIME);
 
-				tp.setFixedEnd(s.getFinishTime().isBefore(END_OF_TIME));
+				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
 				tp.setWorker(w);
 				tp.setIdleSlot(s);
-				tp.setEarliestStartTime( earliest );
-				tp.setLatestStartTime  ( latest   );
+				tp.setEarliestStartTime(earliest);
+				tp.setLatestStartTime(latest);
 
 				// plan the routes of affected workers and schedule task
 				boolean status = tp.plan();
@@ -320,19 +320,19 @@ public class Scheduler {
 	private ScheduleResult success(ScheduleAlternative alternative) {
 		alternative.seal();
 		
-		Collection<WorkerUnitScheduleUpdate> updates = alternative.getUpdates();
+		Collection<WorkerUnitUpdate> updates = alternative.getUpdates();
 		
 		// collect result information
 		
 		UUID transactionId = UUID.randomUUID();
 		
 		Map<UUID, Task> tasks = updates.stream()
-			.map(WorkerUnitScheduleUpdate::getTasks)
+			.map(WorkerUnitUpdate::getTasks)
 			.flatMap(Collection::stream)
 			.collect(toMap(Task::getId, identity()));
 
 		Map<UUID, Task> removals = updates.stream()
-			.map(WorkerUnitScheduleUpdate::getTaskRemovals)
+			.map(WorkerUnitUpdate::getTaskRemovals)
 			.flatMap(Collection::stream)
 			.collect(toMap(Task::getId, identity()));
 		

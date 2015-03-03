@@ -5,6 +5,7 @@ import static java.util.Spliterator.*;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -102,6 +103,65 @@ extends AbstractIntervalSet<T>
 		
 		return (NavigableMap<T, U>) self.map.subMap(from, toExclusive);
 	}
+
+	private static class IntervalIterator<T extends Comparable<? super T>>
+	implements Iterator<Interval<T>>
+	{
+		
+		private final Iterator<Interval<T>> iterator;
+		
+		private Interval<T> peek = null;
+		
+		public IntervalIterator(Iterator<Interval<T>> iterator) {
+			this.iterator = Objects.requireNonNull(iterator, "iterator");
+			this.peek = iterator.hasNext() ? iterator.next() : null;
+		}
+	
+		@Override
+		public boolean hasNext() {
+			return peek != null;
+		}
+	
+		@Override
+		public Interval<T> next() {
+			if (peek == null)
+				throw new NoSuchElementException("no next element");
+			
+			Interval<T> first = peek;
+			Interval<T> last = first;
+			
+			// seek last non-consecutive interval
+			boolean noBreak = true;
+			while (iterator.hasNext()) {
+				peek = iterator.next();
+				
+				T lastTo = last.getToExclusive();
+				T peekFrom = peek.getFromInclusive();
+				
+				if (!peekFrom.equals(lastTo)) {
+					noBreak = false;
+					break;
+				}
+				
+				last = peek;
+			}
+			
+			// !iterator.hasNext() || peek.from != last.to
+			
+			// if while-loop finished ordinarily
+			// indicates that there are no more intervals to iterate over
+			if (noBreak)
+				peek = null;
+			
+			if (last == first)
+				return first; // reuse interval
+			else
+				return new Interval<>(
+					first.getFromInclusive(),
+					last.getToExclusive());
+		}
+		
+	}
 	
 	@Override
 	public Iterator<Interval<T>> iterator() {
@@ -109,7 +169,7 @@ extends AbstractIntervalSet<T>
 			.map(this::interval)
 			.iterator();
 		
-		return makeIterator(it);
+		return new IntervalIterator<>(it);
 	}
 
 	@Override

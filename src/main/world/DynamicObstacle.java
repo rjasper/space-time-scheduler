@@ -56,7 +56,7 @@ public class DynamicObstacle implements Cloneable {
 		Objects.requireNonNull(trajectory, "trajectory");
 		GeometriesRequire.requireValidSimple2DPolygon(shape, "shape");
 		
-		if (trajectory.isEmpty() || trajectory.getDuration().isZero())
+		if (trajectory.isEmpty() || trajectory.duration().isZero())
 			throw new IllegalArgumentException("illegal trajectory");
 
 		this.shape = immutable(shape);
@@ -127,10 +127,10 @@ public class DynamicObstacle implements Cloneable {
 
 	/**
 	 * @return the duration of the trajectory.
-	 * @see Trajectory#getDuration()
+	 * @see Trajectory#duration()
 	 */
 	public Duration getDuration() {
-		return trajectory.getDuration();
+		return trajectory.duration();
 	}
 
 	/**

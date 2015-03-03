@@ -15,7 +15,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import scheduler.WorkerUnit;
-import tasks.fixtures.WorkerUnitFixtures;
+import scheduler.fixtures.WorkerUnitFixtures;
 
 import com.vividsolutions.jts.geom.Point;
 

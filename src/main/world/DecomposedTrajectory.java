@@ -16,10 +16,8 @@ import jts.geom.immutable.ImmutablePoint;
 import util.TimeConv;
 import world.util.BinarySearchSeeker;
 import world.util.DoubleSubPointPathOperation;
-import world.util.Interpolator;
-import world.util.Interpolator.InterpolationResult;
-import world.util.PointPathInterpolator;
 import world.util.Seeker;
+import world.util.Seeker.SeekResult;
 import world.util.TrajectoryComposer;
 
 import com.google.common.collect.ImmutableList;
@@ -291,7 +289,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 * @see world.Trajectory#getDuration()
 	 */
 	@Override
-	public Duration getDuration() {
+	public Duration duration() {
 		return getArcTimePathComponent().duration();
 	}
 
@@ -304,9 +302,16 @@ public class DecomposedTrajectory implements Trajectory {
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to  , "to"  );
 		
-		if (!from.isBefore(to))
+		if (isEmpty())
+			throw new IllegalStateException("trajectory is empty");
+		
+		if (!from.isBefore(to) ||
+			!from.isBefore(getFinishTime()) ||
+			!to.isAfter(getStartTime()))
+		{
 			throw new IllegalArgumentException("invalid interval");
-
+		}
+		
 		// determine min and max arc between 'from' and 'to'
 		
 		double minArc, maxArc;
@@ -321,18 +326,17 @@ public class DecomposedTrajectory implements Trajectory {
 				arcTimePathComponent::getVertex,
 				PointPath.Vertex::getY,
 				arcTimePathComponent.size());
-			Interpolator<Double, ImmutablePoint> stInterpolator =
-				new PointPathInterpolator<>(timeSeeker);
 			
-			// interpolate arc at 'from' and 'to'
-			InterpolationResult<ImmutablePoint> stStart  = stInterpolator.interpolate(fromD);
-			InterpolationResult<ImmutablePoint> stFinish = stInterpolator.interpolate(toD);
+			SeekResult<Double, ArcTimePath.Vertex> stStart =
+				timeSeeker.seekFloor(fromD);
+			SeekResult<Double, ArcTimePath.Vertex> stFinish =
+				timeSeeker.seekFloor(toD);
 			
-			minArc = stStart .getInterpolation().getX();
-			maxArc = stFinish.getInterpolation().getX();
+			minArc = Double.POSITIVE_INFINITY;
+			maxArc = Double.NEGATIVE_INFINITY;
 			
-			// determine if there are even lower/greater arc values than at from/to
-			for (int i = stStart.getStartIndex()+1; i < stFinish.getFinishIndex()-1; ++i) {
+			// determine if there are even lower/greater arc between from and to
+			for (int i = stStart.getIndex(); i <= stFinish.getIndex(); ++i) {
 				double arc = arcTimePathComponent.getPoint(i).getX();
 				
 				minArc = min(minArc, arc);
@@ -346,26 +350,26 @@ public class DecomposedTrajectory implements Trajectory {
 			spatialPathComponent::getVertex,
 			SpatialPath.Vertex::getArc,
 			spatialPathComponent.size());
-		Interpolator<Double, ImmutablePoint> xyInterpolator =
-			new PointPathInterpolator<>(arcSeeker);
-
-		InterpolationResult<ImmutablePoint> xyStart = xyInterpolator.interpolate(minArc);
-		InterpolationResult<ImmutablePoint> xyFinish = xyInterpolator.interpolate(maxArc);
 		
-		ImmutablePoint minArcLocation = xyStart.getInterpolation();
-		ImmutablePoint maxArcLocation = xyFinish.getInterpolation();
+		SeekResult<Double, SpatialPath.Vertex> xyStart =
+			arcSeeker.seekFloor(minArc);
+		SeekResult<Double, SpatialPath.Vertex> xyFinish=
+			arcSeeker.seekCeiling(maxArc);
+		
+		ImmutablePoint floorMinArcLocation = xyStart.get().getPoint();
+		ImmutablePoint ceilMaxArcLocation = xyFinish.get().getPoint();
 
 		// check location at 'minArc' and 'maxArc'
 		
-		if (!minArcLocation.equals(maxArcLocation))
+		if (!floorMinArcLocation.equals(ceilMaxArcLocation))
 			return false;
 		
 		// check locations between 'minArc' and 'maxArc'
 		
-		for (int i = xyStart.getStartIndex()+1; i < xyFinish.getFinishIndex()-1; ++i) {
+		for (int i = xyStart.getIndex(); i <= xyFinish.getIndex(); ++i) {
 			ImmutablePoint location = spatialPathComponent.getPoint(i);
 			
-			if (!location.equals(minArcLocation))
+			if (!location.equals(floorMinArcLocation))
 				return false;
 		}
 		

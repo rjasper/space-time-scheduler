@@ -20,10 +20,9 @@ import world.util.Interpolator;
 import world.util.Interpolator.InterpolationResult;
 import world.util.PointPathInterpolator;
 import world.util.Seeker;
+import world.util.Seeker.SeekResult;
 import world.util.TimeSubIndexInterpolator;
 import world.util.TimeSubTrajectoryOperation;
-import world.util.TrajectoryInterpolator;
-import world.util.TrajectoryInterpolator.TrajectoryInterpolation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -229,58 +228,42 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		return getTimes().get(size() - 1);
 	};
 
-	/**
-	 * Caches the duration of this trajectory.
-	 */
-	private transient Duration duration = null;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see world.Trajectory#getDuration()
-	 */
-	@Override
-	public Duration getDuration() {
-		if (duration == null) {
-			duration = isEmpty()
-				? Duration.ZERO
-				: Duration.between(getStartTime(), getFinishTime());
-		}
-
-		return duration;
-	}
-
 	@Override
 	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to  , "to"  );
 		
-		if (!from.isBefore(to))
-			throw new IllegalArgumentException("invalid interval");
+		if (isEmpty())
+			throw new IllegalStateException("trajectory is empty");
 		
-		// TODO short cut if from == start and to == finish
+		if (!from.isBefore(to) ||
+			!from.isBefore(getFinishTime()) ||
+			!to.isAfter(getStartTime()))
+		{
+			throw new IllegalArgumentException("invalid interval");
+		}
 		
 		Seeker<LocalDateTime, Trajectory.Vertex> timeSeeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Trajectory.Vertex::getTime,
 			size());
-		Interpolator<LocalDateTime, TrajectoryInterpolation> interpolator =
-			new TrajectoryInterpolator<>(timeSeeker, TrajectoryInterpolator.TIME_RELATOR);
-		
-		InterpolationResult<TrajectoryInterpolation> start  = interpolator.interpolate(from);
-		InterpolationResult<TrajectoryInterpolation> finish = interpolator.interpolate(to);
 		
 		// check location at 'from' and 'to'
 		
-		Point fromLocation = start.getInterpolation().getLocation();
-		Point toLocation   = finish.getInterpolation().getLocation();
+		SeekResult<LocalDateTime, Trajectory.Vertex> start =
+			timeSeeker.seekFloor(from);
+		SeekResult<LocalDateTime, Trajectory.Vertex> finish =
+			timeSeeker.seekCeiling(to);
+		
+		Point fromLocation = start.get().getLocation();
+		Point toLocation   = finish.get().getLocation();
 		
 		if (!toLocation.equals( fromLocation ))
 			return false;
 		
 		// check locations between 'from' and 'to'
 		
-		for (int i = start.getStartIndex()+1; i < finish.getFinishIndex()-1; ++i) {
+		for (int i = start.getIndex(); i <= finish.getIndex(); ++i) {
 			Point location = getVertex(i).getLocation();
 			
 			if (!location.equals(fromLocation))
@@ -338,6 +321,27 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	@Override
 	public int size() {
 		return getSpatialPath().size();
+	}
+
+	/**
+	 * Caches the duration of this trajectory.
+	 */
+	private transient Duration duration = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see world.Trajectory#getDuration()
+	 */
+	@Override
+	public Duration duration() {
+		if (duration == null) {
+			duration = isEmpty()
+				? Duration.ZERO
+				: Duration.between(getStartTime(), getFinishTime());
+		}
+	
+		return duration;
 	}
 
 	/*

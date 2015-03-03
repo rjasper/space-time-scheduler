@@ -11,7 +11,7 @@ import world.Trajectory;
 
 public class ScheduleAlternative {
 	
-	private final Map<WorkerUnit, WorkerUnitScheduleUpdate> updates =
+	private final Map<WorkerUnit, WorkerUnitUpdate> updates =
 		new IdentityHashMap<>();
 	
 	private boolean sealed = false;
@@ -24,18 +24,18 @@ public class ScheduleAlternative {
 		return updates.containsKey(worker);
 	}
 
-	public Collection<WorkerUnitScheduleUpdate> getUpdates() {
+	public Collection<WorkerUnitUpdate> getUpdates() {
 		if (!isSealed())
 			throw new IllegalStateException("alternative not sealed");
 		
 		return unmodifiableCollection(updates.values());
 	}
 	
-	private WorkerUnitScheduleUpdate getUpdate(WorkerUnit worker) {
-		return updates.computeIfAbsent(worker, WorkerUnitScheduleUpdate::new);
+	private WorkerUnitUpdate getUpdate(WorkerUnit worker) {
+		return updates.computeIfAbsent(worker, WorkerUnitUpdate::new);
 	}
 
-	public void addTrajectoryUpdate(WorkerUnit worker, Trajectory trajectory) {
+	public void updateTrajectory(WorkerUnit worker, Trajectory trajectory) {
 		Objects.requireNonNull(worker, "worker");
 		Objects.requireNonNull(trajectory, "trajectory");
 		
@@ -79,7 +79,7 @@ public class ScheduleAlternative {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");
 		
-		for (WorkerUnitScheduleUpdate u : updates.values())
+		for (WorkerUnitUpdate u : updates.values())
 			u.seal();
 		
 		sealed = true;

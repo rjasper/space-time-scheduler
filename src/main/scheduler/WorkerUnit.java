@@ -82,28 +82,11 @@ public class WorkerUnit {
 	 * All tasks which were assigned to this worker.
 	 */
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
-
-//	/**
-//	 * An unmodifiable view on {@link #tasks}.
-//	 */
-//	private NavigableMap<LocalDateTime, Task> unmodifiableTasks =
-//		unmodifiableNavigableMap(tasks);
-
-//	/**
-//	 * All obstacle sections of this worker.
-//	 */
-//	private NavigableMap<LocalDateTime, WorkerUnitObstacle> obstacleSections = new TreeMap<>();
-//
-//	/**
-//	 * An unmodifiable view on {@link #obstacleSections}.
-//	 */
-//	private NavigableMap<LocalDateTime, WorkerUnitObstacle> unmodifiableObstacleSegments =
-//		unmodifiableNavigableMap(obstacleSections);
 	
 	/**
 	 * Contains all consecutive trajectories of this worker
 	 */
-	private TrajectoryContainer trajectories = new TrajectoryContainer();
+	private TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 
 	/**
 	 * Constructs a worker defining its shape, maximum velocity, initial
@@ -121,12 +104,11 @@ public class WorkerUnit {
 		this.initialTime = spec.getInitialTime();
 		this.radius = calcRadius(shape);
 
-//		putInitialObstacleSegment();
 		initTrajectoryContainer();
 	}
 
 	/**
-	 * Initializes the {@link #trajectories} with an
+	 * Initializes the {@link #trajectoryContainer} with an
 	 * stationary Trajectory at the worker's initial location and initial
 	 * time until {@link LocalDateTime#MAX}.
 	 */
@@ -137,22 +119,8 @@ public class WorkerUnit {
 			initialTime, Scheduler.END_OF_TIME);
 		Trajectory initialTrajectory = new SimpleTrajectory(spatialPath, times);
 		
-		trajectories.update(initialTrajectory);
+		trajectoryContainer.update(initialTrajectory);
 	}
-
-//	/**
-//	 * Initializes the {@link #obstacleSections} with an
-//	 * {@link IdlingWorkerUnitObstacle} at its initial location and initial
-//	 * time.
-//	 */
-//	private void putInitialObstacleSegment() {
-//		ImmutablePoint initialLocation = getInitialLocation();
-//		LocalDateTime initialTime = getInitialTime();
-//
-//		WorkerUnitObstacle section = new IdlingWorkerUnitObstacle(this, initialLocation, initialTime);
-//
-//		putObstacleSection(section);
-//	}
 
 	/**
 	 * @return the ID.
@@ -222,17 +190,70 @@ public class WorkerUnit {
 	}
 	
 	/**
-	 * Determines whether the worker unit is following a stationary trajectory
-	 * during the given time interval.
+	 * Determines whether the given task is currently assigned to this worker.
 	 * 
-	 * @param from
-	 * @param to
-	 * @return {@code true} if the worker is stationary.
+	 * @param task
+	 * @return {@code true} if {@code task} is assigned.
 	 */
-	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
-		return trajectories.isStationary(from, to);
+	public boolean hasTask(Task task) {
+		Objects.requireNonNull(task, "task");
+		
+		Task retrieval = tasks.get(task.getStartTime());
+		
+		return retrieval != null && retrieval.equals(task);
 	}
+
+	/**
+	 * @return all tasks this unit is assigned to.
+	 */
+	public Collection<Task> getTasks() {
+		return unmodifiableCollection(tasks.values());
+	}
+
+	/**
+	 * Assigns a new task to this worker.
+	 *
+	 * @param task
+	 * @throws NullPointerException
+	 *             if {@code task} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code task} is not assigned to this worker.
+	 */
+	public void addTask(Task task) {
+		Objects.requireNonNull(task, "task");
+		
+		if (task.getAssignedWorker().getActual() != this)
+			throw new IllegalArgumentException("task not assigned to this worker");
 	
+		tasks.put(task.getStartTime(), task);
+	}
+
+	/**
+	 * Removes a task from this worker.
+	 * 
+	 * @param task
+	 * @throws NullPointerException
+	 *             if {@code task} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code task} is not assigned to this worker.
+	 */
+	public void removeTask(Task task) {
+		Objects.requireNonNull(task, "task");
+		
+		boolean status = tasks.remove(task.getStartTime(), task);
+		
+		if (!status)
+			throw new IllegalArgumentException("unknown task");
+	}
+
+	/**
+	 * @return a view on the tasks as a time interval set.
+	 */
+	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
+		return new MappedIntervalSet<LocalDateTime, Task>(tasks,
+			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
+	}
+
 	/**
 	 * Determines whether the worker is idle for the given entire interval.
 	 * 
@@ -243,7 +264,58 @@ public class WorkerUnit {
 	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
 		return !getTaskIntervals().intersects(from, to);
 	}
+
+	// TODO document
+	public Collection<Trajectory> getTrajectories() {
+		return trajectoryContainer.getTrajectories();
+	}
+
+	// TODO document
+	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
+		return trajectoryContainer.getTrajectories(from, to);
+	}
+
+	/**
+	 * Updates the given trajectory.
+	 * 
+	 * @param trajectory
+	 * @throws NullPointerException if {@code trajectory} is {@code null}.
+	 */
+	public void updateTrajectory(Trajectory trajectory) {
+		trajectoryContainer.update(trajectory);
+	}
 	
+	/**
+	 * Calculates a trajectory from all obstacle sections concatenated together.
+	 *
+	 * @return the merged trajectory.
+	 */
+	public Trajectory calcTrajectory() {
+		return trajectoryContainer.calcTrajectory();
+	}
+
+	/**
+	 * Interpolates the location of the worker at the given time.
+	 * 
+	 * @param time
+	 * @return the interpolated location.
+	 */
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		return trajectoryContainer.interpolateLocation(time);
+	}
+
+	/**
+	 * Determines whether the worker unit is following a stationary trajectory
+	 * during the given time interval.
+	 * 
+	 * @param from
+	 * @param to
+	 * @return {@code true} if the worker is stationary.
+	 */
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		return trajectoryContainer.isStationary(from, to);
+	}
+
 	// TODO document
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime))
@@ -318,176 +390,6 @@ public class WorkerUnit {
 	}
 	
 	/**
-	 * Interpolates the location of the worker at the given time.
-	 * 
-	 * @param time
-	 * @return the interpolated location.
-	 */
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		return trajectories.interpolateLocation(time);
-	}
-	
-	/**
-	 * @return all tasks this unit is assigned to.
-	 */
-	public Collection<Task> getTasks() {
-		return unmodifiableCollection(tasks.values());
-	}
-	
-	/**
-	 * Determines whether the given task is currently assigned to this worker.
-	 * 
-	 * @param task
-	 * @return {@code true} if {@code task} is assigned.
-	 */
-	public boolean hasTask(Task task) {
-		Objects.requireNonNull(task, "task");
-		
-		Task retrieval = tasks.get(task.getStartTime());
-		
-		return retrieval != null && retrieval.equals(task);
-	}
-
-//	/**
-//	 * @return an unmodifiable view on the time ordered map of tasks assigned to
-//	 * this worker.
-//	 */
-//	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
-//		return unmodifiableNavigableMap(tasks);
-//	}
-	
-	/**
-	 * @return a view on the tasks as a time interval set.
-	 */
-	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
-		return new MappedIntervalSet<LocalDateTime, Task>(tasks,
-			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
-	}
-
-	/**
-	 * Assigns a new task to this worker.
-	 *
-	 * @param task
-	 * @throws NullPointerException
-	 *             if {@code task} is {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this worker.
-	 */
-	public void addTask(Task task) {
-		Objects.requireNonNull(task, "task");
-		
-		if (task.getAssignedWorker().getActual() != this)
-			throw new IllegalArgumentException("task not assigned to this worker");
-
-		tasks.put(task.getStartTime(), task);
-	}
-	
-	/**
-	 * Removes a task from this worker.
-	 * 
-	 * @param task
-	 * @throws NullPointerException
-	 *             if {@code task} is {@code null}.
-	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this worker.
-	 */
-	public void removeTask(Task task) {
-		Objects.requireNonNull(task, "task");
-		
-		boolean status = tasks.remove(task.getStartTime(), task);
-		
-		if (!status)
-			throw new IllegalArgumentException("unknown task");
-	}
-	
-	public Collection<Trajectory> getTrajectories() {
-		return trajectories.getTrajectories();
-	}
-	
-	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
-		return trajectories.getTrajectories(from, to);
-	}
-
-	/**
-	 * Updates the given trajectory.
-	 * 
-	 * @param trajectory
-	 * @throws NullPointerException if {@code trajectory} is {@code null}.
-	 */
-	public void updateTrajectory(Trajectory trajectory) {
-		trajectories.update(trajectory);
-	}
-
-//	/**
-//	 * @return the obstacle sections of this worker.
-//	 */
-//	public Collection<WorkerUnitObstacle> getObstacleSections() {
-//		return unmodifiableObstacleSegments.values();
-//	}
-//	
-//	/**
-//	 * @return an unmodifiable view on the time ordered map of obstacle sections.
-//	 */
-//	public NavigableMap<LocalDateTime, WorkerUnitObstacle> getNavigableObstacleSegments() {
-//		return unmodifiableObstacleSegments;
-//	}
-//	
-//	/**
-//	 * Returns the obstacle section of the given time. The time interval of
-//	 * returned section will include the given time. If no such obstacle exists
-//	 * (e.g., before the worker was initialized) then {@code null} is returned.
-//	 *
-//	 * @param time
-//	 * @return the obstacle section or {@code null} if no such section exists.
-//	 */
-//	public WorkerUnitObstacle getObstacleSection(LocalDateTime time) {
-//		Objects.requireNonNull(time, "time");
-//
-//		Entry<LocalDateTime, WorkerUnitObstacle> entry = obstacleSections.floorEntry(time);
-//
-//		return entry == null ? null : entry.getValue();
-//	}
-//
-//	/**
-//	 * Adds an obstacle section.
-//	 *
-//	 * @param section
-//	 * @throws NullPointerException if section is null
-//	 */
-//	public void addObstacleSection(WorkerUnitObstacle section) {
-//		Objects.requireNonNull(section, "section");
-//
-//		putObstacleSection(section);
-//	}
-//
-//	/**
-//	 * Puts an obstacle section into the map of {@link #obstacleSections}.
-//	 *
-//	 * @param section
-//	 */
-//	private void putObstacleSection(WorkerUnitObstacle section) {
-//		obstacleSections.put(section.getStartTime(), section);
-//	}
-//
-//	/**
-//	 * Removes an obstacle section.
-//	 *
-//	 * @param section
-//	 * @throws NullPointerException
-//	 *             if section is null
-//	 * @throws IllegalArgumentException
-//	 *             if section is unknown (e.g. not a section of this worker)
-//	 */
-//	public void removeObstacleSection(WorkerUnitObstacle section) {
-//		Objects.requireNonNull(section, "section");
-//
-//		boolean status = obstacleSections.remove(section.getStartTime(), section);
-//
-//		if (!status)
-//			throw new IllegalArgumentException("unknown obstacle section");
-//	}
-
-	/**
 	 * Creates a set of idle slots which represent sections of the worker
 	 * while idling during a given time period.
 	 *
@@ -503,29 +405,6 @@ public class WorkerUnit {
 
 		if (from.isAfter(to))
 			throw new IllegalArgumentException("from is after to");
-
-//		Map.Entry<LocalDateTime, WorkerUnitObstacle> firstEntry = obstacleSections.lowerEntry(from);
-//		Collection<WorkerUnitObstacle> sectionsSubSet =
-//			obstacleSections.subMap(from, true, to, true).values();
-//
-//		// first section might not exist
-//		Stream<WorkerUnitObstacle> first =
-//			firstEntry == null ? Stream.empty() : Stream.of(firstEntry.getValue());
-//		Stream<WorkerUnitObstacle> tail = sectionsSubSet.stream();
-//
-//		return Stream.concat(first, tail)
-//			// filter 'idle' (non-occupied) sections
-//			.filter(s -> s instanceof MovingWorkerUnitObstacle
-//				|| s instanceof IdlingWorkerUnitObstacle)
-//			// filter non-zero
-//			.filter(s -> !s.getDuration().isZero())
-//			// make IdleSlots
-//			.map(s -> new IdleSlot(
-//				s.getStartLocation(),
-//				s.getFinishLocation(),
-//				s.getStartTime(),
-//				s.getFinishTime()))
-//			.collect(toList());
 		
 		if (to.isBefore(initialTime))
 			return emptyList();
@@ -540,10 +419,10 @@ public class WorkerUnit {
 				LocalDateTime startTime  = i.getFromInclusive();
 				LocalDateTime finishTime = i.getToExclusive();
 				
-				Trajectory left = trajectories.getTrajectory(startTime);
+				Trajectory left = trajectoryContainer.getTrajectory(startTime);
 				Trajectory right = left.getFinishTime().compareTo(finishTime) >= 0
 					? left
-					: trajectories.getTrajectory(finishTime);
+					: trajectoryContainer.getTrajectory(finishTime);
 				
 				return new IdleSlot(
 					left .interpolateLocation(startTime ),
@@ -552,20 +431,6 @@ public class WorkerUnit {
 					finishTime);
 			})
 			.collect(toList());
-	}
-
-	/**
-	 * Calculates a trajectory from all obstacle sections concatenated together.
-	 *
-	 * @return the merged trajectory.
-	 */
-	public Trajectory calcTrajectory() {
-//		return obstacleSections.values().stream()
-//			.map(DynamicObstacle::getTrajectory)
-//			.reduce((u, v) -> u.concat(v))
-//			.orElse(SimpleTrajectory.empty());
-		
-		return trajectories.calcTrajectory();
 	}
 
 	/*

@@ -10,12 +10,12 @@ public interface Seeker<P, T> {
 	public static class SeekResult<P, T> {
 		private final int index;
 		private final P position;
-		private final T interpolation;
+		private final T object;
 		
 		public SeekResult(int index, P position, T object) {
 			this.index = index;
 			this.position = position;
-			this.interpolation = object;
+			this.object = object;
 		}
 
 		public int getIndex() {
@@ -26,8 +26,8 @@ public interface Seeker<P, T> {
 			return position;
 		}
 
-		public T getInterpolation() {
-			return interpolation;
+		public T get() {
+			return object;
 		}
 		
 	}

@@ -1,5 +1,6 @@
 package scheduler;
 
+import static scheduler.util.IntervalSets.*;
 import static java.util.Collections.*;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ import world.TrajectoryContainer;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class WorkerUnitScheduleUpdate {
+public class WorkerUnitUpdate {
 	
 	private final WorkerUnit worker;
 	
@@ -34,7 +35,7 @@ public class WorkerUnitScheduleUpdate {
 	
 	private boolean sealed = false;
 
-	public WorkerUnitScheduleUpdate(WorkerUnit worker) {
+	public WorkerUnitUpdate(WorkerUnit worker) {
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 	
@@ -57,19 +58,17 @@ public class WorkerUnitScheduleUpdate {
 	public Collection<Task> getTaskRemovals() {
 		return unmodifiableCollection(taskRemovals);
 	}
-
-	public SimpleIntervalSet<LocalDateTime> getTrajectoriesLock() {
-		if (!isSealed())
-			throw new IllegalStateException("update not sealed");
-		
-		return trajectoryLock;
+	
+	public IntervalSet<LocalDateTime> getTrajectoryIntervals() {
+		return trajectoryContainer.getTrajectoryIntervals();
 	}
 
-	public SimpleIntervalSet<LocalDateTime> getTaskRemovalIntervals() {
-		if (!isSealed())
-			throw new IllegalStateException("update not sealed");
-		
-		return taskRemovalIntervals;
+	public IntervalSet<LocalDateTime> getTrajectoriesLock() {
+		return unmodifiableIntervalSet(trajectoryLock);
+	}
+
+	public IntervalSet<LocalDateTime> getTaskRemovalIntervals() {
+		return unmodifiableIntervalSet(taskRemovalIntervals);
 	}
 
 	public void updateTrajectory(Trajectory trajectory) {
@@ -81,8 +80,9 @@ public class WorkerUnitScheduleUpdate {
 		LocalDateTime startTime  = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
-		// TODO updates should not predate initialTime
-		
+		if (startTime.isBefore(worker.getInitialTime()))
+			throw new IllegalArgumentException("trajectory predates initial time");
+
 		trajectoryLock.add(startTime, finishTime);
 		trajectoryContainer.update(trajectory);
 	}
@@ -96,10 +96,12 @@ public class WorkerUnitScheduleUpdate {
 		LocalDateTime startTime  = task.getStartTime();
 		LocalDateTime finishTime = task.getFinishTime();
 		
-		// TODO updates should not predate initialTime
-
-		checkTask(task);
-		checkTaskLock(startTime, finishTime);
+		if (startTime.isBefore(worker.getInitialTime()))
+			throw new IllegalArgumentException("task predates initial time");
+		if (task.getAssignedWorker().getActual() != worker) // identity comparison
+			throw new IllegalArgumentException("invalid assigned worker");
+		if (taskLock.intersects(startTime, finishTime))
+			throw new IllegalArgumentException("task lock violation");
 		
 		trajectoryLock.add(startTime, finishTime);
 		taskLock.add(startTime, finishTime);
@@ -112,26 +114,16 @@ public class WorkerUnitScheduleUpdate {
 		
 		if (isSealed())
 			throw new IllegalStateException("update is sealed");
+		if (task.getAssignedWorker().getActual() != worker) // identity comparison
+			throw new IllegalArgumentException("invalid assigned worker");
 		
-		checkTask(task);
-		
+		taskRemovalIntervals.add(task.getStartTime(), task.getFinishTime());
 		taskRemovals.add(task);
 	}
 
-	private void checkTask(Task task) {
-		if (task.getAssignedWorker().getActual() != worker) // identity comparison
-			throw new IllegalArgumentException("invalid assigned worker");
-	}
-	
-	private void checkTaskLock(LocalDateTime from, LocalDateTime to) {
-		if (taskLock.intersects(from, to))
-			throw new IllegalArgumentException("task lock violation");
-	}
-	
 	public void checkSelfConsistency() {
 		if (!tasks.stream().allMatch(this::verifyTaskLocation))
 			throw new IllegalStateException("task location violation");
-		
 		if (!verifyTrajectoryContinuity())
 			throw new IllegalStateException("trajectory continuity violation");
 	}

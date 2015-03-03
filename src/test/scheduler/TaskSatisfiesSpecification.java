@@ -1,4 +1,4 @@
-package tasks;
+package scheduler;
 
 import org.hamcrest.Description;
 import org.hamcrest.Factory;

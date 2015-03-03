@@ -290,11 +290,11 @@ public class TaskPlanner {
 		
 		// apply changes to scheduleAlternative
 		
-		if (!trajToTask.getDuration().isZero())
-			scheduleAlternative.addTrajectoryUpdate(worker, trajToTask);
-		scheduleAlternative.addTrajectoryUpdate(worker, trajAtTask);
-		if (!trajFromTask.getDuration().isZero())
-			scheduleAlternative.addTrajectoryUpdate(worker, trajFromTask);
+		if (!trajToTask.duration().isZero())
+			scheduleAlternative.updateTrajectory(worker, trajToTask);
+		scheduleAlternative.updateTrajectory(worker, trajAtTask);
+		if (!trajFromTask.duration().isZero())
+			scheduleAlternative.updateTrajectory(worker, trajFromTask);
 		
 		scheduleAlternative.addTask(task);
 		
