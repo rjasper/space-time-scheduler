@@ -1,10 +1,12 @@
 package scheduler;
 
+import static util.TimeConv.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
 import static util.Maps.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -453,6 +455,50 @@ public class WorkerUnit {
 					finishTime);
 			})
 			.collect(toList());
+	}
+	
+	// TODO document
+	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
+		SimpleIntervalSet<LocalDateTime> intervals = new SimpleIntervalSet<>();
+		
+		intervals.add(from, to).remove(getTaskIntervals());
+		
+		Duration tasksDuration = calcDuration(intervals);
+		Duration scopeDuration = Duration.between(from, to);
+		
+		return durationToSeconds(tasksDuration) / durationToSeconds(scopeDuration);
+	}
+
+	// TODO document
+	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
+		// TODO implement
+		return Double.NaN;
+	}
+
+	// TODO document
+	public double calcLoad(LocalDateTime from, LocalDateTime to) {
+		// TODO implement
+		return Double.NaN;
+	}
+
+	// TODO document
+	public double calcIdleLoad(LocalDateTime from, LocalDateTime to) {
+		// TODO implement
+		return Double.NaN;
+	}
+
+	// TODO document
+	public double calcRelativeMotionLoad(LocalDateTime from, LocalDateTime to) {
+		// TODO implement
+		return Double.NaN;
+	}
+	
+	// TODO document
+	private static Duration calcDuration(IntervalSet<LocalDateTime> timeIntervals) {
+		return timeIntervals.stream()
+			.map(ti -> Duration.between(ti.getFromInclusive(), ti.getToExclusive()))
+			.reduce(Duration::plus)
+			.orElse(Duration.ZERO);
 	}
 
 	/*
