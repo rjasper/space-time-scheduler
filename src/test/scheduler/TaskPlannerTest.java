@@ -17,12 +17,6 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
-import scheduler.IdleSlot;
-import scheduler.Schedule;
-import scheduler.ScheduleAlternative;
-import scheduler.Scheduler;
-import scheduler.TaskPlanner;
-import scheduler.WorkerUnit;
 import scheduler.factories.WorkerUnitFactory;
 import world.DynamicObstacle;
 import world.RadiusBasedWorldPerspectiveCache;

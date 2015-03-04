@@ -14,8 +14,6 @@ import world.Trajectory;
 
 public class ScheduleResult {
 	
-//	private final boolean error;
-	
 	private final UUID transactionId;
 	
 	private final Map<UUID, Task> tasks;
@@ -125,7 +123,7 @@ public class ScheduleResult {
 	/**
 	 * @return the updated trajectories.
 	 */
-	public Collection<TrajectoryUpdate> getTrajectories() {
+	public Collection<TrajectoryUpdate> getTrajectoryUpdates() {
 		return trajectories;
 	}
 

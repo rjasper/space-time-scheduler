@@ -1,6 +1,7 @@
 package world;
 
 import static java.lang.Math.*;
+
 import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutableLineString;

@@ -1,4 +1,4 @@
-package pickers;
+package scheduler.pickers;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
@@ -21,8 +21,6 @@ import com.vividsolutions.jts.geom.Point;
 
 public class WorkerUnitSlotIteratorTest {
 
-	// TODO test frozen horizon
-	
 	@Test
 	public void test() {
 		WorkerUnit w1 = WorkerUnitFixtures.withTwoTasks1();
@@ -40,7 +38,8 @@ public class WorkerUnitSlotIteratorTest {
 		
 		picker.next();
 		assertThat(picker.getCurrentWorker(), is(w2));
-		assertThat(picker.hasNext(), is(false));
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -75,7 +74,8 @@ public class WorkerUnitSlotIteratorTest {
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
 			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 
-		assertThat(picker.hasNext(), is(false));
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -110,7 +110,8 @@ public class WorkerUnitSlotIteratorTest {
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
 			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 
-		assertThat(picker.hasNext(), is(false));
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
 	}
 	
 	@Test
@@ -145,7 +146,122 @@ public class WorkerUnitSlotIteratorTest {
 		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
 			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
-		assertThat(picker.hasNext(), is(false));
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonStartTimePositive() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(0);
+		LocalDateTime frozenHorizon = atHour(5.0);
+		LocalDateTime latest = atHour(6.0);
+		Duration duration = Duration.ofHours(1L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+		
+		picker.next();
+		assertThat(picker.getCurrentWorker(), is(w));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonStartTimeNegative() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(0);
+		LocalDateTime frozenHorizon = atHour(5.5);
+		LocalDateTime latest = atHour(6.0);
+		Duration duration = Duration.ofHours(1L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonFinishTimePositive() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(0);
+		LocalDateTime frozenHorizon = atHour(6.0);
+		LocalDateTime latest = atHour(11.0);
+		Duration duration = Duration.ofHours(1L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+		
+		picker.next();
+		assertThat(picker.getCurrentWorker(), is(w));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonFinishTimeNegative() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(0);
+		LocalDateTime frozenHorizon = atHour(6.5);
+		LocalDateTime latest = atHour(11.0);
+		Duration duration = Duration.ofHours(1L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonDurationPositive() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(5.0);
+		LocalDateTime frozenHorizon = atHour(5.0);
+		LocalDateTime latest = atHour(11.0);
+		Duration duration = Duration.ofHours(2L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+
+		picker.next();
+		assertThat(picker.getCurrentWorker(), is(w));
+	}
+	
+	@Test
+	public void testCheckFrozenHorizonDurationNegative() {
+		WorkerUnit w = WorkerUnitFixtures.withTwoTasks1();
+		
+		Collection<WorkerUnit> workers = Collections.singleton(w);
+
+		Point location = point(0., 0.);
+		LocalDateTime earliest = atHour(5.0);
+		LocalDateTime frozenHorizon = atHour(6.0);
+		LocalDateTime latest = atHour(11.0);
+		Duration duration = Duration.ofHours(2L);
+		
+		WorkerUnitSlotIterator picker = new WorkerUnitSlotIterator(
+			workers, frozenHorizon, location, earliest, latest, duration);
+		
+		assertThat("picker has next when it shouldn't",
+			picker.hasNext(), is(false));
 	}
 
 }

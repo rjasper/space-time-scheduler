@@ -1,7 +1,7 @@
 package scheduler;
 
-import static scheduler.util.IntervalSets.*;
 import static java.util.Collections.*;
+import static scheduler.util.IntervalSets.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

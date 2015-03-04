@@ -1,6 +1,7 @@
 package scheduler;
 
 import static java.util.Collections.*;
+import static scheduler.util.IntervalSets.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -70,6 +71,28 @@ public class Schedule {
 			throw new IllegalArgumentException("unknown worker id");
 		
 		locks.remove(worker);
+	}
+	
+	public IntervalSet<LocalDateTime> getTrajectoryLock(WorkerUnit worker) {
+		Objects.requireNonNull(worker, "worker");
+		
+		WorkerUnitLocks workerLocks = locks.get(worker);
+		
+		if (workerLocks == null)
+			throw new IllegalArgumentException("unknown worker");
+		
+		return unmodifiableIntervalSet(workerLocks.trajectoryLock);
+	}
+	
+	public Set<Task> getTaskRemovalLock(WorkerUnit worker) {
+		Objects.requireNonNull(worker, "worker");
+		
+		WorkerUnitLocks workerLocks = locks.get(worker);
+		
+		if (workerLocks == null)
+			throw new IllegalArgumentException("unknown worker");
+		
+		return unmodifiableSet(workerLocks.taskRemovalLock);
 	}
 	
 	public Collection<ScheduleAlternative> getAlternatives() {

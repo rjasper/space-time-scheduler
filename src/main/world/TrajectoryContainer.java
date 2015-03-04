@@ -1,6 +1,5 @@
 package world;
 
-import scheduler.util.IntervalSet.Interval;
 import static java.util.Collections.*;
 import static util.Comparables.*;
 
@@ -12,9 +11,10 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import scheduler.util.IntervalSet;
-import scheduler.util.MappedIntervalSet;
 import jts.geom.immutable.ImmutablePoint;
+import scheduler.util.IntervalSet;
+import scheduler.util.IntervalSet.Interval;
+import scheduler.util.MappedIntervalSet;
 
 public class TrajectoryContainer {
 	

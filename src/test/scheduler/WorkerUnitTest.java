@@ -1,12 +1,12 @@
 package scheduler;
 
+import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static util.TimeConv.*;
+import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
 import static world.factories.PathFactory.*;
-import static jts.geom.immutable.StaticGeometryBuilder.*;
-import static org.junit.Assert.*;
-import static util.TimeFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,8 +15,6 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
-import scheduler.IdleSlot;
-import scheduler.WorkerUnit;
 import world.DecomposedTrajectory;
 import world.Trajectory;
 

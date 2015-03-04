@@ -13,10 +13,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
-import pickers.LocationIterator;
-import pickers.WorkerUnitSlotIterator;
-import pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
 import scheduler.ScheduleResult.TrajectoryUpdate;
+import scheduler.pickers.LocationIterator;
+import scheduler.pickers.WorkerUnitSlotIterator;
+import scheduler.pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.Trajectory;
 import world.World;
@@ -138,7 +138,7 @@ public class Scheduler {
 	public void removeWorker(String workerId) {
 		WorkerUnit worker = schedule.getWorker(workerId);
 		
-		if (!worker.isIdle(frozenHorizonTime, END_OF_TIME))
+		if (!worker.isIdle(presentTime, END_OF_TIME))
 			throw new IllegalStateException("worker still has scheduled tasks");
 		
 		schedule.removeWorker(workerId);

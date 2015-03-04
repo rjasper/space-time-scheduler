@@ -8,17 +8,19 @@ import static org.junit.Assert.*;
 import static util.TimeConv.*;
 import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import scheduler.ScheduleResult;
-import scheduler.Scheduler;
-import scheduler.TaskSpecification;
-import scheduler.WorkerUnitReference;
-import scheduler.WorkerUnitSpecification;
+import scheduler.ScheduleResult.TrajectoryUpdate;
 import scheduler.factories.WorkerUnitFactory;
 import world.StaticObstacle;
 import world.World;
@@ -28,10 +30,36 @@ import com.google.common.collect.ImmutableList;
 
 public class SchedulerTest {
 	
-	@Rule
-    public ExpectedException thrown = ExpectedException.none();
-
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
+	
+	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
+		-0.5, -0.5, 0.5, 0.5);
+	
+	private static final double WORKER_SPEED = 1.0;
+	
+	private static WorkerUnitSpecification workerUnitSpecification(String workerId, double x, double y) {
+		return new WorkerUnitSpecification(
+			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
+	}
+	
+	private static TaskSpecification taskSpecification(String taskIdSeed, double x, double y, double t, double d) {
+		UUID taskId = uuid(taskIdSeed);
+		ImmutablePoint location = immutablePoint(x, y);
+		LocalDateTime startTime = secondsToTime(t, atSecond(0));
+		Duration duration = secondsToDuration(d);
+		
+		return new TaskSpecification(taskId, location, startTime, startTime, duration);
+	}
+
+	private static ScheduleResult scheduleTask(Scheduler scheduler, TaskSpecification taskSpec) {
+		ScheduleResult res = scheduler.schedule(taskSpec);
+		scheduler.commit(res.getTransactionId());
+		
+		return res;
+	}
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testNoLocation() {
@@ -244,6 +272,48 @@ public class SchedulerTest {
 
 		assertThat("horizon was not increased",
 			sc.getFrozenHorizonTime(), equalTo( atSecond(3) ));
+	}
+	
+	@Test
+	public void testScheduleFrozenHorizon() {
+		WorkerUnitSpecification ws = workerUnitSpecification("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+
+		ScheduleResult res;
+		
+		TaskSpecification ts1 = taskSpecification("ts1", 2, 2, 6, 2);
+		res = scheduleTask(sc, ts1);
+		
+		assertThat(res.isSuccess(), is(true));
+		
+		sc.setPresentTime(atSecond(10));
+		LocalDateTime frozenHorizon = sc.getFrozenHorizonTime(); // atSecond(10)
+		
+		TaskSpecification ts2 = new TaskSpecification(
+			uuid("ts2"),
+			immutablePoint(0, 2),
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(2));
+		
+		res = sc.schedule(ts2);
+		
+		assertThat("schedule failed",
+			res.isSuccess(), is(true));
+		
+		Task t2 = res.getTasks().get(uuid("ts2"));
+		
+		assertThat("task start time before frozen horizon",
+			t2.getStartTime().isBefore(frozenHorizon), is(false));
+		assertThat("no trajectory updates",
+			res.getTrajectoryUpdates().isEmpty(), is(false));
+		assertThat("trajectory start time before frozen horizon",
+			res.getTrajectoryUpdates().stream()
+			.map(TrajectoryUpdate::getTrajectory)
+			.allMatch(t -> !t.getStartTime().isBefore(frozenHorizon)),
+			is(true));
 	}
 
 }

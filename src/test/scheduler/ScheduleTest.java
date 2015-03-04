@@ -1,16 +1,21 @@
 package scheduler;
 
-import static org.hamcrest.CoreMatchers.*;
-import static world.factories.TrajectoryFactory.*;
-import static util.TimeConv.*;
-import static util.UUIDFactory.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static util.TimeConv.*;
 import static util.TimeFactory.*;
+import static util.UUIDFactory.*;
+import static world.factories.TrajectoryFactory.*;
+
+import java.time.LocalDateTime;
+import java.util.Iterator;
+
 import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
+import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
 
 public class ScheduleTest {
@@ -36,26 +41,73 @@ public class ScheduleTest {
 		schedule.addAlternative(sa);
 		schedule.integrate(sa);
 	}
-
-//	private static void scheduleTrajectory(Schedule schedule, WorkerUnit worker, Trajectory trajectory) {
-//		ScheduleAlternative sa = new ScheduleAlternative();
-//		
-//		sa.updateTrajectory(worker, trajectory);
-//		sa.seal();
-//		
-//		schedule.addAlternative(sa);
-//		schedule.integrate(sa);
-//	}
-//	
-//	private static void unscheduleTask(Schedule schedule, Task task) {
-//		ScheduleAlternative sa = new ScheduleAlternative();
-//		
-//		sa.addTaskRemoval(task);
-//		sa.seal();
-//		
-//		schedule.addAlternative(sa);
-//		schedule.integrate(sa);
-//	}
+	
+	private static SimpleIntervalSet<LocalDateTime> intervalSet(LocalDateTime from, LocalDateTime to) {
+		return new SimpleIntervalSet<LocalDateTime>().add(from, to);
+	}
+	
+	@Test
+	public void testTaskLock() {
+		WorkerUnit w = workerUnit("w", 0, 0);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w);
+		
+		ScheduleAlternative sa = new ScheduleAlternative();
+		
+		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		
+		sa.addTask(task);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		
+		assertThat(schedule.getTrajectoryLock(w),
+			equalTo(intervalSet(atSecond(1), atSecond(2))));
+	}
+	
+	@Test
+	public void testTrajectoryLock() {
+		WorkerUnit w = workerUnit("w", 0, 0);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w);
+		
+		ScheduleAlternative sa = new ScheduleAlternative();
+		
+		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
+		
+		sa.updateTrajectory(w, traj);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		
+		assertThat(schedule.getTrajectoryLock(w),
+			equalTo(intervalSet(atSecond(0), atSecond(1))));
+	}
+	
+	@Test
+	public void testTaskRemovalLock() {
+		WorkerUnit w = workerUnit("w", 0, 0);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w);
+		
+		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleTask(schedule, task);
+		
+		ScheduleAlternative sa = new ScheduleAlternative();
+		
+		sa.addTaskRemoval(task);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		
+		Iterator<Task> removalsLock = schedule.getTaskRemovalLock(w).iterator();
+		
+		assertThat(removalsLock.next(), is(task));
+		assertThat(removalsLock.hasNext(), is(false));
+	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testUpdatedTrajectoryOriginLocationViolation() {
@@ -302,6 +354,116 @@ public class ScheduleTest {
 		sa.seal();
 		
 		schedule.addAlternative(sa); // no exception
+	}
+	
+	@Test
+	public void testIntegrate() {
+		WorkerUnit w = workerUnit("w", 0, 0);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w);
+		
+		// set up task to remove
+		
+		Task taskToRemove = new Task(uuid("old task"), w.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleTask(schedule, taskToRemove);
+		
+		// plan trajectory, task and removal
+		Trajectory traj = trajectory(
+			0, 1, 1, 0,
+			0, 1, 1, 0,
+			0, 1, 2, 3);
+		
+		Task taskToSchedule = new Task(uuid("new task"), w.getReference(),
+			immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
+		
+		ScheduleAlternative sa = new ScheduleAlternative();
+		sa.updateTrajectory(w, traj);
+		sa.addTask(taskToSchedule);
+		sa.addTaskRemoval(taskToRemove);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		schedule.integrate(sa);
+		
+		assertThat("task not removed",
+			w.hasTask(taskToRemove), is(false));
+		assertThat("task not scheduled",
+			w.hasTask(taskToSchedule), is(true));
+		
+		// removed locks
+		assertThat("trajectory lock not removed",
+			schedule.getTrajectoryLock(w)
+			.intersects(atSecond(0), atSecond(3)),
+			is(false));
+		assertThat("task removal lock not removed",
+			schedule.getTaskRemovalLock(w)
+			.contains(taskToRemove),
+			is(false));
+		
+		// applied changes
+		Iterator<Trajectory> trajs = w.getTrajectories(atSecond(0), atSecond(3))
+			.iterator();
+		assertThat("trajectory update not applied",
+			trajs.next(), equalTo(traj));
+		assertThat("unexpected trajectory",
+			trajs.hasNext(), is(false));
+	}
+	
+	@Test
+	public void testEliminate() {
+		WorkerUnit w = workerUnit("w", 0, 0);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w);
+		
+		// set up task to remove
+		
+		Task taskToRemove = new Task(uuid("old task"), w.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleTask(schedule, taskToRemove);
+		
+		// plan trajectory, task and removal
+		Trajectory traj = trajectory(
+			0, 1, 1, 0,
+			0, 1, 1, 0,
+			0, 1, 2, 3);
+		
+		Task taskToSchedule = new Task(uuid("new task"), w.getReference(),
+			immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
+		
+		ScheduleAlternative sa = new ScheduleAlternative();
+		sa.updateTrajectory(w, traj);
+		sa.addTask(taskToSchedule);
+		sa.addTaskRemoval(taskToRemove);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		schedule.eliminate(sa);
+		
+		assertThat("task removed when shouldn't have been",
+			w.hasTask(taskToRemove), is(true));
+		assertThat("task scheduled when shouldn't have been",
+			w.hasTask(taskToSchedule), is(false));
+		
+		// removed locks
+		assertThat("trajectory lock not removed",
+			schedule.getTrajectoryLock(w)
+			.intersects(atSecond(0), atSecond(3)),
+			is(false));
+		assertThat("task removal lock not removed",
+			schedule.getTaskRemovalLock(w)
+			.contains(taskToRemove),
+			is(false));
+		
+		// didn't apply changes
+		Iterator<Trajectory> trajs = w.getTrajectories(atSecond(0), atSecond(3))
+			.iterator();
+		assertThat("trajectory update applied when shouldn't have been",
+			trajs.next(), not(equalTo(traj)));
+		assertThat("unexpected trajectory",
+			trajs.hasNext(), is(false));
 	}
 
 }

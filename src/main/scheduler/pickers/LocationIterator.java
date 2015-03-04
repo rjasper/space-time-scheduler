@@ -1,4 +1,4 @@
-package pickers;
+package scheduler.pickers;
 
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 
@@ -365,7 +365,6 @@ public class LocationIterator implements Iterator<Point> {
 		addEnvelope(x2-ulpX, x3     , y1     , y2-ulpY);
 		addEnvelope(x1     , x2+ulpX, y2+ulpY, y3     );
 		addEnvelope(x2+ulpX, x3     , y2-ulpY, y3     );
-
 	}
 	
 	/**
