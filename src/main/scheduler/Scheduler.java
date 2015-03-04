@@ -298,6 +298,33 @@ public class Scheduler {
 		return error();
 	}
 	
+	/**
+	 * Checks if a worker is able to reach a location in regard to its size.
+	 *
+	 * @param location
+	 * @param worker
+	 * @return {@code true} iff worker is able to reach the location.
+	 */
+	private boolean checkLocationFor(Point location, WorkerUnit worker) {
+		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
+		Geometry map = perspective.getView().getMap();
+	
+		return !map.contains(location);
+	}
+
+	/**
+	 * Filters the pool of workers which are able to reach a location in
+	 * regard to their individual size.
+	 *
+	 * @param location
+	 * @return the filtered workers which are able to reach the location.
+	 */
+	private Collection<WorkerUnit> filterByLocation(Point location) {
+		return schedule.getWorkers().stream()
+			.filter(w -> checkLocationFor(location, w))
+			.collect(toList());
+	}
+
 	// TODO document
 	public void commit(UUID transactionId) {
 		Transaction transaction = transactions.get(transactionId);
@@ -371,32 +398,11 @@ public class Scheduler {
 	private ScheduleResult error() {
 		return ScheduleResult.error();
 	}
-
-	/**
-	 * Checks if a worker is able to reach a location in regard to its size.
-	 *
-	 * @param location
-	 * @param worker
-	 * @return {@code true} iff worker is able to reach the location.
-	 */
-	private boolean checkLocationFor(Point location, WorkerUnit worker) {
-		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
-		Geometry map = perspective.getView().getMap();
-
-		return !map.contains(location);
-	}
-
-	/**
-	 * Filters the pool of workers which are able to reach a location in
-	 * regard to their individual size.
-	 *
-	 * @param location
-	 * @return the filtered workers which are able to reach the location.
-	 */
-	private Collection<WorkerUnit> filterByLocation(Point location) {
-		return schedule.getWorkers().stream()
-			.filter(w -> checkLocationFor(location, w))
-			.collect(toList());
+	
+	// TODO
+	public void cleanUp() {
+		for (WorkerUnit w : schedule.getWorkers())
+			w.cleanUp(presentTime);
 	}
 
 }

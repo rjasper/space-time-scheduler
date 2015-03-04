@@ -7,6 +7,7 @@ import static util.TimeConv.*;
 import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
 import static world.factories.PathFactory.*;
+import static world.factories.TrajectoryFactory.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +49,80 @@ public class WorkerUnitTest {
 //		
 //		assertThat(slots, equalTo(expected));
 //	}
+	
+	@Test
+	public void testCleanUp1() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj = trajectory(
+			0, 1, 1, 0,
+			0, 1, 1, 0,
+			0, 1, 2, 3);
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj);
+		worker.addTask(t1);
+		worker.addTask(t2);
+		
+		worker.cleanUp(atSecond(4.5));
+		
+		assertThat("did not remove past task",
+			worker.hasTask(t1), is(false));
+		assertThat("removed unfinished task",
+			worker.hasTask(t2), is(true));
+		assertThat("removed wrong number of trajectories",
+			worker.getTrajectories().size(), is(1));
+	}
+	
+	@Test
+	public void testCleanUp2() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj = trajectory(
+			0, 1, 1, 0,
+			0, 1, 1, 0,
+			0, 1, 2, 3);
+		Task task = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj);
+		worker.addTask(task);
+		
+		worker.cleanUp(atSecond(3));
+		
+		assertThat("removed unfinished task",
+			worker.hasTask(task), is(true));
+		assertThat("removed wrong number of trajectories",
+			worker.getTrajectories().size(), is(1));
+	}
+	
+	@Test
+	public void testCleanUp3() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj = trajectory(
+			0, 1, 1, 0,
+			0, 1, 1, 0,
+			0, 1, 2, 3);
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj);
+		worker.addTask(t1);
+		worker.addTask(t2);
+		
+		worker.cleanUp(atSecond(5));
+		
+		assertThat("did not remove past task",
+			worker.hasTask(t1), is(false));
+		assertThat("removed unfinished task",
+			worker.hasTask(t2), is(false));
+		assertThat("removed wrong number of trajectories",
+			worker.getTrajectories().size(), is(1));
+	}
 	
 	@Test
 	public void testIdleSlots() {

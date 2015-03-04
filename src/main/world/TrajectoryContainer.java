@@ -197,12 +197,12 @@ public class TrajectoryContainer {
 		LocalDateTime lowerTime = lowerEntry.getKey();
 		Trajectory lowerTraj = lowerEntry.getValue();
 		
-		LocalDateTime deleteTime = lowerTraj.getFinishTime().isAfter(time)
+		LocalDateTime lowestKey = lowerTraj.getFinishTime().isAfter(time)
 			? lowerTime // keeps lower trajectory
 			: time;     // deletes lower trajectory
 		
 		// remove trajectories not finishing after 'time'
-		trajectories.headMap(deleteTime)
+		trajectories.headMap(lowestKey)
 			.clear();
 	}
 	

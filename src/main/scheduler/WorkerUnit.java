@@ -8,6 +8,7 @@ import static util.Maps.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -292,6 +293,27 @@ public class WorkerUnit {
 	 */
 	public Trajectory calcTrajectory() {
 		return trajectoryContainer.calcTrajectory();
+	}
+	
+	// TODO document
+	public void cleanUp(LocalDateTime presentTime) {
+		// remove past trajectories
+		trajectoryContainer.deleteBefore(presentTime);
+		
+		// remove past tasks
+		
+		Entry<LocalDateTime, Task> lowerTaskEntry = tasks.lowerEntry(presentTime);
+		
+		// determine lowest key not to be removed
+		if (lowerTaskEntry != null) {
+			Task lowerTask = lowerTaskEntry.getValue();
+			
+			LocalDateTime lowestKey = lowerTask.getFinishTime().isAfter(presentTime)
+				? lowerTask.getStartTime()
+				: presentTime;
+				
+			tasks.headMap(lowestKey).clear();
+		}
 	}
 
 	/**
