@@ -16,9 +16,7 @@ import java.util.UUID;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import scheduler.ScheduleResult.TrajectoryUpdate;
 import scheduler.factories.WorkerUnitFactory;
@@ -57,9 +55,6 @@ public class SchedulerTest {
 		
 		return res;
 	}
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testNoLocation() {
@@ -205,7 +200,7 @@ public class SchedulerTest {
 			sc.getPresentTime(), equalTo( atSecond(1) ));
 	}
 	
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testDecreasePresentTime() {
 		Scheduler sc = new Scheduler(new World());
 		
@@ -213,8 +208,6 @@ public class SchedulerTest {
 		
 		assertThat("present was not set",
 			sc.getPresentTime(), equalTo( atSecond(1) ));
-		
-		thrown.expect(IllegalArgumentException.class);
 		
 		sc.setPresentTime(atSecond(0)); // should throw exception
 		
@@ -275,7 +268,59 @@ public class SchedulerTest {
 	}
 	
 	@Test
-	public void testScheduleFrozenHorizon() {
+	public void testAddWorkerAfterFrozenHorizon() {
+		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.setPresentTime(atSecond(5));
+		
+		sc.addWorker(ws); // no exception
+	}
+	
+	@Test
+	public void testAddWorkerAtFrozenHorizon() {
+		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.setPresentTime(atSecond(10));
+		
+		sc.addWorker(ws); // no exception
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testAddWorkerBeforeFrozenHorizon() {
+		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.setPresentTime(atSecond(20));
+		
+		sc.addWorker(ws);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testScheduleBeforeFrozenHorizon() {
+		WorkerUnitSpecification ws = workerUnitSpecification("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+
+		sc.setPresentTime(atSecond(10));
+		
+		TaskSpecification ts2 = new TaskSpecification(
+			uuid("ts2"),
+			immutablePoint(0, 0),
+			atSecond(0),
+			atSecond(9),
+			secondsToDuration(2));
+		
+		sc.schedule(ts2);
+	}
+	
+	@Test
+	public void testScheduleAfterFrozenHorizon() {
 		WorkerUnitSpecification ws = workerUnitSpecification("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());

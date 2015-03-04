@@ -109,6 +109,10 @@ public class Scheduler {
 	 *             if worker ID is already assigned.
 	 */
 	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
+		// also throws NullPointerException
+		if (spec.getInitialTime().isBefore(getFrozenHorizonTime()))
+			throw new IllegalArgumentException("initial time violates frozen horizon");
+		
 		WorkerUnit worker = new WorkerUnit(spec);
 
 		// TODO check validity of worker placement
