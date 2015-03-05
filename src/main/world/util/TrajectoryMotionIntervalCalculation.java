@@ -9,6 +9,13 @@ import world.util.Seeker.SeekResult;
 
 public class TrajectoryMotionIntervalCalculation {
 	
+	public static SimpleIntervalSet<LocalDateTime> calcMotionIntervals(
+		Trajectory trajectory, LocalDateTime from, LocalDateTime to)
+	{
+		return new TrajectoryMotionIntervalCalculation(trajectory)
+			.calculate(from, to);
+	}
+	
 	private final Trajectory trajectory;
 
 	public TrajectoryMotionIntervalCalculation(Trajectory trajectory) {

@@ -108,7 +108,7 @@ public class TrajectoryComposer {
 			}
 			
 			// add vertex of the current arc
-			locationsBuilder.add(xyRes.getInterpolation());
+			locationsBuilder.add(xyRes.get());
 			timesBuilder.add(time);
 			
 			lastArc = arc;
@@ -131,7 +131,7 @@ public class TrajectoryComposer {
 		double stSubIndex = stIndex + (xyArc - lowArc) / (highArc - lowArc);
 		
 		InterpolationResult<ImmutablePoint> stRes = stInterpolator.interpolate(stSubIndex);
-		ImmutablePoint stPoint = stRes.getInterpolation();
+		ImmutablePoint stPoint = stRes.get();
 		
 		ImmutablePoint location = xyVertex.getPoint();
 		double t = stPoint.getY();

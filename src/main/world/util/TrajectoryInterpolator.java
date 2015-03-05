@@ -20,44 +20,43 @@ extends AbstractInterpolator<
 	TrajectoryInterpolator.TrajectoryInterpolation>
 {
 
-	// TODO central location for common relators
-	public static final
-	TriFunction<LocalDateTime, LocalDateTime, LocalDateTime, Double> TIME_RELATOR =
-		(t, t1, t2) -> {
-			double d1 = durationToSeconds(Duration.between(t1, t));
-			double d12 = durationToSeconds(Duration.between(t1, t2));
-			
-			return d1 / d12;
-		};
-
 	public static class TrajectoryInterpolation {
 		
 		private final double subIndex;
 		private final ImmutablePoint location;
+		private final double arc;
 		private final LocalDateTime time;
 		
-		public TrajectoryInterpolation(double subIndex, ImmutablePoint location, LocalDateTime time) {
+		public TrajectoryInterpolation(double subIndex, ImmutablePoint location, double arc, LocalDateTime time) {
 			this.subIndex = subIndex;
 			this.location = location;
+			this.arc = arc;
 			this.time = time;
 		}
 
 		/**
-		 * @return the subIndex
+		 * @return the subIndex.
 		 */
 		public double getSubIndex() {
 			return subIndex;
 		}
 
 		/**
-		 * @return the location
+		 * @return the location.
 		 */
 		public ImmutablePoint getLocation() {
 			return location;
 		}
 
 		/**
-		 * @return the time
+		 * @return the arc.
+		 */
+		public double getArc() {
+			return arc;
+		}
+
+		/**
+		 * @return the time.
 		 */
 		public LocalDateTime getTime() {
 			return time;
@@ -85,6 +84,9 @@ extends AbstractInterpolator<
 		double x1 = v1.getX(), y1 = v1.getY(), x2 = v2.getX(), y2 = v2.getY();
 		ImmutablePoint location = immutablePoint(x1 + alpha*(x2-x1), y1 + alpha*(y2-y1));
 		
+		double arc1 = v1.getArc(), arc2 = v2.getArc();
+		double arc = arc1 + alpha*(arc2 - arc1);
+		
 		LocalDateTime t1 = v1.getTime();
 		LocalDateTime t2 = v2.getTime();
 		double d = durationToSeconds(Duration.between(t1, t2));
@@ -92,12 +94,12 @@ extends AbstractInterpolator<
 		
 		LocalDateTime time = t1.plus(secondsToDuration(d1));
 		
-		return new TrajectoryInterpolation(subIndex, location, time);
+		return new TrajectoryInterpolation(subIndex, location, arc, time);
 	}
 
 	@Override
 	protected TrajectoryInterpolation onSpot(int index, P position, Vertex vertex) {
-		return new TrajectoryInterpolation(index, vertex.getLocation(), vertex.getTime());
+		return new TrajectoryInterpolation(index, vertex.getLocation(), vertex.getArc(), vertex.getTime());
 	}
 	
 }

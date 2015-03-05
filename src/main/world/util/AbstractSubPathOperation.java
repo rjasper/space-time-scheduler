@@ -77,9 +77,9 @@ implements SubPathOperation<P, Q>
 			new VertexIterator(res1.getStartIndex()+1, res2.getFinishIndex());
 		
 		return construct(
-			res1.getInterpolation(),
+			res1.get(),
 			innerVertices,
-			res2.getInterpolation());
+			res2.get());
 	}
 	
 	private class VertexIterator implements Iterator<V> {

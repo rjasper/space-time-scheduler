@@ -56,7 +56,7 @@ public interface Interpolator<P, T> {
 		/**
 		 * @return the interpolation
 		 */
-		public T getInterpolation() {
+		public T get() {
 			return interpolation;
 		}
 		

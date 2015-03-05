@@ -248,5 +248,180 @@ public class WorkerUnitTest {
 		
 		assertThat(worker.ceilingIdleTimeOrNull(atSecond(3)), equalTo(atSecond(3)));
 	}
+	
+	@Test
+	public void testCalcLoad() {
+		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
+		WorkerUnit worker = new WorkerUnit(spec);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj1 = trajectory(
+			0, 0  , 3, 3,
+			0, 3  , 3, 3,
+			1, 2.5, 4, 10);
+		Trajectory traj2 = trajectory(
+			 3,  3,  3,
+			 3,  2,  2,
+			10, 11, 14);
+		Trajectory traj3 = trajectory(
+			 3,  3,  0,
+			 2,  0,  0,
+			14, 16, 19);
+
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Task t3 = new Task(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj1);
+		worker.updateTrajectory(traj2);
+		worker.updateTrajectory(traj3);
+		
+		worker.addTask(t1);
+		worker.addTask(t2);
+		worker.addTask(t3);
+		
+		assertThat(worker.calcLoad(atSecond(0), atSecond(16)), is(0.6875));
+	}
+	
+	@Test
+	public void testCalcTaskLoad() {
+		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
+		WorkerUnit worker = new WorkerUnit(spec);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj1 = trajectory(
+			0, 0  , 3, 3,
+			0, 3  , 3, 3,
+			1, 2.5, 4, 10);
+		Trajectory traj2 = trajectory(
+			 3,  3,  3,
+			 3,  2,  2,
+			10, 11, 14);
+		Trajectory traj3 = trajectory(
+			 3,  3,  0,
+			 2,  0,  0,
+			14, 16, 19);
+
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Task t3 = new Task(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj1);
+		worker.updateTrajectory(traj2);
+		worker.updateTrajectory(traj3);
+		
+		worker.addTask(t1);
+		worker.addTask(t2);
+		worker.addTask(t3);
+		
+		assertThat(worker.calcTaskLoad(atSecond(0), atSecond(16)), is(0.3125));
+	}
+	
+	@Test
+	public void testCalcMotionLoad() {
+		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
+		WorkerUnit worker = new WorkerUnit(spec);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj1 = trajectory(
+			0, 0  , 3, 3,
+			0, 3  , 3, 3,
+			1, 2.5, 4, 10);
+		Trajectory traj2 = trajectory(
+			 3,  3,  3,
+			 3,  2,  2,
+			10, 11, 14);
+		Trajectory traj3 = trajectory(
+			 3,  3,  0,
+			 2,  0,  0,
+			14, 16, 19);
+
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Task t3 = new Task(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj1);
+		worker.updateTrajectory(traj2);
+		worker.updateTrajectory(traj3);
+		
+		worker.addTask(t1);
+		worker.addTask(t2);
+		worker.addTask(t3);
+		
+		assertThat(worker.calcMotionLoad(atSecond(0), atSecond(16)), is(0.375));
+	}
+	
+	@Test
+	public void testCalcStationaryIdleLoad() {
+		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
+		WorkerUnit worker = new WorkerUnit(spec);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj1 = trajectory(
+			0, 0  , 3, 3,
+			0, 3  , 3, 3,
+			1, 2.5, 4, 10);
+		Trajectory traj2 = trajectory(
+			 3,  3,  3,
+			 3,  2,  2,
+			10, 11, 14);
+		Trajectory traj3 = trajectory(
+			 3,  3,  0,
+			 2,  0,  0,
+			14, 16, 19);
+
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Task t3 = new Task(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj1);
+		worker.updateTrajectory(traj2);
+		worker.updateTrajectory(traj3);
+		
+		worker.addTask(t1);
+		worker.addTask(t2);
+		worker.addTask(t3);
+		
+		assertThat(worker.calcStationaryIdleLoad(atSecond(0), atSecond(16)), is(0.3125));
+	}
+	
+	@Test
+	public void testCalcVelocityLoad() {
+		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
+		WorkerUnit worker = new WorkerUnit(spec);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Trajectory traj1 = trajectory(
+			0, 0  , 3, 3,
+			0, 3  , 3, 3,
+			1, 2.5, 4, 10);
+		Trajectory traj2 = trajectory(
+			 3,  3,  3,
+			 3,  2,  2,
+			10, 11, 14);
+		Trajectory traj3 = trajectory(
+			 3,  3,  0,
+			 2,  0,  0,
+			14, 16, 19);
+
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Task t2 = new Task(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Task t3 = new Task(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		
+		worker.updateTrajectory(traj1);
+		worker.updateTrajectory(traj2);
+		worker.updateTrajectory(traj3);
+		
+		worker.addTask(t1);
+		worker.addTask(t2);
+		worker.addTask(t3);
+		
+		assertThat(worker.calcVelocityLoad(atSecond(0), atSecond(16)), is(0.140625));
+	}
 
 }

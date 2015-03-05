@@ -1,10 +1,13 @@
 package scheduler;
 
-import static util.TimeConv.*;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
 import static util.Maps.*;
+import static util.TimeConv.*;
+import static world.util.ArcTimePathMotionIntervalCalculation.*;
+import static world.util.TrajectoryLengthDurationCalculation.*;
+import static world.util.TrajectoryMotionIntervalCalculation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -20,15 +23,18 @@ import scheduler.util.IntervalSet;
 import scheduler.util.IntervalSet.Interval;
 import scheduler.util.MappedIntervalSet;
 import scheduler.util.SimpleIntervalSet;
+import world.DecomposedTrajectory;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.Trajectory;
 import world.TrajectoryContainer;
+import world.util.TrajectoryLengthDurationCalculation.LengthDuration;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
 
+// TODO document
 /**
  * <p>The representation of a physical worker unit in the real world which is
  * managed by a scheduler. This class abstracts the physical abilities of
@@ -268,12 +274,10 @@ public class WorkerUnit {
 		return !getTaskIntervals().intersects(from, to);
 	}
 
-	// TODO document
 	public Collection<Trajectory> getTrajectories() {
 		return trajectoryContainer.getTrajectories();
 	}
 
-	// TODO document
 	public Collection<Trajectory> getTrajectories(LocalDateTime from, LocalDateTime to) {
 		return trajectoryContainer.getTrajectories(from, to);
 	}
@@ -297,7 +301,6 @@ public class WorkerUnit {
 		return trajectoryContainer.calcTrajectory();
 	}
 	
-	// TODO document
 	public void cleanUp(LocalDateTime presentTime) {
 		// remove past trajectories
 		trajectoryContainer.deleteBefore(presentTime);
@@ -340,7 +343,6 @@ public class WorkerUnit {
 		return trajectoryContainer.isStationary(from, to);
 	}
 
-	// TODO document
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime))
 			return null;
@@ -376,7 +378,6 @@ public class WorkerUnit {
 		return lowerFinish;
 	}
 	
-	// TODO document
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime))
 			return null;
@@ -457,48 +458,127 @@ public class WorkerUnit {
 			.collect(toList());
 	}
 	
-	// TODO document
+	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
+		return calcDuration( getTaskIntervals().intersection(from, to) );
+	}
+	
+	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
+	//		TrajectoryContainerIntervalReducer<Duration> reducer =
+	//			new TrajectoryContainerIntervalReducer<Duration>(
+	//				trajectoryContainer,
+	//				(t, tFrom, tTo) -> {
+	//					if (t instanceof DecomposedTrajectory) {
+	//						DecomposedTrajectory dt = (DecomposedTrajectory) t;
+	//						
+	//						LocalDateTime baseTime = dt.getBaseTime();
+	//						double tFromD = timeToSeconds(tFrom, baseTime);
+	//						double tToD = timeToSeconds(tTo, baseTime);
+	//						
+	//						IntervalSet<Double> intervals = calcMotionIntervals(
+	//							dt.getArcTimePathComponent(), tFromD, tToD);
+	//						
+	//						return secondsToDuration( calcDouble(intervals) );
+	//					} else {
+	//						return calcDuration( calcMotionIntervals(t, tFrom, tTo));
+	//					}
+	//				},
+	//				Duration::plus,
+	//				Duration.ZERO);
+	//		
+	//		return reducer.reduce(from, to);
+			
+			return trajectoryContainer.getTrajectories(from, to).stream()
+				.map(t -> {
+					LocalDateTime tFrom = max(from, t.getStartTime());
+					LocalDateTime tTo = min(to, t.getFinishTime());
+					
+					if (t instanceof DecomposedTrajectory) {
+						DecomposedTrajectory dt = (DecomposedTrajectory) t;
+						
+						LocalDateTime baseTime = dt.getBaseTime();
+						double tFromD = timeToSeconds(tFrom, baseTime);
+						double tToD = timeToSeconds(tTo, baseTime);
+						
+						IntervalSet<Double> intervals = calcMotionIntervals(
+							dt.getArcTimePathComponent(), tFromD, tToD);
+						
+						return secondsToDuration( calcDouble(intervals) );
+					} else {
+						return calcDuration( calcMotionIntervals(t, tFrom, tTo));
+					}
+				})
+				.reduce(Duration::plus)
+				.orElse(Duration.ZERO);
+		}
+
 	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
-		SimpleIntervalSet<LocalDateTime> intervals = new SimpleIntervalSet<>();
-		
-		intervals.add(from, to).remove(getTaskIntervals());
-		
-		Duration tasksDuration = calcDuration(intervals);
 		Duration scopeDuration = Duration.between(from, to);
+		Duration tasksDuration = calcTaskDuration(from, to);
 		
 		return durationToSeconds(tasksDuration) / durationToSeconds(scopeDuration);
 	}
 
-	// TODO document
 	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
-		// TODO implement
-		return Double.NaN;
+		Duration scopeDuration = Duration.between(from, to);
+		Duration motionDuration = calcMotionDuration(from, to);
+		
+		return durationToSeconds(motionDuration) / durationToSeconds(scopeDuration);
 	}
 
-	// TODO document
 	public double calcLoad(LocalDateTime from, LocalDateTime to) {
-		// TODO implement
-		return Double.NaN;
+		Duration scopeDuration = Duration.between(from, to);
+		// assumes that tasks and motions are disjoint
+		Duration loadDuration =
+			calcTaskDuration(from, to).plus(
+			calcMotionDuration(from, to));
+
+		return durationToSeconds(loadDuration) / durationToSeconds(scopeDuration);
 	}
 
-	// TODO document
-	public double calcIdleLoad(LocalDateTime from, LocalDateTime to) {
-		// TODO implement
-		return Double.NaN;
+	public double calcStationaryIdleLoad(LocalDateTime from, LocalDateTime to) {
+		Duration scopeDuration = Duration.between(from, to);
+		Duration loadDuration =
+			calcTaskDuration(from, to).plus(
+			calcMotionDuration(from, to));
+		
+		return durationToSeconds(scopeDuration.minus(loadDuration)) /
+			durationToSeconds(scopeDuration);
 	}
 
-	// TODO document
-	public double calcRelativeMotionLoad(LocalDateTime from, LocalDateTime to) {
-		// TODO implement
-		return Double.NaN;
+	public double calcVelocityLoad(LocalDateTime from, LocalDateTime to) {
+		if (from.isBefore(initialTime))
+			throw new IllegalArgumentException("from is before initial time");
+		
+		LengthDuration lengthDuration = trajectoryContainer
+			.getTrajectories(from, to).stream()
+			.map(t -> {
+				LocalDateTime tFrom = max(from, t.getStartTime());
+				LocalDateTime tTo = min(to, t.getFinishTime());
+				
+				return calcLengthDuration(t, tFrom, tTo);
+			})
+			.reduce((ld1, ld2) ->
+				new LengthDuration(
+					ld1.getLength() + ld2.getLength(),
+					ld1.getDuration().plus(ld2.getDuration()))
+			).get();
+		
+		return lengthDuration.getLength() /
+			(getMaxSpeed() * durationToSeconds( lengthDuration.getDuration() ));
 	}
 	
-	// TODO document
 	private static Duration calcDuration(IntervalSet<LocalDateTime> timeIntervals) {
 		return timeIntervals.stream()
 			.map(ti -> Duration.between(ti.getFromInclusive(), ti.getToExclusive()))
 			.reduce(Duration::plus)
 			.orElse(Duration.ZERO);
+	}
+	
+	private static double calcDouble(IntervalSet<Double> doubleIntervals) {
+		return doubleIntervals.stream()
+			.map(di -> di.getToExclusive() - di.getFromInclusive())
+			.reduce((d1, d2) -> d1 + d2)
+			.orElse(0.0);
 	}
 
 	/*

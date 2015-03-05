@@ -285,7 +285,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		Interpolator<Double, Double> interpolator =
 			new ArcTimePathInterpolator(seeker);
 		
-		return interpolator.interpolate(time).getInterpolation();
+		return interpolator.interpolate(time).get();
 	}
 
 	/*

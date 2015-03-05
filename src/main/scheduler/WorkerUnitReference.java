@@ -1,5 +1,6 @@
 package scheduler;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -7,6 +8,7 @@ import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import world.Trajectory;
 
+// TODO document
 /**
  * A reference to the {@link WorkerUnit} representation maintained by the
  * scheduler.
@@ -78,6 +80,34 @@ public class WorkerUnitReference  {
 	 */
 	public LocalDateTime getInitialTime() {
 		return worker.getInitialTime();
+	}
+
+	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
+		return worker.calcTaskDuration(from, to);
+	}
+
+	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
+		return worker.calcMotionDuration(from, to);
+	}
+
+	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
+		return worker.calcTaskLoad(from, to);
+	}
+
+	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
+		return worker.calcMotionLoad(from, to);
+	}
+
+	public double calcLoad(LocalDateTime from, LocalDateTime to) {
+		return worker.calcLoad(from, to);
+	}
+
+	public double calcStationaryIdleLoad(LocalDateTime from, LocalDateTime to) {
+		return worker.calcStationaryIdleLoad(from, to);
+	}
+
+	public double calcVelocityLoad(LocalDateTime from, LocalDateTime to) {
+		return worker.calcVelocityLoad(from, to);
 	}
 
 	/**

@@ -392,7 +392,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		InterpolationResult<Double> indexResult = indexInterpolator.interpolate(time);
 		
-		double subIndex = indexResult.getInterpolation();
+		double subIndex = indexResult.get();
 		
 		// second step interpolates the location at the given sub index
 		
@@ -405,7 +405,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 		
 		InterpolationResult<ImmutablePoint> locationResult = locationInterpolator.interpolate(subIndex);
 		
-		return locationResult.getInterpolation();
+		return locationResult.get();
 	}
 
 	/*

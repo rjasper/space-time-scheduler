@@ -215,7 +215,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		Interpolator<Double, ImmutablePoint> interpolator =
 			new PointPathInterpolator<>(seeker);
 		
-		return interpolator.interpolate(arc).getInterpolation();
+		return interpolator.interpolate(arc).get();
 	}
 
 	/*
