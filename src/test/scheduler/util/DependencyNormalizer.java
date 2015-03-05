@@ -35,7 +35,7 @@ public class DependencyNormalizer {
 	
 	private final Map<UUID, TaskSpecification> origin;
 	
-	private Map<UUID, Intermediate> intermediate;
+	private transient Map<UUID, Intermediate> intermediate;
 	
 	private static class Intermediate {
 
@@ -111,7 +111,7 @@ public class DependencyNormalizer {
 			normalizeEarliest(forwardIterator.next());
 		
 		if (!verify()) {
-			resetIntermediate();
+			resetIntermediate(); // free temporary resources
 			throw new DependencyNormalizationException("unable to normalize");
 		}
 		
