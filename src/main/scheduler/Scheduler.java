@@ -27,6 +27,7 @@ import world.pathfinder.StraightEdgePathfinder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+// TODO document
 /**
  * <p>The Scheduler manages the distribution of task to a set of
  * {@link WorkerUnit}s. A new task can be scheduled by providing a
@@ -39,10 +40,8 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class Scheduler {
 
-	// TODO document
 	public static final LocalDateTime BEGIN_OF_TIME = LocalDateTime.MIN;
 
-	// TODO document
 	public static final LocalDateTime END_OF_TIME = LocalDateTime.MAX;
 
 	/**
@@ -138,7 +137,6 @@ public class Scheduler {
 		return schedule.getWorker(workerId).getReference();
 	}
 	
-	// TODO document
 	public void removeWorker(String workerId) {
 		WorkerUnit worker = schedule.getWorker(workerId);
 		
@@ -325,7 +323,6 @@ public class Scheduler {
 			.collect(toList());
 	}
 
-	// TODO document
 	public void commit(UUID transactionId) {
 		Transaction transaction = transactions.get(transactionId);
 		
@@ -336,7 +333,6 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 
-	// TODO document
 	public void abort(UUID transactionId) {
 		Transaction transaction = transactions.get(transactionId);
 		
@@ -347,7 +343,6 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 
-	// TODO document
 	private ScheduleResult success(ScheduleAlternative alternative) {
 		alternative.seal();
 		
@@ -394,12 +389,10 @@ public class Scheduler {
 		return result;
 	}
 
-	// TODO document
 	private ScheduleResult error() {
 		return ScheduleResult.error();
 	}
 	
-	// TODO
 	public void cleanUp() {
 		for (WorkerUnit w : schedule.getWorkers())
 			w.cleanUp(presentTime);

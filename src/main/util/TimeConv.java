@@ -6,6 +6,7 @@ import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+// TODO document
 /**
  * {@code DurationConv} provides static conversion functions for
  * {@link Duration}s.
@@ -15,8 +16,6 @@ import java.time.LocalDateTime;
 public final class TimeConv {
 
 	private TimeConv() {}
-	
-	// TODO document
 	
 	private static final long MAX_SAFE_NANO_L = 0x1FFFFFFFFFFFFFL; // 2^53-1
 	private static final double MAX_SAFE_NANO_D = 0x1.FFFFFFFFFFFFFP+52; // 2^53-1
@@ -105,8 +104,6 @@ public final class TimeConv {
 			// which caused the time to underflow or overflow.
 			
 			// This checks whether an underflow or overflow was indeed the cause.
-			// check if duration was too large or too low
-			
 			if (duration.isNegative()) { // possibly underflow
 				Duration minDuration = Duration.between(baseTime, LocalDateTime.MIN);
 				

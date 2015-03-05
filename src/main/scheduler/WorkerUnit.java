@@ -463,30 +463,6 @@ public class WorkerUnit {
 	}
 	
 	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
-	//		TrajectoryContainerIntervalReducer<Duration> reducer =
-	//			new TrajectoryContainerIntervalReducer<Duration>(
-	//				trajectoryContainer,
-	//				(t, tFrom, tTo) -> {
-	//					if (t instanceof DecomposedTrajectory) {
-	//						DecomposedTrajectory dt = (DecomposedTrajectory) t;
-	//						
-	//						LocalDateTime baseTime = dt.getBaseTime();
-	//						double tFromD = timeToSeconds(tFrom, baseTime);
-	//						double tToD = timeToSeconds(tTo, baseTime);
-	//						
-	//						IntervalSet<Double> intervals = calcMotionIntervals(
-	//							dt.getArcTimePathComponent(), tFromD, tToD);
-	//						
-	//						return secondsToDuration( calcDouble(intervals) );
-	//					} else {
-	//						return calcDuration( calcMotionIntervals(t, tFrom, tTo));
-	//					}
-	//				},
-	//				Duration::plus,
-	//				Duration.ZERO);
-	//		
-	//		return reducer.reduce(from, to);
-			
 			return trajectoryContainer.getTrajectories(from, to).stream()
 				.map(t -> {
 					LocalDateTime tFrom = max(from, t.getStartTime());

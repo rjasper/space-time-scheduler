@@ -18,6 +18,7 @@ import scheduler.WorkerUnit;
 
 import com.vividsolutions.jts.geom.Point;
 
+// TODO document
 /**
  * A WorkerUnitSlotIterator iterates over all idle slots of workers which
  * satisfy the given specifications of a task. To satisfy means that a worker is
@@ -71,7 +72,6 @@ public class WorkerUnitSlotIterator implements Iterator<WorkerUnitSlotIterator.W
 
 	}
 	
-	// TODO document
 	private final LocalDateTime frozenHorizonTime;
 
 	/**

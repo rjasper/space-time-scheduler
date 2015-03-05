@@ -44,25 +44,26 @@ public final class ImmutableGeometries {
 	 * @param geometry
 	 * @return the immutable geometry.
 	 */
-	public static Geometry immutable(Geometry geometry) {
+	@SuppressWarnings("unchecked")
+	public static <G extends Geometry & ImmutableGeometry> G immutable(Geometry geometry) {
 		if (geometry == null || geometry instanceof ImmutableGeometry)
-			return geometry;
+			return (G) geometry;
 		if (geometry instanceof Point)
-			return new ImmutablePoint((Point) geometry);
+			return (G) new ImmutablePoint((Point) geometry);
 		if (geometry instanceof LinearRing)
-			return new ImmutableLinearRing((LinearRing) geometry);
+			return (G) new ImmutableLinearRing((LinearRing) geometry);
 		if (geometry instanceof LineString)
-			return new ImmutableLineString((LineString) geometry);
+			return (G) new ImmutableLineString((LineString) geometry);
 		if (geometry instanceof Polygon)
-			return new ImmutablePolygon((Polygon) geometry);
+			return (G) new ImmutablePolygon((Polygon) geometry);
 		if (geometry instanceof MultiPoint)
-			return new ImmutableMultiPoint((MultiPoint) geometry);
+			return (G) new ImmutableMultiPoint((MultiPoint) geometry);
 		if (geometry instanceof MultiLineString)
-			return new ImmutableMultiLineString((MultiLineString) geometry);
+			return (G) new ImmutableMultiLineString((MultiLineString) geometry);
 		if (geometry instanceof MultiPolygon)
-			return new ImmutableMultiPolygon((MultiPolygon) geometry);
+			return (G) new ImmutableMultiPolygon((MultiPolygon) geometry);
 		if (geometry instanceof GeometryCollection)
-			return new ImmutableGeometryCollection((GeometryCollection) geometry);
+			return (G) new ImmutableGeometryCollection((GeometryCollection) geometry);
 		
 		throw new IllegalArgumentException("unknown geometry");
 	}
