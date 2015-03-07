@@ -175,6 +175,13 @@ public class DependencyNormalizer {
 	private static TaskSpecification makeSpec(Intermediate inter) {
 		TaskSpecification origin = inter.getOrigin();
 		
+		// reuse origin if possible
+		if (inter.getEarliestStartTime().isEqual(origin.getEarliestStartTime()) &&
+			inter.getLatestStartTime().isEqual(origin.getLatestStartTime()))
+		{
+			return origin;
+		}
+		
 		return new TaskSpecification(
 			origin.getTaskId(),
 			immutable(origin.getLocationSpace()),
