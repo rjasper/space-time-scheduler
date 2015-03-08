@@ -18,11 +18,9 @@ import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import scheduler.TaskSpecification;
 
-// XXX last edition
-// TODO test
 public class DependencyNormalizer {
 	
-	public static Map<UUID, TaskSpecification> normalizeDependentTaskSpecification(
+	public static Map<UUID, TaskSpecification> normalizeDependentTaskSpecifications(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
 		Map<UUID, TaskSpecification> specifications)
 	throws DependencyNormalizationException
@@ -94,6 +92,10 @@ public class DependencyNormalizer {
 		private DependencyNormalizationException(String message) {
 			super(message);
 		}
+
+		private DependencyNormalizationException(String message, Throwable cause) {
+			super(message, cause);
+		}
 		
 	}
 
@@ -104,18 +106,20 @@ public class DependencyNormalizer {
 			new TopologicalOrderIterator<>(new EdgeReversedGraph<>(dependencyGraph));
 		TopologicalOrderIterator<UUID, DefaultEdge> backwardIterator =
 			new TopologicalOrderIterator<>(dependencyGraph);
-		
+
 		while (forwardIterator.hasNext())
-			normalizeLatest(forwardIterator.next());
-		while (backwardIterator.hasNext())
 			normalizeEarliest(forwardIterator.next());
+		while (backwardIterator.hasNext())
+			normalizeLatest(backwardIterator.next());
 		
-		if (!verify()) {
-			resetIntermediate(); // free temporary resources
-			throw new DependencyNormalizationException("unable to normalize");
+		Map<UUID, TaskSpecification> normalized;
+		try {
+			// intermediate might include invalid start time intervals
+			normalized = build();
+		} catch (IllegalArgumentException e) {
+			resetIntermediate();
+			throw new DependencyNormalizationException("unable to normalize", e);
 		}
-		
-		Map<UUID, TaskSpecification> normalized = build();
 		
 		resetIntermediate();
 		
@@ -159,11 +163,6 @@ public class DependencyNormalizer {
 			.orElse(LocalDateTime.MIN);
 		
 		inter.setEarliestStartTime(max(reqMax, inter.getEarliestStartTime()));
-	}
-
-	private boolean verify() {
-		return intermediate.values().stream()
-			.allMatch(inter -> inter.getEarliestStartTime().isBefore( inter.getLatestStartTime() ));
 	}
 
 	private Map<UUID, TaskSpecification> build() {
