@@ -1,5 +1,6 @@
 package scheduler;
 
+import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
 import static matchers.TaskMatchers.*;
@@ -11,15 +12,19 @@ import static util.UUIDFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
 import org.junit.Test;
 
 import scheduler.ScheduleResult.TrajectoryUpdate;
 import scheduler.factories.WorkerUnitFactory;
+import util.UUIDFactory;
 import world.StaticObstacle;
 import world.World;
 import world.fixtures.WorldFixtures;
@@ -35,12 +40,12 @@ public class SchedulerTest {
 	
 	private static final double WORKER_SPEED = 1.0;
 	
-	private static WorkerUnitSpecification workerUnitSpecification(String workerId, double x, double y) {
+	private static WorkerUnitSpecification workerSpec(String workerId, double x, double y) {
 		return new WorkerUnitSpecification(
 			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
 	}
 	
-	private static TaskSpecification taskSpecification(String taskIdSeed, double x, double y, double t, double d) {
+	private static TaskSpecification taskSpec(String taskIdSeed, double x, double y, double t, double d) {
 		UUID taskId = uuid(taskIdSeed);
 		ImmutablePoint location = immutablePoint(x, y);
 		LocalDateTime startTime = secondsToTime(t, atSecond(0));
@@ -49,13 +54,44 @@ public class SchedulerTest {
 		return new TaskSpecification(taskId, location, startTime, startTime, duration);
 	}
 
+	private static TaskSpecification taskSpec(
+		String taskIdSeed,
+		LocalDateTime earliestStartTime,
+		LocalDateTime latestFinishTime,
+		Duration duration)
+	{
+		return new TaskSpecification(
+			uuid(taskIdSeed),
+			immutablePoint(0, 0),
+			earliestStartTime,
+			latestFinishTime,
+			duration);
+	}
+
+	private static SimpleDirectedGraph<UUID, DefaultEdge> depGraph() {
+		return new SimpleDirectedGraph<>(DefaultEdge.class);
+	}
+
+	private static void addDependency(
+		SimpleDirectedGraph<UUID, DefaultEdge> graph,
+		String taskIdSeed,
+		String... dependencies)
+	{
+		UUID taskId = uuid(taskIdSeed);
+		graph.addVertex(taskId);
+		
+		Arrays.stream(dependencies)
+			.map(UUIDFactory::uuid)
+			.forEach(d -> graph.addEdge(taskId, d));
+	}
+
 	private static ScheduleResult scheduleTask(Scheduler scheduler, TaskSpecification taskSpec) {
 		ScheduleResult res = scheduler.schedule(taskSpec);
 		scheduler.commit(res.getTransactionId());
 		
 		return res;
 	}
-
+	
 	@Test
 	public void testNoLocation() {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
@@ -87,7 +123,7 @@ public class SchedulerTest {
 		sc.addWorker(ws);
 		
 		TaskSpecification ts1 = new TaskSpecification(
-			uuid("ts1"),
+			uuid("t1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
 			atSecond(10), secondsToDurationSafe(60));
@@ -100,10 +136,10 @@ public class SchedulerTest {
 		assertThat("unable to schedule task",
 			result.isSuccess(), equalTo(true));
 		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("ts1")), satisfies(ts1));
+			result.getTasks().get(uuid("t1")), satisfies(ts1));
 		
 		TaskSpecification ts2 = new TaskSpecification(
-			uuid("ts2"),
+			uuid("t2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
 			atSecond(30), secondsToDurationSafe(10));
@@ -300,9 +336,9 @@ public class SchedulerTest {
 		sc.addWorker(ws);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testScheduleBeforeFrozenHorizon() {
-		WorkerUnitSpecification ws = workerUnitSpecification("w", 0, 0);
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -310,25 +346,28 @@ public class SchedulerTest {
 		sc.setPresentTime(atSecond(10));
 		
 		TaskSpecification ts2 = new TaskSpecification(
-			uuid("ts2"),
+			uuid("t2"),
 			immutablePoint(0, 0),
 			atSecond(0),
 			atSecond(9),
 			secondsToDuration(2));
 		
-		sc.schedule(ts2);
+		ScheduleResult res = sc.schedule(ts2);
+		
+		assertThat("scheduled task when it shouldn't have",
+			res.isError(), is(true));
 	}
 	
 	@Test
 	public void testScheduleAfterFrozenHorizon() {
-		WorkerUnitSpecification ws = workerUnitSpecification("w", 0, 0);
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
 
 		ScheduleResult res;
 		
-		TaskSpecification ts1 = taskSpecification("ts1", 2, 2, 6, 2);
+		TaskSpecification ts1 = taskSpec("t1", 2, 2, 6, 2);
 		res = scheduleTask(sc, ts1);
 		
 		assertThat(res.isSuccess(), is(true));
@@ -337,7 +376,7 @@ public class SchedulerTest {
 		LocalDateTime frozenHorizon = sc.getFrozenHorizonTime(); // atSecond(10)
 		
 		TaskSpecification ts2 = new TaskSpecification(
-			uuid("ts2"),
+			uuid("t2"),
 			immutablePoint(0, 2),
 			atSecond(0),
 			atSecond(20),
@@ -348,7 +387,7 @@ public class SchedulerTest {
 		assertThat("schedule failed",
 			res.isSuccess(), is(true));
 		
-		Task t2 = res.getTasks().get(uuid("ts2"));
+		Task t2 = res.getTasks().get(uuid("t2"));
 		
 		assertThat("task start time before frozen horizon",
 			t2.getStartTime().isBefore(frozenHorizon), is(false));
@@ -359,6 +398,121 @@ public class SchedulerTest {
 			.map(TrajectoryUpdate::getTrajectory)
 			.allMatch(t -> !t.getStartTime().isBefore(frozenHorizon)),
 			is(true));
+	}
+	
+	@Test
+	public void testScheduleDependenciesEmpty() {
+		Scheduler sc = new Scheduler(new World());
+		
+		ScheduleResult res = sc.schedule(emptyList(), depGraph());
+		
+		assertThat("scheduling was no success",
+			res.isSuccess(), is(true));
+	}
+	
+	@Test
+	public void testScheduleDependenciesSingle() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		TaskSpecification ts = taskSpec(
+			"t1",
+			atSecond(0),
+			atSecond(0),
+			secondsToDuration(1));
+		
+		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
+		addDependency(depGraph, "t1");
+		
+		ScheduleResult res = sc.schedule(singleton(ts), depGraph);
+		
+		assertThat("scheduling was no success",
+			res.isSuccess(), is(true));
+		
+		Task t = res.getTasks().get(uuid("t1"));
+		
+		assertThat("task was not scheduled",
+			t, not(is(nullValue())));
+		assertThat("task was not correctly scheduled",
+			t, satisfies(ts));
+	}
+	
+	@Test
+	public void testScheduleDependencyTwo() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		Duration margin = secondsToDuration(2);
+		sc.setInterDependencyMargin(margin);
+
+		TaskSpecification ts1 = taskSpec(
+			"t1",
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
+		TaskSpecification ts2 = taskSpec(
+			"t2",
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
+		
+		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
+		addDependency(depGraph, "t1");
+		addDependency(depGraph, "t2", "t1");
+
+		ScheduleResult res = sc.schedule(Arrays.asList(ts1, ts2), depGraph);
+		
+		assertThat("scheduling was no success",
+			res.isSuccess(), is(true));
+		
+		Task t1 = res.getTasks().get(uuid("t1"));
+		Task t2 = res.getTasks().get(uuid("t2"));
+		
+		assertThat("t1 was not scheduled",
+			t1, not(is(nullValue())));
+		assertThat("t2 was not scheduled",
+			t2, not(is(nullValue())));
+		assertThat("t1 was not correctly scheduled",
+			t1, satisfies(ts1));
+		assertThat("t2 was not correctly scheduled",
+			t2, satisfies(ts2));
+		assertThat("t2 was not correctly scheduled after t1",
+			t1.getFinishTime().plus(margin).isAfter(t2.getStartTime()), is(false));
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testScheduleDependencyInconsistence1() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		TaskSpecification ts = taskSpec(
+			"t1",
+			atSecond(0),
+			atSecond(0),
+			secondsToDuration(1));
+		
+		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
+		
+		sc.schedule(singleton(ts), depGraph);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void testScheduleDependencyInconsistence2() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
+		addDependency(depGraph, "t1");
+		
+		sc.schedule(emptyList(), depGraph);
 	}
 
 }

@@ -3,9 +3,11 @@ package scheduler;
 import static java.util.Collections.*;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import world.Trajectory;
 
@@ -13,6 +15,8 @@ public class ScheduleAlternative {
 	
 	private final Map<WorkerUnit, WorkerUnitUpdate> updates =
 		new IdentityHashMap<>();
+	
+	private final Map<UUID, Task> tasks = new HashMap<>();
 	
 	private boolean sealed = false;
 
@@ -61,8 +65,13 @@ public class ScheduleAlternative {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");
 		
+		tasks.put(task.getId(), task);
 		getUpdate(task.getAssignedWorker().getActual())
 			.addTask(task);
+	}
+	
+	public Task getTask(UUID taskId) {
+		return tasks.get(taskId);
 	}
 	
 	public void addTaskRemoval(Task task) {

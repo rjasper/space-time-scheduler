@@ -2,7 +2,6 @@ package scheduler;
 
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
-import static util.Comparables.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -13,19 +12,16 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedGraph;
+
 import scheduler.ScheduleResult.TrajectoryUpdate;
-import scheduler.pickers.LocationIterator;
-import scheduler.pickers.WorkerUnitSlotIterator;
-import scheduler.pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.Trajectory;
 import world.World;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
 import world.pathfinder.StraightEdgePathfinder;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 // TODO document
 /**
@@ -80,6 +76,8 @@ public class Scheduler {
 	 */
 	private Duration frozenHorizonDuration = Duration.ZERO;
 	
+	private Duration interDependencyMargin = Duration.ZERO;
+	
 	/**
 	 * Constructs a scheduler using the given world and set of workers.
 	 * The workers are expected to be managed exclusively by this scheduler.
@@ -92,7 +90,6 @@ public class Scheduler {
 		Objects.requireNonNull(world, "world");
 		
 		this.world = world;
-		// TODO use an envelope based cache
 		this.perspectiveCache = new RadiusBasedWorldPerspectiveCache(world, StraightEdgePathfinder.class);
 	}
 
@@ -211,6 +208,19 @@ public class Scheduler {
 		updateFrozenHorizonTime();
 	}
 
+	public Duration getInterDependencyMargin() {
+		return interDependencyMargin;
+	}
+
+	public void setInterDependencyMargin(Duration interDependencyMargin) {
+		Objects.requireNonNull(interDependencyMargin, "interDependencyMargin");
+		
+		if (interDependencyMargin.isNegative())
+			throw new IllegalArgumentException("negative margin");
+		
+		this.interDependencyMargin = interDependencyMargin;
+	}
+
 	/**
 	 * The default amount of location picks tried by the scheduler before
 	 * giving up.
@@ -225,102 +235,48 @@ public class Scheduler {
 	 *         could be scheduled satisfying the specification.
 	 */
 	public ScheduleResult schedule(TaskSpecification specification) {
-		Objects.requireNonNull(specification, "specification");
-
-		Geometry locationSpace = world.space(specification.getLocationSpace());
-		UUID taskId = specification.getTaskId();
-		LocalDateTime earliest = max(
-			specification.getEarliestStartTime(), frozenHorizonTime);
-		LocalDateTime latest = specification.getLatestStartTime();
-		Duration duration = specification.getDuration();
-		
-		if (latest.compareTo(getFrozenHorizonTime()) < 0)
-			throw new IllegalArgumentException("frozen horizon violation");
-		
 		ScheduleAlternative alternative = new ScheduleAlternative();
-
-		TaskPlanner tp = new TaskPlanner();
-
-		tp.setSchedule(schedule);
-		tp.setScheduleAlternative(alternative);
-		tp.setTaskId(taskId);
-		tp.setDuration(duration);
-
-		// iterate over possible locations
-
-		// TODO prefilter the workers who have time without considering their location
-		// return if no workers remain
-		// TODO workers which already are in position shouldn't need to move.
-
-		Iterable<Point> locations = () -> new LocationIterator(
-			locationSpace, MAX_LOCATION_PICKS);
-
-		for (Point locaction : locations) {
-			tp.setLocation(locaction);
-
-			// iterate over possible worker time slots.
-
-			// Worker units have different perspectives of the world.
-			// The LocationIterator might pick a location which is inaccessible
-			// for a unit. Therefore, the workers are filtered by the location
-			
-			Iterable<WorkerUnitSlot> workerSlots = () -> new WorkerUnitSlotIterator(
-				filterByLocation(locaction),
-				frozenHorizonTime,
-				locaction,
-				earliest, latest, duration);
-
-			for (WorkerUnitSlot ws : workerSlots) {
-				WorkerUnit w = ws.getWorkerUnit();
-				IdleSlot s = ws.getIdleSlot();
-				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
-				boolean fixedEnd = s.getFinishTime().isBefore(END_OF_TIME);
-
-				tp.setFixedEnd(fixedEnd);
-				tp.setWorldPerspective(perspective);
-				tp.setWorker(w);
-				tp.setIdleSlot(s);
-				tp.setEarliestStartTime(earliest);
-				tp.setLatestStartTime(latest);
-
-				// plan the routes of affected workers and schedule task
-				boolean status = tp.plan();
-
-				if (status)
-					return success(alternative);
-			}
-		}
-
-		// all possible variable combinations are exhausted without being able
-		// to schedule a task
-		return error();
+		SingularTaskScheduler sc = new SingularTaskScheduler();
+		
+		sc.setWorld(world);
+		sc.setPerspectiveCache(perspectiveCache);
+		sc.setFrozenHorizonTime(frozenHorizonTime);
+		sc.setSchedule(schedule);
+		sc.setAlternative(alternative);
+		sc.setSpecification(specification);
+		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
+		
+		boolean status = sc.schedule();
+		
+		if (status)
+			return success(alternative);
+		else
+			return error();
 	}
 	
-	/**
-	 * Checks if a worker is able to reach a location in regard to its size.
-	 *
-	 * @param location
-	 * @param worker
-	 * @return {@code true} iff worker is able to reach the location.
-	 */
-	private boolean checkLocationFor(Point location, WorkerUnit worker) {
-		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
-		Geometry map = perspective.getView().getMap();
-	
-		return !map.contains(location);
-	}
-
-	/**
-	 * Filters the pool of workers which are able to reach a location in
-	 * regard to their individual size.
-	 *
-	 * @param location
-	 * @return the filtered workers which are able to reach the location.
-	 */
-	private Collection<WorkerUnit> filterByLocation(Point location) {
-		return schedule.getWorkers().stream()
-			.filter(w -> checkLocationFor(location, w))
-			.collect(toList());
+	public ScheduleResult schedule(
+		Collection<TaskSpecification> specs,
+		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
+	{
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		DependentTaskScheduler sc = new DependentTaskScheduler();
+		
+		sc.setWorld(world);
+		sc.setPerspectiveCache(perspectiveCache);
+		sc.setFrozenHorizonTime(frozenHorizonTime);
+		sc.setSchedule(schedule);
+		sc.setAlternative(alternative);
+		sc.setSpecifications(specs);
+		sc.setDependencies(dependencies);
+		sc.setInterDependencyMargin(interDependencyMargin);
+		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
+		
+		boolean status = sc.schedule();
+		
+		if (status)
+			return success(alternative);
+		else
+			return error();
 	}
 
 	public void commit(UUID transactionId) {

@@ -20,18 +20,18 @@ public class DependentTaskIterator implements Iterator<TaskSpecification> {
 	
 	private final TopologicalOrderIterator<UUID, DefaultEdge> topoIterator;
 	
-	private final Comparator<UUID> comparator = (uuid1, uuid2) -> {
-		TaskSpecification spec1 = specifications.get(uuid1);
-		TaskSpecification spec2 = specifications.get(uuid2);
-		
-		return spec1.getLatestStartTime().compareTo( spec2.getLatestStartTime() );
-	};
-	
 	public DependentTaskIterator(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
 		Map<UUID, TaskSpecification> specifications)
 	{
 		this.specifications = Objects.requireNonNull(specifications, "specifications");
+		
+		Comparator<UUID> comparator = (uuid1, uuid2) -> {
+			TaskSpecification spec1 = specifications.get(uuid1);
+			TaskSpecification spec2 = specifications.get(uuid2);
+			
+			return spec1.getLatestStartTime().compareTo( spec2.getLatestStartTime() );
+		};
 		
 		this.topoIterator = new TopologicalOrderIterator<>(
 			new EdgeReversedGraph<>(dependencyGraph),

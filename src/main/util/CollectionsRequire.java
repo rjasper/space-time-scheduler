@@ -20,7 +20,7 @@ public final class CollectionsRequire {
 	 * @throws NullPointerException
 	 *             if collection is {@code null} or contains a {@code null}.
 	 */
-	public static <T extends Collection<?>> T requireContainsNunNull(T collection) {
+	public static <T extends Collection<?>> T requireNonNull(T collection) {
 		if (!containsNonNull(collection))
 			throw new NullPointerException();
 		
@@ -55,7 +55,7 @@ public final class CollectionsRequire {
 	 * @throws NullPointerException
 	 *             if collection is {@code null} or contains a {@code null}.
 	 */
-	public static <T extends Collection<?>> T requireContainsNonNull(
+	public static <T extends Collection<?>> T requireNonNull(
 		T collection,
 		Supplier<String> messageSupplier)
 	{

@@ -2,7 +2,6 @@ package scheduler.util;
 
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
-import static jts.geom.immutable.ImmutableGeometries.*;
 import static util.Comparables.*;
 
 import java.time.LocalDateTime;
@@ -22,16 +21,19 @@ public class DependencyNormalizer {
 	
 	public static Map<UUID, TaskSpecification> normalizeDependentTaskSpecifications(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
-		Map<UUID, TaskSpecification> specifications)
+		Map<UUID, TaskSpecification> specifications,
+		LocalDateTime frozenHorizonTime)
 	throws DependencyNormalizationException
 	{
-		return new DependencyNormalizer(dependencyGraph, specifications)
+		return new DependencyNormalizer(dependencyGraph, specifications, frozenHorizonTime)
 			.normalize();
 	}
 
 	private final SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph;
 	
 	private final Map<UUID, TaskSpecification> origin;
+	
+	private final LocalDateTime frozenHorizonTime;
 	
 	private transient Map<UUID, Intermediate> intermediate;
 	
@@ -79,10 +81,12 @@ public class DependencyNormalizer {
 	
 	public DependencyNormalizer(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
-		Map<UUID, TaskSpecification> specifications)
+		Map<UUID, TaskSpecification> specifications,
+		LocalDateTime frozenHorizonTime)
 	{
 		this.dependencyGraph = Objects.requireNonNull(dependencyGraph, "dependencyGraph");
 		this.origin = Objects.requireNonNull(specifications, "specifications");
+		this.frozenHorizonTime = Objects.requireNonNull(frozenHorizonTime, "frozenHorizonTime");
 	}
 	
 	public static class DependencyNormalizationException extends Exception {
@@ -162,7 +166,7 @@ public class DependencyNormalizer {
 			.max(TIME_COMPARATOR)
 			.orElse(LocalDateTime.MIN);
 		
-		inter.setEarliestStartTime(max(reqMax, inter.getEarliestStartTime()));
+		inter.setEarliestStartTime(max(reqMax, inter.getEarliestStartTime(), frozenHorizonTime));
 	}
 
 	private Map<UUID, TaskSpecification> build() {
@@ -183,7 +187,7 @@ public class DependencyNormalizer {
 		
 		return new TaskSpecification(
 			origin.getTaskId(),
-			immutable(origin.getLocationSpace()),
+			origin.getLocationSpace(),
 			inter.getEarliestStartTime(),
 			inter.getLatestStartTime(),
 			origin.getDuration());

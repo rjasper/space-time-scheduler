@@ -109,8 +109,9 @@ public class TaskSpecification {
 	/**
 	 * @return the immutable spatial space for a valid {@link Point location}.
 	 */
-	public final Geometry getLocationSpace() {
-		return locationSpace;
+	@SuppressWarnings("unchecked")
+	public final <G extends Geometry & ImmutableGeometry> G getLocationSpace() {
+		return (G) locationSpace;
 	}
 
 	/**

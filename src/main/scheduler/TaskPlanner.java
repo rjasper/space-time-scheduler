@@ -29,7 +29,7 @@ import world.pathfinder.SpatialPathfinder;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
-// TODO document (see bottom)
+// TODO document
 /**
  * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
  * It requires multiple parameters which determine the {@link WorkerUnit worker}
