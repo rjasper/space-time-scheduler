@@ -24,6 +24,10 @@ public class ScheduleAlternative {
 		return sealed;
 	}
 	
+	public boolean isEmpty() {
+		return updates.isEmpty();
+	}
+	
 	public boolean updatesWorker(WorkerUnit worker) {
 		return updates.containsKey(worker);
 	}
@@ -33,6 +37,21 @@ public class ScheduleAlternative {
 			throw new IllegalStateException("alternative not sealed");
 		
 		return unmodifiableCollection(updates.values());
+	}
+	
+	public WorkerUnitUpdate popUpdate(WorkerUnit worker) {
+		if (!isSealed())
+			throw new IllegalStateException("alternative not sealed");
+		
+		WorkerUnitUpdate update = updates.remove(worker);
+		
+		if (update == null)
+			throw new IllegalArgumentException("unknown worker");
+		
+		for (Task t : update.getTasks())
+			tasks.remove(t.getId());
+		
+		return update;
 	}
 	
 	private WorkerUnitUpdate getUpdate(WorkerUnit worker) {
@@ -59,6 +78,10 @@ public class ScheduleAlternative {
 			: emptyList();
 	}
 	
+	public Task getTask(UUID taskId) {
+		return tasks.get(taskId);
+	}
+
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
 		
@@ -68,10 +91,6 @@ public class ScheduleAlternative {
 		tasks.put(task.getId(), task);
 		getUpdate(task.getAssignedWorker().getActual())
 			.addTask(task);
-	}
-	
-	public Task getTask(UUID taskId) {
-		return tasks.get(taskId);
 	}
 	
 	public void addTaskRemoval(Task task) {

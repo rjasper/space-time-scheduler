@@ -465,5 +465,36 @@ public class ScheduleTest {
 		assertThat("unexpected trajectory",
 			trajs.hasNext(), is(false));
 	}
+	
+	@Test
+	public void testIntegrateEliminatePartial() {
+		WorkerUnit w1 = workerUnit("w1", 0, 0);
+		WorkerUnit w2 = workerUnit("w2", 10, 10);
+		
+		Schedule schedule = new Schedule();
+		schedule.addWorker(w1);
+		schedule.addWorker(w2);
+
+		Task t1 = new Task(uuid("t1"), w1.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Task t2 = new Task(uuid("t2"), w2.getReference(),
+			immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
+
+		ScheduleAlternative sa = new ScheduleAlternative();
+		sa.addTask(t1);
+		sa.addTask(t2);
+		sa.seal();
+		
+		schedule.addAlternative(sa);
+		schedule.integrate(sa, w2);
+		schedule.eliminate(sa, w1);
+		
+		assertThat("transaction was not removed",
+			schedule.hasAlternative(sa), is(false));
+		assertThat("t1 was not eliminated",
+			w1.hasTask(t1), is(false));
+		assertThat("t2 was not integrated",
+			w2.hasTask(t2), is(true));
+	}
 
 }

@@ -106,6 +106,9 @@ public class ScheduleResult {
 	}
 
 	public UUID getTransactionId() {
+		if (isError())
+			throw new IllegalStateException("is error");
+		
 		return transactionId;
 	}
 
@@ -113,10 +116,16 @@ public class ScheduleResult {
 	 * @return the scheduled tasks.
 	 */
 	public Map<UUID, Task> getTasks() {
+		if (isError())
+			throw new IllegalStateException("is error");
+		
 		return tasks;
 	}
 
 	public Map<UUID, Task> getTaskRemovals() {
+		if (isError())
+			throw new IllegalStateException("is error");
+		
 		return taskRemovals;
 	}
 
@@ -124,6 +133,9 @@ public class ScheduleResult {
 	 * @return the updated trajectories.
 	 */
 	public Collection<TrajectoryUpdate> getTrajectoryUpdates() {
+		if (isError())
+			throw new IllegalStateException("is error");
+		
 		return trajectories;
 	}
 
@@ -133,8 +145,11 @@ public class ScheduleResult {
 	 */
 	@Override
 	public String toString() {
-		return String.format("tasks=%s, trajectories=%s",
-			tasks.toString(), trajectories.toString());
+		if (isSuccess())
+			return String.format("success(trajectories=%s, tasks=%s, removales=%s)",
+				trajectories, tasks, taskRemovals);
+		else
+			return "error";
 	}
 	
 }

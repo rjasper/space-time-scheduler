@@ -36,6 +36,10 @@ public class Schedule {
 		
 	}
 	
+	public boolean hasAlternative(ScheduleAlternative alternative) {
+		return alternatives.contains(alternative);
+	}
+	
 	public Collection<WorkerUnit> getWorkers() {
 		return unmodifiableCollection(workers.values());
 	}
@@ -118,19 +122,27 @@ public class Schedule {
 		
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
-		
-		releaseLocks(alternative);
 
-		for (WorkerUnitUpdate u : alternative.getUpdates()) {
-			WorkerUnit worker = u.getWorker();
-			
-			for (Task t : u.getTaskRemovals())
-				worker.removeTask(t);
-			for (Task t : u.getTasks())
-				worker.addTask(t);
-			for (Trajectory t : u.getTrajectories())
-				worker.updateTrajectory(t);
-		}
+		releaseLocks(alternative);
+		applyChanges(alternative);
+	}
+	
+	public void integrate(ScheduleAlternative alternative, WorkerUnit worker) {
+		Objects.requireNonNull(alternative, "alternative");
+		Objects.requireNonNull(worker, "worker");
+		
+		boolean status = alternatives.contains(alternative);
+		
+		if (!status)
+			throw new IllegalArgumentException("unknown alternative");
+		
+		WorkerUnitUpdate update = alternative.popUpdate(worker);
+		
+		if (alternative.isEmpty())
+			alternatives.remove(alternative);
+		
+		releaseLocks(update);
+		applyChanges(update);
 	}
 	
 	public void eliminate(ScheduleAlternative alternative) {
@@ -144,6 +156,23 @@ public class Schedule {
 		releaseLocks(alternative);
 	}
 	
+	public void eliminate(ScheduleAlternative alternative, WorkerUnit worker) {
+		Objects.requireNonNull(alternative, "alternative");
+		Objects.requireNonNull(worker, "worker");
+		
+		boolean status = alternatives.contains(alternative);
+		
+		if (!status)
+			throw new IllegalArgumentException("unknown alternative");
+		
+		WorkerUnitUpdate update = alternative.popUpdate(worker);
+		
+		if (alternative.isEmpty())
+			alternatives.remove(alternative);
+		
+		releaseLocks(update);
+	}
+
 	private void checkCompatibility(ScheduleAlternative alternative) {
 		for (WorkerUnitUpdate u : alternative.getUpdates()) {
 			WorkerUnit worker = u.getWorker();
@@ -254,22 +283,44 @@ public class Schedule {
 		return worker.interpolateLocation(time).equals(location);
 	}
 	
+	private void applyChanges(ScheduleAlternative alternative) {
+		for (WorkerUnitUpdate u : alternative.getUpdates())
+			applyChanges(u);
+	}
+
+	private void applyChanges(WorkerUnitUpdate update) {
+		WorkerUnit worker = update.getWorker();
+		
+		for (Task t : update.getTaskRemovals())
+			worker.removeTask(t);
+		for (Task t : update.getTasks())
+			worker.addTask(t);
+		for (Trajectory t : update.getTrajectories())
+			worker.updateTrajectory(t);
+	}
+
 	private void applyLocks(ScheduleAlternative alternative) {
-		for (WorkerUnitUpdate u : alternative.getUpdates()) {
-			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
-			
-			workerLocks.trajectoryLock .add   ( u.getTrajectoriesLock() );
-			workerLocks.taskRemovalLock.addAll( u.getTaskRemovals()     );
-		}
+		for (WorkerUnitUpdate u : alternative.getUpdates())
+			applyLocks(u);
+	}
+	
+	private void applyLocks(WorkerUnitUpdate update) {
+		WorkerUnitLocks workerLocks = locks.get(update.getWorker());
+		
+		workerLocks.trajectoryLock .add   ( update.getTrajectoriesLock() );
+		workerLocks.taskRemovalLock.addAll( update.getTaskRemovals()     );
 	}
 	
 	private void releaseLocks(ScheduleAlternative alternative) {
-		for (WorkerUnitUpdate u : alternative.getUpdates()) {
-			WorkerUnitLocks workerLocks = locks.get(u.getWorker());
-			
-			workerLocks.trajectoryLock .remove   ( u.getTrajectoriesLock() );
-			workerLocks.taskRemovalLock.removeAll( u.getTaskRemovals()     );
-		}
+		for (WorkerUnitUpdate u : alternative.getUpdates())
+			releaseLocks(u);
+	}
+	
+	private void releaseLocks(WorkerUnitUpdate update) {
+		WorkerUnitLocks workerLocks = locks.get(update.getWorker());
+		
+		workerLocks.trajectoryLock .remove   ( update.getTrajectoriesLock() );
+		workerLocks.taskRemovalLock.removeAll( update.getTaskRemovals()     );
 	}
 
 }

@@ -1,5 +1,6 @@
 package scheduler;
 
+import static java.util.UUID.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
 
@@ -211,6 +212,10 @@ public class Scheduler {
 	public Duration getInterDependencyMargin() {
 		return interDependencyMargin;
 	}
+	
+	public boolean hasTransaction(UUID transactionId) {
+		return transactions.containsKey(transactionId);
+	}
 
 	public void setInterDependencyMargin(Duration interDependencyMargin) {
 		Objects.requireNonNull(interDependencyMargin, "interDependencyMargin");
@@ -280,6 +285,8 @@ public class Scheduler {
 	}
 
 	public void commit(UUID transactionId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+		
 		Transaction transaction = transactions.get(transactionId);
 		
 		if (transaction == null)
@@ -288,8 +295,27 @@ public class Scheduler {
 		schedule.integrate(transaction.getAlternative());
 		transactions.remove(transactionId);
 	}
+	
+	public void commit(UUID transactionId, String workerId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+
+		Transaction transaction = transactions.get(transactionId);
+		WorkerUnit worker = schedule.getWorker(workerId);
+		
+		if (transaction == null)
+			throw new IllegalArgumentException("unknown transaction");
+		
+		ScheduleAlternative alternative = transaction.getAlternative();
+		
+		schedule.integrate(alternative, worker);
+		
+		if (alternative.isEmpty())
+			transactions.remove(transactionId);
+	}
 
 	public void abort(UUID transactionId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+		
 		Transaction transaction = transactions.get(transactionId);
 		
 		if (transaction == null)
@@ -297,6 +323,23 @@ public class Scheduler {
 		
 		schedule.eliminate(transaction.getAlternative());
 		transactions.remove(transactionId);
+	}
+	
+	public void abort(UUID transactionId, String workerId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+
+		Transaction transaction = transactions.get(transactionId);
+		WorkerUnit worker = schedule.getWorker(workerId);
+		
+		if (transaction == null)
+			throw new IllegalArgumentException("unknown transaction");
+		
+		ScheduleAlternative alternative = transaction.getAlternative();
+		
+		schedule.eliminate(alternative, worker);
+		
+		if (alternative.isEmpty())
+			transactions.remove(transactionId);
 	}
 
 	private ScheduleResult success(ScheduleAlternative alternative) {
@@ -306,7 +349,9 @@ public class Scheduler {
 		
 		// collect result information
 		
-		UUID transactionId = UUID.randomUUID();
+		UUID transactionId;
+		do transactionId = randomUUID();
+		while (transactions.containsKey(transactionId)); // just to be sure of uniqueness
 		
 		Map<UUID, Task> tasks = updates.stream()
 			.map(WorkerUnitUpdate::getTasks)
