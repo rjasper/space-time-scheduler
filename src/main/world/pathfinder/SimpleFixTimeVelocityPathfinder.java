@@ -20,14 +20,14 @@ import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * Implements a {@link FixTimeVelocityPathfinder}. The resulting velocity
+ * Implements a {@link AbstractFixTimePathfinder}. The resulting velocity
  * profile consists of straight line segments along the vertices of forbidden
  * regions. While this is a very simple solution it may result in unnecessary
  * slow movement instead of stopping and waiting.
  * 
  * @author Rico
  */
-public class FixTimeVelocityPathfinderImpl extends FixTimeVelocityPathfinder {
+public class SimpleFixTimeVelocityPathfinder extends AbstractFixTimePathfinder {
 
 	/**
 	 * The mesh builder.

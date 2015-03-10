@@ -21,13 +21,13 @@ import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * Implements a {@link MinimumTimeVelocityPathfinder}. The resulting velocity
+ * Implements a {@link AbstractMinimumTimePathfinder}. The resulting velocity
  * profile will reach the finish arc as early as possible. Nevertheless, this
  * might still result in slow movement instead of stopping and waiting.
  * 
  * @author Rico
  */
-public class MinimumTimeVelocityPathfinderImpl extends MinimumTimeVelocityPathfinder {
+public class SimpleMinimumTimePathfinder extends AbstractMinimumTimePathfinder {
 	
 	/**
 	 * The mesh builder.

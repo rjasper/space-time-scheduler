@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * The {@code FixTimeVelocityPathfinder} extends the {@link VelocityPathfinder}
+ * The {@code AbstractFixTimePathfinder} extends the {@link AbstractVelocityPathfinder}
  * by configurable parameters specific for fixated start and finish times.
  * 
  * @author Rico
  */
-public abstract class FixTimeVelocityPathfinder extends VelocityPathfinder {
+public abstract class AbstractFixTimePathfinder extends AbstractVelocityPathfinder {
 	
 	/**
 	 * The start time.

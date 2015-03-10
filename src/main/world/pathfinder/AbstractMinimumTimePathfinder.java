@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * The {@code MinimumTimeVelocityPathfinder} extends the {@link VelocityPathfinder}
+ * The {@code AbstractMinimumTimePathfinder} extends the {@link AbstractVelocityPathfinder}
  * by configurable parameters specific for determining time minimal paths.
  * 
  * @author Rico
  */
-public abstract class MinimumTimeVelocityPathfinder extends VelocityPathfinder {
+public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPathfinder {
 	
 	/**
 	 * The start time.

@@ -27,13 +27,13 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
- * An {@link ArcTimeMeshBuilder} builds a directed weighted graph. The edges of
+ * An {@link AbstractMeshBuilder} builds a directed weighted graph. The edges of
  * the graph represent possible path segments in the arc-time plane and will
  * avoid any forbidden region.
  * 
  * @author Rico
  */
-public abstract class ArcTimeMeshBuilder {
+public abstract class AbstractMeshBuilder {
 	
 	/**
 	 * The forbidden regions.

@@ -24,12 +24,12 @@ import world.Trajectory;
 
 import com.google.common.collect.ImmutableList;
 
-public abstract class MinimumTimeVelocityPathfinderTest {
+public abstract class AbstractMinimumTimePathfinderTest {
 
-	protected abstract MinimumTimeVelocityPathfinder createPathfinder();
+	protected abstract AbstractMinimumTimePathfinder createPathfinder();
 	
 	private boolean calcPath(
-		MinimumTimeVelocityPathfinder pf,
+		AbstractMinimumTimePathfinder pf,
 		Collection<DynamicObstacle> dynObst,
 		SpatialPath path,
 		double maxSpeed,
@@ -55,7 +55,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	
 	@Test
 	public void test() {
-		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		AbstractMinimumTimePathfinder pf = createPathfinder();
 		
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
 			immutablePoint(0., 2.), immutablePoint(3., 2.)));
@@ -96,7 +96,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	
 	@Test
 	public void testInsufficientTime() {
-		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		AbstractMinimumTimePathfinder pf = createPathfinder();
 		
 		SpatialPath spatialPath = spatialPath(0, 0, 10, 0);
 		
@@ -115,7 +115,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	
 	@Test
 	public void testViolateBufferDuration() {
-		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		AbstractMinimumTimePathfinder pf = createPathfinder();
 		
 		DynamicObstacle obstacle = new DynamicObstacle(
 			immutableBox(-1, -1, 1, 1),
@@ -141,7 +141,7 @@ public abstract class MinimumTimeVelocityPathfinderTest {
 	
 	@Test
 	public void testTightBufferDuration() {
-		MinimumTimeVelocityPathfinder pf = createPathfinder();
+		AbstractMinimumTimePathfinder pf = createPathfinder();
 		
 		DynamicObstacle obstacle = new DynamicObstacle(
 			immutableBox(-1, -1, 1, 1),

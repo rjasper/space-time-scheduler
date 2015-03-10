@@ -20,12 +20,12 @@ import world.SpatialPath;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 
-public abstract class FixTimeVelocityPathfinderTest {
+public abstract class AbstractFixTimePathfinderTest {
 	
-	protected abstract FixTimeVelocityPathfinder createPathfinder();
+	protected abstract AbstractFixTimePathfinder createPathfinder();
 	
 	private boolean calcPath(
-		FixTimeVelocityPathfinder pf,
+		AbstractFixTimePathfinder pf,
 		Collection<DynamicObstacle> dynObst,
 		SpatialPath path,
 		double maxSpeed,
@@ -63,7 +63,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 		LocalDateTime startTime = atSecond(0);
 		LocalDateTime finishTime = atSecond(11);
 		
-		FixTimeVelocityPathfinder pf = createPathfinder();
+		AbstractFixTimePathfinder pf = createPathfinder();
 
 		boolean validPath = calcPath(pf,
 			dynamicObstacles,
@@ -86,7 +86,7 @@ public abstract class FixTimeVelocityPathfinderTest {
 	
 	@Test
 	public void testInsufficientTime() {
-		FixTimeVelocityPathfinder pf = createPathfinder();
+		AbstractFixTimePathfinder pf = createPathfinder();
 		
 		SpatialPath spatialPath = spatialPath(0, 0, 10, 0);
 		

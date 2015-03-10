@@ -23,13 +23,13 @@ import world.DynamicObstacle;
 import world.SpatialPath;
 
 /**
- * The {@code VelocityPathfinder} is the abstract base class for velocity path
+ * The {@code AbstractVelocityPathfinder} is the abstract base class for velocity path
  * finders. A velocity path finder determines the arc-time mapping for
  * trajectories while avoiding any dynamic obstacles.
  * 
  * @author Rico
  */
-public abstract class VelocityPathfinder {
+public abstract class AbstractVelocityPathfinder {
 	
 	/**
 	 * The forbidden region builder.

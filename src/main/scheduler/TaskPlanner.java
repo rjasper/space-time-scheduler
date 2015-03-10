@@ -20,10 +20,10 @@ import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.Trajectory;
 import world.WorldPerspective;
-import world.pathfinder.FixTimeVelocityPathfinder;
-import world.pathfinder.FixTimeVelocityPathfinderImpl;
-import world.pathfinder.MinimumTimeVelocityPathfinder;
-import world.pathfinder.MinimumTimeVelocityPathfinderImpl;
+import world.pathfinder.AbstractFixTimePathfinder;
+import world.pathfinder.SimpleFixTimeVelocityPathfinder;
+import world.pathfinder.AbstractMinimumTimePathfinder;
+import world.pathfinder.SimpleMinimumTimePathfinder;
 import world.pathfinder.SpatialPathfinder;
 
 import com.google.common.collect.ImmutableList;
@@ -373,7 +373,7 @@ public class TaskPlanner {
 	}
 
 	private Trajectory calculateTrajectoryToTask(SpatialPath path) {
-		MinimumTimeVelocityPathfinder pf = new MinimumTimeVelocityPathfinderImpl();
+		AbstractMinimumTimePathfinder pf = new SimpleMinimumTimePathfinder();
 		
 		Collection<DynamicObstacle> dynamicObstacles =
 			worldPerspective.getView().getDynamicObstacles();
@@ -396,7 +396,7 @@ public class TaskPlanner {
 	}
 
 	private Trajectory calculateTrajectoryFromTask(SpatialPath path, LocalDateTime startTime) {
-		FixTimeVelocityPathfinder pf = new FixTimeVelocityPathfinderImpl();
+		AbstractFixTimePathfinder pf = new SimpleFixTimeVelocityPathfinder();
 		
 		Collection<DynamicObstacle> dynamicObstacles =
 			worldPerspective.getView().getDynamicObstacles();

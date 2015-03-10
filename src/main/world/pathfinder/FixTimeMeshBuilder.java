@@ -11,14 +11,14 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * The {@code FixTimeMeshBuilder} implements an {@link ArcTimeMeshBuilder}.
+ * The {@code FixTimeMeshBuilder} implements an {@link AbstractMeshBuilder}.
  * It builds a graph with exactly one start vertex and one finish vertex. Both
  * points have to be set before building the graph. Since both points are
  * configured in advance the time is also fixated.
  * 
  * @author Rico
  */
-public class FixTimeMeshBuilder extends ArcTimeMeshBuilder {
+public class FixTimeMeshBuilder extends AbstractMeshBuilder {
 	
 	/**
 	 * The start vertex.

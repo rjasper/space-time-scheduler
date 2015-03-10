@@ -18,7 +18,7 @@ import com.vividsolutions.jts.geom.Point;
 
 /**
  * <p>
- * The {@code MinimumTimeMeshBuilder} implements an {@link ArcTimeMeshBuilder}.
+ * The {@code MinimumTimeMeshBuilder} implements an {@link AbstractMeshBuilder}.
  * It builds a graph with exactly one start vertex but multiple finish vertices.
  * The start vertex has to be set before building the graph. The finish vertices
  * are determined by the builder. The builder guarantees that if it is possible
@@ -33,7 +33,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class MinimumTimeMeshBuilder extends ArcTimeMeshBuilder {
+public class MinimumTimeMeshBuilder extends AbstractMeshBuilder {
 	
 	/**
 	 * The start vertex.
