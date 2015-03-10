@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Point;
  *
  * @author Rico Jasper
  */
-public class TaskSpecification {
+public final class TaskSpecification {
 	
 	/**
 	 * The ID of the task.

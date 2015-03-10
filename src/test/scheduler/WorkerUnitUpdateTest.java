@@ -196,5 +196,7 @@ public class WorkerUnitUpdateTest {
 		
 		update.checkSelfConsistency();
 	}
+	
+	// TODO test cloning
 
 }

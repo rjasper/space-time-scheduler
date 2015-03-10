@@ -14,7 +14,7 @@ import jts.geom.util.GeometriesRequire;
  * 
  * @author Rico
  */
-public class WorkerUnitSpecification {
+public final class WorkerUnitSpecification {
 	
 	/**
 	 * The worker's ID.
@@ -89,35 +89,35 @@ public class WorkerUnitSpecification {
 	/**
 	 * @return the worker's ID.
 	 */
-	public final String getWorkerId() {
+	public String getWorkerId() {
 		return workerId;
 	}
 
 	/**
 	 * @return the physical shape of this worker.
 	 */
-	public final ImmutablePolygon getShape() {
+	public ImmutablePolygon getShape() {
 		return shape;
 	}
 
 	/**
 	 * @return the maximum velocity.
 	 */
-	public final double getMaxSpeed() {
+	public double getMaxSpeed() {
 		return maxSpeed;
 	}
 
 	/**
 	 * @return the initial location of the worker where it begins to 'exist'.
 	 */
-	public final ImmutablePoint getInitialLocation() {
+	public ImmutablePoint getInitialLocation() {
 		return initialLocation;
 	}
 
 	/**
 	 * @return the initial time of the worker when it begins to 'exist'.
 	 */
-	public final LocalDateTime getInitialTime() {
+	public LocalDateTime getInitialTime() {
 		return initialTime;
 	}
 

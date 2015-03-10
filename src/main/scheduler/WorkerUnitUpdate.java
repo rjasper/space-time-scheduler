@@ -17,7 +17,7 @@ import world.TrajectoryContainer;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class WorkerUnitUpdate {
+public class WorkerUnitUpdate implements Cloneable {
 	
 	private final WorkerUnit worker;
 	
@@ -163,6 +163,7 @@ public class WorkerUnitUpdate {
 		while (it.hasNext()) {
 			Trajectory curr = it.next();
 			
+			// curr.startTime == last.finishTime && curr.startLoc != last.finishLoc
 			if (curr.getStartTime().equals(last.getFinishTime()) &&
 				!curr.getStartLocation().equals(last.getFinishLocation()))
 			{
@@ -183,6 +184,21 @@ public class WorkerUnitUpdate {
 		taskLock.seal();
 		
 		sealed = true;
+	}
+	
+	@Override
+	public WorkerUnitUpdate clone() {
+		WorkerUnitUpdate clone = new WorkerUnitUpdate(worker);
+		
+		clone.trajectoryContainer.update(trajectoryContainer);
+		clone.tasks.addAll(tasks);
+		clone.taskRemovals.addAll(taskRemovals);
+		clone.trajectoryLock.add(trajectoryLock);
+		clone.taskLock.add(taskLock);
+		clone.taskRemovalIntervals.add(taskRemovalIntervals);
+		clone.sealed = sealed;
+		
+		return clone;
 	}
 
 }

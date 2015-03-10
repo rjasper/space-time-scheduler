@@ -13,26 +13,70 @@ import world.Trajectory;
 
 public class ScheduleAlternative {
 	
-	private final Map<WorkerUnit, WorkerUnitUpdate> updates =
-		new IdentityHashMap<>();
+	private final ScheduleAlternative parent;
 	
-	private final Map<UUID, Task> tasks = new HashMap<>();
+	private int branches = 0;
+	
+	private boolean invalid = false;
 	
 	private boolean sealed = false;
 
+	private Map<WorkerUnit, WorkerUnitUpdate> updates =
+		new IdentityHashMap<>();
+	
+	private Map<UUID, Task> tasks = new HashMap<>();
+	
+	public ScheduleAlternative() {
+		this.parent = null;
+	}
+	
+	private ScheduleAlternative(ScheduleAlternative parent) {
+		this.parent = parent;
+		
+		parent.updates.values().stream()
+			.map(WorkerUnitUpdate::clone)
+			.forEach(u -> this.updates.put(u.getWorker(), u));
+		
+		this.tasks.putAll(parent.tasks);
+	}
+	
+	public boolean isRootBranch() {
+		return parent == null;
+	}
+	
+	public boolean isBranched() {
+		return branches > 0;
+	}
+	
+	public boolean isInvalid() {
+		return invalid;
+	}
+	
+	public boolean isModifiable() {
+		return !isBranched() && !isInvalid() && !isSealed();
+	}
+	
 	public boolean isSealed() {
 		return sealed;
 	}
 	
 	public boolean isEmpty() {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		
 		return updates.isEmpty();
 	}
 	
 	public boolean updatesWorker(WorkerUnit worker) {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		
 		return updates.containsKey(worker);
 	}
 
 	public Collection<WorkerUnitUpdate> getUpdates() {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
 		if (!isSealed())
 			throw new IllegalStateException("alternative not sealed");
 		
@@ -40,6 +84,8 @@ public class ScheduleAlternative {
 	}
 	
 	public WorkerUnitUpdate popUpdate(WorkerUnit worker) {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
 		if (!isSealed())
 			throw new IllegalStateException("alternative not sealed");
 		
@@ -61,32 +107,41 @@ public class ScheduleAlternative {
 	public void updateTrajectory(WorkerUnit worker, Trajectory trajectory) {
 		Objects.requireNonNull(worker, "worker");
 		Objects.requireNonNull(trajectory, "trajectory");
-		
-		if (isSealed())
-			throw new IllegalStateException("alternative is sealed");
+
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
 		
 		getUpdate(worker).updateTrajectory(trajectory);
 	}
 	
 	public Collection<WorkerUnit> getWorkers() {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		
 		return unmodifiableCollection(updates.keySet());
 	}
 	
 	public Collection<Trajectory> getTrajectoryUpdates(WorkerUnit worker) {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		
 		return updatesWorker(worker)
 			? getUpdate(worker).getTrajectories()
 			: emptyList();
 	}
 	
 	public Task getTask(UUID taskId) {
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		
 		return tasks.get(taskId);
 	}
 
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
-		
-		if (isSealed())
-			throw new IllegalStateException("alternative is sealed");
+
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
 		
 		tasks.put(task.getId(), task);
 		getUpdate(task.getAssignedWorker().getActual())
@@ -95,15 +150,66 @@ public class ScheduleAlternative {
 	
 	public void addTaskRemoval(Task task) {
 		Objects.requireNonNull(task, "task");
-		
-		if (isSealed())
-			throw new IllegalStateException("alternative is sealed");
+
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
 		
 		getUpdate(task.getAssignedWorker().getActual())
 			.addTaskRemoval(task);
 	}
 	
+	public ScheduleAlternative branch() {
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
+		
+		return new ScheduleAlternative(this);
+	}
+	
+	public ScheduleAlternative merge() {
+		if (isRootBranch())
+			throw new IllegalStateException("cannot merge root branch");
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
+		
+		parent.mergeBranch(this);
+		
+		return parent;
+	}
+	
+	private void mergeBranch(ScheduleAlternative branch) {
+		if (branches > 1)
+			throw new IllegalStateException("cannot merge while there are multiple branches");
+		
+		updates = branch.updates;
+		tasks = branch.tasks;
+		
+		--branches;
+	}
+	
+	public ScheduleAlternative delete() {
+		if (isRootBranch())
+			throw new IllegalStateException("cannot delete root branch");
+		if (!isModifiable())
+			throw new IllegalStateException("alternative is unmodifiable");
+		
+		parent.deleteBranch();
+
+		invalid = true;
+		updates = null;
+		tasks = null;
+		
+		return parent;
+	}
+	
+	private void deleteBranch() {
+		--branches;
+	}
+	
 	public void seal() {
+		if (!isRootBranch())
+			throw new IllegalStateException("can only seal root branch");
+		if (isBranched())
+			throw new IllegalStateException("cannot seal branched alternative");
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");
 		

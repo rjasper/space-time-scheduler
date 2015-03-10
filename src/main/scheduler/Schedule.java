@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
 import scheduler.util.IntervalSet;
@@ -22,11 +23,13 @@ import com.vividsolutions.jts.geom.Point;
 
 public class Schedule {
 	
-	private Map<String, WorkerUnit> workers = new HashMap<>();
+	private final Map<String, WorkerUnit> workers = new HashMap<>();
 	
-	private Set<ScheduleAlternative> alternatives = new HashSet<>();
+	private final Set<ScheduleAlternative> alternatives = new HashSet<>();
 	
-	private Map<WorkerUnit, WorkerUnitLocks> locks = new IdentityHashMap<>();
+	private final Map<WorkerUnit, WorkerUnitLocks> locks = new IdentityHashMap<>();
+	
+	private final Map<UUID, Task> tasks = new HashMap<>();
 	
 	private static class WorkerUnitLocks {
 		
@@ -75,6 +78,15 @@ public class Schedule {
 			throw new IllegalArgumentException("unknown worker id");
 		
 		locks.remove(worker);
+	}
+	
+	public Task getTask(UUID taskId) {
+		Task task = tasks.get(taskId);
+		
+		if (task == null)
+			throw new IllegalArgumentException("unknown task id");
+		
+		return task;
 	}
 	
 	public IntervalSet<LocalDateTime> getTrajectoryLock(WorkerUnit worker) {
@@ -291,10 +303,14 @@ public class Schedule {
 	private void applyChanges(WorkerUnitUpdate update) {
 		WorkerUnit worker = update.getWorker();
 		
-		for (Task t : update.getTaskRemovals())
+		for (Task t : update.getTaskRemovals()) {
 			worker.removeTask(t);
-		for (Task t : update.getTasks())
+			tasks.remove(t.getId());
+		}
+		for (Task t : update.getTasks()) {
 			worker.addTask(t);
+			tasks.put(t.getId(), t);
+		}
 		for (Trajectory t : update.getTrajectories())
 			worker.updateTrajectory(t);
 	}

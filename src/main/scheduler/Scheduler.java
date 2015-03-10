@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -252,11 +253,8 @@ public class Scheduler {
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
 		boolean status = sc.schedule();
-		
-		if (status)
-			return success(alternative);
-		else
-			return error();
+
+		return status ? success(alternative) : error();
 	}
 	
 	public ScheduleResult schedule(
@@ -277,11 +275,48 @@ public class Scheduler {
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
 		boolean status = sc.schedule();
+
+		return status ? success(alternative) : error();
+	}
+	
+	// TODO test
+	public ScheduleResult schedule(PeriodicTaskSpecification periodicSpec) {
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		PeriodicTaskScheduler sc = new PeriodicTaskScheduler();
+
+		sc.setWorld(world);
+		sc.setPerspectiveCache(perspectiveCache);
+		sc.setFrozenHorizonTime(frozenHorizonTime);
+		sc.setSchedule(schedule);
+		sc.setAlternative(alternative);
+		sc.setSpecification(periodicSpec);
+		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
-		if (status)
-			return success(alternative);
-		else
-			return error();
+		boolean status = sc.schedule();
+		
+		return status ? success(alternative) : error();
+	}
+	
+	public ScheduleResult reschedule(TaskSpecification spec) {
+		// TODO implement
+		throw new UnsupportedOperationException("nyi");
+	}
+	
+	public ScheduleResult unschedule(String workerId, UUID taskId) {
+		// TODO implement
+		throw new UnsupportedOperationException("nyi");
+	}
+	
+	// TODO test
+	public void removeTask(String workerId, UUID taskId) {
+		WorkerUnit worker = schedule.getWorker(workerId);
+		Task task = schedule.getTask(taskId);
+		Set<Task> lock = schedule.getTaskRemovalLock(worker);
+		
+		if (lock.contains(task))
+			throw new IllegalStateException("given task is locked for removal");
+		
+		worker.removeTask(task);
 	}
 
 	public void commit(UUID transactionId) {

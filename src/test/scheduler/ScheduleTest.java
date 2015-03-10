@@ -496,5 +496,7 @@ public class ScheduleTest {
 		assertThat("t2 was not integrated",
 			w2.hasTask(t2), is(true));
 	}
+	
+	// TODO test alternative branching
 
 }

@@ -181,6 +181,11 @@ public class TrajectoryContainer {
 			put( right.subPath(finishTime, right.getFinishTime()) );
 	}
 	
+	public void update(TrajectoryContainer container) {
+		for (Trajectory t : container.trajectories.values())
+			update(t);
+	}
+	
 	private void put(Trajectory trajectory) {
 		trajectories.put(trajectory.getStartTime(), trajectory);
 	}

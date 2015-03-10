@@ -1,5 +1,6 @@
 package scheduler;
 
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static util.Comparables.*;
 
@@ -105,11 +106,12 @@ public class SingularTaskScheduler {
 		// return if no workers remain
 		// TODO workers which already are in position shouldn't need to move.
 
-		Iterable<Point> locations = () -> new LocationIterator(
-			locationSpace, maxLocationPicks);
+		Iterable<Point> locations = locationSpace instanceof Point
+			? singleton((Point) locationSpace)
+			: () -> new LocationIterator(locationSpace, maxLocationPicks);
 
-		for (Point locaction : locations) {
-			tp.setLocation(locaction);
+		for (Point location : locations) {
+			tp.setLocation(location);
 
 			// iterate over possible worker time slots.
 
@@ -118,9 +120,9 @@ public class SingularTaskScheduler {
 			// for a unit. Therefore, the workers are filtered by the location
 			
 			Iterable<WorkerUnitSlot> workerSlots = () -> new WorkerUnitSlotIterator(
-				filterByLocation(locaction),
+				filterByLocation(location),
 				frozenHorizonTime,
-				locaction,
+				location,
 				earliest, latest, duration);
 
 			for (WorkerUnitSlot ws : workerSlots) {
