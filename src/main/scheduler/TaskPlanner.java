@@ -24,7 +24,7 @@ import world.pathfinder.AbstractFixTimePathfinder;
 import world.pathfinder.SimpleFixTimeVelocityPathfinder;
 import world.pathfinder.AbstractMinimumTimePathfinder;
 import world.pathfinder.SimpleMinimumTimePathfinder;
-import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.AbstractSpatialPathfinder;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
@@ -362,7 +362,7 @@ public class TaskPlanner {
 	 * @return {@code true} if a path connecting both locations was found.
 	 */
 	private SpatialPath calculateSpatialPath(Point startLocation, Point finishLocation) {
-		SpatialPathfinder pf = worldPerspective.getSpatialPathfinder();
+		AbstractSpatialPathfinder pf = worldPerspective.getSpatialPathfinder();
 	
 		pf.setStartLocation(startLocation);
 		pf.setFinishLocation(finishLocation);

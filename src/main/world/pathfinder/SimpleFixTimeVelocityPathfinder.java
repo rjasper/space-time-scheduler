@@ -32,7 +32,7 @@ public class SimpleFixTimeVelocityPathfinder extends AbstractFixTimePathfinder {
 	/**
 	 * The mesh builder.
 	 */
-	private FixTimeMeshBuilder meshBuilder = new FixTimeMeshBuilder();
+	private SimpleFixTimeMeshBuilder meshBuilder = new SimpleFixTimeMeshBuilder();
 	
 	/**
 	 * The arc-time start point.
@@ -47,7 +47,7 @@ public class SimpleFixTimeVelocityPathfinder extends AbstractFixTimePathfinder {
 	/**
 	 * @return the mesh builder.
 	 */
-	private FixTimeMeshBuilder getMeshBuilder() {
+	private SimpleFixTimeMeshBuilder getMeshBuilder() {
 		return meshBuilder;
 	}
 
@@ -120,7 +120,7 @@ public class SimpleFixTimeVelocityPathfinder extends AbstractFixTimePathfinder {
 		Point startPoint = getArcTimeStartPoint();
 		Point finishPoint = getArcTimeFinishPoint();
 		
-		FixTimeMeshBuilder builder = getMeshBuilder();
+		SimpleFixTimeMeshBuilder builder = getMeshBuilder();
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);

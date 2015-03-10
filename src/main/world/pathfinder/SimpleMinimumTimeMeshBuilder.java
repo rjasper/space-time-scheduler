@@ -33,7 +33,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class MinimumTimeMeshBuilder extends AbstractMeshBuilder {
+public class SimpleMinimumTimeMeshBuilder extends AbstractMeshBuilder {
 	
 	/**
 	 * The start vertex.

@@ -1,9 +1,9 @@
 package world.pathfinder;
 
-public class StraightEdgePathfinderTest extends SpatialPathfinderTest {
+public class StraightEdgePathfinderTest extends AbstractSpatialPathfinderTest {
 
 	@Override
-	protected SpatialPathfinder createPathfinder() {
+	protected AbstractSpatialPathfinder createPathfinder() {
 		return new StraightEdgePathfinder();
 	}
 

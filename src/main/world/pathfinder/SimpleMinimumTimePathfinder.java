@@ -32,7 +32,7 @@ public class SimpleMinimumTimePathfinder extends AbstractMinimumTimePathfinder {
 	/**
 	 * The mesh builder.
 	 */
-	private MinimumTimeMeshBuilder meshBuilder = new MinimumTimeMeshBuilder();
+	private SimpleMinimumTimeMeshBuilder meshBuilder = new SimpleMinimumTimeMeshBuilder();
 	
 	/**
 	 * The arc-time start point.
@@ -47,7 +47,7 @@ public class SimpleMinimumTimePathfinder extends AbstractMinimumTimePathfinder {
 	/**
 	 * @return the mesh builder.
 	 */
-	private MinimumTimeMeshBuilder getMeshBuilder() {
+	private SimpleMinimumTimeMeshBuilder getMeshBuilder() {
 		return meshBuilder;
 	}
 
@@ -121,7 +121,7 @@ public class SimpleMinimumTimePathfinder extends AbstractMinimumTimePathfinder {
 		double earliest = inSeconds( getEarliestFinishTime() );
 		double latest = inSeconds( getLatestFinishTime() );
 		
-		MinimumTimeMeshBuilder builder = getMeshBuilder();
+		SimpleMinimumTimeMeshBuilder builder = getMeshBuilder();
 		
 		builder.setForbiddenRegions(forbiddenRegions);
 		builder.setMaxSpeed(maxSpeed);

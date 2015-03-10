@@ -18,7 +18,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class FixTimeMeshBuilder extends AbstractMeshBuilder {
+public class SimpleFixTimeMeshBuilder extends AbstractMeshBuilder {
 	
 	/**
 	 * The start vertex.

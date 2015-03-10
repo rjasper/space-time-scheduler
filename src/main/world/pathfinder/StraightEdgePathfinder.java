@@ -24,13 +24,13 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * The {@code StraightEdgePathfinder} is a {@link SpatialPathfinder} which
+ * The {@code StraightEdgePathfinder} is a {@link AbstractSpatialPathfinder} which
  * implements a minimum distance path finder. It wraps a {@link PathFinder}
  * of the StraightEdge library.
  * 
  * @author Rico
  */
-public class StraightEdgePathfinder extends SpatialPathfinder {
+public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 
 	/**
 	 * The underlying path finder implementation.

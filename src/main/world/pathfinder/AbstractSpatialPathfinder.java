@@ -18,7 +18,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public abstract class SpatialPathfinder {
+public abstract class AbstractSpatialPathfinder {
 
 	/**
 	 * The static obstacles to avoid.

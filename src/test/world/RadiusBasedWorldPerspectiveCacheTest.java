@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import scheduler.WorkerUnit;
 import scheduler.factories.WorkerUnitFactory;
-import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.AbstractSpatialPathfinder;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.google.common.collect.ImmutableList;
@@ -32,12 +32,12 @@ public class RadiusBasedWorldPerspectiveCacheTest {
 
 	@Test(expected = NullPointerException.class)
 	public void testNullPathfinderClassInitialization() {
-		new RadiusBasedWorldPerspectiveCache(new World(), (Class<SpatialPathfinder>) null);
+		new RadiusBasedWorldPerspectiveCache(new World(), (Class<AbstractSpatialPathfinder>) null);
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testNullPathfinderSupplierInitialization() {
-		new RadiusBasedWorldPerspectiveCache(new World(), (Supplier<SpatialPathfinder>) null);
+		new RadiusBasedWorldPerspectiveCache(new World(), (Supplier<AbstractSpatialPathfinder>) null);
 	}
 
 	@Test

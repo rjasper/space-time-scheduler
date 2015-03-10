@@ -15,12 +15,12 @@ import world.fixtures.WorldFixtures;
 
 import com.vividsolutions.jts.geom.Point;
 
-public abstract class SpatialPathfinderTest {
+public abstract class AbstractSpatialPathfinderTest {
 	
-	protected abstract SpatialPathfinder createPathfinder();
+	protected abstract AbstractSpatialPathfinder createPathfinder();
 	
 	private boolean findPath(Collection<StaticObstacle> obstacles, Point startLocation, Point finishLocation) {
-		SpatialPathfinder pf = createPathfinder();
+		AbstractSpatialPathfinder pf = createPathfinder();
 		
 		pf.setStaticObstacles(obstacles);
 		pf.setStartLocation(startLocation);

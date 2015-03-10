@@ -14,7 +14,7 @@ import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.graph.view.GraphViewer;
-import world.pathfinder.FixTimeMeshBuilder;
+import world.pathfinder.SimpleFixTimeMeshBuilder;
 import world.pathfinder.ForbiddenRegion;
 
 import com.google.common.collect.ImmutableList;
@@ -40,7 +40,7 @@ public class VelocityGraphTest {
 			.map((b) -> new ForbiddenRegion(b, dummy))
 			.collect(Collectors.toList());
 
-		FixTimeMeshBuilder meshBuilder = new FixTimeMeshBuilder();
+		SimpleFixTimeMeshBuilder meshBuilder = new SimpleFixTimeMeshBuilder();
 //		MinimumTimeMeshBuilder meshBuilder = new MinimumTimeMeshBuilder();
 		meshBuilder.setForbiddenRegions(regions);
 		meshBuilder.setMinArc(0.0);

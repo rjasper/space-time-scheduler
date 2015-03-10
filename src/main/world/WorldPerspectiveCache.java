@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import scheduler.WorkerUnit;
-import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
  * Caches the perspectives of multiple worker units and takes advantage of
@@ -22,7 +22,7 @@ public abstract class WorldPerspectiveCache {
 	/**
 	 * The spatial pathfinder supplier. Supplies pathfinders for world views.
 	 */
-	private final Supplier<? extends SpatialPathfinder> spatialPathfinderSupplier;
+	private final Supplier<? extends AbstractSpatialPathfinder> spatialPathfinderSupplier;
 
 	/**
 	 * Constructs a new {@code WorldPerspectiveCache} of the given world.
@@ -33,7 +33,7 @@ public abstract class WorldPerspectiveCache {
 	 * @param spatialPathfinderSupplier
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public WorldPerspectiveCache(World world, Supplier<? extends SpatialPathfinder> spatialPathfinderSupplier) {
+	public WorldPerspectiveCache(World world, Supplier<? extends AbstractSpatialPathfinder> spatialPathfinderSupplier) {
 		this.world = Objects.requireNonNull(world, "world");
 		this.spatialPathfinderSupplier =
 			Objects.requireNonNull(spatialPathfinderSupplier, "spatialPathfinderSupplier");
@@ -48,7 +48,7 @@ public abstract class WorldPerspectiveCache {
 	 * @param spatialPathfinderClass
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
-	public WorldPerspectiveCache(World world, Class<? extends SpatialPathfinder> spatialPathfinderClass) {
+	public WorldPerspectiveCache(World world, Class<? extends AbstractSpatialPathfinder> spatialPathfinderClass) {
 		this(world, makeSpatialPathfinderSupplier(spatialPathfinderClass));
 	}
 
@@ -58,8 +58,8 @@ public abstract class WorldPerspectiveCache {
 	 * @param spatialPathfinderClass
 	 * @return the supplier.
 	 */
-	private static Supplier<? extends SpatialPathfinder> makeSpatialPathfinderSupplier(
-		Class<? extends SpatialPathfinder> spatialPathfinderClass)
+	private static Supplier<? extends AbstractSpatialPathfinder> makeSpatialPathfinderSupplier(
+		Class<? extends AbstractSpatialPathfinder> spatialPathfinderClass)
 	{
 		Objects.requireNonNull(spatialPathfinderClass, "spatialPathfinderClass");
 
@@ -75,7 +75,7 @@ public abstract class WorldPerspectiveCache {
 	/**
 	 * @return creates a new spatial pathfinder.
 	 */
-	protected SpatialPathfinder createSpatialPathfinder() {
+	protected AbstractSpatialPathfinder createSpatialPathfinder() {
 		return spatialPathfinderSupplier.get();
 	}
 

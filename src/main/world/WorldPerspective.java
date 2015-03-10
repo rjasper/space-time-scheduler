@@ -2,7 +2,7 @@ package world;
 
 import java.util.Objects;
 
-import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
  * A {@code WorldPerspective} describes the view of a worker unit on the world.
@@ -24,7 +24,7 @@ public class WorldPerspective {
 	/**
 	 * The spatial pathfinder of the view.
 	 */
-	private final SpatialPathfinder spatialPathfinder;
+	private final AbstractSpatialPathfinder spatialPathfinder;
 
 	/**
 	 * Creates a perspective with the given view and spatial pathfinder of the
@@ -35,7 +35,7 @@ public class WorldPerspective {
 	 * @param spatialPathfinder
 	 *            of the view.
 	 */
-	public WorldPerspective(World view, SpatialPathfinder spatialPathfinder) {
+	public WorldPerspective(World view, AbstractSpatialPathfinder spatialPathfinder) {
 		this.view = Objects.requireNonNull(view, "view");;
 		this.spatialPathfinder = Objects.requireNonNull(spatialPathfinder, "spatialPathfinder");;
 
@@ -53,7 +53,7 @@ public class WorldPerspective {
 	/**
 	 * @return the spatial pathfinder of the view of this perspective.
 	 */
-	public SpatialPathfinder getSpatialPathfinder() {
+	public AbstractSpatialPathfinder getSpatialPathfinder() {
 		return spatialPathfinder;
 	}
 

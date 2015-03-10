@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import scheduler.WorkerUnit;
-import world.pathfinder.SpatialPathfinder;
+import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
  * The {@code RadiusBasedWorldPerspectiveCache} is an implementation of the
@@ -107,7 +107,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 */
 	public RadiusBasedWorldPerspectiveCache(
 		World world,
-		Class<? extends SpatialPathfinder> spatialPathfinderClass)
+		Class<? extends AbstractSpatialPathfinder> spatialPathfinderClass)
 	{
 		super(world, spatialPathfinderClass);
 	}
@@ -122,7 +122,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * @throws NullPointerException if any argument is {@code null}.
 	 */
 	public RadiusBasedWorldPerspectiveCache(
-		World world, Supplier<? extends SpatialPathfinder> spatialPathfinderSupplier)
+		World world, Supplier<? extends AbstractSpatialPathfinder> spatialPathfinderSupplier)
 	{
 		super(world, spatialPathfinderSupplier);
 	}
@@ -201,7 +201,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	private WorldPerspectiveReference createPerspective(double radius) {
 		World world = getWorld().buffer(radius);
 	
-		SpatialPathfinder spatialPathfinder = createSpatialPathfinder();
+		AbstractSpatialPathfinder spatialPathfinder = createSpatialPathfinder();
 		spatialPathfinder.setStaticObstacles(world.getStaticObstacles());
 	
 		WorldPerspective perspective = new WorldPerspective(world, spatialPathfinder);
