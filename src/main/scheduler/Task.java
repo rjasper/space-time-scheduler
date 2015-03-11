@@ -107,7 +107,7 @@ public class Task {
 	/**
 	 * @return the assigned worker.
 	 */
-	public WorkerUnitReference getAssignedWorker() {
+	public WorkerUnitReference getWorkerReference() {
 		return assignedWorker;
 	}
 
@@ -148,7 +148,7 @@ public class Task {
 	public String toString() {
 		// lazy evaluation
 		Supplier<String> defaultString = () -> String.format("%s:(%s, %s, %s)",
-			getAssignedWorker(), getLocation(), getStartTime(), getFinishTime());
+			getWorkerReference(), getLocation(), getStartTime(), getFinishTime());
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

@@ -23,7 +23,7 @@ import util.CollectionsRequire;
 import world.World;
 import world.WorldPerspectiveCache;
 
-public class DependentTaskPlanner {
+public class DependentTaskScheduler {
 	
 	private World world = null;
 	
@@ -126,7 +126,7 @@ public class DependentTaskPlanner {
 		
 		Iterator<TaskSpecification> it = new DependentTaskIterator(dependencies, normalizedSpecMap);
 		
-		SingularTaskPlanner sc = new SingularTaskPlanner();
+		SingularTaskScheduler sc = new SingularTaskScheduler();
 
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);

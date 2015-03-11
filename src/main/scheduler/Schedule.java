@@ -94,7 +94,7 @@ public class Schedule {
 	
 	public void removeTask(UUID taskId) {
 		Task task = getTask(taskId);
-		WorkerUnit worker = task.getAssignedWorker().getActual();
+		WorkerUnit worker = task.getWorkerReference().getActual();
 		Set<Task> lock = getTaskRemovalLock(worker);
 		
 		if (lock.contains(task))
@@ -247,7 +247,7 @@ public class Schedule {
 	}
 
 	private boolean verifyTaskLocation(Task task, IntervalSet<LocalDateTime> trajectoryUpdates) {
-		WorkerUnit worker = task.getAssignedWorker().getActual();
+		WorkerUnit worker = task.getWorkerReference().getActual();
 		Point location = task.getLocation();
 		LocalDateTime taskStart = task.getStartTime();
 		LocalDateTime taskFinish = task.getFinishTime();

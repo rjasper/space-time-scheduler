@@ -102,7 +102,7 @@ public class WorkerUnitUpdate implements Cloneable {
 		
 		if (startTime.isBefore(worker.getInitialTime()))
 			throw new IllegalArgumentException("task predates initial time");
-		if (task.getAssignedWorker().getActual() != worker) // identity comparison
+		if (task.getWorkerReference().getActual() != worker) // identity comparison
 			throw new IllegalArgumentException("invalid assigned worker");
 		if (taskLock.intersects(startTime, finishTime))
 			throw new IllegalArgumentException("task lock violation");
@@ -118,7 +118,7 @@ public class WorkerUnitUpdate implements Cloneable {
 		
 		if (isSealed())
 			throw new IllegalStateException("update is sealed");
-		if (task.getAssignedWorker().getActual() != worker) // identity comparison
+		if (task.getWorkerReference().getActual() != worker) // identity comparison
 			throw new IllegalArgumentException("invalid assigned worker");
 		
 		taskRemovalIntervals.add(task.getStartTime(), task.getFinishTime());

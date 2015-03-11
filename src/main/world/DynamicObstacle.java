@@ -4,6 +4,7 @@ import static jts.geom.immutable.ImmutableGeometries.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,6 +13,7 @@ import jts.geom.immutable.ImmutablePolygon;
 import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -152,6 +154,23 @@ public class DynamicObstacle implements Cloneable {
 		clone.shape = immutable((Polygon) getShape().buffer(distance));
 
 		return clone;
+	}
+
+	/**
+	 * Calculates the radius.
+	 *
+	 * @return the radius.
+	 */
+	public double calcRadius() {
+		Coordinate[] coords = shape.getCoordinates();
+
+		// determine the maximum square-distance to the origin
+		double sqRadius = Arrays.stream(coords)
+			.mapToDouble(c -> c.x*c.x + c.y*c.y)
+			.max()
+			.getAsDouble();
+
+		return Math.sqrt(sqRadius);
 	}
 
 	/*

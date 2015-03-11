@@ -15,7 +15,7 @@ import world.WorldPerspectiveCache;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class PeriodicTaskPlanner {
+public class PeriodicTaskScheduler {
 	
 	private World world = null;
 	
@@ -99,7 +99,7 @@ public class PeriodicTaskPlanner {
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
 		
-		SingularTaskPlanner sc = new SingularTaskPlanner();
+		SingularTaskScheduler sc = new SingularTaskScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -152,7 +152,7 @@ public class PeriodicTaskPlanner {
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
 		
-		SingularTaskPlanner sc = new SingularTaskPlanner();
+		SingularTaskScheduler sc = new SingularTaskScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -179,6 +179,8 @@ public class PeriodicTaskPlanner {
 			
 			periodStart = periodFinish;
 		}
+		
+		// TODO alternative might be polluted
 
 		// indicates successful scheduling of all tasks
 		return noBreak;

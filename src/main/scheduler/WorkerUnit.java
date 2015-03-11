@@ -231,7 +231,7 @@ public class WorkerUnit {
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
 		
-		if (task.getAssignedWorker().getActual() != this)
+		if (task.getWorkerReference().getActual() != this)
 			throw new IllegalArgumentException("task not assigned to this worker");
 	
 		tasks.put(task.getStartTime(), task);

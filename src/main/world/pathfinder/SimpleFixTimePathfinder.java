@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @author Rico
  */
-public class SimpleFixTimeVelocityPathfinder extends AbstractFixTimePathfinder {
+public class SimpleFixTimePathfinder extends AbstractFixTimePathfinder {
 
 	/**
 	 * The mesh builder.

@@ -240,7 +240,7 @@ public class Scheduler {
 	 */
 	public ScheduleResult schedule(TaskSpecification specification) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		SingularTaskPlanner sc = new SingularTaskPlanner();
+		SingularTaskScheduler sc = new SingularTaskScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -260,7 +260,7 @@ public class Scheduler {
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		DependentTaskPlanner sc = new DependentTaskPlanner();
+		DependentTaskScheduler sc = new DependentTaskScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -279,7 +279,7 @@ public class Scheduler {
 	
 	public ScheduleResult schedule(PeriodicTaskSpecification periodicSpec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		PeriodicTaskPlanner sc = new PeriodicTaskPlanner();
+		PeriodicTaskScheduler sc = new PeriodicTaskScheduler();
 
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -299,9 +299,26 @@ public class Scheduler {
 		throw new UnsupportedOperationException("nyi");
 	}
 	
-	public ScheduleResult unschedule(String workerId, UUID taskId) {
+	// TODO test
+	public ScheduleResult unschedule(UUID taskId) {
 		// TODO implement
-		throw new UnsupportedOperationException("nyi");
+		
+		Task task = schedule.getTask(taskId);
+		WorkerUnit worker = task.getWorkerReference().getActual();
+		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
+		
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		TaskRemovalPlanner pl = new TaskRemovalPlanner();
+		
+		pl.setWorld(world);
+		pl.setWorldPerspective(perspective);
+		pl.setFrozenHorizonTime(frozenHorizonTime);
+		pl.setSchedule(schedule);
+		pl.setAlternative(alternative);
+		pl.setTask(task);
+//		pl.setFixedEnd(fixedEnd); // TODO
+		
+		return null;
 	}
 	
 	public void removeTask(String workerId, UUID taskId) {

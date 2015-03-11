@@ -2,11 +2,11 @@ package scheduler;
 
 import static jts.geom.immutable.ImmutableGeometries.*;
 import static util.Comparables.*;
+import static world.util.DynamicCollisionDetector.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,7 +21,7 @@ import world.WorldPerspective;
 import world.pathfinder.AbstractFixTimePathfinder;
 import world.pathfinder.AbstractMinimumTimePathfinder;
 import world.pathfinder.AbstractSpatialPathfinder;
-import world.pathfinder.SimpleFixTimeVelocityPathfinder;
+import world.pathfinder.SimpleFixTimePathfinder;
 import world.pathfinder.SimpleMinimumTimePathfinder;
 
 import com.google.common.collect.ImmutableList;
@@ -103,7 +103,7 @@ public class TaskPlanner {
 	/**
 	 * The workers as dynamic obstacles.
 	 */
-	private Collection<DynamicObstacle> workerObstacles = new LinkedList<>();
+	private transient Collection<DynamicObstacle> dynamicObstacles;
 	
 	/**
 	 * Indicates if the final position of time slot is mandatory.
@@ -259,44 +259,53 @@ public class TaskPlanner {
 		builder.setSchedule(schedule);
 		builder.setAlternative(alternative);
 		
-		workerObstacles = builder.build();
+		Collection<DynamicObstacle>
+			worldObstacles = worldPerspective.getView().getDynamicObstacles(),
+			workerObstacles = builder.build();
+		
+		dynamicObstacles = JoinedCollection.of(worldObstacles, workerObstacles);
 	}
 
 	private void cleanUp() {
-		workerObstacles = null;
+		dynamicObstacles = null;
 	}
 
 	private boolean planImpl() {
-		ImmutablePoint taskLocation = location;
-		ImmutablePoint slotStartLocation = idleSlot.getStartLocation();
-		ImmutablePoint slotFinishLocation = fixedEnd
-			? idleSlot.getFinishLocation()
-			: taskLocation;
-		
-		// calculate spatial path to and from new task
-		SpatialPath spatialToTask = calculateSpatialPath(slotStartLocation, taskLocation);
-		if (spatialToTask.isEmpty())
-			return false;
-		SpatialPath spatialFromTask = calculateSpatialPath(taskLocation, slotFinishLocation);
-		if (spatialFromTask.isEmpty())
-			return false;
-		
-		// calculate trajectories to and from new task
-		Trajectory trajToTask = calculateTrajectoryToTask(spatialToTask);
+		// calculate trajectory to task
+			
+		Trajectory trajToTask = calculateTrajectoryToTask();
 		if (trajToTask.isEmpty())
 			return false;
+		
+		// make task
 		
 		LocalDateTime taskStartTime = trajToTask.getFinishTime();
 		Task task = new Task(taskId, worker.getReference(), location, taskStartTime, duration);
 		LocalDateTime taskFinishTime = task.getFinishTime();
 		
-		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, taskFinishTime);
+		// calculate trajectory from task
+		
+		Trajectory trajFromTask = fixedEnd
+			? calculateTrajectoryFromTask(taskFinishTime)
+			: calculateStationaryTrajectory(location, taskFinishTime, idleSlot.getFinishTime());
+
 		if (trajFromTask.isEmpty())
 			return false;
-		
-		// in case of an open end don't use calculated trajectory since it is inaccurate
-		if (!fixedEnd)
-			trajFromTask = makeFinalTrajectory(slotFinishLocation, taskFinishTime);
+
+//		SpatialPath spatialFromTask = calculateSpatialPath(taskLocation, slotFinishLocation);
+//		if (spatialFromTask.isEmpty())
+//			return false;
+//		
+//		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, taskFinishTime);
+//		if (trajFromTask.isEmpty())
+//			return false;
+//		
+//		// TODO use collision detector
+//		// if end location is not fixed a collision detector would be sufficient
+//		
+//		// in case of an open end don't use calculated trajectory since it is inaccurate
+//		if (!fixedEnd)
+//			trajFromTask = makeFinalTrajectory(slotFinishLocation, taskFinishTime);
 		
 		Trajectory trajAtTask = makeTrajectoryAtTask(task);
 		
@@ -312,59 +321,6 @@ public class TaskPlanner {
 		
 		return true;
 	}
-
-//	private Map<WorkerUnit, ImmutablePolygon> shapeLookUp = new IdentityHashMap<>();
-//
-//	private void initWorkerObstacles() {
-//		workerObstacles.clear();
-//		
-//		LocalDateTime from = idleSlot.getStartTime();
-//		LocalDateTime to = idleSlot.getFinishTime();
-//		
-//		// TODO make code fancier (a little repetitive right now)
-//	
-//		// original trajectories
-//		for (WorkerUnit w : schedule.getWorkers()) {
-//			if (w == worker)
-//				continue;
-//			
-//			for (Trajectory t : w.getTrajectories(from, to))
-//				workerObstacles.add(makeWorkerObstacle(w, t));
-//		}
-//		
-//		// alternative trajectories added to schedule
-//		for (ScheduleAlternative a : schedule.getAlternatives()) {
-//			for (WorkerUnit w : a.getWorkers()) {
-//				if (w == worker)
-//					continue;
-//				
-//				for (Trajectory t : a.getTrajectoryUpdates(w))
-//					workerObstacles.add(makeWorkerObstacle(w, t));
-//			}
-//		}
-//	
-//		// alternative trajectories of current alternative
-//		for (WorkerUnit w : scheduleAlternative.getWorkers()) {
-//			if (w == worker)
-//				continue;
-//			
-//			for (Trajectory t : scheduleAlternative.getTrajectoryUpdates(w))
-//				workerObstacles.add(makeWorkerObstacle(w, t));
-//		}
-//	}
-//
-//	private void resetWorkerObstacles() {
-//		shapeLookUp.clear();
-//	}
-//
-//	private DynamicObstacle makeWorkerObstacle(WorkerUnit worker, Trajectory trajectory) {
-//		double radius = this.worker.getRadius();
-//		
-//		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(worker, w ->
-//			(ImmutablePolygon) immutable(w.getShape().buffer(radius)));
-//		
-//		return new DynamicObstacle(shape, trajectory);
-//	}
 
 	/**
 	 * Calculates the path between to locations.
@@ -384,13 +340,12 @@ public class TaskPlanner {
 		return pf.getResultSpatialPath();
 	}
 
-	private Trajectory calculateTrajectoryToTask(SpatialPath path) {
+	private Trajectory calculateTrajectoryToTask() {
+		SpatialPath path = calculateSpatialPath(idleSlot.getStartLocation(), location);
+		
 		AbstractMinimumTimePathfinder pf = new SimpleMinimumTimePathfinder();
 		
-		Collection<DynamicObstacle> dynamicObstacles =
-			worldPerspective.getView().getDynamicObstacles();
-		
-		pf.setDynamicObstacles(JoinedCollection.of(dynamicObstacles, workerObstacles));
+		pf.setDynamicObstacles  ( dynamicObstacles        );
 		pf.setSpatialPath       ( path                    );
 		pf.setStartArc          ( 0.0                     );
 		pf.setFinishArc         ( path.length()           );
@@ -400,20 +355,19 @@ public class TaskPlanner {
 		pf.setStartTime         ( idleSlot.getStartTime() );
 		pf.setEarliestFinishTime( earliestStartTime()     );
 		pf.setLatestFinishTime  ( latestStartTime()       );
-		pf.setBufferDuration    ( duration                );
+		pf.setBufferDuration    ( duration                ); // TODO no fixed end
 		
 		pf.calculate();
 		
 		return pf.getResultTrajectory();
 	}
 
-	private Trajectory calculateTrajectoryFromTask(SpatialPath path, LocalDateTime startTime) {
-		AbstractFixTimePathfinder pf = new SimpleFixTimeVelocityPathfinder();
+	private Trajectory calculateTrajectoryFromTask(LocalDateTime startTime) {
+		SpatialPath path = calculateSpatialPath(location, idleSlot.getFinishLocation());
 		
-		Collection<DynamicObstacle> dynamicObstacles =
-			worldPerspective.getView().getDynamicObstacles();
-
-		pf.setDynamicObstacles(JoinedCollection.of(dynamicObstacles, workerObstacles));
+		AbstractFixTimePathfinder pf = new SimpleFixTimePathfinder();
+		
+		pf.setDynamicObstacles( dynamicObstacles         );
 		pf.setSpatialPath     ( path                     );
 		pf.setStartArc        ( 0.0                      );
 		pf.setFinishArc       ( path.length()            );
@@ -428,16 +382,36 @@ public class TaskPlanner {
 		return pf.getResultTrajectory();
 	}
 
+	private Trajectory calculateStationaryTrajectory(
+		ImmutablePoint location,
+		LocalDateTime startTime,
+		LocalDateTime finishTime)
+	{
+		// make stationary obstacle
+		
+		SpatialPath spatialPath = new SpatialPath( ImmutableList.of(location, location) );
+		ImmutableList<LocalDateTime> times = ImmutableList.of(startTime, finishTime);
+		
+		Trajectory trajectory = new SimpleTrajectory(spatialPath, times);
+		
+		// check for dynamic collisions
+		
+		if (collides(trajectory, dynamicObstacles))
+			return SimpleTrajectory.empty();
+		else
+			return trajectory;
+	}
+
 	private Trajectory makeTrajectoryAtTask(Task task) {
 		return new SimpleTrajectory(
 			new SpatialPath(ImmutableList.of(location, location)),
 			ImmutableList.of(task.getStartTime(), task.getFinishTime()));
 	}
 	
-	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {
-		return new SimpleTrajectory(
-			new SpatialPath(ImmutableList.of(location, location)),
-			ImmutableList.of(startTime, idleSlot.getFinishTime()));
-	}
+//	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {
+//		return new SimpleTrajectory(
+//			new SpatialPath(ImmutableList.of(location, location)),
+//			ImmutableList.of(startTime, idleSlot.getFinishTime()));
+//	}
 	
 }

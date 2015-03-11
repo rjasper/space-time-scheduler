@@ -148,7 +148,7 @@ public class ScheduleAlternative {
 			throw new IllegalStateException("alternative is unmodifiable");
 		
 		tasks.put(task.getId(), task);
-		getUpdate(task.getAssignedWorker().getActual())
+		getUpdate(task.getWorkerReference().getActual())
 			.addTask(task);
 	}
 	
@@ -158,7 +158,7 @@ public class ScheduleAlternative {
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		getUpdate(task.getAssignedWorker().getActual())
+		getUpdate(task.getWorkerReference().getActual())
 			.addTaskRemoval(task);
 	}
 	
