@@ -72,11 +72,14 @@ public class Schedule {
 	public void removeWorker(String workerId) {
 		Objects.requireNonNull(workerId, "workerId");
 		
-		WorkerUnit worker = workers.remove(workerId);
+		WorkerUnit worker = workers.get(workerId);
 		
 		if (worker == null)
 			throw new IllegalArgumentException("unknown worker id");
+		if (!worker.isIdle())
+			throw new IllegalStateException("worker still has scheduled tasks");
 		
+		workers.remove(workerId);
 		locks.remove(worker);
 	}
 	
@@ -87,6 +90,18 @@ public class Schedule {
 			throw new IllegalArgumentException("unknown task id");
 		
 		return task;
+	}
+	
+	public void removeTask(UUID taskId) {
+		Task task = getTask(taskId);
+		WorkerUnit worker = task.getAssignedWorker().getActual();
+		Set<Task> lock = getTaskRemovalLock(worker);
+		
+		if (lock.contains(task))
+			throw new IllegalStateException("given task is locked for removal");
+		
+		worker.removeTask(task);
+		tasks.remove(taskId);
 	}
 	
 	public IntervalSet<LocalDateTime> getTrajectoryLock(WorkerUnit worker) {

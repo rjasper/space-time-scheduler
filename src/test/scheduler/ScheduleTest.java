@@ -497,6 +497,4 @@ public class ScheduleTest {
 			w2.hasTask(t2), is(true));
 	}
 	
-	// TODO test alternative branching
-
 }

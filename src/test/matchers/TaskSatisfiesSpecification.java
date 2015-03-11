@@ -1,5 +1,7 @@
 package matchers;
 
+import java.util.Objects;
+
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
@@ -18,7 +20,7 @@ public class TaskSatisfiesSpecification extends TypeSafeMatcher<Task> {
 	private final TaskSpecification spec;
 
 	public TaskSatisfiesSpecification(TaskSpecification spec) {
-		this.spec = spec;
+		this.spec = Objects.requireNonNull(spec, "spec");
 	}
 
 	@Override

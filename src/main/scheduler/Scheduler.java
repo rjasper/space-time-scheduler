@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -139,8 +138,7 @@ public class Scheduler {
 	public void removeWorker(String workerId) {
 		WorkerUnit worker = schedule.getWorker(workerId);
 		
-		if (!worker.isIdle(presentTime, END_OF_TIME))
-			throw new IllegalStateException("worker still has scheduled tasks");
+		worker.cleanUp(presentTime);
 		
 		schedule.removeWorker(workerId);
 		perspectiveCache.removePerceiver(worker);
@@ -279,7 +277,6 @@ public class Scheduler {
 		return status ? success(alternative) : error();
 	}
 	
-	// TODO test
 	public ScheduleResult schedule(PeriodicTaskSpecification periodicSpec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		PeriodicTaskPlanner sc = new PeriodicTaskPlanner();
@@ -307,16 +304,8 @@ public class Scheduler {
 		throw new UnsupportedOperationException("nyi");
 	}
 	
-	// TODO test
 	public void removeTask(String workerId, UUID taskId) {
-		WorkerUnit worker = schedule.getWorker(workerId);
-		Task task = schedule.getTask(taskId);
-		Set<Task> lock = schedule.getTaskRemovalLock(worker);
-		
-		if (lock.contains(task))
-			throw new IllegalStateException("given task is locked for removal");
-		
-		worker.removeTask(task);
+		schedule.removeTask(taskId);
 	}
 
 	public void commit(UUID transactionId) {

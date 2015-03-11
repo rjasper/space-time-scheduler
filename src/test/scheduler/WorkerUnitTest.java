@@ -9,6 +9,7 @@ import static util.UUIDFactory.*;
 import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -122,6 +123,24 @@ public class WorkerUnitTest {
 			worker.hasTask(t2), is(false));
 		assertThat("removed wrong number of trajectories",
 			worker.getTrajectories().size(), is(1));
+	}
+	
+	@Test
+	public void testIdleSlotsEmptyInterval() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		
+		Collection<IdleSlot> slots = worker.idleSlots(atSecond(1), atSecond(1));
+		
+		assertThat(slots.isEmpty(), is(true));
+	}
+	
+	@Test
+	public void testIdleSlotsEmptyInitialTime() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		
+		Collection<IdleSlot> slots = worker.idleSlots(LocalDateTime.MIN, atSecond(0));
+		
+		assertThat(slots.isEmpty(), is(true));
 	}
 	
 	@Test

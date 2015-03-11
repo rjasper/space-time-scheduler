@@ -82,8 +82,8 @@ public class PeriodicTaskPlanner {
 		Duration period = periodicSpec.getPeriod();
 		
 		// short cut if first task cannot be scheduled due to frozen horizon
-		// startTime + period >= frozenHorizonTime + duration
-		if (! startTime.plus(period) .isBefore( frozenHorizonTime.plus(duration) ))
+		// startTime + period < frozenHorizonTime + duration
+		if (startTime.plus(period) .isBefore( frozenHorizonTime.plus(duration) ))
 			return false;
 		
 		if (periodicSpec.isSameLocation())

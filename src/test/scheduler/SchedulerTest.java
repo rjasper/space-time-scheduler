@@ -514,5 +514,97 @@ public class SchedulerTest {
 		
 		sc.schedule(emptyList(), depGraph);
 	}
+	
+	@Test
+	public void testSchedulePeriodicSameLocation() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		ImmutableList<UUID> taskIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		
+		PeriodicTaskSpecification ps = new PeriodicTaskSpecification(
+			taskIds,
+			immutablePoint(0, 0),
+			true,
+			secondsToDuration(1),
+			atSecond(0),
+			secondsToDuration(2));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getTasks().values(), satisfy(ps));
+	}
+	
+	@Test
+	public void testSchedulePeriodicIndependentLocation() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		ImmutableList<UUID> taskIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		
+		PeriodicTaskSpecification ps = new PeriodicTaskSpecification(
+			taskIds,
+			immutablePoint(0, 0),
+			false,
+			secondsToDuration(1),
+			atSecond(0),
+			secondsToDuration(2));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getTasks().values(), satisfy(ps));
+	}
+	
+	@Test
+	public void testRemoveTask() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+
+		ScheduleResult res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		
+		assertThat("task was not scheduled",
+			res.isSuccess(), is(true));
+		
+		Task task = res.getTasks().get(uuid("task"));
+		
+		assertThat("task was not assigned to worker",
+			wref.hasTask(task), is(true));
+		
+		sc.removeTask("w", uuid("task"));
+
+		assertThat("task to be removed was not removed",
+			wref.hasTask(task), is(false));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void testRemoveLockedTask() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+
+		ScheduleResult res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		Task task = res.getTasks().get(uuid("task"));
+		
+		assertThat("task was not scheduled",
+			res.isSuccess(), is(true));
+		
+		assertThat("task was not assigned to worker",
+			wref.hasTask(task), is(true));
+		
+		sc.unschedule("w", uuid("task")); // pending task removal
+		
+		sc.removeTask("w", uuid("task"));
+	}
 
 }

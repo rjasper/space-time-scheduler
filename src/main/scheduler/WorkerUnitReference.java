@@ -82,6 +82,10 @@ public class WorkerUnitReference  {
 		return worker.getInitialTime();
 	}
 
+	public boolean hasTask(Task task) {
+		return worker.hasTask(task);
+	}
+
 	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
 		return worker.calcTaskDuration(from, to);
 	}

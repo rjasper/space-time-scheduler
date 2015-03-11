@@ -9,12 +9,12 @@ import jts.geom.immutable.ImmutableGeometry;
 import jts.geom.util.GeometriesRequire;
 import util.CollectionsRequire;
 
-import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 
 public final class PeriodicTaskSpecification {
 	
-	private final ImmutableCollection<UUID> taskIds;
+	private final ImmutableList<UUID> taskIds;
 	
 	private final Geometry locationSpace;
 	
@@ -27,7 +27,7 @@ public final class PeriodicTaskSpecification {
 	private final Duration period;
 
 	public <G extends Geometry & ImmutableGeometry> PeriodicTaskSpecification(
-		ImmutableCollection<UUID> taskIds,
+		ImmutableList<UUID> taskIds,
 		G locationSpace,
 		boolean sameLocation,
 		Duration duration,
@@ -41,13 +41,15 @@ public final class PeriodicTaskSpecification {
 		this.startTime     = Objects.requireNonNull(startTime, "startTime");
 		this.period        = Objects.requireNonNull(period, "period");
 		
+		if (taskIds.isEmpty())
+			throw new IllegalArgumentException("no repetitions");
 		if (duration.isNegative() || duration.isZero())
 			throw new IllegalArgumentException("illegal duration");
 		if (period.compareTo(duration) < 0)
 			throw new IllegalArgumentException("illegal period");
 	}
 
-	public ImmutableCollection<UUID> getTaskIds() {
+	public ImmutableList<UUID> getTaskIds() {
 		return taskIds;
 	}
 
@@ -70,6 +72,12 @@ public final class PeriodicTaskSpecification {
 
 	public Duration getPeriod() {
 		return period;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("(%s, %s, %s, %s, %s, %s)",
+			taskIds, locationSpace, sameLocation, duration, startTime, period);
 	}
 
 }

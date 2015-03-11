@@ -130,6 +130,10 @@ public class ScheduleAlternative {
 			: emptyList();
 	}
 	
+	public boolean hasTask(UUID taskId) {
+		return tasks.containsKey(taskId);
+	}
+	
 	public Task getTask(UUID taskId) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
@@ -159,8 +163,12 @@ public class ScheduleAlternative {
 	}
 	
 	public ScheduleAlternative branch() {
-		if (!isModifiable())
-			throw new IllegalStateException("alternative is unmodifiable");
+		if (isInvalid())
+			throw new IllegalStateException("alternative is invalid");
+		if (isSealed())
+			throw new IllegalStateException("alternative is sealed");
+		
+		++branches;
 		
 		return new ScheduleAlternative(this);
 	}

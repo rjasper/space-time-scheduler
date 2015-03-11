@@ -262,6 +262,10 @@ public class WorkerUnit {
 		return new MappedIntervalSet<LocalDateTime, Task>(tasks,
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
+	
+	public boolean isIdle() {
+		return tasks.isEmpty();
+	}
 
 	/**
 	 * Determines whether the worker is idle for the given entire interval.
@@ -431,7 +435,8 @@ public class WorkerUnit {
 		if (from.isAfter(to))
 			throw new IllegalArgumentException("from is after to");
 		
-		if (to.isBefore(initialTime))
+		// short cut empty interval
+		if (from.isEqual(to) || !to.isAfter(initialTime))
 			return emptyList();
 		
 		IntervalSet<LocalDateTime> taskIntervals = getTaskIntervals();
