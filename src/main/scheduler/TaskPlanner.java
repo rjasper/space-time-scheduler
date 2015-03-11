@@ -6,14 +6,12 @@ import static util.Comparables.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
-import jts.geom.immutable.ImmutablePolygon;
+import scheduler.util.WorkerUnitObstacleBuilder;
 import util.JoinedCollection;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
@@ -21,10 +19,10 @@ import world.SpatialPath;
 import world.Trajectory;
 import world.WorldPerspective;
 import world.pathfinder.AbstractFixTimePathfinder;
-import world.pathfinder.SimpleFixTimeVelocityPathfinder;
 import world.pathfinder.AbstractMinimumTimePathfinder;
-import world.pathfinder.SimpleMinimumTimePathfinder;
 import world.pathfinder.AbstractSpatialPathfinder;
+import world.pathfinder.SimpleFixTimeVelocityPathfinder;
+import world.pathfinder.SimpleMinimumTimePathfinder;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
@@ -100,7 +98,7 @@ public class TaskPlanner {
 	/**
 	 * The schedule alternative used to store schedule changes.
 	 */
-	private ScheduleAlternative scheduleAlternative = null;
+	private ScheduleAlternative alternative = null;
 	
 	/**
 	 * The workers as dynamic obstacles.
@@ -149,7 +147,7 @@ public class TaskPlanner {
 	}
 
 	public void setScheduleAlternative(ScheduleAlternative alternative) {
-		this.scheduleAlternative = Objects.requireNonNull(alternative, "alternative");
+		this.alternative = Objects.requireNonNull(alternative, "alternative");
 	}
 
 	public void setFixedEnd(boolean fixedEnd) {
@@ -205,7 +203,7 @@ public class TaskPlanner {
 			idleSlot            == null ||
 			worldPerspective    == null ||
 			schedule            == null ||
-			scheduleAlternative == null)
+			alternative == null)
 		{
 			throw new IllegalStateException("some parameters are not set");
 		}
@@ -245,15 +243,29 @@ public class TaskPlanner {
 			return false;
 		}
 
-		initWorkerObstacles();
-
+		init();
 		boolean status = planImpl();
-		
-		resetWorkerObstacles();
+		cleanUp();
 		
 		return status;
 	}
 	
+	private void init() {
+		WorkerUnitObstacleBuilder builder = new WorkerUnitObstacleBuilder();
+		
+		builder.setWorker(worker);
+		builder.setStartTime(idleSlot.getStartTime());
+		builder.setFinishTime(idleSlot.getFinishTime());
+		builder.setSchedule(schedule);
+		builder.setAlternative(alternative);
+		
+		workerObstacles = builder.build();
+	}
+
+	private void cleanUp() {
+		workerObstacles = null;
+	}
+
 	private boolean planImpl() {
 		ImmutablePoint taskLocation = location;
 		ImmutablePoint slotStartLocation = idleSlot.getStartLocation();
@@ -291,68 +303,68 @@ public class TaskPlanner {
 		// apply changes to scheduleAlternative
 		
 		if (!trajToTask.duration().isZero())
-			scheduleAlternative.updateTrajectory(worker, trajToTask);
-		scheduleAlternative.updateTrajectory(worker, trajAtTask);
+			alternative.updateTrajectory(worker, trajToTask);
+		alternative.updateTrajectory(worker, trajAtTask);
 		if (!trajFromTask.duration().isZero())
-			scheduleAlternative.updateTrajectory(worker, trajFromTask);
+			alternative.updateTrajectory(worker, trajFromTask);
 		
-		scheduleAlternative.addTask(task);
+		alternative.addTask(task);
 		
 		return true;
 	}
 
-	private Map<WorkerUnit, ImmutablePolygon> shapeLookUp = new IdentityHashMap<>();
-
-	private void initWorkerObstacles() {
-		workerObstacles.clear();
-		
-		LocalDateTime from = idleSlot.getStartTime();
-		LocalDateTime to = idleSlot.getFinishTime();
-		
-		// TODO make code fancier (a little repetitive right now)
-	
-		// original trajectories
-		for (WorkerUnit w : schedule.getWorkers()) {
-			if (w == worker)
-				continue;
-			
-			for (Trajectory t : w.getTrajectories(from, to))
-				workerObstacles.add(makeWorkerObstacle(w, t));
-		}
-		
-		// alternative trajectories added to schedule
-		for (ScheduleAlternative a : schedule.getAlternatives()) {
-			for (WorkerUnit w : a.getWorkers()) {
-				if (w == worker)
-					continue;
-				
-				for (Trajectory t : a.getTrajectoryUpdates(w))
-					workerObstacles.add(makeWorkerObstacle(w, t));
-			}
-		}
-	
-		// alternative trajectories of current alternative
-		for (WorkerUnit w : scheduleAlternative.getWorkers()) {
-			if (w == worker)
-				continue;
-			
-			for (Trajectory t : scheduleAlternative.getTrajectoryUpdates(w))
-				workerObstacles.add(makeWorkerObstacle(w, t));
-		}
-	}
-
-	private void resetWorkerObstacles() {
-		shapeLookUp.clear();
-	}
-
-	private DynamicObstacle makeWorkerObstacle(WorkerUnit worker, Trajectory trajectory) {
-		double radius = this.worker.getRadius();
-		
-		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(worker, w ->
-			(ImmutablePolygon) immutable(w.getShape().buffer(radius)));
-		
-		return new DynamicObstacle(shape, trajectory);
-	}
+//	private Map<WorkerUnit, ImmutablePolygon> shapeLookUp = new IdentityHashMap<>();
+//
+//	private void initWorkerObstacles() {
+//		workerObstacles.clear();
+//		
+//		LocalDateTime from = idleSlot.getStartTime();
+//		LocalDateTime to = idleSlot.getFinishTime();
+//		
+//		// TODO make code fancier (a little repetitive right now)
+//	
+//		// original trajectories
+//		for (WorkerUnit w : schedule.getWorkers()) {
+//			if (w == worker)
+//				continue;
+//			
+//			for (Trajectory t : w.getTrajectories(from, to))
+//				workerObstacles.add(makeWorkerObstacle(w, t));
+//		}
+//		
+//		// alternative trajectories added to schedule
+//		for (ScheduleAlternative a : schedule.getAlternatives()) {
+//			for (WorkerUnit w : a.getWorkers()) {
+//				if (w == worker)
+//					continue;
+//				
+//				for (Trajectory t : a.getTrajectoryUpdates(w))
+//					workerObstacles.add(makeWorkerObstacle(w, t));
+//			}
+//		}
+//	
+//		// alternative trajectories of current alternative
+//		for (WorkerUnit w : scheduleAlternative.getWorkers()) {
+//			if (w == worker)
+//				continue;
+//			
+//			for (Trajectory t : scheduleAlternative.getTrajectoryUpdates(w))
+//				workerObstacles.add(makeWorkerObstacle(w, t));
+//		}
+//	}
+//
+//	private void resetWorkerObstacles() {
+//		shapeLookUp.clear();
+//	}
+//
+//	private DynamicObstacle makeWorkerObstacle(WorkerUnit worker, Trajectory trajectory) {
+//		double radius = this.worker.getRadius();
+//		
+//		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(worker, w ->
+//			(ImmutablePolygon) immutable(w.getShape().buffer(radius)));
+//		
+//		return new DynamicObstacle(shape, trajectory);
+//	}
 
 	/**
 	 * Calculates the path between to locations.
