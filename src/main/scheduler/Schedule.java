@@ -196,7 +196,7 @@ public class Schedule {
 			IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
 			IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
 			IntervalSet<LocalDateTime> trajIntervals = u.getTrajectoryIntervals();
-			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoriesLock();
+			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoryLock();
 			
 			Collection<Task> tasks = u.getTasks();
 			Collection<Task> removals = u.getTaskRemovals();
@@ -323,7 +323,7 @@ public class Schedule {
 	private void applyLocks(WorkerUnitUpdate update) {
 		WorkerUnitLocks workerLocks = locks.get(update.getWorker());
 		
-		workerLocks.trajectoryLock .add   ( update.getTrajectoriesLock() );
+		workerLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
 		workerLocks.taskRemovalLock.addAll( update.getTaskRemovals()     );
 	}
 	
@@ -335,7 +335,7 @@ public class Schedule {
 	private void releaseLocks(WorkerUnitUpdate update) {
 		WorkerUnitLocks workerLocks = locks.get(update.getWorker());
 		
-		workerLocks.trajectoryLock .remove   ( update.getTrajectoriesLock() );
+		workerLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
 		workerLocks.taskRemovalLock.removeAll( update.getTaskRemovals()     );
 	}
 

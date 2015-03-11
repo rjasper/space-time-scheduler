@@ -1,5 +1,6 @@
 package scheduler;
 
+import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -10,14 +11,19 @@ import static world.factories.PathFactory.*;
 import static world.factories.TrajectoryFactory.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
+import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
+import util.TimeFactory;
 import world.DecomposedTrajectory;
 import world.SimpleTrajectory;
 import world.Trajectory;
@@ -44,6 +50,17 @@ public class WorkerUnitUpdateTest {
 		
 		return new WorkerUnitUpdate(worker);
 	}
+	
+	private static <T> List<T> toList(Collection<T> collection) {
+		return new ArrayList<>(collection);
+	}
+	
+	private static IntervalSet<LocalDateTime> interval(double from, double to) {
+		LocalDateTime fromTime = secondsToTime(from, TimeFactory.BASE_TIME);
+		LocalDateTime toTime = secondsToTime(to, TimeFactory.BASE_TIME);
+		
+		return new SimpleIntervalSet<LocalDateTime>().add(fromTime, toTime);
+	}
 
 	@Test
 	public void testUpdateTrajectory() {
@@ -57,7 +74,7 @@ public class WorkerUnitUpdateTest {
 		SimpleIntervalSet<LocalDateTime> expected = new SimpleIntervalSet<>();
 		expected.add(atSecond(0), atSecond(1));
 		
-		assertThat(update.getTrajectoriesLock(),
+		assertThat(update.getTrajectoryLock(),
 			equalTo(expected));
 	}
 
@@ -83,7 +100,7 @@ public class WorkerUnitUpdateTest {
 		SimpleIntervalSet<LocalDateTime> expected = new SimpleIntervalSet<>();
 		expected.add(atSecond(0), atSecond(1));
 		
-		assertThat(update.getTrajectoriesLock(),
+		assertThat(update.getTrajectoryLock(),
 			equalTo(expected));
 	}
 	
@@ -197,6 +214,82 @@ public class WorkerUnitUpdateTest {
 		update.checkSelfConsistency();
 	}
 	
-	// TODO test cloning
+	@Test
+	public void testCloneIdentical() {
+		WorkerUnitUpdate origin = workerUnitUpdate();
+		WorkerUnit worker = origin.getWorker();
+		WorkerUnitReference ref = worker.getReference();
+
+		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
+		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Task removal = new Task(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		
+		origin.updateTrajectory(traj);
+		origin.addTask(task);
+		origin.addTaskRemoval(removal);
+		
+		WorkerUnitUpdate clone = origin.clone();
+		
+		clone.seal();
+		
+		assertThat("different trajectories",
+			toList(clone.getTrajectories()), equalTo(singletonList(traj)));
+		assertThat("different tasks",
+			clone.getTasks(), equalTo(singleton(task)));
+		assertThat("different removals",
+			clone.getTaskRemovals(), equalTo(singleton(removal)));
+		assertThat("different trajectory lock",
+			clone.getTrajectoryLock(), equalTo(interval(0, 2)));
+		assertThat("different task lock",
+			clone.getTaskLock(), equalTo(interval(1, 2)));
+		assertThat("different removal intervals",
+			clone.getTaskRemovalIntervals(), equalTo(interval(0, 1)));
+	}
+	
+	@Test
+	public void testCloneIndependent() {
+		WorkerUnitUpdate origin = workerUnitUpdate();
+		WorkerUnit worker = origin.getWorker();
+		WorkerUnitReference ref = worker.getReference();
+		
+		WorkerUnitUpdate clone = origin.clone();
+
+		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
+		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Task removal = new Task(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		
+		clone.updateTrajectory(traj);
+		clone.addTask(task);
+		clone.addTaskRemoval(removal);
+		
+		origin.seal();
+		clone.seal();
+		
+		assertThat("different trajectories",
+			toList(origin.getTrajectories()).isEmpty(), is(true));
+		assertThat("different tasks",
+			origin.getTasks().isEmpty(), is(true));
+		assertThat("different removals",
+			origin.getTaskRemovals().isEmpty(), is(true));
+		assertThat("different trajectory lock",
+			origin.getTrajectoryLock().isEmpty(), is(true));
+		assertThat("different task lock",
+			origin.getTaskLock().isEmpty(), is(true));
+		assertThat("different removal intervals",
+			origin.getTaskRemovalIntervals().isEmpty(), is(true));
+		
+		assertThat("different trajectories",
+			toList(clone.getTrajectories()), equalTo(singletonList(traj)));
+		assertThat("different tasks",
+			clone.getTasks(), equalTo(singleton(task)));
+		assertThat("different removals",
+			clone.getTaskRemovals(), equalTo(singleton(removal)));
+		assertThat("different trajectory lock",
+			clone.getTrajectoryLock(), equalTo(interval(0, 2)));
+		assertThat("different task lock",
+			clone.getTaskLock(), equalTo(interval(1, 2)));
+		assertThat("different removal intervals",
+			clone.getTaskRemovalIntervals(), equalTo(interval(0, 1)));
+	}
 
 }

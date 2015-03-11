@@ -51,20 +51,24 @@ public class WorkerUnitUpdate implements Cloneable {
 		return trajectoryContainer.getTrajectories();
 	}
 
-	public Collection<Task> getTasks() {
-		return unmodifiableCollection(tasks);
+	public Set<Task> getTasks() {
+		return unmodifiableSet(tasks);
 	}
 
-	public Collection<Task> getTaskRemovals() {
-		return unmodifiableCollection(taskRemovals);
+	public Set<Task> getTaskRemovals() {
+		return unmodifiableSet(taskRemovals);
 	}
 	
 	public IntervalSet<LocalDateTime> getTrajectoryIntervals() {
 		return trajectoryContainer.getTrajectoryIntervals();
 	}
 
-	public IntervalSet<LocalDateTime> getTrajectoriesLock() {
+	public IntervalSet<LocalDateTime> getTrajectoryLock() {
 		return unmodifiableIntervalSet(trajectoryLock);
+	}
+	
+	public IntervalSet<LocalDateTime> getTaskLock() {
+		return unmodifiableIntervalSet(taskLock);
 	}
 
 	public IntervalSet<LocalDateTime> getTaskRemovalIntervals() {
