@@ -242,7 +242,7 @@ public class Scheduler {
 	 */
 	public ScheduleResult schedule(TaskSpecification specification) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+		SingularTaskPlanner sc = new SingularTaskPlanner();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -262,7 +262,7 @@ public class Scheduler {
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		DependentTaskScheduler sc = new DependentTaskScheduler();
+		DependentTaskPlanner sc = new DependentTaskPlanner();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -282,7 +282,7 @@ public class Scheduler {
 	// TODO test
 	public ScheduleResult schedule(PeriodicTaskSpecification periodicSpec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		PeriodicTaskScheduler sc = new PeriodicTaskScheduler();
+		PeriodicTaskPlanner sc = new PeriodicTaskPlanner();
 
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);

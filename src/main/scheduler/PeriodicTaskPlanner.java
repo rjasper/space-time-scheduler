@@ -15,7 +15,7 @@ import world.WorldPerspectiveCache;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class PeriodicTaskScheduler {
+public class PeriodicTaskPlanner {
 	
 	private World world = null;
 	
@@ -76,9 +76,7 @@ public class PeriodicTaskScheduler {
 	
 	public boolean schedule() {
 		checkParameters();
-
-		Collection<UUID> taskIds = periodicSpec.getTaskIds();
-		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
+		
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
@@ -88,7 +86,20 @@ public class PeriodicTaskScheduler {
 		if (! startTime.plus(period) .isBefore( frozenHorizonTime.plus(duration) ))
 			return false;
 		
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+		if (periodicSpec.isSameLocation())
+			return scheduleSameLocation();
+		else
+			return scheduleIndependentLocation();
+	}
+	
+	private boolean scheduleSameLocation() {
+		Collection<UUID> taskIds = periodicSpec.getTaskIds();
+		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
+		Duration duration = periodicSpec.getDuration();
+		LocalDateTime startTime = periodicSpec.getStartTime();
+		Duration period = periodicSpec.getPeriod();
+		
+		SingularTaskPlanner sc = new SingularTaskPlanner();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -132,6 +143,45 @@ public class PeriodicTaskScheduler {
 		}
 		
 		return false;
+	}
+	
+	private boolean scheduleIndependentLocation() {
+		Collection<UUID> taskIds = periodicSpec.getTaskIds();
+		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
+		Duration duration = periodicSpec.getDuration();
+		LocalDateTime startTime = periodicSpec.getStartTime();
+		Duration period = periodicSpec.getPeriod();
+		
+		SingularTaskPlanner sc = new SingularTaskPlanner();
+		
+		sc.setWorld(world);
+		sc.setPerspectiveCache(perspectiveCache);
+		sc.setFrozenHorizonTime(frozenHorizonTime);
+		sc.setSchedule(schedule);
+		sc.setAlternative(alternative);
+		sc.setMaxLocationPicks(maxLocationPicks);
+
+		LocalDateTime periodStart = startTime;
+		boolean noBreak = true;
+		for (UUID taskId : taskIds) {
+			LocalDateTime periodFinish = periodStart.plus(period);
+			TaskSpecification taskSpec = new TaskSpecification(
+				taskId, immutable(locationSpace), periodStart, periodFinish, duration);
+			
+			sc.setSpecification(taskSpec);
+			
+			boolean status = sc.schedule();
+			
+			if (!status) {
+				noBreak = false;
+				break;
+			}
+			
+			periodStart = periodFinish;
+		}
+
+		// indicates successful scheduling of all tasks
+		return noBreak;
 	}
 
 }

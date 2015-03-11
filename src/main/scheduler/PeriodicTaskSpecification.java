@@ -17,6 +17,8 @@ public final class PeriodicTaskSpecification {
 	private final ImmutableCollection<UUID> taskIds;
 	
 	private final Geometry locationSpace;
+	
+	private final boolean sameLocation;
 
 	private final Duration duration;
 
@@ -27,12 +29,14 @@ public final class PeriodicTaskSpecification {
 	public <G extends Geometry & ImmutableGeometry> PeriodicTaskSpecification(
 		ImmutableCollection<UUID> taskIds,
 		G locationSpace,
+		boolean sameLocation,
 		Duration duration,
 		LocalDateTime startTime,
 		Duration period)
 	{
 		this.taskIds       = CollectionsRequire.requireNonNull(taskIds, "taskIds");
 		this.locationSpace = GeometriesRequire.requireValidSimple2DGeometry(locationSpace, "locationSpace");
+		this.sameLocation  = sameLocation;
 		this.duration      = Objects.requireNonNull(duration, "duration");
 		this.startTime     = Objects.requireNonNull(startTime, "startTime");
 		this.period        = Objects.requireNonNull(period, "period");
@@ -50,6 +54,10 @@ public final class PeriodicTaskSpecification {
 	@SuppressWarnings("unchecked")
 	public <G extends Geometry & ImmutableGeometry> G getLocationSpace() {
 		return (G) locationSpace;
+	}
+
+	public boolean isSameLocation() {
+		return sameLocation;
 	}
 
 	public Duration getDuration() {

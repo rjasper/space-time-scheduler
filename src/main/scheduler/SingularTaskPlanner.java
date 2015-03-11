@@ -21,7 +21,7 @@ import world.World;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
 
-public class SingularTaskScheduler {
+public class SingularTaskPlanner {
 	
 	private World world = null;
 	
