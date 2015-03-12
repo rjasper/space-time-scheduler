@@ -17,21 +17,21 @@ public class ScheduleAlternativeTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
-	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
+	private static final ImmutablePolygon NODE_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
 	
-	private static final double WORKER_SPEED = 1.0;
+	private static final double NODE_SPEED = 1.0;
 	
-	private static Node workerUnit(String workerId, double x, double y) {
+	private static Node node(String nodeId, double x, double y) {
 		NodeSpecification spec = new NodeSpecification(
-			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
+			nodeId, NODE_SHAPE, NODE_SPEED, immutablePoint(x, y), atSecond(0));
 		
 		return new Node(spec);
 	}
 	
 	@Test
 	public void testBranch() {
-		Node w = workerUnit("w1", 0, 0);
+		Node w = node("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
 		Task task = new Task(uuid("task"), w.getReference(),
@@ -66,7 +66,7 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchMerge() {
-		Node w = workerUnit("w1", 0, 0);
+		Node w = node("w1", 0, 0);
 		
 		ScheduleAlternative root = new ScheduleAlternative();
 		ScheduleAlternative branch = root.branch();
@@ -107,7 +107,7 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchDelete() {
-		Node w = workerUnit("w1", 0, 0);
+		Node w = node("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
 		Task task = new Task(uuid("task"), w.getReference(),

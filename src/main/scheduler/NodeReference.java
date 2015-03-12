@@ -23,147 +23,147 @@ import world.Trajectory;
 public class NodeReference  {
 	
 	/**
-	 * The referenced worker.
+	 * The referenced node.
 	 */
-	private final Node worker;
+	private final Node node;
 
 	/**
-	 * Constructs a new {@code NodeReference} of the given worker.
+	 * Constructs a new {@code NodeReference} of the given node.
 	 * 
-	 * @param worker
+	 * @param node
 	 */
-	public NodeReference(Node worker) {
-		this.worker = Objects.requireNonNull(worker, "worker");
+	public NodeReference(Node node) {
+		this.node = Objects.requireNonNull(node, "node");
 	}
 
 	/**
-	 * @return the worker's ID.
+	 * @return the node's ID.
 	 */
 	public String getId() {
-		return worker.getId();
+		return node.getId();
 	}
 	
 	/**
-	 * @return the actual worker.
+	 * @return the actual node.
 	 */
 	Node getActual() {
-		return worker;
+		return node;
 	}
 
 	/**
-	 * @return the physical shape of the worker.
+	 * @return the physical shape of the node.
 	 */
 	public ImmutablePolygon getShape() {
-		return worker.getShape();
+		return node.getShape();
 	}
 
 	/**
-	 * @return the radius of this worker's shape.
+	 * @return the radius of this node's shape.
 	 */
 	public double getRadius() {
-		return worker.getRadius();
+		return node.getRadius();
 	}
 
 	/**
 	 * @return the maximum velocity.
 	 */
 	public double getMaxSpeed() {
-		return worker.getMaxSpeed();
+		return node.getMaxSpeed();
 	}
 
 	/**
-	 * @return the initial location of the worker where it begins to 'exist'.
+	 * @return the initial location of the node where it begins to 'exist'.
 	 */
 	public ImmutablePoint getInitialLocation() {
-		return worker.getInitialLocation();
+		return node.getInitialLocation();
 	}
 
 	/**
-	 * @return the initial time of the worker when it begins to 'exist'.
+	 * @return the initial time of the node when it begins to 'exist'.
 	 */
 	public LocalDateTime getInitialTime() {
-		return worker.getInitialTime();
+		return node.getInitialTime();
 	}
 
 	public boolean hasTask(Task task) {
-		return worker.hasTask(task);
+		return node.hasTask(task);
 	}
 
 	public Collection<Task> getTasks() {
-		return worker.getTasks();
+		return node.getTasks();
 	}
 
 	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
-		return worker.getNavigableTasks();
+		return node.getNavigableTasks();
 	}
 
 	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
-		return worker.getTaskIntervals();
+		return node.getTaskIntervals();
 	}
 
 	public boolean isIdle() {
-		return worker.isIdle();
+		return node.isIdle();
 	}
 
 	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
-		return worker.isIdle(from, to);
+		return node.isIdle(from, to);
 	}
 
 	public Collection<Trajectory> getTrajectories() {
-		return worker.getTrajectories();
+		return node.getTrajectories();
 	}
 
 	public Collection<Trajectory> getTrajectories(LocalDateTime from,
 		LocalDateTime to) {
-		return worker.getTrajectories(from, to);
+		return node.getTrajectories(from, to);
 	}
 
 	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		return worker.interpolateLocation(time);
+		return node.interpolateLocation(time);
 	}
 
 	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
-		return worker.isStationary(from, to);
+		return node.isStationary(from, to);
 	}
 
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
-		return worker.floorIdleTimeOrNull(time);
+		return node.floorIdleTimeOrNull(time);
 	}
 
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
-		return worker.ceilingIdleTimeOrNull(time);
+		return node.ceilingIdleTimeOrNull(time);
 	}
 
 	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
-		return worker.idleSlots(from, to);
+		return node.idleSlots(from, to);
 	}
 
 	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
-		return worker.calcTaskDuration(from, to);
+		return node.calcTaskDuration(from, to);
 	}
 
 	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
-		return worker.calcMotionDuration(from, to);
+		return node.calcMotionDuration(from, to);
 	}
 
 	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
-		return worker.calcTaskLoad(from, to);
+		return node.calcTaskLoad(from, to);
 	}
 
 	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
-		return worker.calcMotionLoad(from, to);
+		return node.calcMotionLoad(from, to);
 	}
 
 	public double calcLoad(LocalDateTime from, LocalDateTime to) {
-		return worker.calcLoad(from, to);
+		return node.calcLoad(from, to);
 	}
 
 	public double calcStationaryIdleLoad(LocalDateTime from, LocalDateTime to) {
-		return worker.calcStationaryIdleLoad(from, to);
+		return node.calcStationaryIdleLoad(from, to);
 	}
 
 	public double calcVelocityLoad(LocalDateTime from, LocalDateTime to) {
-		return worker.calcVelocityLoad(from, to);
+		return node.calcVelocityLoad(from, to);
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class NodeReference  {
 	 * @return the merged trajectory.
 	 */
 	public Trajectory calcTrajectory() {
-		return worker.calcTrajectory();
+		return node.calcTrajectory();
 	}
 
 	/*
@@ -181,7 +181,7 @@ public class NodeReference  {
 	 */
 	@Override
 	public String toString() {
-		return worker.toString();
+		return node.toString();
 	}
 	
 }

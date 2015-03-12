@@ -20,8 +20,8 @@ import com.vividsolutions.jts.geom.Point;
 
 // TODO document
 /**
- * A NodeSlotIterator iterates over all idle slots of workers which
- * satisfy the given specifications of a task. To satisfy means that a worker is
+ * A NodeSlotIterator iterates over all idle slots of nodes which
+ * satisfy the given specifications of a task. To satisfy means that a node is
  * capable to reach the task location while driving at maximum speed without
  * violating any time specification of the new task or other tasks. The
  * avoidance of obstacles are not considered.
@@ -31,14 +31,14 @@ import com.vividsolutions.jts.geom.Point;
 public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 
 	/**
-	 * Helper class to pair a worker and one of its idle slots.
+	 * Helper class to pair a node and one of its idle slots.
 	 */
 	public static class NodeSlot {
 
 		/**
-		 * The worker of the idle slot.
+		 * The node of the idle slot.
 		 */
-		private final Node workerUnit;
+		private final Node node;
 
 		/**
 		 * The idle slot.
@@ -46,21 +46,21 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		private final IdleSlot idleSlot;
 
 		/**
-		 * Pairs an idle slot with its worker.
+		 * Pairs an idle slot with its node.
 		 *
-		 * @param workerUnit
+		 * @param node
 		 * @param idleSlot
 		 */
-		public NodeSlot(Node workerUnit, IdleSlot idleSlot) {
-			this.workerUnit = workerUnit;
+		public NodeSlot(Node node, IdleSlot idleSlot) {
+			this.node = node;
 			this.idleSlot = idleSlot;
 		}
 
 		/**
-		 * @return the worker of the idle slot.
+		 * @return the node of the idle slot.
 		 */
 		public Node getNode() {
-			return workerUnit;
+			return node;
 		}
 
 		/**
@@ -95,19 +95,19 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	private final Duration duration;
 
 	/**
-	 * An iterator over the workers to be considered.
+	 * An iterator over the nodes to be considered.
 	 */
-	private Iterator<Node> workerIterator;
+	private Iterator<Node> nodeIterator;
 
 	/**
-	 * An iterator over the idle slots of the current worker.
+	 * An iterator over the idle slots of the current node.
 	 */
 	private Iterator<IdleSlot> slotIterator;
 
 	/**
-	 * The next worker to be returned as current worker.
+	 * The next node to be returned as current node.
 	 */
-	private Node nextWorker = null;
+	private Node nextNode = null;
 
 	/**
 	 * The next slot to be returned as current slot.
@@ -115,9 +115,9 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	private IdleSlot nextSlot = null;
 
 	/**
-	 * The current worker of the iteration.
+	 * The current node of the iteration.
 	 */
-	private Node currentWorker = null;
+	private Node currentNode = null;
 
 	/**
 	 * The current slot of the iteration.
@@ -126,9 +126,9 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 
 	/**
 	 * Constructs a NodeSlotIterator which iterates over the given set of
-	 * workers to while checking against the given task specifications.
+	 * nodes to while checking against the given task specifications.
 	 *
-	 * @param workers the worker pool to check
+	 * @param nodes the node pool to check
 	 * @param location of the task
 	 * @param earliestStartTime the earliest time to begin the task execution
 	 * @param latestStartTime the latest time to begin the task execution
@@ -143,14 +143,14 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	 * </ul>
 	 */
 	public NodeSlotIterator(
-		Iterable<Node> workers,
+		Iterable<Node> nodes,
 		LocalDateTime frozenHorizonTime,
 		Point location,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		Objects.requireNonNull(workers, "workers");
+		Objects.requireNonNull(nodes, "nodes");
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizon");
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
@@ -164,32 +164,32 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		if (duration.isNegative())
 			throw new IllegalArgumentException("duration is negative");
 
-		this.workerIterator = workers.iterator();
+		this.nodeIterator = nodes.iterator();
 		this.frozenHorizonTime = frozenHorizonTime;
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
 		this.duration = duration;
 
-		// The next worker and idle slot pair is calculated before they are
+		// The next node and idle slot pair is calculated before they are
 		// requested. This enables an easy check whether or not there is a next
 		// pair.
 		if (!frozenHorizonTime.isAfter(latestStartTime)) {
-			nextWorker();
+			nextNode();
 			nextSlot();
 		}
 	}
 
 	@Override
 	public boolean hasNext() {
-		return nextWorker != null;
+		return nextNode != null;
 	}
 
 	/**
-	 * @return the current worker of the iteration.
+	 * @return the current node of the iteration.
 	 */
-	public Node getCurrentWorker() {
-		return currentWorker;
+	public Node getCurrentNode() {
+		return currentNode;
 	}
 
 	/**
@@ -199,8 +199,8 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		return currentSlot;
 	}
 	
-	private LocalDateTime earliestStartTime(Node worker) {
-		return max(earliestStartTime, frozenHorizonTime, worker.getInitialTime());
+	private LocalDateTime earliestStartTime(Node node) {
+		return max(earliestStartTime, frozenHorizonTime, node.getInitialTime());
 	}
 	
 	private LocalDateTime latestStartTime() {
@@ -216,39 +216,39 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		if (!hasNext())
 			throw new NoSuchElementException();
 		
-		currentWorker = nextWorker;
+		currentNode = nextNode;
 		currentSlot = nextSlot;
 
 		nextSlot();
 
-		return new NodeSlot(getCurrentWorker(), getCurrentSlot());
+		return new NodeSlot(getCurrentNode(), getCurrentSlot());
 	}
 
 	/**
-	 * Determines the next worker of the iteration.
+	 * Determines the next node of the iteration.
 	 *
-	 * @return the next worker.
+	 * @return the next node.
 	 */
-	private Node nextWorker() {
-		// sets the next worker and initializes an new idle slot iterator
+	private Node nextNode() {
+		// sets the next node and initializes an new idle slot iterator
 
-		Node worker;
+		Node node;
 		LocalDateTime from, to;
 		do {
-			if (!workerIterator.hasNext()) {
-				worker = null;
+			if (!nodeIterator.hasNext()) {
+				node = null;
 				from = null;
 				to = null;
 				
 				break;
 			}
 			
-			worker = workerIterator.next();
+			node = nodeIterator.next();
 			
-			LocalDateTime earliest = earliestStartTime(worker);
+			LocalDateTime earliest = earliestStartTime(node);
 			LocalDateTime latest = latestStartTime();
-			LocalDateTime floorIdle = worker.floorIdleTimeOrNull(earliest);
-			LocalDateTime ceilIdle = worker.ceilingIdleTimeOrNull(latest);
+			LocalDateTime floorIdle = node.floorIdleTimeOrNull(earliest);
+			LocalDateTime ceilIdle = node.ceilingIdleTimeOrNull(latest);
 			
 			from = max(
 				floorIdle != null ? floorIdle : earliest,
@@ -256,14 +256,14 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 			to = ceilIdle  != null ? ceilIdle  : latest;
 		} while (from.isAfter(to));
 		
-		Collection<IdleSlot> slots = worker == null // indicates loop break
+		Collection<IdleSlot> slots = node == null // indicates loop break
 			? emptyList()
-			: worker.idleSlots(from, to);
+			: node.idleSlots(from, to);
 
-		nextWorker = worker;
+		nextNode = node;
 		slotIterator = slots.iterator();
 
-		return worker;
+		return node;
 	}
 
 	/**
@@ -272,22 +272,22 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	 * @return the next idle slot.
 	 */
 	private IdleSlot nextSlot() {
-		Node worker = nextWorker;
+		Node node = nextNode;
 		IdleSlot slot = null;
 
-		// iterates over the remaining idle slots of the remaining workers
+		// iterates over the remaining idle slots of the remaining nodes
 		// until a valid slot was found
-		while (workerIterator.hasNext() || slotIterator.hasNext()) {
-			// if there are no more idle slots of the current worker
+		while (nodeIterator.hasNext() || slotIterator.hasNext()) {
+			// if there are no more idle slots of the current node
 			// then get the next one
 			if (!slotIterator.hasNext()) {
-				worker = nextWorker();
+				node = nextNode();
 			// otherwise check the next idle slot
 			} else {
 				IdleSlot candidate = slotIterator.next();
 
 				// break if the current idle slot is accepted
-				if (check(worker, candidate)) {
+				if (check(node, candidate)) {
 					slot = candidate;
 					break;
 				}
@@ -296,8 +296,8 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 
 		// if there are no more valid idle slots
 		if (slot == null)
-			// #hasNext checks if #nextWorker is null
-			nextWorker = null;
+			// #hasNext checks if #nextNode is null
+			nextNode = null;
 
 		nextSlot = slot;
 
@@ -305,17 +305,17 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	}
 
 	/**
-	 * Checks if a worker is able during a given idle slot to drive to a task
+	 * Checks if a node is able during a given idle slot to drive to a task
 	 * location without violating any time constraints of the new task or
 	 * the next task. It does not considers the presence of any obstacles to
 	 * avoid.
 	 *
-	 * @param worker
+	 * @param node
 	 * @param slot
-	 * @return {@code true} iff worker can potentially execute the task in time.
+	 * @return {@code true} iff node can potentially execute the task in time.
 	 */
-	private boolean check(Node worker, IdleSlot slot) {
-		double vInv = 1. / worker.getMaxSpeed();
+	private boolean check(Node node, IdleSlot slot) {
+		double vInv = 1. / node.getMaxSpeed();
 		LocalDateTime t1 = slot.getStartTime();
 		LocalDateTime t2 = slot.getFinishTime();
 		Point p1 = slot.getStartLocation();
@@ -332,7 +332,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		}
 		// task can be finished in time
 		// t2 - t_min < l2 / v_max + d
-		if (Duration.between(earliestStartTime(worker), t2).compareTo(
+		if (Duration.between(earliestStartTime(node), t2).compareTo(
 			secondsToDuration(vInv * l2).plus(duration)) < 0)
 		{
 			return false;

@@ -15,7 +15,7 @@ import world.DynamicObstacle;
 public class NodeCollidesWithDynamicObstacles extends MapMatcher<Node, DynamicObstacle> {
 	
 	@Factory
-	public static Matcher<Node> workerCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
+	public static Matcher<Node> nodeCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
 		return new NodeCollidesWithDynamicObstacles(obstacles);
 	}
 	
@@ -31,7 +31,7 @@ public class NodeCollidesWithDynamicObstacles extends MapMatcher<Node, DynamicOb
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("a worker colliding with ")
+			.appendText("a node colliding with ")
 			.appendValue(obstacles);
 	}
 

@@ -39,7 +39,7 @@ public class TaskRemovalPlanner {
 	
 	private boolean fixedEnd = true;
 	
-	private transient Node worker;
+	private transient Node node;
 	
 	private transient LocalDateTime slotStartTime;
 	
@@ -98,12 +98,12 @@ public class TaskRemovalPlanner {
 	}
 	
 	private void init() {
-		worker = task.getWorkerReference().getActual();
+		node = task.getNodeReference().getActual();
 		
 		LocalDateTime taskStartTime = task.getStartTime();
 		LocalDateTime taskFinishTime = task.getFinishTime();
-		LocalDateTime idleStartTime = worker.floorIdleTimeOrNull(taskStartTime);
-		LocalDateTime idleFinishTime = worker.ceilingIdleTimeOrNull(taskFinishTime);
+		LocalDateTime idleStartTime = node.floorIdleTimeOrNull(taskStartTime);
+		LocalDateTime idleFinishTime = node.ceilingIdleTimeOrNull(taskFinishTime);
 		
 		slotStartTime = max(
 			frozenHorizonTime,
@@ -112,7 +112,7 @@ public class TaskRemovalPlanner {
 		
 		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
-		builder.setWorker(worker);
+		builder.setNode(node);
 		builder.setStartTime(slotStartTime);
 		builder.setFinishTime(slotFinishTime);
 		builder.setSchedule(schedule);
@@ -120,22 +120,22 @@ public class TaskRemovalPlanner {
 		
 		Collection<DynamicObstacle>
 			worldObstacles = worldPerspective.getView().getDynamicObstacles(),
-			workerObstacles = builder.build();
+			nodeObstacles = builder.build();
 		
-		dynamicObstacles = JoinedCollection.of(worldObstacles, workerObstacles);
+		dynamicObstacles = JoinedCollection.of(worldObstacles, nodeObstacles);
 	}
 
 	private void cleanUp() {
-		worker = null;
+		node = null;
 		dynamicObstacles = null;
 		slotStartTime = null;
 		slotFinishTime = null;
 	}
 	
 	private boolean planImpl() {
-		ImmutablePoint startLocation = worker.interpolateLocation(slotStartTime);
+		ImmutablePoint startLocation = node.interpolateLocation(slotStartTime);
 		ImmutablePoint finishLocation = fixedEnd
-			? worker.interpolateLocation(slotFinishTime)
+			? node.interpolateLocation(slotFinishTime)
 			: null;
 		
 		Trajectory trajectory = fixedEnd
@@ -145,7 +145,7 @@ public class TaskRemovalPlanner {
 		if (trajectory.isEmpty())
 			return false;
 		
-		alternative.updateTrajectory(worker, trajectory);
+		alternative.updateTrajectory(node, trajectory);
 		alternative.addTaskRemoval(task);
 		
 		return true;
@@ -199,7 +199,7 @@ public class TaskRemovalPlanner {
 		vpf.setFinishArc       ( spatialPath.length() );
 		vpf.setMinArc          ( 0.0                  );
 		vpf.setMaxArc          ( spatialPath.length() );
-		vpf.setMaxSpeed        ( worker.getMaxSpeed() );
+		vpf.setMaxSpeed        ( node.getMaxSpeed() );
 		vpf.setStartTime       ( startTime            );
 		vpf.setFinishTime      ( finishTime           );
 		

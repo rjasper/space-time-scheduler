@@ -12,18 +12,18 @@
 //import world.Trajectory;
 //
 ///**
-// * <p>A {@code NodeObstacle} is a path section of a worker represented as a
-// * dynamic obstacle. A worker typically has multiple path sections which form
-// * the entire path the worker follows. Ordinarily one section connects two
-// * locations in time which a worker has to visit. The path between those
+// * <p>A {@code NodeObstacle} is a path section of a node represented as a
+// * dynamic obstacle. A node typically has multiple path sections which form
+// * the entire path the node follows. Ordinarily one section connects two
+// * locations in time which a node has to visit. The path between those
 // * locations is interchangeable. This enables to replace singular sections due
 // * to task planning.</p>
 // *
-// * <p>Another property of a {@code NodeObstacle} are evasions. Workers
-// * might need to evade another worker to avoid collisions. When a worker changes
+// * <p>Another property of a {@code NodeObstacle} are evasions. Nodes
+// * might need to evade another node to avoid collisions. When a node changes
 // * one of its sections due to task planning a previous evasion might become
 // * obsolete. A {@code NodeObstacle} provides the functionality to register
-// * the path section of the worker which was evading this one. This enables to
+// * the path section of the node which was evading this one. This enables to
 // * detect any obsolete evasions for further actions.</p>
 // *
 // * @author Rico
@@ -31,12 +31,12 @@
 //public abstract class NodeObstacle extends DynamicObstacle {
 //
 //	/**
-//	 * The worker unit represented as an obstacle.
+//	 * The node unit represented as an obstacle.
 //	 */
-//	private final Node workerUnit;
+//	private final Node node;
 //
 //	/**
-//	 * Stores the path sections of worker which where evading this one.
+//	 * Stores the path sections of node which where evading this one.
 //	 */
 //	private final Set<MovingNodeObstacle> evaders = new HashSet<>();
 //
@@ -46,45 +46,45 @@
 //	private final Set<MovingNodeObstacle> unmodifiableEvaders = unmodifiableSet(evaders);
 //
 //	/**
-//	 * Creates a new {@code NodeObstacle} for the given worker along the
+//	 * Creates a new {@code NodeObstacle} for the given node along the
 //	 * trajectory.
 //	 *
-//	 * @param worker
+//	 * @param node
 //	 * @param trajectory
 //	 * @throws NullPointerException
 //	 *             if any argument is {@code null}.
 //	 * @throws IllegalArgumentException
 //	 *             if the trajectory is empty.
 //	 */
-//	public NodeObstacle(Node worker, Trajectory trajectory) {
-//		// retrieveShape throws NullPointerException if worker is null
-//		super(retrieveShape(worker), trajectory);
+//	public NodeObstacle(Node node, Trajectory trajectory) {
+//		// retrieveShape throws NullPointerException if node is null
+//		super(retrieveShape(node), trajectory);
 //
-//		this.workerUnit = worker;
+//		this.node = node;
 //	}
 //
 //	/**
-//	 * Returns the worker's shape.
+//	 * Returns the node's shape.
 //	 *
-//	 * @param worker
+//	 * @param node
 //	 * @return the shape.
-//	 * @throws NullPointerException if the worker is {@code null}.
+//	 * @throws NullPointerException if the node is {@code null}.
 //	 */
-//	private static ImmutablePolygon retrieveShape(Node worker) {
-//		Objects.requireNonNull(worker, "worker");
+//	private static ImmutablePolygon retrieveShape(Node node) {
+//		Objects.requireNonNull(node, "node");
 //
-//		return worker.getShape();
+//		return node.getShape();
 //	}
 //
 //	/**
-//	 * @return the worker unit represented by this obstacle.
+//	 * @return the node unit represented by this obstacle.
 //	 */
 //	public Node getNode() {
-//		return workerUnit;
+//		return node;
 //	}
 //
 //	/**
-//	 * @return other worker's path sections which had to evade this obstacle.
+//	 * @return other node's path sections which had to evade this obstacle.
 //	 */
 //	public Set<MovingNodeObstacle> getEvaders() {
 //		return unmodifiableEvaders;

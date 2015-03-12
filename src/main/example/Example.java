@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import scheduler.NodeReference;
+import scheduler.NodeSpecification;
 import scheduler.ScheduleResult;
 import scheduler.Scheduler;
 import scheduler.TaskSpecification;
-import scheduler.NodeReference;
-import scheduler.NodeSpecification;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -65,26 +65,26 @@ public final class Example {
 			new DynamicObstacle(dynamicObstacleShape, dynamicObstacleTrajectory);
 		// world actual
 		World world = new World(ImmutableList.of(staticObstacle), ImmutableList.of(dynamicObstacle));
-		// worker for scheduler
-		// for worker
-		ImmutablePolygon workerShape = immutablePolygon(
+		// node for scheduler
+		// for node
+		ImmutablePolygon nodeShape = immutablePolygon(
 			-0.5, -0.5,
 			+0.5, -0.5,
 			+0.5, +0.5,
 			-0.5, +0.5,
 			-0.5, -0.5);
-		// for worker
+		// for node
 		double maxSpeed = 1.0; // m/s
-		// for worker
+		// for node
 		ImmutablePoint initialLocation = immutablePoint(2.5, 2.5);
-		// for worker
+		// for node
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 0, 0); // 1/1/2015 12:00 AM
-		// worker actual
-		NodeSpecification workerSpec =
-			new NodeSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
+		// node actual
+		NodeSpecification nodeSpec =
+			new NodeSpecification("node-id", nodeShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
 		Scheduler scheduler = new Scheduler(world);
-		NodeReference workerRef = scheduler.addWorker(workerSpec);
+		NodeReference nodeRef = scheduler.addNode(nodeSpec);
 		
 		// specification
 		// for specification
@@ -105,7 +105,7 @@ public final class Example {
 		scheduler.commit(result.getTransactionId());
 		
 		System.out.println(result);
-		System.out.println(workerRef.calcTrajectory());
+		System.out.println(nodeRef.calcTrajectory());
 	}
 
 }

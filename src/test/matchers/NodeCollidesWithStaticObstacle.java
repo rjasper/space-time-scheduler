@@ -17,7 +17,7 @@ import com.vividsolutions.jts.geom.IntersectionMatrix;
 public class NodeCollidesWithStaticObstacle extends TypeSafeMatcher<Node> {
 	
 	@Factory
-	public static Matcher<Node> workerCollideWith(StaticObstacle obstacle) {
+	public static Matcher<Node> nodeCollideWith(StaticObstacle obstacle) {
 		return new NodeCollidesWithStaticObstacle(obstacle);
 	}
 	
@@ -30,7 +30,7 @@ public class NodeCollidesWithStaticObstacle extends TypeSafeMatcher<Node> {
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("a worker colliding with ")
+			.appendText("a node colliding with ")
 			.appendValue(obstacle);
 	}
 

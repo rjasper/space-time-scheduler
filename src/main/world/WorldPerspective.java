@@ -5,11 +5,11 @@ import java.util.Objects;
 import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
- * A {@code WorldPerspective} describes the view of a worker unit on the world.
- * Worker units perceive the world differently than it is for itself. The reason
- * is the worker units' individual shape which is reduced to a point. To ensure
+ * A {@code WorldPerspective} describes the view of a node unit on the world.
+ * Node units perceive the world differently than it is for itself. The reason
+ * is the node units' individual shape which is reduced to a point. To ensure
  * collision avoidance the world needs to be buffered by the extend of the
- * worker's shape. This enables an easier implementation of navigating through
+ * node's shape. This enables an easier implementation of navigating through
  * the world.
  * 
  * @author Rico

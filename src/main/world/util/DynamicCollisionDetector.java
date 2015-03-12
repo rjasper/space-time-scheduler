@@ -38,7 +38,7 @@ public class DynamicCollisionDetector {
 	}
 
 	public boolean collides() {
-		// checks if the arc time trace of the worker intersects with any
+		// checks if the arc time trace of the node intersects with any
 		// forbidden region
 		
 		LocalDateTime baseTime = trajectory.getStartTime();

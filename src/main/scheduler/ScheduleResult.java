@@ -26,11 +26,11 @@ public class ScheduleResult {
 		
 		private final Trajectory trajectory;
 		
-		private final NodeReference workerRef;
+		private final NodeReference nodeRef;
 
-		public TrajectoryUpdate(Trajectory trajectory, NodeReference workerRef) {
+		public TrajectoryUpdate(Trajectory trajectory, NodeReference nodeRef) {
 			this.trajectory = Objects.requireNonNull(trajectory, "trajectory");
-			this.workerRef  = Objects.requireNonNull(workerRef , "workerRef" );
+			this.nodeRef  = Objects.requireNonNull(nodeRef , "nodeRef" );
 		}
 
 		/**
@@ -41,10 +41,10 @@ public class ScheduleResult {
 		}
 
 		/**
-		 * @return the worker reference whose trajectory was changed.
+		 * @return the node reference whose trajectory was changed.
 		 */
-		public NodeReference getWorkerRef() {
-			return workerRef;
+		public NodeReference getNodeRef() {
+			return nodeRef;
 		}
 		
 		/*
@@ -54,7 +54,7 @@ public class ScheduleResult {
 		@Override
 		public String toString() {
 			return String.format("%s:%s",
-				workerRef, trajectory);
+				nodeRef, trajectory);
 		}
 	}
 	

@@ -7,7 +7,7 @@ import scheduler.Node;
 import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
- * Caches the perspectives of multiple worker units and takes advantage of
+ * Caches the perspectives of multiple node units and takes advantage of
  * similar perspective by reusing existing ones.
  * 
  * @author Rico

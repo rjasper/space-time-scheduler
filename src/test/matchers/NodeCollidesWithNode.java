@@ -15,29 +15,29 @@ import world.DynamicObstacle;
 public class NodeCollidesWithNode extends NodeCollidesWithDynamicObstacles {
 	
 	@Factory
-	public static Matcher<Node> workerCollidesWith(Node worker) {
-		return new NodeCollidesWithNode(worker);
+	public static Matcher<Node> nodeCollidesWith(Node node) {
+		return new NodeCollidesWithNode(node);
 	}
 	
-	private final Node worker;
+	private final Node node;
 	
-	public NodeCollidesWithNode(Node worker) {
-		super(makeObstacles(worker));
+	public NodeCollidesWithNode(Node node) {
+		super(makeObstacles(node));
 		
-		this.worker = Objects.requireNonNull(worker, "worker");
+		this.node = Objects.requireNonNull(node, "node");
 	}
 
-	private static Collection<? extends DynamicObstacle> makeObstacles(Node worker) {
-		return worker.getTrajectories().stream()
-			.map(t -> new DynamicObstacle(worker.getShape(), t))
+	private static Collection<? extends DynamicObstacle> makeObstacles(Node node) {
+		return node.getTrajectories().stream()
+			.map(t -> new DynamicObstacle(node.getShape(), t))
 			.collect(toList());
 	}
 
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("a worker colliding with ")
-			.appendValue(worker);
+			.appendText("a node colliding with ")
+			.appendValue(node);
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class NodeCollidesWithNode extends NodeCollidesWithDynamicObstacles {
 		mismatchDescription
 			.appendValue(item)
 			.appendText(" is not colliding with ")
-			.appendValue(worker);
+			.appendValue(node);
 	}
 	
 }

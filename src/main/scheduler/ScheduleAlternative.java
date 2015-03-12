@@ -35,7 +35,7 @@ public class ScheduleAlternative {
 		
 		parent.updates.values().stream()
 			.map(NodeUpdate::clone)
-			.forEach(u -> this.updates.put(u.getWorker(), u));
+			.forEach(u -> this.updates.put(u.getNode(), u));
 		
 		this.tasks.putAll(parent.tasks);
 	}
@@ -67,11 +67,11 @@ public class ScheduleAlternative {
 		return updates.isEmpty();
 	}
 	
-	public boolean updatesWorker(Node worker) {
+	public boolean updatesNode(Node node) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
-		return updates.containsKey(worker);
+		return updates.containsKey(node);
 	}
 
 	public Collection<NodeUpdate> getUpdates() {
@@ -83,16 +83,16 @@ public class ScheduleAlternative {
 		return unmodifiableCollection(updates.values());
 	}
 	
-	public NodeUpdate popUpdate(Node worker) {
+	public NodeUpdate popUpdate(Node node) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		if (!isSealed())
 			throw new IllegalStateException("alternative not sealed");
 		
-		NodeUpdate update = updates.remove(worker);
+		NodeUpdate update = updates.remove(node);
 		
 		if (update == null)
-			throw new IllegalArgumentException("unknown worker");
+			throw new IllegalArgumentException("unknown node");
 		
 		for (Task t : update.getTasks())
 			tasks.remove(t.getId());
@@ -100,33 +100,33 @@ public class ScheduleAlternative {
 		return update;
 	}
 	
-	private NodeUpdate getUpdate(Node worker) {
-		return updates.computeIfAbsent(worker, NodeUpdate::new);
+	private NodeUpdate getUpdate(Node node) {
+		return updates.computeIfAbsent(node, NodeUpdate::new);
 	}
 
-	public void updateTrajectory(Node worker, Trajectory trajectory) {
-		Objects.requireNonNull(worker, "worker");
+	public void updateTrajectory(Node node, Trajectory trajectory) {
+		Objects.requireNonNull(node, "node");
 		Objects.requireNonNull(trajectory, "trajectory");
 
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		getUpdate(worker).updateTrajectory(trajectory);
+		getUpdate(node).updateTrajectory(trajectory);
 	}
 	
-	public Collection<Node> getWorkers() {
+	public Collection<Node> getNodes() {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
 		return unmodifiableCollection(updates.keySet());
 	}
 	
-	public Collection<Trajectory> getTrajectoryUpdates(Node worker) {
+	public Collection<Trajectory> getTrajectoryUpdates(Node node) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
-		return updatesWorker(worker)
-			? getUpdate(worker).getTrajectories()
+		return updatesNode(node)
+			? getUpdate(node).getTrajectories()
 			: emptyList();
 	}
 	
@@ -148,7 +148,7 @@ public class ScheduleAlternative {
 			throw new IllegalStateException("alternative is unmodifiable");
 		
 		tasks.put(task.getId(), task);
-		getUpdate(task.getWorkerReference().getActual())
+		getUpdate(task.getNodeReference().getActual())
 			.addTask(task);
 	}
 	
@@ -158,7 +158,7 @@ public class ScheduleAlternative {
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		getUpdate(task.getWorkerReference().getActual())
+		getUpdate(task.getNodeReference().getActual())
 			.addTaskRemoval(task);
 	}
 	

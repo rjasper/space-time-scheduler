@@ -16,7 +16,7 @@
 //
 ///**
 // * A {@code MovingNodeObstacle} represents a non-stationary path segment
-// * of a worker. The goal of any moving worker is always a task. The trajectory
+// * of a node. The goal of any moving node is always a task. The trajectory
 // * is always decomposed.
 // * 
 // * @author Rico
@@ -39,10 +39,10 @@
 //	private final Set<NodeObstacle> unmodifiableEvadees = unmodifiableSet(evadees);
 //	
 //	/**
-//	 * Constructs a new {@code MovingNodeObstacle} of a worker along a
+//	 * Constructs a new {@code MovingNodeObstacle} of a node along a
 //	 * trajectory leading to the task.
 //	 * 
-//	 * @param worker
+//	 * @param node
 //	 * @param trajectory
 //	 * @param goal
 //	 * @throws NullPointerException
@@ -54,9 +54,9 @@
 //	 *             <li>The trajectory does not lead to the goal.</li>
 //	 *             </ul>
 //	 */
-//	public MovingNodeObstacle(Node worker, DecomposedTrajectory trajectory, Task goal) {
+//	public MovingNodeObstacle(Node node, DecomposedTrajectory trajectory, Task goal) {
 //		// throws NullPointerException and IllegalArgumentException
-//		super(worker, trajectory);
+//		super(node, trajectory);
 //		
 //		this.goal = Objects.requireNonNull(goal, "goal");
 //		
@@ -87,7 +87,7 @@
 //	}
 //	
 //	/**
-//	 * @return the goal which the worker is moving to.
+//	 * @return the goal which the node is moving to.
 //	 */
 //	public Task getGoal() {
 //		return goal;
@@ -110,7 +110,7 @@
 //	}
 //
 //	/**
-//	 * @return other worker's path sections which were evaded by this obstacle.
+//	 * @return other node's path sections which were evaded by this obstacle.
 //	 */
 //	public Set<NodeObstacle> getEvadees() {
 //		return unmodifiableEvadees;

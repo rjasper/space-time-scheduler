@@ -14,28 +14,28 @@
 //
 ///**
 // * An {@code OccupiedNodeObstacle} represents the stationary path segment
-// * of a worker being occupied with a task.
+// * of a node being occupied with a task.
 // * 
 // * @author Rico
 // */
 //public class OccupiedNodeObstacle extends NodeObstacle {
 //
 //	/**
-//	 * The task the worker is occupied with.
+//	 * The task the node is occupied with.
 //	 */
 //	private final Task occupation;
 //
 //	/**
-//	 * Constructs a new {@code OccupiedNodeObstacle} of the worker having
+//	 * Constructs a new {@code OccupiedNodeObstacle} of the node having
 //	 * an occupation.
 //	 * 
-//	 * @param worker
+//	 * @param node
 //	 * @param occupation
 //	 * @throws NullPointerException if any argument is {@code null}.
 //	 */
-//	public OccupiedNodeObstacle(Node worker, Task occupation) {
+//	public OccupiedNodeObstacle(Node node, Task occupation) {
 //		// throws NullPointerException
-//		super(worker, buildTrajectory(occupation));
+//		super(node, buildTrajectory(occupation));
 //		
 //		Objects.requireNonNull(occupation, "occupation");
 //
@@ -43,7 +43,7 @@
 //	}
 //
 //	/**
-//	 * Builds the stationary trajectory of the worker during its occupation.
+//	 * Builds the stationary trajectory of the node during its occupation.
 //	 * 
 //	 * @param occupation
 //	 * @return the trajectory.
@@ -62,7 +62,7 @@
 //	}
 //
 //	/**
-//	 * @return the occupation of the worker.
+//	 * @return the occupation of the node.
 //	 */
 //	public Task getOccupation() {
 //		return occupation;

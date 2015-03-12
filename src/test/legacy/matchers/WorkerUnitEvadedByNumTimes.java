@@ -27,7 +27,7 @@ package legacy.matchers;
 //	@Override
 //	public void describeTo(Description description) {
 //		description
-//			.appendText("a worker evaded by ")
+//			.appendText("a node evaded by ")
 //			.appendValue(operand)
 //			.appendText(" ")
 //			.appendValue(expectedTimes)

@@ -13,7 +13,7 @@ import util.NameProvider;
 /**
  * <p>A Task represents the smallest assignment of a {@link Node} that the
  * {@link Scheduler} can manage. Each task is assigned to exactly one
- * worker.</p>
+ * node.</p>
  *
  * <p>An object of this class stores the location, start time, finish time, and
  * duration of the execution of the task.</p>
@@ -28,9 +28,9 @@ public class Task {
 	private final UUID id;
 	
 	/**
-	 * The worker assigned to this task.
+	 * The node assigned to this task.
 	 */
-	private final NodeReference assignedWorker;
+	private final NodeReference assignedNode;
 
 	/**
 	 * The location where the task is executed.
@@ -57,7 +57,7 @@ public class Task {
 	 * and duration.
 	 * 
 	 * @param id
-	 * @param assignedWorker
+	 * @param assignedNode
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
@@ -75,13 +75,13 @@ public class Task {
 	 */
 	public Task(
 		UUID id,
-		NodeReference assignedWorker,
+		NodeReference assignedNode,
 		ImmutablePoint location,
 		LocalDateTime startTime,
 		Duration duration)
 	{
 		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(assignedWorker, "assignedWorker");
+		Objects.requireNonNull(assignedNode, "assignedNode");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(duration, "duration");
 		GeometriesRequire.requireValid2DPoint(location, "location");
@@ -90,7 +90,7 @@ public class Task {
 			throw new IllegalArgumentException("invalid duration");
 
 		this.id = id;
-		this.assignedWorker = assignedWorker;
+		this.assignedNode = assignedNode;
 		this.location = location;
 		this.startTime = startTime;
 		this.finishTime = startTime.plus(duration);
@@ -105,10 +105,10 @@ public class Task {
 	}
 
 	/**
-	 * @return the assigned worker.
+	 * @return the assigned node.
 	 */
-	public NodeReference getWorkerReference() {
-		return assignedWorker;
+	public NodeReference getNodeReference() {
+		return assignedNode;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class Task {
 	public String toString() {
 		// lazy evaluation
 		Supplier<String> defaultString = () -> String.format("%s:(%s, %s, %s)",
-			getWorkerReference(), getLocation(), getStartTime(), getFinishTime());
+			getNodeReference(), getLocation(), getStartTime(), getFinishTime());
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

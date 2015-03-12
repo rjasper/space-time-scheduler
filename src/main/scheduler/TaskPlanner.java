@@ -30,20 +30,20 @@ import com.vividsolutions.jts.geom.Point;
 // TODO document
 /**
  * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
- * It requires multiple parameters which determine the {@link Node worker}
+ * It requires multiple parameters which determine the {@link Node node}
  * to execute the new task, and the location, duration, and time interval of the
- * execution. It is also responsible for ensuring that the designated worker is
+ * execution. It is also responsible for ensuring that the designated node is
  * able to reach the task's location with colliding with any other object; be it
- * stationary or another worker.</p>
+ * stationary or another node.</p>
  *
  * <p>Should it be impossible to plan the new task then the TaskPlanner will
  * not change the current task set. This might be the case when the designated
- * worker is unable to reach the location without violating any time
+ * node is unable to reach the location without violating any time
  * constraints.</p>
  *
  * <p>The planning involves the calculation of a spatial path from the previous
- * location of the worker to the task's location and the successive path to
- * the next location the worker is required to be. The next step is to calculate
+ * location of the node to the task's location and the successive path to
+ * the next location the node is required to be. The next step is to calculate
  * a velocity profile to evade dynamic obstacles.</p>
  *
  * @author Rico Jasper
@@ -56,9 +56,9 @@ public class TaskPlanner {
 	private UUID taskId = null;
 
 	/**
-	 * The current worker.
+	 * The current node.
 	 */
-	private Node worker = null;
+	private Node node = null;
 	
 	/**
 	 * The location of the {@link Task task} to be planned.
@@ -86,7 +86,7 @@ public class TaskPlanner {
 	private IdleSlot idleSlot = null;
 	
 	/**
-	 * The world perspective of obstacles as perceived by the {@link #worker}.
+	 * The world perspective of obstacles as perceived by the {@link #node}.
 	 */
 	private WorldPerspective worldPerspective = null;
 	
@@ -101,7 +101,7 @@ public class TaskPlanner {
 	private ScheduleAlternative alternative = null;
 	
 	/**
-	 * The workers as dynamic obstacles.
+	 * The nodes as dynamic obstacles.
 	 */
 	private transient Collection<DynamicObstacle> dynamicObstacles;
 	
@@ -114,8 +114,8 @@ public class TaskPlanner {
 		this.taskId = Objects.requireNonNull(taskId, "taskId");
 	}
 
-	public void setWorker(Node workerUnit) {
-		this.worker = Objects.requireNonNull(workerUnit, "workerUnit");
+	public void setNode(Node node) {
+		this.node = Objects.requireNonNull(node, "node");
 	}
 
 	public void setLocation(Point location) {
@@ -157,7 +157,7 @@ public class TaskPlanner {
 	private LocalDateTime earliestStartTime() {
 		return max(
 			earliestStartTime,
-			worker.getInitialTime(),
+			node.getInitialTime(),
 			idleSlot.getStartTime());
 	}
 	
@@ -178,7 +178,7 @@ public class TaskPlanner {
 	 * 
 	 * <ul>
 	 * <li>taskId</li>
-	 * <li>workerUnit</li>
+	 * <li>node</li>
 	 * <li>location</li>
 	 * <li>earliestStartTime</li>
 	 * <li>latestStartTime</li>
@@ -195,7 +195,7 @@ public class TaskPlanner {
 	private void checkParameters() {
 		// assert all parameters set
 		if (taskId              == null ||
-			worker              == null ||
+			node              == null ||
 			location            == null ||
 			earliestStartTime   == null ||
 			latestStartTime     == null ||
@@ -212,9 +212,9 @@ public class TaskPlanner {
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
 			throw new IllegalStateException("earliestStartTime is after latestStartTime");
 
-		// cannot plan with worker which is not initialized yet
-		if (latestStartTime.compareTo(worker.getInitialTime()) < 0)
-			throw new IllegalStateException("worker not initialized yet");
+		// cannot plan with node which is not initialized yet
+		if (latestStartTime.compareTo(node.getInitialTime()) < 0)
+			throw new IllegalStateException("node not initialized yet");
 		
 		if (duration.compareTo(Duration.ZERO) <= 0)
 			throw new IllegalStateException("duration is not positive");
@@ -222,7 +222,7 @@ public class TaskPlanner {
 
 	
 	/**
-	 * <p>Plans new path sections of the current worker to the new task and
+	 * <p>Plans new path sections of the current node to the new task and
 	 * the following one. The old section is replaced by the new ones.</p>
 	 *
 	 * @return {@code true} if the task has been successfully planned.
@@ -253,7 +253,7 @@ public class TaskPlanner {
 	private void init() {
 		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
-		builder.setWorker(worker);
+		builder.setNode(node);
 		builder.setStartTime(idleSlot.getStartTime());
 		builder.setFinishTime(idleSlot.getFinishTime());
 		builder.setSchedule(schedule);
@@ -261,9 +261,9 @@ public class TaskPlanner {
 		
 		Collection<DynamicObstacle>
 			worldObstacles = worldPerspective.getView().getDynamicObstacles(),
-			workerObstacles = builder.build();
+			nodeObstacles = builder.build();
 		
-		dynamicObstacles = JoinedCollection.of(worldObstacles, workerObstacles);
+		dynamicObstacles = JoinedCollection.of(worldObstacles, nodeObstacles);
 	}
 
 	private void cleanUp() {
@@ -280,7 +280,7 @@ public class TaskPlanner {
 		// make task
 		
 		LocalDateTime taskStartTime = trajToTask.getFinishTime();
-		Task task = new Task(taskId, worker.getReference(), location, taskStartTime, duration);
+		Task task = new Task(taskId, node.getReference(), location, taskStartTime, duration);
 		LocalDateTime taskFinishTime = task.getFinishTime();
 		
 		// calculate trajectory from task
@@ -297,10 +297,10 @@ public class TaskPlanner {
 		// apply changes to scheduleAlternative
 		
 		if (!trajToTask.duration().isZero())
-			alternative.updateTrajectory(worker, trajToTask);
-		alternative.updateTrajectory(worker, trajAtTask);
+			alternative.updateTrajectory(node, trajToTask);
+		alternative.updateTrajectory(node, trajAtTask);
 		if (!trajFromTask.duration().isZero())
-			alternative.updateTrajectory(worker, trajFromTask);
+			alternative.updateTrajectory(node, trajFromTask);
 		
 		alternative.addTask(task);
 		
@@ -336,7 +336,7 @@ public class TaskPlanner {
 		pf.setFinishArc         ( path.length()           );
 		pf.setMinArc            ( 0.0                     );
 		pf.setMaxArc            ( path.length()           );
-		pf.setMaxSpeed          ( worker.getMaxSpeed()    );
+		pf.setMaxSpeed          ( node.getMaxSpeed()    );
 		pf.setStartTime         ( idleSlot.getStartTime() );
 		pf.setEarliestFinishTime( earliestStartTime()     );
 		pf.setLatestFinishTime  ( latestStartTime()       );
@@ -358,7 +358,7 @@ public class TaskPlanner {
 		pf.setFinishArc       ( path.length()            );
 		pf.setMinArc          ( 0.0                      );
 		pf.setMaxArc          ( path.length()            );
-		pf.setMaxSpeed        ( worker.getMaxSpeed()     );
+		pf.setMaxSpeed        ( node.getMaxSpeed()     );
 		pf.setStartTime       ( startTime                );
 		pf.setFinishTime      ( idleSlot.getFinishTime() );
 		

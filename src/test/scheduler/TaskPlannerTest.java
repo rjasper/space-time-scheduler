@@ -34,11 +34,11 @@ public class TaskPlannerTest {
 
 	private static final NodeFactory wFact = NodeFactory.getInstance();
 	
-	private static Schedule makeSchedule(Node... workers) {
+	private static Schedule makeSchedule(Node... nodes) {
 		Schedule schedule = new Schedule();
 		
-		for (Node w : workers)
-			schedule.addWorker(w);
+		for (Node w : nodes)
+			schedule.addNode(w);
 		
 		return schedule;
 	}
@@ -46,29 +46,29 @@ public class TaskPlannerTest {
 	private static boolean planTask(
 		World world,
 		Schedule schedule,
-		Node worker,
+		Node node,
 		UUID taskId,
 		Point location,
 		LocalDateTime startTime,
 		Duration duration)
 	{
-		LocalDateTime floorTime = worker.floorIdleTimeOrNull(startTime);
-		LocalDateTime ceilTime = worker.ceilingIdleTimeOrNull(startTime);
+		LocalDateTime floorTime = node.floorIdleTimeOrNull(startTime);
+		LocalDateTime ceilTime = node.ceilingIdleTimeOrNull(startTime);
 		
 		if (floorTime == null || ceilTime == null)
 			return false;
 		
-		IdleSlot idleSlot = worker.idleSlots(floorTime, ceilTime).iterator().next();
+		IdleSlot idleSlot = node.idleSlots(floorTime, ceilTime).iterator().next();
 		WorldPerspectiveCache cache = new RadiusBasedWorldPerspectiveCache(
 			world, StraightEdgePathfinder.class);
-		WorldPerspective perspective = cache.getPerspectiveFor(worker);
+		WorldPerspective perspective = cache.getPerspectiveFor(node);
 
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
 		TaskPlanner tp = new TaskPlanner();
 
 		tp.setTaskId(taskId);
-		tp.setWorker(worker);
+		tp.setNode(node);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(startTime);
 		tp.setLatestStartTime(startTime);
@@ -111,7 +111,7 @@ public class TaskPlannerTest {
 		assertThat("unable to plan task",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
-			w, not(workerCollidesWith(obstacle)));
+			w, not(nodeCollidesWith(obstacle)));
 	}
 	
 	@Test
@@ -138,7 +138,7 @@ public class TaskPlannerTest {
 		assertThat("unable to plan task",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
-			w, not(workerCollidesWith(obstacle)));
+			w, not(nodeCollidesWith(obstacle)));
 	}
 	
 //	@Test
@@ -163,7 +163,7 @@ public class TaskPlannerTest {
 //		assertThat("unable to plan task",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
-////			workers, not(areEvadedBy(w1)));
+////			nodes, not(areEvadedBy(w1)));
 //	
 //		// w = w2, P = (5, 3), t = 10, d = 2
 //		status = planTask(world, schedule,
@@ -176,11 +176,11 @@ public class TaskPlannerTest {
 //		assertThat("unable to plan task",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
-////			workers, not(areEvadedBy(w1)));
+////			nodes, not(areEvadedBy(w1)));
 ////		assertThat("w2 didn't evade w1",
 ////			w1, isEvadedBy(w2, atSecond(5.0)));
 ////		assertThat("w2 evaded someone it wasn't supposed to",
-////			workers, evadedByNumTimes(w2, 1));
+////			nodes, evadedByNumTimes(w2, 1));
 //	
 //		// w = w1, P = (1, 3), t = 4, d = 2
 //		status = planTask(world, schedule,
@@ -193,9 +193,9 @@ public class TaskPlannerTest {
 //		assertThat("unable to plan task",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
-////			workers, not(areEvadedBy(w1)));
+////			nodes, not(areEvadedBy(w1)));
 ////		assertThat("w2 evaded someone when it shouldn't have",
-////			workers, not(areEvadedBy(w2)));
+////			nodes, not(areEvadedBy(w2)));
 //	}
 	
 	@Test

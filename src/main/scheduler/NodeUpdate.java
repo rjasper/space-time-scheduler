@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Point;
 
 public class NodeUpdate implements Cloneable {
 	
-	private final Node worker;
+	private final Node node;
 	
 	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 	
@@ -35,16 +35,16 @@ public class NodeUpdate implements Cloneable {
 	
 	private boolean sealed = false;
 
-	public NodeUpdate(Node worker) {
-		this.worker = Objects.requireNonNull(worker, "worker");
+	public NodeUpdate(Node node) {
+		this.node = Objects.requireNonNull(node, "node");
 	}
 	
 	public boolean isSealed() {
 		return sealed;
 	}
 
-	public Node getWorker() {
-		return worker;
+	public Node getNode() {
+		return node;
 	}
 
 	public Collection<Trajectory> getTrajectories() {
@@ -84,7 +84,7 @@ public class NodeUpdate implements Cloneable {
 		LocalDateTime startTime  = trajectory.getStartTime();
 		LocalDateTime finishTime = trajectory.getFinishTime();
 		
-		if (startTime.isBefore(worker.getInitialTime()))
+		if (startTime.isBefore(node.getInitialTime()))
 			throw new IllegalArgumentException("trajectory predates initial time");
 
 		trajectoryLock.add(startTime, finishTime);
@@ -100,10 +100,10 @@ public class NodeUpdate implements Cloneable {
 		LocalDateTime startTime  = task.getStartTime();
 		LocalDateTime finishTime = task.getFinishTime();
 		
-		if (startTime.isBefore(worker.getInitialTime()))
+		if (startTime.isBefore(node.getInitialTime()))
 			throw new IllegalArgumentException("task predates initial time");
-		if (task.getWorkerReference().getActual() != worker) // identity comparison
-			throw new IllegalArgumentException("invalid assigned worker");
+		if (task.getNodeReference().getActual() != node) // identity comparison
+			throw new IllegalArgumentException("invalid assigned node");
 		if (taskLock.intersects(startTime, finishTime))
 			throw new IllegalArgumentException("task lock violation");
 		
@@ -118,8 +118,8 @@ public class NodeUpdate implements Cloneable {
 		
 		if (isSealed())
 			throw new IllegalStateException("update is sealed");
-		if (task.getWorkerReference().getActual() != worker) // identity comparison
-			throw new IllegalArgumentException("invalid assigned worker");
+		if (task.getNodeReference().getActual() != node) // identity comparison
+			throw new IllegalArgumentException("invalid assigned node");
 		
 		taskRemovalIntervals.add(task.getStartTime(), task.getFinishTime());
 		taskRemovals.add(task);
@@ -192,7 +192,7 @@ public class NodeUpdate implements Cloneable {
 	
 	@Override
 	public NodeUpdate clone() {
-		NodeUpdate clone = new NodeUpdate(worker);
+		NodeUpdate clone = new NodeUpdate(node);
 		
 		clone.trajectoryContainer.update(trajectoryContainer);
 		clone.tasks.addAll(tasks);

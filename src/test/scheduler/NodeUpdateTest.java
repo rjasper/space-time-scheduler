@@ -37,23 +37,23 @@ public class NodeUpdateTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
-	private static final String WORKER_ID = "worker";
+	private static final String NODE_ID = "node";
 	
-	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
+	private static final ImmutablePolygon NODE_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
 	
-	private static final double WORKER_SPEED = 1.0;
+	private static final double NODE_SPEED = 1.0;
 
-	private static final ImmutablePoint WORKER_INITIAL_LOCATION = immutablePoint(0, 0);
+	private static final ImmutablePoint NODE_INITIAL_LOCATION = immutablePoint(0, 0);
 
-	private static final LocalDateTime WORKER_INITIAL_TIME = atSecond(0);
+	private static final LocalDateTime NODE_INITIAL_TIME = atSecond(0);
 	
-	private static NodeUpdate workerUnitUpdate() {
+	private static NodeUpdate nodeUpdate() {
 		NodeSpecification spec = new NodeSpecification(
-			WORKER_ID, WORKER_SHAPE, WORKER_SPEED, WORKER_INITIAL_LOCATION, WORKER_INITIAL_TIME);
-		Node worker = new Node(spec);
+			NODE_ID, NODE_SHAPE, NODE_SPEED, NODE_INITIAL_LOCATION, NODE_INITIAL_TIME);
+		Node node = new Node(spec);
 		
-		return new NodeUpdate(worker);
+		return new NodeUpdate(node);
 	}
 	
 	private static <T> List<T> toList(Collection<T> collection) {
@@ -69,7 +69,7 @@ public class NodeUpdateTest {
 
 	@Test
 	public void testUpdateTrajectory() {
-		NodeUpdate update = workerUnitUpdate();
+		NodeUpdate update = nodeUpdate();
 		
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
 		
@@ -85,7 +85,7 @@ public class NodeUpdateTest {
 
 	@Test
 	public void testUpdateTrajectoryPredate() {
-		NodeUpdate update = workerUnitUpdate();
+		NodeUpdate update = nodeUpdate();
 		
 		Trajectory traj = trajectory(0, 0, 0, 0, -1, 1);
 		
@@ -96,8 +96,8 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testAddTask() {
-		NodeUpdate update = workerUnitUpdate();
-		NodeReference ref = update.getWorker().getReference();
+		NodeUpdate update = nodeUpdate();
+		NodeReference ref = update.getNode().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -112,9 +112,9 @@ public class NodeUpdateTest {
 	}
 	
 	@Test
-	public void testAddTaskInvalidWorker() {
-		NodeUpdate update = workerUnitUpdate();
-		NodeReference other = workerUnitUpdate().getWorker().getReference();
+	public void testAddTaskInvalidNode() {
+		NodeUpdate update = nodeUpdate();
+		NodeReference other = nodeUpdate().getNode().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -125,8 +125,8 @@ public class NodeUpdateTest {
 
 	@Test
 	public void testAddTaskPredate() {
-		NodeUpdate update = workerUnitUpdate();
-		NodeReference ref = update.getWorker().getReference();
+		NodeUpdate update = nodeUpdate();
+		NodeReference ref = update.getNode().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(1));
 		
@@ -137,8 +137,8 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testAddTaskRemoval() {
-		NodeUpdate update = workerUnitUpdate();
-		NodeReference ref = update.getWorker().getReference();
+		NodeUpdate update = nodeUpdate();
+		NodeReference ref = update.getNode().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -152,9 +152,9 @@ public class NodeUpdateTest {
 	}
 	
 	@Test
-	public void testAddTaskRemovalInvalidWorker() {
-		NodeUpdate update = workerUnitUpdate();
-		NodeReference other = workerUnitUpdate().getWorker().getReference();
+	public void testAddTaskRemovalInvalidNode() {
+		NodeUpdate update = nodeUpdate();
+		NodeReference other = nodeUpdate().getNode().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -165,9 +165,9 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyPositive() {
-		NodeUpdate update = workerUnitUpdate();
-		Node worker = update.getWorker();
-		NodeReference ref = worker.getReference();
+		NodeUpdate update = nodeUpdate();
+		Node node = update.getNode();
+		NodeReference ref = node.getReference();
 		
 		Trajectory traj = new DecomposedTrajectory(
 			atSecond(0),
@@ -188,9 +188,9 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyLocation() {
-		NodeUpdate update = workerUnitUpdate();
-		Node worker = update.getWorker();
-		NodeReference ref = worker.getReference();
+		NodeUpdate update = nodeUpdate();
+		Node node = update.getNode();
+		NodeReference ref = node.getReference();
 		
 		Trajectory traj = new DecomposedTrajectory(
 			atSecond(0),
@@ -214,7 +214,7 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyContinuity() {
-		NodeUpdate update = workerUnitUpdate();
+		NodeUpdate update = nodeUpdate();
 		
 		Trajectory traj1 = new SimpleTrajectory(
 			spatialPath(0, 0, 1, 1),
@@ -233,9 +233,9 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testCloneIdentical() {
-		NodeUpdate origin = workerUnitUpdate();
-		Node worker = origin.getWorker();
-		NodeReference ref = worker.getReference();
+		NodeUpdate origin = nodeUpdate();
+		Node node = origin.getNode();
+		NodeReference ref = node.getReference();
 
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
@@ -265,9 +265,9 @@ public class NodeUpdateTest {
 	
 	@Test
 	public void testCloneIndependent() {
-		NodeUpdate origin = workerUnitUpdate();
-		Node worker = origin.getWorker();
-		NodeReference ref = worker.getReference();
+		NodeUpdate origin = nodeUpdate();
+		Node node = origin.getNode();
+		NodeReference ref = node.getReference();
 		
 		NodeUpdate clone = origin.clone();
 

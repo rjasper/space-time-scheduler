@@ -31,7 +31,7 @@ import world.pathfinder.StraightEdgePathfinder;
  * {@link TaskSpecification}. The {@link #schedule(TaskSpecification)} method tries
  * to find a realizable configuration which satisfies the specification. In
  * the successful case a task will be created and assigned to an appropriate
- * worker.</p>
+ * node.</p>
  *
  * @author Rico Jasper
  */
@@ -42,13 +42,13 @@ public class Scheduler {
 	public static final LocalDateTime END_OF_TIME = LocalDateTime.MAX;
 
 	/**
-	 * The physical outside world representation where the workers are located.
+	 * The physical outside world representation where the nodes are located.
 	 */
 	private final World world;
 
 	/**
 	 * A cache of the {@link WorldPerspective perspectives} of the
-	 * {@link Node workers}.
+	 * {@link Node nodes}.
 	 */
 	private final WorldPerspectiveCache perspectiveCache;
 
@@ -80,12 +80,12 @@ public class Scheduler {
 	private Duration interDependencyMargin = Duration.ZERO;
 	
 	/**
-	 * Constructs a scheduler using the given world and set of workers.
-	 * The workers are expected to be managed exclusively by this scheduler.
+	 * Constructs a scheduler using the given world and set of nodes.
+	 * The nodes are expected to be managed exclusively by this scheduler.
 	 *
 	 * @param world
-	 * @param workerPool
-	 * @throws NullPointerException if world or workers is null
+	 * @param nodePool
+	 * @throws NullPointerException if world or nodes is null
 	 */
 	public Scheduler(World world) {
 		Objects.requireNonNull(world, "world");
@@ -96,52 +96,52 @@ public class Scheduler {
 
 	/**
 	 * Adds a new {@link Node} to the scheduler. The given specification
-	 * is used to create the worker.
+	 * is used to create the node.
 	 * 
 	 * @param spec
-	 * @return a reference to the worker.
+	 * @return a reference to the node.
 	 * @throws NullPointerException
 	 *             if {@code spec} is {@code null}
 	 * @throws IllegalArgumentException
-	 *             if worker ID is already assigned.
+	 *             if node ID is already assigned.
 	 */
-	public NodeReference addWorker(NodeSpecification spec) {
+	public NodeReference addNode(NodeSpecification spec) {
 		// also throws NullPointerException
 		if (spec.getInitialTime().isBefore(getFrozenHorizonTime()))
 			throw new IllegalArgumentException("initial time violates frozen horizon");
 		
-		Node worker = new Node(spec);
+		Node node = new Node(spec);
 
-		// TODO check validity of worker placement
-		// don't overlap with static or dynamic obstacles or with other workers
+		// TODO check validity of node placement
+		// don't overlap with static or dynamic obstacles or with other nodes
 		// only allow after frozen horizon
 		
-		schedule.addWorker(worker);
+		schedule.addNode(node);
 		
-		return worker.getReference();
+		return node.getReference();
 	}
 	
 	/**
-	 * Returns the reference to the worker with the given id.
+	 * Returns the reference to the node with the given id.
 	 * 
-	 * @param workerId
+	 * @param nodeId
 	 * @return the reference.
 	 * @throws NullPointerException
-	 *             if {@code workerId} is {@code null}
+	 *             if {@code nodeId} is {@code null}
 	 * @throws IllegalArgumentException
-	 *             if worker ID is unassigned.
+	 *             if node ID is unassigned.
 	 */
-	public NodeReference getWorkerReference(String workerId) {
-		return schedule.getWorker(workerId).getReference();
+	public NodeReference getNodeReference(String nodeId) {
+		return schedule.getNode(nodeId).getReference();
 	}
 	
-	public void removeWorker(String workerId) {
-		Node worker = schedule.getWorker(workerId);
+	public void removeNode(String nodeId) {
+		Node node = schedule.getNode(nodeId);
 		
-		worker.cleanUp(presentTime);
+		node.cleanUp(presentTime);
 		
-		schedule.removeWorker(workerId);
-		perspectiveCache.removePerceiver(worker);
+		schedule.removeNode(nodeId);
+		perspectiveCache.removePerceiver(node);
 	}
 	
 	public Task getTask(UUID taskId) {
@@ -330,11 +330,11 @@ public class Scheduler {
 	}
 	
 	private boolean unscheduleImpl(Task task, ScheduleAlternative alternative) {
-		Node worker = task.getWorkerReference().getActual();
-		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
+		Node node = task.getNodeReference().getActual();
+		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		
 		// there should be at least one entry
-		Task lastTask = worker.getNavigableTasks().lastEntry().getValue();
+		Task lastTask = node.getNavigableTasks().lastEntry().getValue();
 		boolean fixedEnd = lastTask != task;
 		
 		TaskRemovalPlanner pl = new TaskRemovalPlanner();
@@ -385,18 +385,18 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 	
-	public void commit(UUID transactionId, String workerId) {
+	public void commit(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 
 		Transaction transaction = transactions.get(transactionId);
-		Node worker = schedule.getWorker(workerId);
+		Node node = schedule.getNode(nodeId);
 		
 		if (transaction == null)
 			throw new IllegalArgumentException("unknown transaction");
 		
 		ScheduleAlternative alternative = transaction.getAlternative();
 		
-		schedule.integrate(alternative, worker);
+		schedule.integrate(alternative, node);
 		
 		if (alternative.isEmpty())
 			transactions.remove(transactionId);
@@ -414,18 +414,18 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 	
-	public void abort(UUID transactionId, String workerId) {
+	public void abort(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 
 		Transaction transaction = transactions.get(transactionId);
-		Node worker = schedule.getWorker(workerId);
+		Node node = schedule.getNode(nodeId);
 		
 		if (transaction == null)
 			throw new IllegalArgumentException("unknown transaction");
 		
 		ScheduleAlternative alternative = transaction.getAlternative();
 		
-		schedule.eliminate(alternative, worker);
+		schedule.eliminate(alternative, node);
 		
 		if (alternative.isEmpty())
 			transactions.remove(transactionId);
@@ -454,7 +454,7 @@ public class Scheduler {
 		
 		Collection<TrajectoryUpdate> trajectories = updates.stream()
 			.flatMap(u -> {
-				NodeReference w = u.getWorker().getReference();
+				NodeReference w = u.getNode().getReference();
 				
 				// circumvents nested lambda expression
 				// t -> new TrajectoryUpdate(t, w)
@@ -484,7 +484,7 @@ public class Scheduler {
 	}
 	
 	public void cleanUp() {
-		for (Node w : schedule.getWorkers())
+		for (Node w : schedule.getNodes())
 			w.cleanUp(presentTime);
 	}
 

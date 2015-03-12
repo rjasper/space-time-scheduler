@@ -25,14 +25,14 @@ public class ScheduleTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
-	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
+	private static final ImmutablePolygon NODE_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
 	
-	private static final double WORKER_SPEED = 1.0;
+	private static final double NODE_SPEED = 1.0;
 	
-	private static Node workerUnit(String workerId, double x, double y) {
+	private static Node node(String nodeId, double x, double y) {
 		NodeSpecification spec = new NodeSpecification(
-			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
+			nodeId, NODE_SHAPE, NODE_SPEED, immutablePoint(x, y), atSecond(0));
 		
 		return new Node(spec);
 	}
@@ -53,10 +53,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskLock() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
@@ -73,10 +73,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTrajectoryLock() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
@@ -93,10 +93,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalLock() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		scheduleTask(schedule, task);
@@ -116,10 +116,10 @@ public class ScheduleTest {
 
 	@Test
 	public void testUpdatedTrajectoryOriginLocationViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set task
 		
@@ -143,10 +143,10 @@ public class ScheduleTest {
 
 	@Test
 	public void testTaskLockViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa1 = new ScheduleAlternative();
 		ScheduleAlternative sa2 = new ScheduleAlternative();
@@ -168,10 +168,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTrajectoryLockViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa1 = new ScheduleAlternative();
 		ScheduleAlternative sa2 = new ScheduleAlternative();
@@ -193,10 +193,10 @@ public class ScheduleTest {
 
 	@Test
 	public void testContinuousTrajectoryViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
@@ -211,10 +211,10 @@ public class ScheduleTest {
 	}
 	
 	public void testTaskLocationViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
@@ -230,10 +230,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testUpdatedTrajectoryAtTaskPositive() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 
@@ -252,10 +252,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testUpdateTrajectoryAtTaskNegative() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 
@@ -276,10 +276,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemoval() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -301,10 +301,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalUnknown() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -324,10 +324,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalLockViolation() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -352,10 +352,10 @@ public class ScheduleTest {
 
 	@Test
 	public void testUpdateTrajectoryOfRemoval() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -378,10 +378,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testIntegrate() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -433,10 +433,10 @@ public class ScheduleTest {
 	
 	@Test
 	public void testEliminate() {
-		Node w = workerUnit("w", 0, 0);
+		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w);
+		schedule.addNode(w);
 		
 		// set up task to remove
 		
@@ -488,12 +488,12 @@ public class ScheduleTest {
 	
 	@Test
 	public void testIntegrateEliminatePartial() {
-		Node w1 = workerUnit("w1", 0, 0);
-		Node w2 = workerUnit("w2", 10, 10);
+		Node w1 = node("w1", 0, 0);
+		Node w2 = node("w2", 10, 10);
 		
 		Schedule schedule = new Schedule();
-		schedule.addWorker(w1);
-		schedule.addWorker(w2);
+		schedule.addNode(w1);
+		schedule.addNode(w2);
 
 		Task t1 = new Task(uuid("t1"), w1.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));

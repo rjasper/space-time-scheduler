@@ -102,9 +102,9 @@ public class SingularTaskScheduler {
 
 		// iterate over possible locations
 
-		// TODO prefilter the workers who have time without considering their location
-		// return if no workers remain
-		// TODO workers which already are in position shouldn't need to move.
+		// TODO prefilter the nodes who have time without considering their location
+		// return if no nodes remain
+		// TODO nodes which already are in position shouldn't need to move.
 
 		Iterable<Point> locations = locationSpace instanceof Point
 			? singleton((Point) locationSpace)
@@ -113,19 +113,19 @@ public class SingularTaskScheduler {
 		for (Point location : locations) {
 			tp.setLocation(location);
 
-			// iterate over possible worker time slots.
+			// iterate over possible node time slots.
 
-			// Worker units have different perspectives of the world.
+			// Node units have different perspectives of the world.
 			// The LocationIterator might pick a location which is inaccessible
-			// for a unit. Therefore, the workers are filtered by the location
+			// for a unit. Therefore, the nodes are filtered by the location
 			
-			Iterable<NodeSlot> workerSlots = () -> new NodeSlotIterator(
+			Iterable<NodeSlot> nodeSlots = () -> new NodeSlotIterator(
 				filterByLocation(location),
 				frozenHorizonTime,
 				location,
 				earliest, latest, duration);
 
-			for (NodeSlot ws : workerSlots) {
+			for (NodeSlot ws : nodeSlots) {
 				Node w = ws.getNode();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
@@ -138,12 +138,12 @@ public class SingularTaskScheduler {
 
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
-				tp.setWorker(w);
+				tp.setNode(w);
 				tp.setIdleSlot(s);
 				tp.setEarliestStartTime(earliest);
 				tp.setLatestStartTime(latest);
 
-				// plan the routes of affected workers and schedule task
+				// plan the routes of affected nodes and schedule task
 				boolean status = tp.plan();
 
 				if (status)
@@ -157,27 +157,27 @@ public class SingularTaskScheduler {
 	}
 	
 	/**
-	 * Filters the pool of workers which are able to reach a location in
+	 * Filters the pool of nodes which are able to reach a location in
 	 * regard to their individual size.
 	 *
 	 * @param location
-	 * @return the filtered workers which are able to reach the location.
+	 * @return the filtered nodes which are able to reach the location.
 	 */
 	private Collection<Node> filterByLocation(Point location) {
-		return schedule.getWorkers().stream()
+		return schedule.getNodes().stream()
 			.filter(w -> checkLocationFor(location, w))
 			.collect(toList());
 	}
 	
 	/**
-	 * Checks if a worker is able to reach a location in regard to its size.
+	 * Checks if a node is able to reach a location in regard to its size.
 	 *
 	 * @param location
-	 * @param worker
-	 * @return {@code true} iff worker is able to reach the location.
+	 * @param node
+	 * @return {@code true} iff node is able to reach the location.
 	 */
-	private boolean checkLocationFor(Point location, Node worker) {
-		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
+	private boolean checkLocationFor(Point location, Node node) {
+		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		Geometry map = perspective.getView().getMap();
 	
 		return !map.contains(location);

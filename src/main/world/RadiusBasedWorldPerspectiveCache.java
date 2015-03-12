@@ -12,7 +12,7 @@ import world.pathfinder.AbstractSpatialPathfinder;
 /**
  * The {@code RadiusBasedWorldPerspectiveCache} is an implementation of the
  * {@link WorldPerspectiveCache}. The perspective on the original world is
- * determined by the radius of the individual worker units. Worker units of
+ * determined by the radius of the individual node units. Node units of
  * the same radius will perceive the same view on the world.
  * 
  * @author Rico
@@ -20,7 +20,7 @@ import world.pathfinder.AbstractSpatialPathfinder;
 public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	/**
-	 * The perspective references of each known worker.
+	 * The perspective references of each known node.
 	 */
 	private final Map<Node, WorldPerspectiveReference> perceiverReferences =
 		new IdentityHashMap<>();

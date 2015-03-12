@@ -10,12 +10,12 @@ import java.util.UUID;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import scheduler.IdleSlot;
+import scheduler.Node;
+import scheduler.NodeSpecification;
 import scheduler.Schedule;
 import scheduler.ScheduleAlternative;
 import scheduler.Scheduler;
 import scheduler.TaskPlanner;
-import scheduler.Node;
-import scheduler.NodeSpecification;
 import world.World;
 import world.WorldPerspective;
 import world.pathfinder.StraightEdgePathfinder;
@@ -107,32 +107,32 @@ public class NodeFactory {
 		return new NodeSpecification(id, shape, maxSpeed, initialLocation, initialTime);
 	}
 
-	public boolean addTask(Node worker, UUID taskId, double x, double y, long tStart, long tEnd) {
-		return addTaskWithDuration(worker, taskId, x, y, tStart, tEnd - tStart);
+	public boolean addTask(Node node, UUID taskId, double x, double y, long tStart, long tEnd) {
+		return addTaskWithDuration(node, taskId, x, y, tStart, tEnd - tStart);
 	}
 
-	public boolean addTaskWithDuration(Node worker, UUID taskId, double x, double y, long t, long d) {
+	public boolean addTaskWithDuration(Node node, UUID taskId, double x, double y, long t, long d) {
 		TaskPlanner tp = new TaskPlanner();
 
 		Point location = point(x, y);
 		LocalDateTime time = atSecond(t);
 		Duration duration = Duration.ofSeconds(d);
-		LocalDateTime floorTime = worker.floorIdleTimeOrNull(time);
-		LocalDateTime ceilTime = worker.ceilingIdleTimeOrNull(time);
+		LocalDateTime floorTime = node.floorIdleTimeOrNull(time);
+		LocalDateTime ceilTime = node.ceilingIdleTimeOrNull(time);
 		
 		if (floorTime == null || ceilTime == null)
 			return false;
 		
-		IdleSlot idleSlot = worker.idleSlots(floorTime, ceilTime).iterator().next();
+		IdleSlot idleSlot = node.idleSlots(floorTime, ceilTime).iterator().next();
 		WorldPerspective perspective = new WorldPerspective(
 			new World(), new StraightEdgePathfinder());
 		Schedule schedule = new Schedule();
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
-		schedule.addWorker(worker);
+		schedule.addNode(node);
 
 		tp.setTaskId(taskId);
-		tp.setWorker(worker);
+		tp.setNode(node);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);
 		tp.setLatestStartTime(time);

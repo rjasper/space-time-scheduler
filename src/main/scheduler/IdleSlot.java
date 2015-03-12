@@ -13,11 +13,11 @@ import jts.geom.util.GeometriesRequire;
  * one task to the next task.</p>
  *
  * <p>An object of this class stores a quadruple containing the start and end time
- * of this IdleSlot and the locations of the worker at those times. The time
- * interval should always be as large as possible, i.e., the worker was
+ * of this IdleSlot and the locations of the node at those times. The time
+ * interval should always be as large as possible, i.e., the node was
  * occupied right before the idle slot started and is occupied again immediately
  * after the slot ended. The two exceptions to this are the times before the
- * initialization of the worker and the end of all time after which no task
+ * initialization of the node and the end of all time after which no task
  * can be scheduled.</p>
  *
  * @author Rico Jasper

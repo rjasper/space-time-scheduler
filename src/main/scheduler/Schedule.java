@@ -23,7 +23,7 @@ import com.vividsolutions.jts.geom.Point;
 
 public class Schedule {
 	
-	private final Map<String, Node> workers = new HashMap<>();
+	private final Map<String, Node> nodes = new HashMap<>();
 	
 	private final Set<ScheduleAlternative> alternatives = new HashSet<>();
 	
@@ -43,44 +43,44 @@ public class Schedule {
 		return alternatives.contains(alternative);
 	}
 	
-	public Collection<Node> getWorkers() {
-		return unmodifiableCollection(workers.values());
+	public Collection<Node> getNodes() {
+		return unmodifiableCollection(nodes.values());
 	}
 	
-	public Node getWorker(String workerId) {
-		Objects.requireNonNull(workerId, "workerId");
+	public Node getNode(String nodeId) {
+		Objects.requireNonNull(nodeId, "nodeId");
 		
-		Node worker = workers.get(workerId);
+		Node node = nodes.get(nodeId);
 		
-		if (worker == null)
-			throw new IllegalArgumentException("unknown worker id");
+		if (node == null)
+			throw new IllegalArgumentException("unknown node id");
 		
-		return worker;
+		return node;
 	}
 
-	public void addWorker(Node worker) {
-		Objects.requireNonNull(worker, "worker");
+	public void addNode(Node node) {
+		Objects.requireNonNull(node, "node");
 		
-		Node previous = workers.putIfAbsent(worker.getId(), worker);
+		Node previous = nodes.putIfAbsent(node.getId(), node);
 		
 		if (previous != null)
-			throw new IllegalArgumentException("worker id already assigned");
+			throw new IllegalArgumentException("node id already assigned");
 		
-		locks.put(worker, new NodeLocks());
+		locks.put(node, new NodeLocks());
 	}
 	
-	public void removeWorker(String workerId) {
-		Objects.requireNonNull(workerId, "workerId");
+	public void removeNode(String nodeId) {
+		Objects.requireNonNull(nodeId, "nodeId");
 		
-		Node worker = workers.get(workerId);
+		Node node = nodes.get(nodeId);
 		
-		if (worker == null)
-			throw new IllegalArgumentException("unknown worker id");
-		if (!worker.isIdle())
-			throw new IllegalStateException("worker still has scheduled tasks");
+		if (node == null)
+			throw new IllegalArgumentException("unknown node id");
+		if (!node.isIdle())
+			throw new IllegalStateException("node still has scheduled tasks");
 		
-		workers.remove(workerId);
-		locks.remove(worker);
+		nodes.remove(nodeId);
+		locks.remove(node);
 	}
 	
 	public Task getTask(UUID taskId) {
@@ -94,36 +94,36 @@ public class Schedule {
 	
 	public void removeTask(UUID taskId) {
 		Task task = getTask(taskId);
-		Node worker = task.getWorkerReference().getActual();
-		Set<Task> lock = getTaskRemovalLock(worker);
+		Node node = task.getNodeReference().getActual();
+		Set<Task> lock = getTaskRemovalLock(node);
 		
 		if (lock.contains(task))
 			throw new IllegalStateException("given task is locked for removal");
 		
-		worker.removeTask(task);
+		node.removeTask(task);
 		tasks.remove(taskId);
 	}
 	
-	public IntervalSet<LocalDateTime> getTrajectoryLock(Node worker) {
-		Objects.requireNonNull(worker, "worker");
+	public IntervalSet<LocalDateTime> getTrajectoryLock(Node node) {
+		Objects.requireNonNull(node, "node");
 		
-		NodeLocks workerLocks = locks.get(worker);
+		NodeLocks nodeLocks = locks.get(node);
 		
-		if (workerLocks == null)
-			throw new IllegalArgumentException("unknown worker");
+		if (nodeLocks == null)
+			throw new IllegalArgumentException("unknown node");
 		
-		return unmodifiableIntervalSet(workerLocks.trajectoryLock);
+		return unmodifiableIntervalSet(nodeLocks.trajectoryLock);
 	}
 	
-	public Set<Task> getTaskRemovalLock(Node worker) {
-		Objects.requireNonNull(worker, "worker");
+	public Set<Task> getTaskRemovalLock(Node node) {
+		Objects.requireNonNull(node, "node");
 		
-		NodeLocks workerLocks = locks.get(worker);
+		NodeLocks nodeLocks = locks.get(node);
 		
-		if (workerLocks == null)
-			throw new IllegalArgumentException("unknown worker");
+		if (nodeLocks == null)
+			throw new IllegalArgumentException("unknown node");
 		
-		return unmodifiableSet(workerLocks.taskRemovalLock);
+		return unmodifiableSet(nodeLocks.taskRemovalLock);
 	}
 	
 	public Collection<ScheduleAlternative> getAlternatives() {
@@ -154,16 +154,16 @@ public class Schedule {
 		applyChanges(alternative);
 	}
 	
-	public void integrate(ScheduleAlternative alternative, Node worker) {
+	public void integrate(ScheduleAlternative alternative, Node node) {
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(worker, "worker");
+		Objects.requireNonNull(node, "node");
 		
 		boolean status = alternatives.contains(alternative);
 		
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 		
-		NodeUpdate update = alternative.popUpdate(worker);
+		NodeUpdate update = alternative.popUpdate(node);
 		
 		if (alternative.isEmpty())
 			alternatives.remove(alternative);
@@ -183,16 +183,16 @@ public class Schedule {
 		releaseLocks(alternative);
 	}
 	
-	public void eliminate(ScheduleAlternative alternative, Node worker) {
+	public void eliminate(ScheduleAlternative alternative, Node node) {
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(worker, "worker");
+		Objects.requireNonNull(node, "node");
 		
 		boolean status = alternatives.contains(alternative);
 		
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 		
-		NodeUpdate update = alternative.popUpdate(worker);
+		NodeUpdate update = alternative.popUpdate(node);
 		
 		if (alternative.isEmpty())
 			alternatives.remove(alternative);
@@ -202,13 +202,13 @@ public class Schedule {
 
 	private void checkCompatibility(ScheduleAlternative alternative) {
 		for (NodeUpdate u : alternative.getUpdates()) {
-			Node worker = u.getWorker();
-			NodeLocks workerLocks = locks.get(worker);
+			Node node = u.getNode();
+			NodeLocks nodeLocks = locks.get(node);
 			
-			if (workerLocks == null)
-				throw new IllegalArgumentException("unknown worker");
+			if (nodeLocks == null)
+				throw new IllegalArgumentException("unknown node");
 
-			IntervalSet<LocalDateTime> originTasksIntervals = worker.getTaskIntervals();
+			IntervalSet<LocalDateTime> originTasksIntervals = node.getTaskIntervals();
 			IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
 			IntervalSet<LocalDateTime> trajIntervals = u.getTrajectoryIntervals();
 			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoryLock();
@@ -229,25 +229,25 @@ public class Schedule {
 				throw new IllegalArgumentException("trajectory lock violation");
 			}
 			// no mutual trajectory locks with other alternatives
-			if (trajLockIntervals.intersects(workerLocks.trajectoryLock))
+			if (trajLockIntervals.intersects(nodeLocks.trajectoryLock))
 				throw new IllegalArgumentException("trajectory lock violation");
 			// continuous trajectories
-			if (!verifyTrajectoryContinuity(worker, u.getTrajectories()))
+			if (!verifyTrajectoryContinuity(node, u.getTrajectories()))
 				throw new IllegalArgumentException("trajectory continuity violation");
 			// non-updated original trajectories lead to tasks
 			if (!tasks.stream().allMatch(t -> verifyTaskLocation(t, trajIntervals)))
 				throw new IllegalArgumentException("task location violation");
 			// no unknown task removals
-			if (!removals.stream().allMatch(worker::hasTask))
+			if (!removals.stream().allMatch(node::hasTask))
 				throw new IllegalArgumentException("unknown task removal");
 			// no mutual task removals
-			if (removals.stream().anyMatch(workerLocks.taskRemovalLock::contains))
+			if (removals.stream().anyMatch(nodeLocks.taskRemovalLock::contains))
 				throw new IllegalArgumentException("task removal lock violation");
 		}
 	}
 
 	private boolean verifyTaskLocation(Task task, IntervalSet<LocalDateTime> trajectoryUpdates) {
-		Node worker = task.getWorkerReference().getActual();
+		Node node = task.getNodeReference().getActual();
 		Point location = task.getLocation();
 		LocalDateTime taskStart = task.getStartTime();
 		LocalDateTime taskFinish = task.getFinishTime();
@@ -264,12 +264,12 @@ public class Schedule {
 				LocalDateTime finish = i.getToExclusive();
 			
 				return
-					worker.isStationary(start, finish) &&
-					worker.interpolateLocation(start).equals(location);
+					node.isStationary(start, finish) &&
+					node.interpolateLocation(start).equals(location);
 			});
 	}
 	
-	private boolean verifyTrajectoryContinuity(Node worker, Collection<Trajectory> trajectories) {
+	private boolean verifyTrajectoryContinuity(Node node, Collection<Trajectory> trajectories) {
 		if (trajectories.isEmpty())
 			return true;
 		
@@ -278,7 +278,7 @@ public class Schedule {
 		Trajectory first = it.next();
 		Trajectory last = first;
 		
-		if (!verifyWorkerLocation(worker, first.getStartLocation(), first.getStartTime()))
+		if (!verifyNodeLocation(node, first.getStartLocation(), first.getStartTime()))
 			return false;
 		
 		while (it.hasNext()) {
@@ -288,8 +288,8 @@ public class Schedule {
 			LocalDateTime startTime = curr.getStartTime();
 			
 			if (!startTime.equals(finishTime) && (
-				!verifyWorkerLocation(worker, last.getFinishLocation(), finishTime) ||
-				!verifyWorkerLocation(worker, curr.getStartLocation(), startTime)))
+				!verifyNodeLocation(node, last.getFinishLocation(), finishTime) ||
+				!verifyNodeLocation(node, curr.getStartLocation(), startTime)))
 			{
 				return false;
 			}
@@ -297,17 +297,17 @@ public class Schedule {
 			last = curr;
 		}
 		
-		if (!verifyWorkerLocation(worker, last.getFinishLocation(), last.getFinishTime()))
+		if (!verifyNodeLocation(node, last.getFinishLocation(), last.getFinishTime()))
 			return false;
 		
 		return true;
 	}
 	
-	private boolean verifyWorkerLocation(Node worker, ImmutablePoint location, LocalDateTime time) {
+	private boolean verifyNodeLocation(Node node, ImmutablePoint location, LocalDateTime time) {
 		if (time.equals(Scheduler.END_OF_TIME))
 			return true;
 		
-		return worker.interpolateLocation(time).equals(location);
+		return node.interpolateLocation(time).equals(location);
 	}
 	
 	private void applyChanges(ScheduleAlternative alternative) {
@@ -316,18 +316,18 @@ public class Schedule {
 	}
 
 	private void applyChanges(NodeUpdate update) {
-		Node worker = update.getWorker();
+		Node node = update.getNode();
 		
 		for (Task t : update.getTaskRemovals()) {
-			worker.removeTask(t);
+			node.removeTask(t);
 			tasks.remove(t.getId());
 		}
 		for (Task t : update.getTasks()) {
-			worker.addTask(t);
+			node.addTask(t);
 			tasks.put(t.getId(), t);
 		}
 		for (Trajectory t : update.getTrajectories())
-			worker.updateTrajectory(t);
+			node.updateTrajectory(t);
 	}
 
 	private void applyLocks(ScheduleAlternative alternative) {
@@ -336,10 +336,10 @@ public class Schedule {
 	}
 	
 	private void applyLocks(NodeUpdate update) {
-		NodeLocks workerLocks = locks.get(update.getWorker());
+		NodeLocks nodeLocks = locks.get(update.getNode());
 		
-		workerLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
-		workerLocks.taskRemovalLock.addAll( update.getTaskRemovals()     );
+		nodeLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
+		nodeLocks.taskRemovalLock.addAll( update.getTaskRemovals()     );
 	}
 	
 	private void releaseLocks(ScheduleAlternative alternative) {
@@ -348,10 +348,10 @@ public class Schedule {
 	}
 	
 	private void releaseLocks(NodeUpdate update) {
-		NodeLocks workerLocks = locks.get(update.getWorker());
+		NodeLocks nodeLocks = locks.get(update.getNode());
 		
-		workerLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
-		workerLocks.taskRemovalLock.removeAll( update.getTaskRemovals()     );
+		nodeLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
+		nodeLocks.taskRemovalLock.removeAll( update.getTaskRemovals()     );
 	}
 
 }

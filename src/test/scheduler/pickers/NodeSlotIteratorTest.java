@@ -26,7 +26,7 @@ public class NodeSlotIteratorTest {
 		Node w1 = NodeFixtures.withTwoTasks1();
 		Node w2 = NodeFixtures.withTwoTasks2();
 		
-		Collection<Node> workers = Arrays.asList(w1, w2);
+		Collection<Node> nodes = Arrays.asList(w1, w2);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(3.0);
@@ -34,10 +34,10 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(3L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w2));
+		assertThat(picker.getCurrentNode(), is(w2));
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
 	}
@@ -46,7 +46,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckStartTimePositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(3.0);
@@ -54,17 +54,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckStartTimeNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(3.0);
@@ -72,7 +72,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
@@ -82,7 +82,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckFinishTimePositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(6.5);
@@ -90,17 +90,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckFinishTimeNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(7.5);
@@ -108,7 +108,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
@@ -118,7 +118,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckDurationPositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(3.0);
@@ -126,17 +126,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckDurationNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(3.0);
@@ -144,7 +144,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(3L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, BEGIN_OF_TIME, location, earliest, latest, duration);
+			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 		
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
@@ -154,7 +154,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckFrozenHorizonStartTimePositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(0);
@@ -163,17 +163,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 		
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckFrozenHorizonStartTimeNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(0);
@@ -182,7 +182,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
@@ -192,7 +192,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckFrozenHorizonFinishTimePositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(0);
@@ -201,17 +201,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 		
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckFrozenHorizonFinishTimeNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(0);
@@ -220,7 +220,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(1L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));
@@ -230,7 +230,7 @@ public class NodeSlotIteratorTest {
 	public void testCheckFrozenHorizonDurationPositive() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(5.0);
@@ -239,17 +239,17 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(2L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		picker.next();
-		assertThat(picker.getCurrentWorker(), is(w));
+		assertThat(picker.getCurrentNode(), is(w));
 	}
 	
 	@Test
 	public void testCheckFrozenHorizonDurationNegative() {
 		Node w = NodeFixtures.withTwoTasks1();
 		
-		Collection<Node> workers = Collections.singleton(w);
+		Collection<Node> nodes = Collections.singleton(w);
 
 		Point location = point(0., 0.);
 		LocalDateTime earliest = atHour(5.0);
@@ -258,7 +258,7 @@ public class NodeSlotIteratorTest {
 		Duration duration = Duration.ofHours(2L);
 		
 		NodeSlotIterator picker = new NodeSlotIterator(
-			workers, frozenHorizon, location, earliest, latest, duration);
+			nodes, frozenHorizon, location, earliest, latest, duration);
 		
 		assertThat("picker has next when it shouldn't",
 			picker.hasNext(), is(false));

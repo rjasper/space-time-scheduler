@@ -37,9 +37,9 @@ import com.vividsolutions.jts.geom.Polygon;
 
 // TODO document
 /**
- * <p>The representation of a physical worker unit in the real world which is
+ * <p>The representation of a physical node unit in the real world which is
  * managed by a scheduler. This class abstracts the physical abilities of
- * the real worker, such as its shape and maximum velocity. It stores a
+ * the real node, such as its shape and maximum velocity. It stores a
  * list of takes it is assigned to and its routes which it travels in the real
  * world.</p>
  *
@@ -54,17 +54,17 @@ import com.vividsolutions.jts.geom.Polygon;
 public class Node {
 	
 	/**
-	 * The worker's ID.
+	 * The node's ID.
 	 */
 	private final String id;
 	
 	/**
-	 * The reference to this worker.
+	 * The reference to this node.
 	 */
 	private final NodeReference reference;
 
 	/**
-	 * The physical shape of this worker.
+	 * The physical shape of this node.
 	 */
 	private final ImmutablePolygon shape;
 
@@ -74,39 +74,39 @@ public class Node {
 	private final double radius;
 
 	/**
-	 * The maximum velocity of this worker.
+	 * The maximum velocity of this node.
 	 */
 	private final double maxSpeed;
 
 	/**
-	 * The initial location of the worker where it begins to 'exist'.
+	 * The initial location of the node where it begins to 'exist'.
 	 */
 	private final ImmutablePoint initialLocation;
 
 	/**
-	 * The initial time of the worker when it begins to 'exist'.
+	 * The initial time of the node when it begins to 'exist'.
 	 */
 	private final LocalDateTime initialTime;
 
 	/**
-	 * All tasks which were assigned to this worker.
+	 * All tasks which were assigned to this node.
 	 */
 	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
 	
 	/**
-	 * Contains all consecutive trajectories of this worker
+	 * Contains all consecutive trajectories of this node
 	 */
 	private TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 
 	/**
-	 * Constructs a worker defining its shape, maximum velocity, initial
+	 * Constructs a node defining its shape, maximum velocity, initial
 	 * location and initial time.
 	 * 
 	 * @param spec
-	 *            the specification used to define configure the worker.
+	 *            the specification used to define configure the node.
 	 */
 	public Node(NodeSpecification spec) {
-		this.id = spec.getWorkerId();
+		this.id = spec.getNodeId();
 		this.reference = new NodeReference(this);
 		this.shape = spec.getShape();
 		this.maxSpeed = spec.getMaxSpeed();
@@ -119,7 +119,7 @@ public class Node {
 
 	/**
 	 * Initializes the {@link #trajectoryContainer} with an
-	 * stationary Trajectory at the worker's initial location and initial
+	 * stationary Trajectory at the node's initial location and initial
 	 * time until {@link LocalDateTime#MAX}.
 	 */
 	private void initTrajectoryContainer() {
@@ -140,21 +140,21 @@ public class Node {
 	}
 
 	/**
-	 * @return the reference to this worker.
+	 * @return the reference to this node.
 	 */
 	public NodeReference getReference() {
 		return reference;
 	}
 
 	/**
-	 * @return the physical shape of this worker.
+	 * @return the physical shape of this node.
 	 */
 	public ImmutablePolygon getShape() {
 		return shape;
 	}
 
 	/**
-	 * @return the radius of this worker's shape.
+	 * @return the radius of this node's shape.
 	 */
 	public double getRadius() {
 		return radius;
@@ -163,7 +163,7 @@ public class Node {
 	/**
 	 * Calculates the radius.
 	 *
-	 * @param shape of the worker
+	 * @param shape of the node
 	 * @return the radius.
 	 */
 	private static double calcRadius(Polygon shape) {
@@ -186,21 +186,21 @@ public class Node {
 	}
 
 	/**
-	 * @return the initial location of the worker where it begins to 'exist'.
+	 * @return the initial location of the node where it begins to 'exist'.
 	 */
 	public ImmutablePoint getInitialLocation() {
 		return initialLocation;
 	}
 
 	/**
-	 * @return the initial time of the worker when it begins to 'exist'.
+	 * @return the initial time of the node when it begins to 'exist'.
 	 */
 	public LocalDateTime getInitialTime() {
 		return initialTime;
 	}
 	
 	/**
-	 * Determines whether the given task is currently assigned to this worker.
+	 * Determines whether the given task is currently assigned to this node.
 	 * 
 	 * @param task
 	 * @return {@code true} if {@code task} is assigned.
@@ -225,31 +225,31 @@ public class Node {
 	}
 
 	/**
-	 * Assigns a new task to this worker.
+	 * Assigns a new task to this node.
 	 *
 	 * @param task
 	 * @throws NullPointerException
 	 *             if {@code task} is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this worker.
+	 *             if {@code task} is not assigned to this node.
 	 */
 	public void addTask(Task task) {
 		Objects.requireNonNull(task, "task");
 		
-		if (task.getWorkerReference().getActual() != this)
-			throw new IllegalArgumentException("task not assigned to this worker");
+		if (task.getNodeReference().getActual() != this)
+			throw new IllegalArgumentException("task not assigned to this node");
 	
 		tasks.put(task.getStartTime(), task);
 	}
 
 	/**
-	 * Removes a task from this worker.
+	 * Removes a task from this node.
 	 * 
 	 * @param task
 	 * @throws NullPointerException
 	 *             if {@code task} is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this worker.
+	 *             if {@code task} is not assigned to this node.
 	 */
 	public void removeTask(Task task) {
 		Objects.requireNonNull(task, "task");
@@ -273,11 +273,11 @@ public class Node {
 	}
 
 	/**
-	 * Determines whether the worker is idle for the given entire interval.
+	 * Determines whether the node is idle for the given entire interval.
 	 * 
 	 * @param from
 	 * @param to
-	 * @return {@code true} if the worker is idle.
+	 * @return {@code true} if the node is idle.
 	 */
 	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
 		return !getTaskIntervals().intersects(from, to);
@@ -331,7 +331,7 @@ public class Node {
 	}
 
 	/**
-	 * Interpolates the location of the worker at the given time.
+	 * Interpolates the location of the node at the given time.
 	 * 
 	 * @param time
 	 * @return the interpolated location.
@@ -341,12 +341,12 @@ public class Node {
 	}
 
 	/**
-	 * Determines whether the worker unit is following a stationary trajectory
+	 * Determines whether the node unit is following a stationary trajectory
 	 * during the given time interval.
 	 * 
 	 * @param from
 	 * @param to
-	 * @return {@code true} if the worker is stationary.
+	 * @return {@code true} if the node is stationary.
 	 */
 	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
 		return trajectoryContainer.isStationary(from, to);
@@ -420,7 +420,7 @@ public class Node {
 	}
 	
 	/**
-	 * Creates a set of idle slots which represent sections of the worker
+	 * Creates a set of idle slots which represent sections of the node
 	 * while idling during a given time period.
 	 *
 	 * @param from the beginning of the time period

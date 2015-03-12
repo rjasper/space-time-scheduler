@@ -43,30 +43,30 @@
 //
 ///**
 // * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
-// * It requires multiple parameters which determine the {@link Node worker}
+// * It requires multiple parameters which determine the {@link Node node}
 // * to execute the new task, and the location, duration, and time interval of the
-// * execution. It is also responsible for ensuring that the designated worker is
+// * execution. It is also responsible for ensuring that the designated node is
 // * able to reach the task's location with colliding with any other object; be it
-// * stationary or another worker.</p>
+// * stationary or another node.</p>
 // *
 // * <p>Should it be impossible to plan the new task then the TaskPlanner will
 // * not change the current task set. This might be the case when the designated
-// * worker is unable to reach the location without violating any time
+// * node is unable to reach the location without violating any time
 // * constraints.</p>
 // *
 // * <p>The planning involves the calculation of a spatial path from the previous
-// * location of the worker to the task's location and the successive path to
-// * the next location the worker is required to be. The next step is to calculate
+// * location of the node to the task's location and the successive path to
+// * the next location the node is required to be. The next step is to calculate
 // * a velocity profile to evade dynamic obstacles. Since the old path which
-// * the worker was previously planned to follow will be obsolete other workers
-// * might be affected. Workers which were previously evading the now obsolete
+// * the node was previously planned to follow will be obsolete other nodes
+// * might be affected. Nodes which were previously evading the now obsolete
 // * path section should update their affected path sections with a new
 // * velocity profile.</p>
 // *
 // * <p>The TaskPlanner creates a job queue to calculate the new velocity profile
-// * for the new spatial paths of the designated worker and all other affected
-// * path sections of other workers. The jobs are sorted by the
-// * {@link Job#laxity()} to give priority to workers in a hurry.</p>
+// * for the new spatial paths of the designated node and all other affected
+// * path sections of other nodes. The jobs are sorted by the
+// * {@link Job#laxity()} to give priority to nodes in a hurry.</p>
 // *
 // * @author Rico Jasper
 // */
@@ -83,18 +83,18 @@
 //	private MinimumTimeVelocityPathfinder minimumTimeVelocityPathfinder = new MinimumTimeVelocityPathfinderImpl();
 //
 //	/**
-//	 * The current worker.
+//	 * The current node.
 //	 */
-//	private Node workerUnit = null;
+//	private Node node = null;
 //
 //	/**
-//	 * The whole worker pool.
+//	 * The whole node pool.
 //	 */
-//	private Collection<Node> workerPool = null;
+//	private Collection<Node> nodePool = null;
 //
 //	/**
 //	 * A cache of the {@link WorldPerspective perspectives} of the
-//	 * {@link Node workers}.
+//	 * {@link Node nodes}.
 //	 */
 //	private WorldPerspectiveCache perspectiveCache = null;
 //
@@ -103,7 +103,7 @@
 //	 * {@link Task} the list of DynamicObstacles might be extended multiple
 //	 * times.
 //	 */
-//	private Collection<NodeObstacle> workerObstacles = new LinkedList<>();
+//	private Collection<NodeObstacle> nodeObstacles = new LinkedList<>();
 //	
 //	/**
 //	 * The id of the {@link Task task} to be planned.
@@ -155,44 +155,44 @@
 //	}
 //
 //	/**
-//	 * @return the current worker.
+//	 * @return the current node.
 //	 */
 //	private Node getNode() {
-//		return workerUnit;
+//		return node;
 //	}
 //
 //	/**
-//	 * Sets the current worker. The TaskPlanner uses this worker to plan a
-//	 * {@link Task} which is executed by this worker.
+//	 * Sets the current node. The TaskPlanner uses this node to plan a
+//	 * {@link Task} which is executed by this node.
 //	 *
-//	 * @param worker to execute the task
-//	 * @throws NullPointerException if worker is null
+//	 * @param node to execute the task
+//	 * @throws NullPointerException if node is null
 //	 */
-//	public void setNode(Node worker) {
-//		Objects.requireNonNull(worker, "worker");
+//	public void setNode(Node node) {
+//		Objects.requireNonNull(node, "node");
 //
-//		this.workerUnit = worker;
+//		this.node = node;
 //	}
 //
 //	/**
-//	 * @return the worker pool
+//	 * @return the node pool
 //	 */
-//	private Collection<Node> getWorkerPool() {
-//		return workerPool;
+//	private Collection<Node> getNodePool() {
+//		return nodePool;
 //	}
 //
 //	/**
-//	 * Sets the worker pool. Only workers part of this pool will be regarded as
+//	 * Sets the node pool. Only nodes part of this pool will be regarded as
 //	 * {@link DynamicObstacle dynamic obstacles}.
 //	 *
-//	 * @param workerPool
+//	 * @param nodePool
 //	 * @throws NullPointerException
-//	 *             if workerPool is null of contains {@code null}
+//	 *             if nodePool is null of contains {@code null}
 //	 */
-//	public void setWorkerPool(Collection<Node> workerPool) {
-//		CollectionsRequire.requireNonNull(workerPool, "workerPool");
+//	public void setNodePool(Collection<Node> nodePool) {
+//		CollectionsRequire.requireNonNull(nodePool, "nodePool");
 //		
-//		this.workerPool = unmodifiableCollection( workerPool );
+//		this.nodePool = unmodifiableCollection( nodePool );
 //	}
 //
 //	/**
@@ -215,36 +215,36 @@
 //	}
 //
 //	/**
-//	 * @return the worker obstacles currently of interest. This also includes
-//	 *         already planned path sections of workers.
+//	 * @return the node obstacles currently of interest. This also includes
+//	 *         already planned path sections of nodes.
 //	 */
-//	private Collection<NodeObstacle> getWorkerObstacles() {
-//		return workerObstacles;
+//	private Collection<NodeObstacle> getNodeObstacles() {
+//		return nodeObstacles;
 //	}
 //
 //	/**
-//	 * Adds a path section of a worker to the worker obstacles of interests.
+//	 * Adds a path section of a node to the node obstacles of interests.
 //	 *
 //	 * @param section
 //	 */
 //	private void addNodeObstacle(NodeObstacle section) {
-//		workerObstacles.add(section);
+//		nodeObstacles.add(section);
 //	}
 //
 //	/**
-//	 * Adds multiple worker obstacles to the ones of interest.
+//	 * Adds multiple node obstacles to the ones of interest.
 //	 *
 //	 * @param sections
 //	 */
-//	private void addAllWorkerObstacles(Collection<NodeObstacle> sections) {
-//		workerObstacles.addAll(sections);
+//	private void addAllNodeObstacles(Collection<NodeObstacle> sections) {
+//		nodeObstacles.addAll(sections);
 //	}
 //
 //	/**
 //	 * Clears the collection of dynamic obstacles of interests.
 //	 */
 //	private void clearCurrentDynamicObstacles() {
-//		workerObstacles.clear();
+//		nodeObstacles.clear();
 //	}
 //
 //	/**
@@ -286,7 +286,7 @@
 //	 * planned.<p>
 //	 *
 //	 * <p>Also consideres the {@link Node#getInitialTime() initial time} of
-//	 * the {@link Node current worker}.</p>
+//	 * the {@link Node current node}.</p>
 //	 *
 //	 * @return the earliest start time of the task to be planned.
 //	 */
@@ -384,11 +384,11 @@
 //	 * Adds a new {@link TrajectoryUpdate} to {@link #resultTrajectoryUpdates}.
 //	 * 
 //	 * @param trajectory the updated trajectory
-//	 * @param worker whose trajectory was updated
+//	 * @param node whose trajectory was updated
 //	 */
-//	private void addTrajectoryUpdate(Trajectory trajectory, Node worker) {
+//	private void addTrajectoryUpdate(Trajectory trajectory, Node node) {
 //		resultTrajectoryUpdates.add(
-//			new TrajectoryUpdate(trajectory, worker.getReference()));
+//			new TrajectoryUpdate(trajectory, node.getReference()));
 //	}
 //
 //	/**
@@ -403,10 +403,10 @@
 //	 * @return the SpatialPathfinder.
 //	 */
 //	private SpatialPathfinder getSpatialPathfinder() {
-//		Node worker = getNode();
+//		Node node = getNode();
 //		WorldPerspectiveCache cache = getPerspectiveCache();
 //
-//		WorldPerspective perspective = cache.getPerspectiveFor(worker);
+//		WorldPerspective perspective = cache.getPerspectiveFor(node);
 //
 //		return perspective.getSpatialPathfinder();
 //	}
@@ -417,8 +417,8 @@
 //	 * <p>
 //	 * The following parameters are to be set by their respective setters:
 //	 * <ul>
-//	 * <li>workerUnit</li>
-//	 * <li>workerPool</li>
+//	 * <li>node</li>
+//	 * <li>nodePool</li>
 //	 * <li>perspectiveCache</li>
 //	 * <li>location</li>
 //	 * <li>earliestStartTime</li>
@@ -433,8 +433,8 @@
 //	 */
 //	private void checkParameters() {
 //		// assert all parameters set
-//		if (workerUnit        == null ||
-//			workerPool        == null ||
+//		if (node        == null ||
+//			nodePool        == null ||
 //			perspectiveCache  == null ||
 //			taskId            == null ||
 //			location          == null ||
@@ -449,20 +449,20 @@
 //		if (earliestStartTime.compareTo(latestStartTime) > 0)
 //			throw new IllegalStateException("earliestStartTime is after latestStartTime");
 //
-//		// cannot plan with worker which is not initialized yet
-//		if (latestStartTime.compareTo(workerUnit.getInitialTime()) < 0)
-//			throw new IllegalStateException("worker not initialized yet");
+//		// cannot plan with node which is not initialized yet
+//		if (latestStartTime.compareTo(node.getInitialTime()) < 0)
+//			throw new IllegalStateException("node not initialized yet");
 //	}
 //	
 //	/**
-//	 * <p>Plans new path sections of the current worker to the new task and
+//	 * <p>Plans new path sections of the current node to the new task and
 //	 * the following one. The old section is replaced by the new ones.</p>
 //	 *
-//	 * <p>Other workers might also be affected. If a worker was previously
-//	 * evading the current worker while on a section which now has been removed,
-//	 * then the evading worker's velocity profile will be recalculated. Affected
-//	 * workers might also trigger the recalculation of sections of other
-//	 * workers recursively.</p>
+//	 * <p>Other nodes might also be affected. If a node was previously
+//	 * evading the current node while on a section which now has been removed,
+//	 * then the evading node's velocity profile will be recalculated. Affected
+//	 * nodes might also trigger the recalculation of sections of other
+//	 * nodes recursively.</p>
 //	 *
 //	 * @return {@code true} if the task has been successfully planned.
 //	 */
@@ -489,10 +489,10 @@
 //	 * @return {@code true} if the task has been successfully planned.
 //	 */
 //	private boolean planImpl() {
-//		Node worker = getNode();
+//		Node node = getNode();
 //
 //		// the section to be replaced by two section to and form the new task
-//		NodeObstacle section = worker.getObstacleSection( getEarliestStartTime() );
+//		NodeObstacle section = node.getObstacleSection( getEarliestStartTime() );
 //
 //		Point taskLocation = getLocation();
 //		Point sectionStartLocation = section.getStartLocation();
@@ -512,8 +512,8 @@
 //		// determine the path sections to be recalculated
 //		Collection<MovingNodeObstacle> evasions = buildEvasions(section);
 //
-//		// prepare worker obstacles
-//		addAllWorkerObstacles( buildWorkerPoolSegments(evasions, section) );
+//		// prepare node obstacles
+//		addAllNodeObstacles( buildNodePoolSegments(evasions, section) );
 //
 //		// make jobs
 //		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, section));
@@ -562,7 +562,7 @@
 //
 //	/**
 //	 * A abstract Job to first calculate a velocity profile and then to apply
-//	 * it existing path section of workers. It also has the property to
+//	 * it existing path section of nodes. It also has the property to
 //	 * calculate a laxity to order jobs by importance.
 //	 */
 //	private static abstract class Job implements Comparable<Job> {
@@ -595,7 +595,7 @@
 //
 //		/**
 //		 * Calculates and caches the laxity value. The laxity value is defined
-//		 * by the time allowed to stop per length unit for a worker and still
+//		 * by the time allowed to stop per length unit for a node and still
 //		 * being able to reach the destination in time.
 //		 *
 //		 * @return the laxity
@@ -616,9 +616,9 @@
 //		public abstract double calcLaxity();
 //
 //		/**
-//		 * Calculates the new path sections but does not change any workers
+//		 * Calculates the new path sections but does not change any nodes
 //		 * directly or indirectly. The calculation might be unsuccessful if
-//		 * a worker is unable to reach its destination in time.
+//		 * a node is unable to reach its destination in time.
 //		 *
 //		 * @return {@code true} if valid path sections could be calculated.
 //		 */
@@ -639,10 +639,10 @@
 //	}
 //
 //	/**
-//	 * A CreateJob calculates the velocity profile for the current worker
+//	 * A CreateJob calculates the velocity profile for the current node
 //	 * to the new task and to the following task. It calculates three entirely
 //	 * new trajectories (toTask, atTask, fromTask) which will replace the
-//	 * old section of the current worker.
+//	 * old section of the current node.
 //	 */
 //	private class CreateJob extends Job {
 //
@@ -674,7 +674,7 @@
 //		// calculateTrajectoryFromTask which are called by calculate.
 //
 //		/**
-//		 * The view of the current worker on the dynamic obstacles.
+//		 * The view of the current node on the dynamic obstacles.
 //		 */
 //		private Collection<DynamicObstacle> dynamicObstacles;
 //
@@ -759,8 +759,8 @@
 //		 */
 //		@Override
 //		public double calcLaxity() {
-//			Node worker = getNode();
-//			double maxSpeed = worker.getMaxSpeed();
+//			Node node = getNode();
+//			double maxSpeed = node.getMaxSpeed();
 //			double length = toTask.length() + fromTask.length();
 //			double taskDuration = inSeconds( getDuration() );
 //			double maxDuration = inSeconds( getJobDuration() );
@@ -771,8 +771,8 @@
 //		@Override
 //		public boolean calculate() {
 //			boolean status;
-//			Node worker = getNode();
-//			dynamicObstacles = buildDynamicObstaclesFor(worker);
+//			Node node = getNode();
+//			dynamicObstacles = buildDynamicObstaclesFor(node);
 //
 //			// calculate trajectory to task
 //
@@ -785,12 +785,12 @@
 //			// create task
 //
 //			UUID taskId = getTaskId();
-//			NodeReference workerRef = worker.getReference();
+//			NodeReference nodeRef = node.getReference();
 //			ImmutablePoint taskLocation = getLocation();
 //			Duration taskDuration = getDuration();
 //			LocalDateTime taskStartTime = trajToTask.getFinishTime();
 //
-//			task = new Task(taskId, workerRef, taskLocation, taskStartTime, taskDuration);
+//			task = new Task(taskId, nodeRef, taskLocation, taskStartTime, taskDuration);
 //
 //			// calculate trajectory from task
 //
@@ -804,18 +804,18 @@
 //
 //			// don't introduce trajectories without duration
 //			sectionToTask = trajToTask.getDuration().isZero() ?
-//				null : new MovingNodeObstacle(worker, trajToTask, task);
-//			sectionAtTask = new OccupiedNodeObstacle(worker, task);
+//				null : new MovingNodeObstacle(node, trajToTask, task);
+//			sectionAtTask = new OccupiedNodeObstacle(node, task);
 //
 //			if (section instanceof MovingNodeObstacle) {
 //				Task nextTask = ((MovingNodeObstacle) section).getGoal();
 //				
 //				// don't introduce trajectories without duration
 //				sectionFromTask = trajFromTask.getDuration().isZero() ?
-//					null : new MovingNodeObstacle(worker, trajFromTask, nextTask);
+//					null : new MovingNodeObstacle(node, trajFromTask, nextTask);
 //			} else if (section instanceof IdlingNodeObstacle) {
 //				LocalDateTime taskFinishTime = task.getFinishTime();
-//				sectionFromTask = new IdlingNodeObstacle(worker, taskLocation, taskFinishTime);
+//				sectionFromTask = new IdlingNodeObstacle(node, taskLocation, taskFinishTime);
 //			} else {
 //				throw new RuntimeException("unexpected NodeObstacle");
 //			}
@@ -932,22 +932,22 @@
 //			}
 //
 //			// add obstacle sections and task
-//			Node worker = getNode();
+//			Node node = getNode();
 //			silenceSection(section);
 //			if (sectionToTask != null) {
-//				worker.addObstacleSection(sectionToTask);
-//				addTrajectoryUpdate(trajToTask, worker);
+//				node.addObstacleSection(sectionToTask);
+//				addTrajectoryUpdate(trajToTask, node);
 //			}
 //			
-//			worker.addObstacleSection(sectionAtTask);
-//			addTrajectoryUpdate(sectionAtTask.getTrajectory(), worker);
+//			node.addObstacleSection(sectionAtTask);
+//			addTrajectoryUpdate(sectionAtTask.getTrajectory(), node);
 //			
 //			if (sectionFromTask != null) {
-//				worker.addObstacleSection(sectionFromTask);
-//				addTrajectoryUpdate(trajFromTask, worker);
+//				node.addObstacleSection(sectionFromTask);
+//				addTrajectoryUpdate(trajFromTask, node);
 //			}
 //			
-//			worker.addTask(task);
+//			node.addTask(task);
 //			setResultTask(task);
 //		}
 //
@@ -955,8 +955,8 @@
 //
 //	/**
 //	 * An UpdateJob recalculates the existing velocity profile of a path
-//	 * section of a worker directly or indirectly affected by the new spatial
-//	 * path of the current worker.
+//	 * section of a node directly or indirectly affected by the new spatial
+//	 * path of the current node.
 //	 */
 //	private class UpdateJob extends Job {
 //
@@ -993,8 +993,8 @@
 //
 //		@Override
 //		public double calcLaxity() {
-//			Node worker = section.getNode();
-//			double maxSpeed = worker.getMaxSpeed();
+//			Node node = section.getNode();
+//			double maxSpeed = node.getMaxSpeed();
 //			double length = section.getTrajectory().length();
 //			double maxDuration = inSeconds( getJobDuration() );
 //
@@ -1010,18 +1010,18 @@
 //		 */
 //		@Override
 //		public boolean calculate() {
-//			Node worker = section.getNode();
+//			Node node = section.getNode();
 //			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 //			
 //			ArcTimePath st = section.getArcTimePathComponent();
 //
-//			pf.setDynamicObstacles( buildDynamicObstaclesFor(worker)  );
+//			pf.setDynamicObstacles( buildDynamicObstaclesFor(node)  );
 //			pf.setSpatialPath     ( section.getSpatialPathComponent() );
 //			pf.setMinArc          ( st.minArc()                       );
 //			pf.setMaxArc          ( st.maxArc()                       );
 //			pf.setStartArc        ( st.getStartPoint().getX()         );
 //			pf.setFinishArc       ( st.getFinishPoint().getX()        );
-//			pf.setMaxSpeed        ( worker.getMaxSpeed()              );
+//			pf.setMaxSpeed        ( node.getMaxSpeed()              );
 //			pf.setStartTime       ( section.getStartTime()            );
 //			pf.setFinishTime      ( section.getFinishTime()           );
 //
@@ -1032,7 +1032,7 @@
 //
 //			evaded = onlyNodeObstacles( pf.getResultEvadedObstacles() );
 //			updatedSegment = new MovingNodeObstacle(
-//				worker, pf.getResultTrajectory(), section.getGoal());
+//				node, pf.getResultTrajectory(), section.getGoal());
 //
 //			addNodeObstacle(updatedSegment);
 //
@@ -1053,10 +1053,10 @@
 //				registerEvasion(updatedSegment, e);
 //
 //			// update obstacle section
-//			Node worker = section.getNode();
+//			Node node = section.getNode();
 //			silenceSection(section);
-//			worker.addObstacleSection(updatedSegment);
-//			addTrajectoryUpdate(updatedSegment.getTrajectory(), worker);
+//			node.addObstacleSection(updatedSegment);
+//			addTrajectoryUpdate(updatedSegment.getTrajectory(), node);
 //		}
 //
 //	}
@@ -1077,7 +1077,7 @@
 //
 //	/**
 //	 * Builds a collection of all potentially affected path sections when
-//	 * removing the original path section of the current worker.
+//	 * removing the original path section of the current node.
 //	 *
 //	 * @param obstacleSegment the original path section to be removed
 //	 * @return the potentially affected path sections
@@ -1105,7 +1105,7 @@
 //	}
 //
 //	/**
-//	 * Builds a collection of worker obstacles using the {@link #workerPool}.
+//	 * Builds a collection of node obstacles using the {@link #nodePool}.
 //	 * Exculdes all path sections given by exclusions and the obsolete section
 //	 * to be removed.
 //	 *
@@ -1113,11 +1113,11 @@
 //	 * @param obsoleteSegment
 //	 * @return
 //	 */
-//	private Collection<NodeObstacle> buildWorkerPoolSegments(
+//	private Collection<NodeObstacle> buildNodePoolSegments(
 //		Collection<? extends NodeObstacle> exclusions,
 //		NodeObstacle obsoleteSegment)
 //	{
-//		Collection<Node> pool = getWorkerPool();
+//		Collection<Node> pool = getNodePool();
 //
 //		// tODO only use relevant sections
 //		return pool.stream()
@@ -1127,32 +1127,32 @@
 //	}
 //
 //	/**
-//	 * Builds the the given worker's perspective on the dynamic obstacles.
-//	 * It buffers all {@link #workerObstacles obstacles of interests}
-//	 * by the worker's radius and excludes the path sections of the worker
+//	 * Builds the the given node's perspective on the dynamic obstacles.
+//	 * It buffers all {@link #nodeObstacles obstacles of interests}
+//	 * by the node's radius and excludes the path sections of the node
 //	 * itself.
 //	 *
-//	 * @param worker to build the perspective for
-//	 * @return a collection of dynamic obstacles in the worker's perspective.
+//	 * @param node to build the perspective for
+//	 * @return a collection of dynamic obstacles in the node's perspective.
 //	 */
-//	private Collection<DynamicObstacle> buildDynamicObstaclesFor(Node worker) {
-//		double bufferDistance = worker.getRadius();
+//	private Collection<DynamicObstacle> buildDynamicObstaclesFor(Node node) {
+//		double bufferDistance = node.getRadius();
 //
 //		// an exact solution would be to calculate the minkowski sum
-//		// of each obstacle and the worker's shape
+//		// of each obstacle and the node's shape
 //		
 //		Stream<DynamicObstacle> worldObstacles = getPerspectiveCache()
-//			.getPerspectiveFor(worker)
+//			.getPerspectiveFor(node)
 //			.getView()
 //			.getDynamicObstacles()
 //			.stream();
 //		
-//		Stream<DynamicObstacle> workerObstacles = getWorkerObstacles().stream()
+//		Stream<DynamicObstacle> nodeObstacles = getNodeObstacles().stream()
 //			.filter(o -> !(o instanceof NodeObstacle)
-//				|| o.getNode() != worker)
+//				|| o.getNode() != node)
 //			.map(o -> o.buffer(bufferDistance));
 //
-//		return Stream.concat(worldObstacles, workerObstacles)
+//		return Stream.concat(worldObstacles, nodeObstacles)
 //			.collect(toList());
 //	}
 //	
@@ -1172,7 +1172,7 @@
 //	}
 //	
 //	/**
-//	 * Silences the given section. The section will be removed from its worker
+//	 * Silences the given section. The section will be removed from its node
 //	 * and will unregister any evasions which it is involved in.
 //	 * 
 //	 * @param section
