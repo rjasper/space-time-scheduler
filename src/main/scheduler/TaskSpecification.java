@@ -29,6 +29,39 @@ import com.vividsolutions.jts.geom.Point;
  */
 public final class TaskSpecification {
 	
+	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createSF(
+		UUID taskId,
+		G locationSpace,
+		LocalDateTime earliestStartTime,
+		LocalDateTime latestFinishTime,
+		Duration duration)
+	{
+		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
+		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+	}
+	
+	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createSS(
+		UUID taskId,
+		G locationSpace,
+		LocalDateTime earliestStartTime,
+		LocalDateTime latestStartTime,
+		Duration duration)
+	{
+		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+	}
+	
+	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createFF(
+		UUID taskId,
+		G locationSpace,
+		LocalDateTime earliestFinishTime,
+		LocalDateTime latestFinishTime,
+		Duration duration)
+	{
+		LocalDateTime earliestStartTime = earliestFinishTime.minus(duration);
+		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
+		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+	}
+	
 	/**
 	 * The ID of the task.
 	 */
@@ -102,7 +135,7 @@ public final class TaskSpecification {
 	/**
 	 * @return the id of the task.
 	 */
-	public final UUID getTaskId() {
+	public UUID getTaskId() {
 		return taskId;
 	}
 
@@ -110,28 +143,42 @@ public final class TaskSpecification {
 	 * @return the immutable spatial space for a valid {@link Point location}.
 	 */
 	@SuppressWarnings("unchecked")
-	public final <G extends Geometry & ImmutableGeometry> G getLocationSpace() {
+	public <G extends Geometry & ImmutableGeometry> G getLocationSpace() {
 		return (G) locationSpace;
 	}
 
 	/**
 	 * @return the earliest possible start time.
 	 */
-	public final LocalDateTime getEarliestStartTime() {
+	public LocalDateTime getEarliestStartTime() {
 		return earliestStartTime;
 	}
 
 	/**
 	 * @return the latest possible start time.
 	 */
-	public final LocalDateTime getLatestStartTime() {
+	public LocalDateTime getLatestStartTime() {
 		return latestStartTime;
+	}
+	
+	/**
+	 * @return the earliest possible finish time.
+	 */
+	public LocalDateTime getEarliestFinishTime() {
+		return earliestStartTime.plus(duration);
+	}
+	
+	/**
+	 * @return the latest possible finish time.
+	 */
+	public LocalDateTime getLatestFinishTime() {
+		return latestStartTime.plus(duration);
 	}
 
 	/**
 	 * @return the exact duration of a task.
 	 */
-	public final Duration getDuration() {
+	public Duration getDuration() {
 		return duration;
 	}
 
