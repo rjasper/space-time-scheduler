@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LocationIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator.NodeSlot;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator.NodeIdleSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
@@ -119,13 +119,13 @@ public class SingularJobScheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the nodes are filtered by the location
 			
-			Iterable<NodeSlot> nodeSlots = () -> new NodeIdleSlotIterator(
+			Iterable<NodeIdleSlot> nodeSlots = () -> new NodeIdleSlotIterator(
 				filterByLocation(location),
 				frozenHorizonTime,
 				location,
 				earliest, latest, duration);
 
-			for (NodeSlot ws : nodeSlots) {
+			for (NodeIdleSlot ws : nodeSlots) {
 				Node w = ws.getNode();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);

@@ -28,14 +28,14 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
  *
  * @author Rico Jasper
  */
-public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeSlot> {
+public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeIdleSlot> {
 	
 	// TODO sort by least detour
 
 	/**
 	 * Helper class to pair a node and one of its idle slots.
 	 */
-	public static class NodeSlot {
+	public static class NodeIdleSlot {
 
 		/**
 		 * The node of the idle slot.
@@ -53,7 +53,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeS
 		 * @param node
 		 * @param idleSlot
 		 */
-		public NodeSlot(Node node, IdleSlot idleSlot) {
+		public NodeIdleSlot(Node node, IdleSlot idleSlot) {
 			this.node = node;
 			this.idleSlot = idleSlot;
 		}
@@ -214,7 +214,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeS
 	 * @see java.util.Iterator#next()
 	 */
 	@Override
-	public NodeSlot next() {
+	public NodeIdleSlot next() {
 		if (!hasNext())
 			throw new NoSuchElementException();
 		
@@ -223,7 +223,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeS
 
 		nextSlot();
 
-		return new NodeSlot(getCurrentNode(), getCurrentSlot());
+		return new NodeIdleSlot(getCurrentNode(), getCurrentSlot());
 	}
 
 	/**
