@@ -24,7 +24,6 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import org.junit.Test;
 
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.DependentJobIterator;
 import de.tu_berlin.mailbox.rjasper.time.TimeFactory;
 import de.tu_berlin.mailbox.rjasper.util.UUIDFactory;
 

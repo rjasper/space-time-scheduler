@@ -13,8 +13,8 @@ import java.util.TreeMap;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.MappedIntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.MappedIntervalSet;
 
 public class TrajectoryContainer {
 	

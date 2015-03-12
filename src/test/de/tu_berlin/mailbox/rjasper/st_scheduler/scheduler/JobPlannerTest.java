@@ -19,12 +19,6 @@ import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobPlanner;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Schedule;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories.NodeFactory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.RadiusBasedWorldPerspectiveCache;
@@ -42,8 +36,8 @@ public class JobPlannerTest {
 	private static Schedule makeSchedule(Node... nodes) {
 		Schedule schedule = new Schedule();
 		
-		for (Node w : nodes)
-			schedule.addNode(w);
+		for (Node n : nodes)
+			schedule.addNode(n);
 		
 		return schedule;
 	}
@@ -100,14 +94,14 @@ public class JobPlannerTest {
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
 			immutableBox(30., 10., 40., 40.));
-		Node w = wFact.createNode("w", 10.0, 20.0);
+		Node n = wFact.createNode("n", 10.0, 20.0);
 
-		Schedule schedule = makeSchedule(w);
+		Schedule schedule = makeSchedule(n);
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job"),
 			point(60., 20.),
 			atSecond(120.),
@@ -115,8 +109,8 @@ public class JobPlannerTest {
 		
 		assertThat("unable to plan job",
 			status, equalTo(true));
-		assertThat("w collided with obstacle",
-			w, not(nodeCollidesWith(obstacle)));
+		assertThat("n collided with obstacle",
+			n, not(nodeCollidesWith(obstacle)));
 	}
 	
 	@Test
@@ -127,14 +121,14 @@ public class JobPlannerTest {
 			40,  0,
 			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
-		Node w = wFact.createNode("w", 10.0, 20.0);
+		Node n = wFact.createNode("n", 10.0, 20.0);
 
-		Schedule schedule = makeSchedule(w);
+		Schedule schedule = makeSchedule(n);
 		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
 		
 		// P = (60, 20), t = 120, d = 30
 		boolean status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job"),
 			point(50., 20.),
 			atSecond(60.),
@@ -142,77 +136,20 @@ public class JobPlannerTest {
 		
 		assertThat("unable to plan job",
 			status, equalTo(true));
-		assertThat("w collided with obstacle",
-			w, not(nodeCollidesWith(obstacle)));
+		assertThat("n collided with obstacle",
+			n, not(nodeCollidesWith(obstacle)));
 	}
-	
-//	@Test
-//	public void testObsoleteEvasions() {
-//		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
-//		Node w1 = wFact.createNode("w1", shape, 1.0, 3.0, 5.0, 0.0);
-//		Node w2 = wFact.createNode("w2", shape, 1.0, 2.0, 3.0, 5.0);
-//
-//		Schedule schedule = makeSchedule(w1, w2);
-//		World world = new World();
-//		
-//		boolean status;
-//	
-//		// w = w1, P = (3, 1), t = 10, d = 2
-//		status = planJob(world, schedule,
-//			w1,
-//			uuid("job1"),
-//			point(3.0, 1.0),
-//			atSecond(10.0),
-//			ofSeconds(2.0));
-//	
-//		assertThat("unable to plan job",
-//			status, equalTo(true));
-////		assertThat("w1 evaded someone when it shouldn't have",
-////			nodes, not(areEvadedBy(w1)));
-//	
-//		// w = w2, P = (5, 3), t = 10, d = 2
-//		status = planJob(world, schedule,
-//			w2,
-//			uuid("job2"),
-//			point(5.0, 3.0),
-//			atSecond(10.0),
-//			ofSeconds(2.0));
-//	
-//		assertThat("unable to plan job",
-//			status, equalTo(true));
-////		assertThat("w1 evaded someone when it shouldn't have",
-////			nodes, not(areEvadedBy(w1)));
-////		assertThat("w2 didn't evade w1",
-////			w1, isEvadedBy(w2, atSecond(5.0)));
-////		assertThat("w2 evaded someone it wasn't supposed to",
-////			nodes, evadedByNumTimes(w2, 1));
-//	
-//		// w = w1, P = (1, 3), t = 4, d = 2
-//		status = planJob(world, schedule,
-//			w1,
-//			uuid("job3"),
-//			point(1.0, 3.0),
-//			atSecond(4.0),
-//			ofSeconds(2.0));
-//	
-//		assertThat("unable to plan job",
-//			status, equalTo(true));
-////		assertThat("w1 evaded someone when it shouldn't have",
-////			nodes, not(areEvadedBy(w1)));
-////		assertThat("w2 evaded someone when it shouldn't have",
-////			nodes, not(areEvadedBy(w2)));
-//	}
 	
 	@Test
 	public void testTightPlan1() {
-		Node w = wFact.createNode(
-			"w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		Node n = wFact.createNode(
+			"n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 
 		World world = new World();
-		Schedule schedule = makeSchedule(w);
+		Schedule schedule = makeSchedule(n);
 		
 		boolean status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job"),
 			point(0, 0),
 			atSecond(0),
@@ -224,17 +161,17 @@ public class JobPlannerTest {
 
 	@Test
 	public void testTightPlan2() {
-		Node w = wFact.createNode(
-			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+		Node n = wFact.createNode(
+			"n", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 
 		World world = new World();
-		Schedule schedule = makeSchedule(w);
+		Schedule schedule = makeSchedule(n);
 		
 		boolean status;
 
 		// P = (3, 1), t = 2, d = 1
 		status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job1"),
 			point(3, 1),
 			atSecond(2),
@@ -245,7 +182,7 @@ public class JobPlannerTest {
 
 		// P = (3, 1), t = 3, d = 1
 		status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job2"),
 			point(3, 1),
 			atSecond(3),
@@ -257,17 +194,17 @@ public class JobPlannerTest {
 	
 	@Test
 	public void testTightPlan3() {
-		Node w = wFact.createNode(
-			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
+		Node n = wFact.createNode(
+			"n", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 
 		World world = new World();
-		Schedule schedule = makeSchedule(w);
+		Schedule schedule = makeSchedule(n);
 		
 		boolean status;
 
 		// P = (3, 1), t = 3, d = 1
 		status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job1"),
 			point(3, 1),
 			atSecond(3),
@@ -278,7 +215,7 @@ public class JobPlannerTest {
 
 		// P = (3, 1), t = 2, d = 1
 		status = planJob(world, schedule,
-			w,
+			n,
 			uuid("job2"),
 			point(3, 1),
 			atSecond(2),

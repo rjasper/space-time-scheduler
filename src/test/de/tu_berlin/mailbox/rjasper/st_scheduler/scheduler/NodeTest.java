@@ -16,11 +16,6 @@ import java.util.Collection;
 import org.junit.Test;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeReference;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DecomposedTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
@@ -64,19 +59,19 @@ public class NodeTest {
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
 		
 		node.updateTrajectory(traj);
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		node.cleanUp(atSecond(4.5));
 		
 		assertThat("did not remove past job",
-			node.hasJob(t1), is(false));
+			node.hasJob(j1), is(false));
 		assertThat("removed unfinished job",
-			node.hasJob(t2), is(true));
+			node.hasJob(j2), is(true));
 		assertThat("removed wrong number of trajectories",
 			node.getTrajectories().size(), is(1));
 	}
@@ -90,7 +85,7 @@ public class NodeTest {
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
-		Job job = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		Job job = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
 		
 		node.updateTrajectory(traj);
 		node.addJob(job);
@@ -112,19 +107,19 @@ public class NodeTest {
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(1, 1), atSecond(0), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(4), secondsToDuration(1));
 		
 		node.updateTrajectory(traj);
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		node.cleanUp(atSecond(5));
 		
 		assertThat("did not remove past job",
-			node.hasJob(t1), is(false));
+			node.hasJob(j1), is(false));
 		assertThat("removed unfinished job",
-			node.hasJob(t2), is(false));
+			node.hasJob(j2), is(false));
 		assertThat("removed wrong number of trajectories",
 			node.getTrajectories().size(), is(1));
 	}
@@ -157,14 +152,14 @@ public class NodeTest {
 			spatialPath(0, 0, 0, 1, 1, 1, 1, 0),
 			arcTimePath(0, 0, 1, 1, 1, 2, 2, 3, 2, 4, 3, 5, 3, 6));
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
-		Job t3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
+		Job j3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
 		
 		node.updateTrajectory(traj);
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		Collection<IdleSlot> slots = node.idleSlots(atSecond(0.5), atSecond(4.5));
 		
@@ -181,9 +176,9 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
-		node.addJob(t1);
+		node.addJob(j1);
 		
 		assertThat(node.floorIdleTimeOrNull(atSecond(1.5)), is(nullValue()));
 	}
@@ -193,11 +188,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.floorIdleTimeOrNull(atSecond(2.5)), equalTo(atSecond(2)));
 	}
@@ -207,11 +202,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.floorIdleTimeOrNull(atSecond(2)), equalTo(atSecond(2)));
 	}
@@ -221,11 +216,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.floorIdleTimeOrNull(atSecond(3)), equalTo(atSecond(2)));
 	}
@@ -235,9 +230,9 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
-		node.addJob(t1);
+		node.addJob(j1);
 		
 		assertThat(node.floorIdleTimeOrNull(atSecond(0)), is(nullValue()));
 	}
@@ -247,11 +242,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.ceilingIdleTimeOrNull(atSecond(2.5)), equalTo(atSecond(3)));
 	}
@@ -261,11 +256,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.ceilingIdleTimeOrNull(atSecond(2)), equalTo(atSecond(3)));
 	}
@@ -275,11 +270,11 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
 		
-		node.addJob(t1);
-		node.addJob(t2);
+		node.addJob(j1);
+		node.addJob(j2);
 		
 		assertThat(node.ceilingIdleTimeOrNull(atSecond(3)), equalTo(atSecond(3)));
 	}
@@ -289,9 +284,9 @@ public class NodeTest {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
-		node.addJob(t1);
+		node.addJob(j1);
 		
 		assertThat(node.ceilingIdleTimeOrNull(atSecond(0)), is(nullValue()));
 	}
@@ -316,17 +311,17 @@ public class NodeTest {
 			 2,  0,  0,
 			14, 16, 19);
 
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
-		Job t3 = new Job(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Job j3 = new Job(uuid("j2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
 		
 		node.updateTrajectory(traj1);
 		node.updateTrajectory(traj2);
 		node.updateTrajectory(traj3);
 		
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		assertThat(node.calcLoad(atSecond(0), atSecond(16)), is(0.6875));
 	}
@@ -351,17 +346,17 @@ public class NodeTest {
 			 2,  0,  0,
 			14, 16, 19);
 
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
-		Job t3 = new Job(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Job j3 = new Job(uuid("j2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
 		
 		node.updateTrajectory(traj1);
 		node.updateTrajectory(traj2);
 		node.updateTrajectory(traj3);
 		
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		assertThat(node.calcJobLoad(atSecond(0), atSecond(16)), is(0.3125));
 	}
@@ -386,17 +381,17 @@ public class NodeTest {
 			 2,  0,  0,
 			14, 16, 19);
 
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
-		Job t3 = new Job(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Job j3 = new Job(uuid("j2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
 		
 		node.updateTrajectory(traj1);
 		node.updateTrajectory(traj2);
 		node.updateTrajectory(traj3);
 		
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		assertThat(node.calcMotionLoad(atSecond(0), atSecond(16)), is(0.375));
 	}
@@ -421,17 +416,17 @@ public class NodeTest {
 			 2,  0,  0,
 			14, 16, 19);
 
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
-		Job t3 = new Job(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Job j3 = new Job(uuid("j2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
 		
 		node.updateTrajectory(traj1);
 		node.updateTrajectory(traj2);
 		node.updateTrajectory(traj3);
 		
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		assertThat(node.calcStationaryIdleLoad(atSecond(0), atSecond(16)), is(0.3125));
 	}
@@ -456,17 +451,17 @@ public class NodeTest {
 			 2,  0,  0,
 			14, 16, 19);
 
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
-		Job t3 = new Job(uuid("t2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(2));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(3, 3), atSecond( 6), secondsToDuration(3));
+		Job j3 = new Job(uuid("j2"), ref, immutablePoint(3, 2), atSecond(12), secondsToDuration(1));
 		
 		node.updateTrajectory(traj1);
 		node.updateTrajectory(traj2);
 		node.updateTrajectory(traj3);
 		
-		node.addJob(t1);
-		node.addJob(t2);
-		node.addJob(t3);
+		node.addJob(j1);
+		node.addJob(j2);
+		node.addJob(j3);
 		
 		assertThat(node.calcVelocityLoad(atSecond(0), atSecond(16)), is(0.140625));
 	}

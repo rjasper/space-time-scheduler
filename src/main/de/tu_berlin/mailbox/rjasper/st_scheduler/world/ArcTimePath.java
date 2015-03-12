@@ -128,13 +128,9 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 		 * 
 		 * @param index
 		 * @param point
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
 		 */
-		private Vertex(int index, ImmutablePoint point, boolean first, boolean last) {
-			super(index, point, first, last);
+		private Vertex(ArcTimePath path, int index, ImmutablePoint point) {
+			super(path, index, point);
 		}
 		
 	}
@@ -143,7 +139,7 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * The segment of a {@code ArcTimePath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends PointPath.Segment<Vertex> {
+	public class Segment extends PointPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
@@ -185,8 +181,8 @@ public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePa
 	 * @see world.AbstractPointPath#makeVertex(int, jts.geom.immutable.ImmutablePoint, boolean, boolean)
 	 */
 	@Override
-	protected Vertex makeVertex(int index, ImmutablePoint point, boolean first, boolean last) {
-		return new Vertex(index, point, first, last);
+	protected Vertex makeVertex(int index, ImmutablePoint point) {
+		return new Vertex(this, index, point);
 	}
 
 	/*

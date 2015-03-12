@@ -12,10 +12,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
 
 public class ScheduleAlternativeTest {
 	
@@ -36,10 +32,10 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranch() {
-		Node w = node("w1", 0, 0);
+		Node n = node("n", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
-		Job job = new Job(uuid("job"), w.getReference(),
+		Job job = new Job(uuid("job"), n.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
 		root.addJob(job);
@@ -71,12 +67,12 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchMerge() {
-		Node w = node("w1", 0, 0);
+		Node n = node("n", 0, 0);
 		
 		ScheduleAlternative root = new ScheduleAlternative();
 		ScheduleAlternative branch = root.branch();
 		
-		Job job = new Job(uuid("job"), w.getReference(),
+		Job job = new Job(uuid("job"), n.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
 		branch.addJob(job);
@@ -112,10 +108,10 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchDelete() {
-		Node w = node("w1", 0, 0);
+		Node n = node("n", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
-		Job job = new Job(uuid("job"), w.getReference(),
+		Job job = new Job(uuid("job"), n.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
 		ScheduleAlternative branch = root.branch();
@@ -138,12 +134,12 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testDuplicateJobId() {
-		Node w = node("w1", 0, 0);
+		Node n = node("n", 0, 0);
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
-		Job j1 = new Job(uuid("duplicate"), w.getReference(),
+		Job j1 = new Job(uuid("duplicate"), n.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Job j2 = new Job(uuid("duplicate"), w.getReference(),
+		Job j2 = new Job(uuid("duplicate"), n.getReference(),
 			immutablePoint(10, 10), atSecond(10), secondsToDuration(1));
 		
 		alternative.addJob(j1);

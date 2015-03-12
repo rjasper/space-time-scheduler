@@ -12,9 +12,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.TrajectoryContainer;
-
 public class TrajectoryContainerTest {
 	
 	@Rule

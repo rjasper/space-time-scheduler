@@ -14,7 +14,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 import de.tu_berlin.mailbox.rjasper.util.NameProvider;
 
 /**
- * <p>An object of this class describes the specifications of a job.</p>
+ * <p>An object of this class describes the specification of a job.</p>
  *
  * <p>To schedule a new job it is required to pass a specification to the
  * {@link Scheduler}. It will try to find a realizable configuration of a job
@@ -29,6 +29,28 @@ import de.tu_berlin.mailbox.rjasper.util.NameProvider;
  */
 public final class JobSpecification {
 	
+	/**
+	 * Creates a JobSpecification defining an interval for the location and
+	 * start time and the duration of a {@link Job job}.
+	 * 
+	 * @param jobId
+	 * @param locationSpace
+	 * @param earliestStartTime
+	 * @param latestFinishTime
+	 * @param duration
+	 *
+	 * @throws NullPointerException
+	 *             if any argument is null
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>the {@code locationSpace} is empty, non-simple, or invalid</li>
+	 *             <li>the duration between {@code earliestStartTime} and
+	 *             {@code latestStartTime} is smaller than the given
+	 *             {@code duration}</li>
+	 *             </ul>
+	 * @return
+	 */
 	public static <G extends Geometry & ImmutableGeometry> JobSpecification createSF(
 		UUID jobId,
 		G locationSpace,
@@ -39,7 +61,28 @@ public final class JobSpecification {
 		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
 		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
-	
+
+	/**
+	 * Creates a JobSpecification defining an interval for the location and
+	 * start time and the duration of a {@link Job job}.
+	 * 
+	 * @param jobId
+	 * @param locationSpace
+	 * @param earliestStartTime
+	 * @param latestStartTime
+	 * @param duration
+	 *
+	 * @throws NullPointerException
+	 *             if any argument is null
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>the {@code locationSpace} is empty, non-simple, or invalid</li>
+	 *             <li>the {@code earliestStartTime} is after the {@code latestStartTime}</li>
+	 *             <li>the {@code duration} is negative or zero</li>
+	 *             </ul>
+	 * @return
+	 */
 	public static <G extends Geometry & ImmutableGeometry> JobSpecification createSS(
 		UUID jobId,
 		G locationSpace,
@@ -49,7 +92,28 @@ public final class JobSpecification {
 	{
 		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
-	
+
+	/**
+	 * Creates a JobSpecification defining an interval for the location and
+	 * start time and the duration of a {@link Job job}.
+	 * 
+	 * @param jobId
+	 * @param locationSpace
+	 * @param earliestFinishTime
+	 * @param latestFinishTime
+	 * @param duration
+	 *
+	 * @throws NullPointerException
+	 *             if any argument is null
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>the {@code locationSpace} is empty, non-simple, or invalid</li>
+	 *             <li>the {@code earliestFinishTime} is after the {@code latestFinishTime}</li>
+	 *             <li>the {@code duration} is negative or zero</li>
+	 *             </ul>
+	 * @return
+	 */
 	public static <G extends Geometry & ImmutableGeometry> JobSpecification createFF(
 		UUID jobId,
 		G locationSpace,
@@ -88,7 +152,7 @@ public final class JobSpecification {
 	private final Duration duration;
 
 	/**
-	 * Constructs a new Specification defining an interval for the location and
+	 * Constructs a {@code JobSpecification} defining an interval for the location and
 	 * start time and the duration of a {@link Job job}.
 	 * 
 	 * @param jobId

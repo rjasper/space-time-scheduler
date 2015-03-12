@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableList;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractFixTimePathfinder;
 
 public abstract class AbstractFixTimePathfinderTest {
 	

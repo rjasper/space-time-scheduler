@@ -115,13 +115,9 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		 * @param point
 		 * @param arc
 		 *            value
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
 		 */
-		public Vertex(int index, ImmutablePoint point, double arc, boolean first, boolean last) {
-			super(index, point, first, last);
+		public Vertex(SpatialPath path, int index, ImmutablePoint point, double arc) {
+			super(path, index, point);
 			
 			this.arc = arc;
 		}
@@ -139,7 +135,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * The segment of a {@code SpatialPath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment extends PointPath.Segment<Vertex> {
+	public class Segment extends PointPath.Segment<Vertex> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
@@ -167,8 +163,8 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 * @see world.AbstractPointPath#makeVertex(int, jts.geom.immutable.ImmutablePoint, boolean, boolean)
 	 */
 	@Override
-	protected Vertex makeVertex(int index, ImmutablePoint point, boolean first, boolean last) {
-		return new Vertex(index, point, arcs[index], first, last);
+	protected Vertex makeVertex(int index, ImmutablePoint point) {
+		return new Vertex(this, index, point, arcs[index]);
 	}
 
 	/*

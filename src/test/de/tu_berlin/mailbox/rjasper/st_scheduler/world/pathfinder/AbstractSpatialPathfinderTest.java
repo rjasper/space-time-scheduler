@@ -14,7 +14,6 @@ import com.vividsolutions.jts.geom.Point;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.fixtures.WorldFixtures;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatialPathfinder;
 
 public abstract class AbstractSpatialPathfinderTest {
 	

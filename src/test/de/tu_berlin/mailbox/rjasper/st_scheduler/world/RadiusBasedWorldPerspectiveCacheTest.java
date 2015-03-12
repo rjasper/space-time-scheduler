@@ -17,11 +17,6 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories.NodeFactory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.RadiusBasedWorldPerspectiveCache;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatialPathfinder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.StraightEdgePathfinder;
 

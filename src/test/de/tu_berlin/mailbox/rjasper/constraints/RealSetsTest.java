@@ -6,10 +6,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.tu_berlin.mailbox.rjasper.constraints.Interval;
-import de.tu_berlin.mailbox.rjasper.constraints.Relation;
-import de.tu_berlin.mailbox.rjasper.constraints.Singleton;
-
 public class RealSetsTest {
 	
 	@Test

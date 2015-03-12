@@ -21,12 +21,12 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.BinarySearchSeeker;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DoubleSubTrajectoryOperation;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.IndexSeeker;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Interpolator;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Interpolator.InterpolationResult;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.PointPathInterpolator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker.SeekResult;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TimeSubIndexInterpolator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TimeSubTrajectoryOperation;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Interpolator.InterpolationResult;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker.SeekResult;
 import de.tu_berlin.mailbox.rjasper.util.SmartArrayCache;
 
 /**
@@ -105,21 +105,20 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 * @see world.AbstractPath#makeVertex(int, boolean, boolean)
 	 */
 	@Override
-	protected Trajectory.Vertex makeVertex(int index, boolean first, boolean last) {
+	protected Trajectory.Vertex makeVertex(int index) {
 		SpatialPath.Vertex spatialVertex = getSpatialPath().getVertex(index);
 		LocalDateTime time = getTimes().get(index);
 		
-		return new Trajectory.Vertex(spatialVertex, time);
+		return new Trajectory.Vertex(this, spatialVertex, time);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.AbstractPath#makeSegment(world.Path.Vertex, world.Path.Vertex)
+	 * @see world.AbstractPath#makeSegment(world.Path.Trajectory.Vertex, world.Path.Trajectory.Vertex)
 	 */
 	@Override
 	protected Trajectory.Segment makeSegment(Trajectory.Vertex start, Trajectory.Vertex finish) {
-		SpatialPath.Segment spatialSegment = new SpatialPath.Segment(
-			start.getSpatialVertex(), finish.getSpatialVertex());
+		SpatialPath.Segment spatialSegment = spatialPath.getSegment(start.getIndex());
 		
 		return new Trajectory.Segment(start, finish, spatialSegment);
 	}
@@ -413,7 +412,7 @@ public class SimpleTrajectory extends AbstractPath<Trajectory.Vertex, Trajectory
 	 * @see world.Path#concat(world.Path)
 	 */
 	@Override
-	public Trajectory concat(Path<? extends Trajectory.Vertex, ? extends Trajectory.Segment> other) {
+	public SimpleTrajectory concat(Path<? extends Trajectory.Vertex, ? extends Trajectory.Segment> other) {
 		Objects.requireNonNull(other, "other");
 		
 		if (!(other instanceof Trajectory))

@@ -45,6 +45,8 @@ public final class NodeSpecification {
 	 * Constructs a node specification defining its shape, maximum velocity,
 	 * initial location and initial time.
 	 *
+	 * @param nodeId
+	 *            the node id.
 	 * @param shape
 	 *            the physical shape
 	 * @param maxSpeed

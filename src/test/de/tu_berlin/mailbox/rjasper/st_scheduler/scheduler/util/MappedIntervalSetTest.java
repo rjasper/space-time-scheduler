@@ -16,9 +16,6 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories.NodeFactory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.MappedIntervalSet;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.SimpleIntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval;
 import de.tu_berlin.mailbox.rjasper.util.UUIDFactory;
 

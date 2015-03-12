@@ -59,7 +59,7 @@ public class PeriodicJobsSatisfySpecification extends TypeSafeMatcher<Collection
 			
 			LocalDateTime periodFinish = periodStart.plus(spec.getPeriod());
 			
-			JobSpecification jobSpec = new JobSpecification(
+			JobSpecification jobSpec = JobSpecification.createSF(
 				jobId,
 				spec.getLocationSpace(),
 				periodStart,

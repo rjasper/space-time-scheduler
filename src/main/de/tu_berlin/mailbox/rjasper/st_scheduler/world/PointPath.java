@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static java.lang.Math.*;
+import static java.lang.Double.*;
 
 import java.util.NoSuchElementException;
 
@@ -22,7 +22,7 @@ extends Path<V, S>
 	 * The vertex of a {@code Path}. Stores additional information about the
 	 * vertex in context to the path.
 	 */
-	public static class Vertex implements Path.Vertex {
+	public static class Vertex extends Path.Vertex {
 		
 		/**
 		 * The point of the vertex.
@@ -30,35 +30,15 @@ extends Path<V, S>
 		private final ImmutablePoint point;
 		
 		/**
-		 * The position of the vertex.
-		 */
-		private final int index;
-		
-		/**
-		 * Whether the vertex is the first one.
-		 */
-		private final boolean first;
-		
-		/**
-		 * Whether the vertex is the last one.
-		 */
-		private final boolean last;
-		
-		/**
 		 * Constructs a new {@code Vertex}.
 		 * 
 		 * @param index
 		 * @param point
-		 * @param first
-		 *            whether the vertex is the first one
-		 * @param last
-		 *            whether the vertex is the last one
 		 */
-		protected Vertex(int index, ImmutablePoint point, boolean first, boolean last) {
-			this.index = index;
+		protected Vertex(PointPath<?, ?> path, int index, ImmutablePoint point) {
+			super(path, index);
+			
 			this.point = point;
-			this.first = first;
-			this.last = last;
 		}
 	
 		/**
@@ -81,30 +61,6 @@ extends Path<V, S>
 		public double getY() {
 			return point.getY();
 		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathVertex#getIndex()
-		 */
-		@Override
-		public int getIndex() {
-			return index;
-		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathVertex#isFirst()
-		 */
-		@Override
-		public boolean isFirst() {
-			return first;
-		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathVertex#isLast()
-		 */
-		@Override
-		public boolean isLast() {
-			return last;
-		}
 		
 		/*
 		 * (non-Javadoc)
@@ -123,17 +79,7 @@ extends Path<V, S>
 	 * 
 	 * @param <V> the vertex type
 	 */
-	public static class Segment<V extends PointPath.Vertex> implements Path.Segment<V> {
-	
-		/**
-		 * The start vertex.
-		 */
-		private final V start;
-		
-		/**
-		 * The finish vertex.
-		 */
-		private final V finish;
+	public static class Segment<V extends Vertex> extends Path.Segment<V> {
 		
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
@@ -144,54 +90,21 @@ extends Path<V, S>
 		 *            finish vertex
 		 */
 		protected Segment(V start, V finish) {
-			this.start = start;
-			this.finish = finish;
-		}
-		
-		/* (non-Javadoc)
-		 * @see world.PathSegment#isFirst()
-		 */
-		@Override
-		public boolean isFirst() {
-			return start.isFirst();
-		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathSegment#isLast()
-		 */
-		@Override
-		public boolean isLast() {
-			return finish.isLast();
-		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathSegment#getStartVertex()
-		 */
-		@Override
-		public V getStartVertex() {
-			return start;
-		}
-	
-		/* (non-Javadoc)
-		 * @see world.PathSegment#getFinishVertex()
-		 */
-		@Override
-		public V getFinishVertex() {
-			return finish;
+			super(start, finish);
 		}
 		
 		/**
 		 * @return the start point.
 		 */
 		public ImmutablePoint getStartPoint() {
-			return start.getPoint();
+			return startVertex.getPoint();
 		}
 		
 		/**
 		 * @return the finish point
 		 */
 		public ImmutablePoint getFinishPoint() {
-			return finish.getPoint();
+			return finishVertex.getPoint();
 		}
 		
 		public Envelope getEnvelope() {
@@ -199,15 +112,6 @@ extends Path<V, S>
 			double x1 = p1.getX(), y1 = p1.getY(), x2 = p2.getX(), y2 = p2.getY();
 			
 			return new Envelope(min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2));
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return String.format("(%s, %s)", getStartVertex(), getFinishVertex());
 		}
 		
 	}

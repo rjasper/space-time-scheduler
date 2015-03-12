@@ -1,9 +1,5 @@
 package de.tu_berlin.mailbox.rjasper.constraints;
 
-import de.tu_berlin.mailbox.rjasper.constraints.Interval;
-import de.tu_berlin.mailbox.rjasper.constraints.Relation;
-import de.tu_berlin.mailbox.rjasper.constraints.Singleton;
-import de.tu_berlin.mailbox.rjasper.constraints.Variable;
 import de.tu_berlin.mailbox.rjasper.util.NameProvider;
 
 

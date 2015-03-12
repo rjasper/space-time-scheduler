@@ -37,8 +37,14 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.StraightEdgePa
  */
 public class Scheduler {
 
+	/**
+	 * The earliest time possible used by the scheduler.
+	 */
 	public static final LocalDateTime BEGIN_OF_TIME = LocalDateTime.MIN;
 
+	/**
+	 * The latest time possible used by the scheduler.
+	 */
 	public static final LocalDateTime END_OF_TIME = LocalDateTime.MAX;
 
 	/**
@@ -77,6 +83,9 @@ public class Scheduler {
 	 */
 	private Duration frozenHorizonDuration = Duration.ZERO;
 	
+	/**
+	 * The safety margin between to dependent task.
+	 */
 	private Duration interDependencyMargin = Duration.ZERO;
 	
 	/**
@@ -135,6 +144,17 @@ public class Scheduler {
 		return schedule.getNode(nodeId).getReference();
 	}
 	
+	/**
+	 * Removes a node from the schedule. Only idle nodes can be removed.
+	 * 
+	 * @param nodeId
+	 * @throws NullPointerException
+	 *             if {@code nodeId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code nodeId} is unknown.
+	 * @throws IllegalStateException
+	 *             if the node is not idle.
+	 */
 	public void removeNode(String nodeId) {
 		Node node = schedule.getNode(nodeId);
 		
@@ -144,23 +164,58 @@ public class Scheduler {
 		perspectiveCache.removePerceiver(node);
 	}
 	
+	/**
+	 * <p>
+	 * Retrieves the job by the given job id.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note that only scheduled (committed) jobs can be retrieved.
+	 * </p>
+	 * 
+	 * @param jobId
+	 * @return the job.
+	 * @throws NullPointerException
+	 *             if {@code jobId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code jobId} is unknown.
+	 */
 	public Job getJob(UUID jobId) {
 		return schedule.getJob(jobId);
 	}
 	
+	/**
+	 * <p>
+	 * Removes a job from the schedule.
+	 * </p>
+	 * 
+	 * <p>
+	 * Be careful to not remove finished jobs since they might have been removed
+	 * by {@link #cleanUp()}.
+	 * </p>
+	 * 
+	 * @param jobId
+	 * @throws NullPointerException
+	 *             if {@code jobId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code jobId} is unknown.
+	 * @throws IllegalStateException
+	 *             if the job is locked for removal.
+	 */
 	public void removeJob(UUID jobId) {
 		schedule.removeJob(jobId);
 	}
 
 	/**
-	 * @return the present time
+	 * @return the present time.
 	 */
 	public LocalDateTime getPresentTime() {
 		return presentTime;
 	}
 
 	/**
-	 * Sets the present time.
+	 * Sets the present time. In the regular case setting the present time will push the frozen
+	 * horizon forward.
 	 * 
 	 * @param presentTime
 	 * @throws NullPointerException
@@ -204,7 +259,18 @@ public class Scheduler {
 	}
 
 	/**
-	 * @param frozenHorizonDuration the frozenHorizonDuration to set
+	 * <p>
+	 * Sets the duration between the frozen horizon and the present time.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note that in the regular case increasing the duration will also push the
+	 * frozen horizon forward. However, decreasing the duration will never
+	 * change the frozen horizon. The frozen horizon cannot be pulled back.
+	 * </p>
+	 * 
+	 * @param frozenHorizonDuration
+	 *            the frozenHorizonDuration to set
 	 */
 	public void setFrozenHorizonDuration(Duration frozenHorizonDuration) {
 		// also throws NullPointerException
@@ -216,10 +282,23 @@ public class Scheduler {
 		updateFrozenHorizonTime();
 	}
 
+	/**
+	 * @return the current safety margin kept between to dependent tasks.
+	 */
 	public Duration getInterDependencyMargin() {
 		return interDependencyMargin;
 	}
 	
+	/**
+	 * Sets the safety margin kept between to dependent tasks.
+	 * 
+	 * @param interDependencyMargin
+	 * @see Scheduler#schedule(Collection, SimpleDirectedGraph)
+	 * @throws NullPointerException
+	 *             if {@code interDependencyMargin} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code interDependencyMargin} is negative.
+	 */
 	public void setInterDependencyMargin(Duration interDependencyMargin) {
 		Objects.requireNonNull(interDependencyMargin, "interDependencyMargin");
 		
@@ -229,7 +308,15 @@ public class Scheduler {
 		this.interDependencyMargin = interDependencyMargin;
 	}
 
+	/**
+	 * Returns if the given transaction is known.
+	 * 
+	 * @param transactionId
+	 * @return {@code true} if the transaction to the given id is known.
+	 */
 	public boolean hasTransaction(UUID transactionId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+		
 		return transactions.containsKey(transactionId);
 	}
 
@@ -237,14 +324,30 @@ public class Scheduler {
 	 * The default amount of location picks tried by the scheduler before
 	 * giving up.
 	 */
-	private static final int MAX_LOCATION_PICKS = 10;
+	private static final int MAX_LOCATION_PICKS = 5;
 
 	/**
+	 * <p>
 	 * Tries to schedule a new job satisfying the given specification.
+	 * </p>
+	 * 
+	 * <p>
+	 * After returning the changes to the schedule have to be commit to be
+	 * actually applied. The current schedule will not be updated otherwise.
+	 * Eventually the change must either be committed or aborted. However, if
+	 * the scheduling was unsuccessful, neither commit nor abort must be called.
+	 * An unsuccessful scheduling is indicated by the returned
+	 * {@link ScheduleResult}.
+	 * </p>
 	 *
 	 * @param spec
-	 * @return {@code true} iff a job was scheduled. {@code false} iff no job
-	 *         could be scheduled satisfying the specification.
+	 * @return a schedule result.
+	 * @throws NullPointerException
+	 *             if {@code spec} is {@code null}.
+	 * @see #commit(UUID)
+	 * @see #commit(UUID, String)
+	 * @see #abort(UUID)
+	 * @see #abort(UUID, String)
 	 */
 	public ScheduleResult schedule(JobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
@@ -267,6 +370,42 @@ public class Scheduler {
 		return sc.schedule();
 	}
 	
+	/**
+	 * <p>
+	 * Tries to schedule multiple jobs satisfying the given specifications.
+	 * Additionally, a dependency graph has to be supplied. Dependent jobs may
+	 * have an edge pointing to the job's id required to be finished before
+	 * being executed itself.
+	 * </p>
+	 * 
+	 * <p>
+	 * The UUIDs of each job to be schedules must be present as vertex in the
+	 * graph. The graph must not contain any other vertices than the job ids
+	 * given by the specifications.
+	 * </p>
+	 * 
+	 * <p>
+	 * After returning the changes to the schedule have to be commit to be
+	 * actually applied. The current schedule will not be updated otherwise.
+	 * Eventually the change must either be committed or aborted. However, if
+	 * the scheduling was unsuccessful, neither commit nor abort must be called.
+	 * An unsuccessful scheduling is indicated by the returned
+	 * {@link ScheduleResult}.
+	 * </p>
+	 * 
+	 * @param specs
+	 * @param dependencies
+	 * @return a schedule result.
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if the specs' job ids are inconsistent to the graph's
+	 *             vertices.
+	 * @see #commit(UUID)
+	 * @see #commit(UUID, String)
+	 * @see #abort(UUID)
+	 * @see #abort(UUID, String)
+	 */
 	public ScheduleResult schedule(
 		Collection<JobSpecification> specs,
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
@@ -298,6 +437,29 @@ public class Scheduler {
 		return sc.schedule();
 	}
 
+	/**
+	 * <p>
+	 * Tries to schedule multiple job repetitions periodically.
+	 * </p>
+	 * 
+	 * <p>
+	 * After returning the changes to the schedule have to be commit to be
+	 * actually applied. The current schedule will not be updated otherwise.
+	 * Eventually the change must either be committed or aborted. However, if
+	 * the scheduling was unsuccessful, neither commit nor abort must be called.
+	 * An unsuccessful scheduling is indicated by the returned
+	 * {@link ScheduleResult}.
+	 * </p>
+	 * 
+	 * @param spec
+	 * @return a schedule result.
+	 * @throws NullPointerException
+	 *             if {@code spec} is {@code null}.
+	 * @see #commit(UUID)
+	 * @see #commit(UUID, String)
+	 * @see #abort(UUID)
+	 * @see #abort(UUID, String)
+	 */
 	public ScheduleResult schedule(PeriodicJobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
@@ -320,6 +482,35 @@ public class Scheduler {
 		return sc.schedule();
 	}
 	
+	/**
+	 * <p>
+	 * Tries to unschedule the job with the given id. Unscheduling includes the
+	 * removal of the job and the recalculation of the assigned node's
+	 * trajectory.
+	 * </p>
+	 * 
+	 * <p>
+	 * After returning the changes to the schedule have to be commit to be
+	 * actually applied. The current schedule will not be updated otherwise.
+	 * Eventually the change must either be committed or aborted. However, if
+	 * the scheduling was unsuccessful, neither commit nor abort must be called.
+	 * An unsuccessful scheduling is indicated by the returned
+	 * {@link ScheduleResult}.
+	 * </p>
+	 * 
+	 * @param jobId
+	 * @return a schedule result.
+	 * @throws NullPointerException
+	 *             if {@code jobId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code jobId} is unknown.
+	 * @throws IllegalStateException
+	 *             if the job is already locked for removal.
+	 * @see #commit(UUID)
+	 * @see #commit(UUID, String)
+	 * @see #abort(UUID)
+	 * @see #abort(UUID, String)
+	 */
 	public ScheduleResult unschedule(UUID jobId) {
 		Job job = schedule.getJob(jobId);
 		ScheduleAlternative alternative = new ScheduleAlternative();
@@ -330,6 +521,9 @@ public class Scheduler {
 	}
 	
 	private boolean unscheduleImpl(Job job, ScheduleAlternative alternative) {
+		if (schedule.isJobLockedForRemoval(job))
+			throw new IllegalStateException("job is locked for removal");
+		
 		Node node = job.getNodeReference().getActual();
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		
@@ -350,6 +544,36 @@ public class Scheduler {
 		return pl.plan();
 	}
 	
+	/**
+	 * <p>
+	 * Tries to reschedule a scheduled task to meet the given specifications.
+	 * This is a atomic composition of unschedule and schedule. First the scheduled
+	 * job with the id given by the specification is unscheduled and afterwards scheduled
+	 * using the new specification.
+	 * </p>
+	 * 
+	 * <p>
+	 * After returning the changes to the schedule have to be commit to be
+	 * actually applied. The current schedule will not be updated otherwise.
+	 * Eventually the change must either be committed or aborted. However, if
+	 * the scheduling was unsuccessful, neither commit nor abort must be called.
+	 * An unsuccessful scheduling is indicated by the returned
+	 * {@link ScheduleResult}.
+	 * </p>
+	 * 
+	 * @param spec
+	 * @return a schedule result.
+	 * @throws NullPointerException
+	 *             if {@code spec} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if job id given by spec is unknown.
+	 * @throws IllegalStateException
+	 *             if the job is already locked for removal.
+	 * @see #commit(UUID)
+	 * @see #commit(UUID, String)
+	 * @see #abort(UUID)
+	 * @see #abort(UUID, String)
+	 */
 	public ScheduleResult reschedule(JobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
@@ -359,7 +583,10 @@ public class Scheduler {
 	}
 	
 	private boolean rescheduleImpl(JobSpecification spec, ScheduleAlternative alternative) {
-		Job job = getJob(spec.getJobId());
+		Job job = getJob(spec.getJobId()); // throws NPE
+
+		if (schedule.isJobLockedForRemoval(job))
+			throw new IllegalStateException("job is locked for removal");
 		
 		boolean status;
 		
@@ -373,6 +600,17 @@ public class Scheduler {
 		return status;
 	}
 
+	/**
+	 * Commits the schedule transaction given by its id. Any previously
+	 * partially aborted node updates stay aborted. The changes will be applied
+	 * to the schedule.
+	 * 
+	 * @param transactionId
+	 * @throws NullPointerException
+	 *             if {@code tranactionId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code tranactionId} is unknown.
+	 */
 	public void commit(UUID transactionId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 		
@@ -385,6 +623,19 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 	
+	/**
+	 * Partially commits the schedule transaction given by its id. Only the node
+	 * updates given by the node id are committed. The changes will be applied
+	 * to the schedule.
+	 * 
+	 * @param transactionId
+	 * @param nodeId
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code transactionId} is unknown or if there is no node
+	 *             updated for the node given by {@code nodeId}.
+	 */
 	public void commit(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 
@@ -402,6 +653,16 @@ public class Scheduler {
 			transactions.remove(transactionId);
 	}
 
+	/**
+	 * Aborts the schedule transaction given by its id. Any previously
+	 * partially committed node updates stay committed. The changes will be discarded.
+	 * 
+	 * @param transactionId
+	 * @throws NullPointerException
+	 *             if {@code tranactionId} is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code tranactionId} is unknown.
+	 */
 	public void abort(UUID transactionId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 		
@@ -414,6 +675,18 @@ public class Scheduler {
 		transactions.remove(transactionId);
 	}
 	
+	/**
+	 * Partially aborts the schedule transaction given by its id. Only the node
+	 * updates given by the node id are aborted. The changes will be discarded.
+	 * 
+	 * @param transactionId
+	 * @param nodeId
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if {@code transactionId} is unknown or if there is no node
+	 *             updated for the node given by {@code nodeId}.
+	 */
 	public void abort(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
 
@@ -483,9 +756,11 @@ public class Scheduler {
 		return ScheduleResult.error();
 	}
 	
+	/**
+	 * Removes finished jobs and trajectories from the schedule.
+	 */
 	public void cleanUp() {
-		for (Node w : schedule.getNodes())
-			w.cleanUp(presentTime);
+		schedule.cleanUp(presentTime);
 	}
 
 }

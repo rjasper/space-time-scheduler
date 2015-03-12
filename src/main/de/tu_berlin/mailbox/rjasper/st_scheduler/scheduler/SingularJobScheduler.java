@@ -119,6 +119,7 @@ public class SingularJobScheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the nodes are filtered by the location
 			
+			// FIXME ignores alternative changes completely
 			Iterable<NodeIdleSlot> nodeSlots = () -> new NodeIdleSlotIterator(
 				filterByLocation(location),
 				frozenHorizonTime,
@@ -126,18 +127,18 @@ public class SingularJobScheduler {
 				earliest, latest, duration);
 
 			for (NodeIdleSlot ws : nodeSlots) {
-				Node w = ws.getNode();
+				Node n = ws.getNode();
 				IdleSlot s = ws.getIdleSlot();
-				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
+				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(n);
 				
-				NavigableMap<LocalDateTime, Job> wJobs = w.getNavigableJobs();
+				NavigableMap<LocalDateTime, Job> wJobs = n.getNavigableJobs();
 				// true if there is one job after s.finish
 				boolean fixedEnd = !wJobs.isEmpty() &&
 					!wJobs.lastKey().isBefore( s.getFinishTime() );
 				
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
-				tp.setNode(w);
+				tp.setNode(n);
 				tp.setIdleSlot(s);
 				tp.setEarliestStartTime(earliest);
 				tp.setLatestStartTime(latest);

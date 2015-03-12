@@ -22,7 +22,6 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractMinimumTimePathfinder;
 
 public abstract class AbstractMinimumTimePathfinderTest {
 

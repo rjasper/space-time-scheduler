@@ -30,10 +30,11 @@ import de.tu_berlin.mailbox.rjasper.util.SmartArrayCache;
  */
 public abstract class AbstractPointPath<
 	V extends PointPath.Vertex,
-	S extends PointPath.Segment<? extends V>>
+	S extends PointPath.Segment<V>>
 extends AbstractPath<V, S>
 implements PointPath<V, S>
 {
+
 	
 	/**
 	 * The points of the path.
@@ -93,8 +94,8 @@ implements PointPath<V, S>
 	 * @see world.AbstractPath#makeVertex(int, boolean, boolean)
 	 */
 	@Override
-	protected final V makeVertex(int index, boolean first, boolean last) {
-		return makeVertex(index, getPoint(index), first, last);
+	protected final V makeVertex(int index) {
+		return makeVertex(index, getPoint(index));
 	}
 	
 	/**
@@ -102,11 +103,9 @@ implements PointPath<V, S>
 	 * 
 	 * @param index
 	 * @param point at the given index
-	 * @param first whether it's the first vertex
-	 * @param last whether it's the last vertex
 	 * @return the vertex.
 	 */
-	protected abstract V makeVertex(int index, ImmutablePoint point, boolean first, boolean last);
+	protected abstract V makeVertex(int index, ImmutablePoint point);
 
 	/* (non-Javadoc)
 	 * @see world.Path#isEmpty()

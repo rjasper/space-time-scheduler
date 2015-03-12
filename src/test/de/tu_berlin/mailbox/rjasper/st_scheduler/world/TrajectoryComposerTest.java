@@ -10,10 +10,6 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.ArcTimePath;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DecomposedTrajectory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryComposer;
 
 public class TrajectoryComposerTest {

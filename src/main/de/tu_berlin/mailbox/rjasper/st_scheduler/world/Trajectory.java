@@ -40,13 +40,15 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * 
  * @author Rico Jasper
  */
-public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> {
+public interface Trajectory
+extends Path<Trajectory.Vertex, Trajectory.Segment>
+{
 
 	/**
 	 * The vertex of a {@code Trajectory}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
-	public static class Vertex implements Path.Vertex {
+	public static class Vertex extends AbstractPath.Vertex {
 		
 		/**
 		 * The spatial vertex.
@@ -64,24 +66,11 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @param spatialVertex
 		 * @param time
 		 */
-		public Vertex(SpatialPath.Vertex spatialVertex, LocalDateTime time) {
+		public Vertex(Trajectory trajectory, SpatialPath.Vertex spatialVertex, LocalDateTime time) {
+			super(trajectory, spatialVertex.getIndex());
+			
 			this.spatialVertex = spatialVertex;
 			this.time = time;
-		}
-	
-		@Override
-		public boolean isFirst() {
-			return spatialVertex.isFirst();
-		}
-	
-		@Override
-		public boolean isLast() {
-			return spatialVertex.isLast();
-		}
-	
-		@Override
-		public int getIndex() {
-			return spatialVertex.getIndex();
 		}
 	
 		/**
@@ -150,17 +139,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	 * The segment of a {@code Trajectory}. Stores additional information about
 	 * the segment in context to the path.
 	 */
-	public static class Segment implements Path.Segment<Vertex> {
-		
-		/**
-		 * The start vertex.
-		 */
-		private final Vertex start;
-		
-		/**
-		 * The finish vertex.
-		 */
-		private final Vertex finish;
+	public static class Segment extends AbstractPath.Segment<Vertex> {
 		
 		/**
 		 * The spatial segment.
@@ -187,25 +166,9 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @param spatialSegment
 		 */
 		public Segment(Vertex start, Vertex finish, SpatialPath.Segment spatialSegment) {
-			this.start = start;
-			this.finish = finish;
+			super(start, finish);
+			
 			this.spatialSegment = spatialSegment;
-		}
-		
-		/**
-		 * @return whether this segment is the first one.
-		 */
-		@Override
-		public boolean isFirst() {
-			return spatialSegment.isFirst();
-		}
-	
-		/**
-		 * @return whether this segment is the last one.
-		 */
-		@Override
-		public boolean isLast() {
-			return spatialSegment.isLast();
 		}
 	
 		/**
@@ -222,49 +185,33 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		public SpatialPath.Segment getSpatialSegment() {
 			return spatialSegment;
 		}
-
-		/**
-		 * @return the start vertex.
-		 */
-		@Override
-		public Vertex getStartVertex() {
-			return start;
-		}
-	
-		/**
-		 * @return the finish vertex.
-		 */
-		@Override
-		public Vertex getFinishVertex() {
-			return finish;
-		}
 		
 		/**
 		 * @return the start location.
 		 */
 		public ImmutablePoint getStartLocation() {
-			return start.getLocation();
+			return startVertex.getLocation();
 		}
 		
 		/**
 		 * @return the finish location.
 		 */
 		public ImmutablePoint getFinishLocation() {
-			return finish.getLocation();
+			return finishVertex.getLocation();
 		}
 		
 		/**
 		 * @return the start time.
 		 */
 		public LocalDateTime getStartTime() {
-			return start.getTime();
+			return startVertex.getTime();
 		}
 		
 		/**
 		 * @return the finish time.
 		 */
 		public LocalDateTime getFinishTime() {
-			return finish.getTime();
+			return finishVertex.getTime();
 		}
 		
 		/**
@@ -273,7 +220,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @return the start time in seconds.
 		 */
 		public double getStartTimeInSeconds(LocalDateTime baseTime) {
-			return start.getTimeInSeconds(baseTime);
+			return startVertex.getTimeInSeconds(baseTime);
 		}
 	
 		/**
@@ -282,7 +229,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 * @return the finish time in seconds.
 		 */
 		public double getFinishTimeInSeconds(LocalDateTime baseTime) {
-			return finish.getTimeInSeconds(baseTime);
+			return finishVertex.getTimeInSeconds(baseTime);
 		}
 	
 		/**
@@ -297,7 +244,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 */
 		public Duration duration() {
 			if (duration == null)
-				duration = Duration.between(start.getTime(), finish.getTime());
+				duration = Duration.between(startVertex.getTime(), finishVertex.getTime());
 			
 			return duration;
 		}

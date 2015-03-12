@@ -26,13 +26,6 @@ import com.google.common.collect.ImmutableList;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeReference;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.PeriodicJobSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult.TrajectoryUpdate;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories.NodeFactory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
@@ -42,6 +35,8 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.fixtures.WorldFixtures;
 import de.tu_berlin.mailbox.rjasper.util.UUIDFactory;
 
 public class SchedulerTest {
+	
+	// TODO test to atomically schedule multiple jobs with overlapping time constraints.
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -136,7 +131,7 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		
 		JobSpecification ts1 = new JobSpecification(
-			uuid("t1"),
+			uuid("j1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
 			atSecond(10), secondsToDurationSafe(60));
@@ -149,10 +144,10 @@ public class SchedulerTest {
 		assertThat("unable to schedule job",
 			result.isSuccess(), equalTo(true));
 		assertThat("scheduled job doesn't meet specification",
-			result.getJobs().get(uuid("t1")), satisfies(ts1));
+			result.getJobs().get(uuid("j1")), satisfies(ts1));
 		
 		JobSpecification ts2 = new JobSpecification(
-			uuid("t2"),
+			uuid("j2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
 			atSecond(30), secondsToDurationSafe(10));
@@ -383,7 +378,7 @@ public class SchedulerTest {
 		sc.setPresentTime(atSecond(10));
 		
 		JobSpecification ts2 = new JobSpecification(
-			uuid("t2"),
+			uuid("j2"),
 			immutablePoint(0, 0),
 			atSecond(0),
 			atSecond(9),
@@ -404,7 +399,7 @@ public class SchedulerTest {
 
 		ScheduleResult res;
 		
-		JobSpecification ts1 = jobSpec("t1", 2, 2, 6, 2);
+		JobSpecification ts1 = jobSpec("j1", 2, 2, 6, 2);
 		res = scheduleJob(sc, ts1);
 		
 		assertThat(res.isSuccess(), is(true));
@@ -413,7 +408,7 @@ public class SchedulerTest {
 		LocalDateTime frozenHorizon = sc.getFrozenHorizonTime(); // atSecond(10)
 		
 		JobSpecification ts2 = new JobSpecification(
-			uuid("t2"),
+			uuid("j2"),
 			immutablePoint(0, 2),
 			atSecond(0),
 			atSecond(20),
@@ -424,10 +419,10 @@ public class SchedulerTest {
 		assertThat("schedule failed",
 			res.isSuccess(), is(true));
 		
-		Job t2 = res.getJobs().get(uuid("t2"));
+		Job j2 = res.getJobs().get(uuid("j2"));
 		
 		assertThat("job start time before frozen horizon",
-			t2.getStartTime().isBefore(frozenHorizon), is(false));
+			j2.getStartTime().isBefore(frozenHorizon), is(false));
 		assertThat("no trajectory updates",
 			res.getTrajectoryUpdates().isEmpty(), is(false));
 		assertThat("trajectory start time before frozen horizon",
@@ -455,25 +450,25 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		
 		JobSpecification ts = jobSpec(
-			"t1",
+			"j1",
 			atSecond(0),
 			atSecond(0),
 			secondsToDuration(1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
-		addDependency(depGraph, "t1");
+		addDependency(depGraph, "j1");
 		
 		ScheduleResult res = sc.schedule(singleton(ts), depGraph);
 		
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
 		
-		Job t = res.getJobs().get(uuid("t1"));
+		Job j = res.getJobs().get(uuid("j1"));
 		
 		assertThat("job was not scheduled",
-			t, not(is(nullValue())));
+			j, not(is(nullValue())));
 		assertThat("job was not correctly scheduled",
-			t, satisfies(ts));
+			j, satisfies(ts));
 	}
 	
 	@Test
@@ -487,38 +482,38 @@ public class SchedulerTest {
 		sc.setInterDependencyMargin(margin);
 
 		JobSpecification ts1 = jobSpec(
-			"t1",
+			"j1",
 			atSecond(0),
 			atSecond(20),
 			secondsToDuration(1));
 		JobSpecification ts2 = jobSpec(
-			"t2",
+			"j2",
 			atSecond(0),
 			atSecond(20),
 			secondsToDuration(1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
-		addDependency(depGraph, "t1");
-		addDependency(depGraph, "t2", "t1");
+		addDependency(depGraph, "j1");
+		addDependency(depGraph, "j2", "j1");
 
 		ScheduleResult res = sc.schedule(Arrays.asList(ts1, ts2), depGraph);
 		
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
 		
-		Job t1 = res.getJobs().get(uuid("t1"));
-		Job t2 = res.getJobs().get(uuid("t2"));
+		Job j1 = res.getJobs().get(uuid("j1"));
+		Job j2 = res.getJobs().get(uuid("j2"));
 		
-		assertThat("t1 was not scheduled",
-			t1, not(is(nullValue())));
-		assertThat("t2 was not scheduled",
-			t2, not(is(nullValue())));
-		assertThat("t1 was not correctly scheduled",
-			t1, satisfies(ts1));
-		assertThat("t2 was not correctly scheduled",
-			t2, satisfies(ts2));
-		assertThat("t2 was not correctly scheduled after t1",
-			t1.getFinishTime().plus(margin).isAfter(t2.getStartTime()), is(false));
+		assertThat("j1 was not scheduled",
+			j1, not(is(nullValue())));
+		assertThat("j2 was not scheduled",
+			j2, not(is(nullValue())));
+		assertThat("j1 was not correctly scheduled",
+			j1, satisfies(ts1));
+		assertThat("j2 was not correctly scheduled",
+			j2, satisfies(ts2));
+		assertThat("j2 was not correctly scheduled after j1",
+			j1.getFinishTime().plus(margin).isAfter(j2.getStartTime()), is(false));
 	}
 
 	@Test
@@ -529,7 +524,7 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		
 		JobSpecification ts = jobSpec(
-			"t1",
+			"j1",
 			atSecond(0),
 			atSecond(0),
 			secondsToDuration(1));
@@ -549,7 +544,7 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
-		addDependency(depGraph, "t1");
+		addDependency(depGraph, "j1");
 		
 		thrown.expect(IllegalStateException.class);
 		
@@ -563,7 +558,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
 		PeriodicJobSpecification ps = new PeriodicJobSpecification(
 			jobIds,
@@ -585,7 +580,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
 		PeriodicJobSpecification ps = new PeriodicJobSpecification(
 			jobIds,
@@ -594,6 +589,96 @@ public class SchedulerTest {
 			secondsToDuration(1),
 			atSecond(0),
 			secondsToDuration(2));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getJobs().values(), satisfy(ps));
+	}
+	
+	@Test
+	public void testSchedulePeriodicSameLocationTight() {
+		NodeSpecification ws = nodeSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ws);
+		
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
+		
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			true,
+			secondsToDuration(1),
+			atSecond(0),
+			secondsToDuration(1));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getJobs().values(), satisfy(ps));
+	}
+	
+	@Test
+	public void testSchedulePeriodicIndependentLocationTight() {
+		NodeSpecification ws = nodeSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ws);
+		
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
+		
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			false,
+			secondsToDuration(1),
+			atSecond(0),
+			secondsToDuration(1));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getJobs().values(), satisfy(ps));
+	}
+	
+	// TODO define error
+	@Test
+	public void testSchedulePeriodicSameLocationTooTight() {
+		NodeSpecification ws = nodeSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ws);
+		
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"));
+		
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			true,
+			secondsToDuration(1),
+			atSecond(-0.5),
+			secondsToDuration(1));
+		
+		ScheduleResult res = sc.schedule(ps);
+		
+		assertThat(res.getJobs().values(), satisfy(ps));
+	}
+
+	// TODO define error
+	@Test
+	public void testSchedulePeriodicIndependentLocationTooTight() {
+		NodeSpecification ws = nodeSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ws);
+		
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"));
+		
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			false,
+			secondsToDuration(1),
+			atSecond(-0.5),
+			secondsToDuration(1));
 		
 		ScheduleResult res = sc.schedule(ps);
 		
@@ -673,13 +758,13 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		NodeReference wref = sc.getNodeReference("w");
 		
-		scheduleJob(sc, jobSpec("t1", 0, 1, 3, 1));
-		scheduleJob(sc, jobSpec("t2", 1, 2, 6, 1));
-		scheduleJob(sc, jobSpec("t3", 2, 1, 9, 1));
+		scheduleJob(sc, jobSpec("j1", 0, 1, 3, 1));
+		scheduleJob(sc, jobSpec("j2", 1, 2, 6, 1));
+		scheduleJob(sc, jobSpec("j3", 2, 1, 9, 1));
 		
-		Job t2 = sc.getJob(uuid("t2"));
+		Job j2 = sc.getJob(uuid("j2"));
 
-		ScheduleResult res = sc.unschedule(uuid("t2"));
+		ScheduleResult res = sc.unschedule(uuid("j2"));
 		
 		assertThat("job wasn't unscheduled",
 			res.isSuccess(), is(true));
@@ -687,7 +772,7 @@ public class SchedulerTest {
 		sc.commit(res.getTransactionId());
 		
 		assertThat("job still known",
-			wref.hasJob(t2), is(false));
+			wref.hasJob(j2), is(false));
 		
 		Trajectory traj = wref.getTrajectories(atSecond(4), atSecond(9)).iterator().next();
 		

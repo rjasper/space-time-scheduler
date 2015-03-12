@@ -12,8 +12,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterator;
-
 public class GeometryIteratorTest {
 
 	@Test

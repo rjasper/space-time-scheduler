@@ -19,8 +19,8 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.BinarySearchSeeker;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DoubleSubPointPathOperation;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryComposer;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker.SeekResult;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryComposer;
 import de.tu_berlin.mailbox.rjasper.time.TimeConv;
 
 /**
@@ -520,7 +520,7 @@ public class DecomposedTrajectory implements Trajectory {
 	 * @see world.Trajectory#concat(world.Path)
 	 */
 	@Override
-	public Trajectory concat(Path<? extends Vertex, ? extends Segment> other) {
+	public SimpleTrajectory concat(Path<? extends Vertex, ? extends Segment> other) {
 		return composed().concat(other);
 	}
 

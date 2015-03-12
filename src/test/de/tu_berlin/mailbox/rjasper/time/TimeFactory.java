@@ -3,8 +3,6 @@ package de.tu_berlin.mailbox.rjasper.time;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import de.tu_berlin.mailbox.rjasper.time.TimeConv;
-
 public final class TimeFactory {
 	
 	public static final LocalDateTime BASE_TIME =

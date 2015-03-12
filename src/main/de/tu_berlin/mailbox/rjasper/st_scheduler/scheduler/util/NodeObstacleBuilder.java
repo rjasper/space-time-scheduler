@@ -62,32 +62,32 @@ public class NodeObstacleBuilder {
 		// TODO make code fancier (a little repetitive right now)
 	
 		// original trajectories
-		for (Node w : schedule.getNodes()) {
-			if (w == node)
+		for (Node n : schedule.getNodes()) {
+			if (n == node)
 				continue;
 			
-			for (Trajectory t : w.getTrajectories(from, to))
-				nodeObstacles.add(makeNodeObstacle(w, t));
+			for (Trajectory t : n.getTrajectories(from, to))
+				nodeObstacles.add(makeNodeObstacle(n, t));
 		}
 		
 		// alternative trajectories added to schedule
 		for (ScheduleAlternative a : schedule.getAlternatives()) {
-			for (Node w : a.getNodes()) {
-				if (w == node)
+			for (Node n : a.getNodes()) {
+				if (n == node)
 					continue;
 				
-				for (Trajectory t : a.getTrajectoryUpdates(w))
-					nodeObstacles.add(makeNodeObstacle(w, t));
+				for (Trajectory t : a.getTrajectoryUpdates(n))
+					nodeObstacles.add(makeNodeObstacle(n, t));
 			}
 		}
 	
 		// alternative trajectories of current alternative
-		for (Node w : alternative.getNodes()) {
-			if (w == node)
+		for (Node n : alternative.getNodes()) {
+			if (n == node)
 				continue;
 			
-			for (Trajectory t : alternative.getTrajectoryUpdates(w))
-				nodeObstacles.add(makeNodeObstacle(w, t));
+			for (Trajectory t : alternative.getTrajectoryUpdates(n))
+				nodeObstacles.add(makeNodeObstacle(n, t));
 		}
 		
 		cleanUp();

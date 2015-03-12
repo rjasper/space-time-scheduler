@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 public abstract class AbstractPath<
 	V extends Path.Vertex,
-	S extends Path.Segment<? extends V>>
+	S extends Path.Segment<V>>
 implements Path<V, S>
 {
 	
@@ -86,11 +86,9 @@ implements Path<V, S>
 	 * Makes a vertex for the given index.
 	 * 
 	 * @param index
-	 * @param first whether it's the first vertex
-	 * @param last whether it's the last vertex
 	 * @return the vertex.
 	 */
-	protected abstract V makeVertex(int index, boolean first, boolean last);
+	protected abstract V makeVertex(int index);
 
 	/**
 	 * Makes a segment from the start vertex to the finish vertex.
@@ -110,10 +108,7 @@ implements Path<V, S>
 		if (index < 0 || index >= size())
 			throw new IllegalArgumentException("invalid index");
 		
-		boolean first = index == 0;
-		boolean last = index == size() - 1;
-		
-		return makeVertex(index, first, last);
+		return makeVertex(index);
 	}
 	
 	/*

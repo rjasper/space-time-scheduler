@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
+import static de.tu_berlin.mailbox.rjasper.collect.Maps.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
 import static java.util.Collections.*;
 
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -25,11 +27,11 @@ public class Schedule {
 	
 	private final Map<String, Node> nodes = new HashMap<>();
 	
+	private final Map<UUID, Job> jobs = new HashMap<>();
+
 	private final Set<ScheduleAlternative> alternatives = new HashSet<>();
 	
 	private final Map<Node, NodeLocks> locks = new IdentityHashMap<>();
-	
-	private final Map<UUID, Job> jobs = new HashMap<>();
 	
 	private final Set<UUID> jobIdLock = new HashSet<>();
 	
@@ -96,11 +98,11 @@ public class Schedule {
 	
 	public void removeJob(UUID jobId) {
 		Job job = getJob(jobId);
-		Node node = job.getNodeReference().getActual();
-		Set<Job> lock = getJobRemovalLock(node);
 		
-		if (lock.contains(job))
-			throw new IllegalStateException("given job is locked for removal");
+		if (isJobLockedForRemoval(job))
+			throw new IllegalStateException("job is locked for removal");
+		
+		Node node = job.getNodeReference().getActual();
 		
 		node.removeJob(job);
 		jobs.remove(jobId);
@@ -126,6 +128,13 @@ public class Schedule {
 			throw new IllegalArgumentException("unknown node");
 		
 		return unmodifiableSet(nodeLocks.jobRemovalLock);
+	}
+	
+	public boolean isJobLockedForRemoval(Job job) {
+		Node node = job.getNodeReference().getActual();
+		Set<Job> lock = getJobRemovalLock(node);
+		
+		return lock.contains(job);
 	}
 	
 	public Collection<ScheduleAlternative> getAlternatives() {
@@ -344,13 +353,13 @@ public class Schedule {
 	private void applyChanges(NodeUpdate update) {
 		Node node = update.getNode();
 		
-		for (Job t : update.getJobRemovals()) {
-			node.removeJob(t);
-			jobs.remove(t.getId());
+		for (Job j : update.getJobRemovals()) {
+			node.removeJob(j);
+			jobs.remove(j.getId());
 		}
-		for (Job t : update.getJobs()) {
-			node.addJob(t);
-			jobs.put(t.getId(), t);
+		for (Job j : update.getJobs()) {
+			node.addJob(j);
+			jobs.put(j.getId(), j);
 		}
 		for (Trajectory t : update.getTrajectories())
 			node.updateTrajectory(t);
@@ -386,6 +395,26 @@ public class Schedule {
 		update.getJobs().stream()
 			.map(Job::getId)
 			.forEach(jobIdLock::remove);
+	}
+	
+	public void cleanUp(LocalDateTime presentTime) {
+		for (Node n : nodes.values()) {
+			NavigableMap<LocalDateTime, Job> nJobs = n.getNavigableJobs();
+			Job lowerJob = value( nJobs.lowerEntry(presentTime) );
+			
+			if (lowerJob != null) {
+				// determine lowest key not to be removed
+				LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
+					? lowerJob.getStartTime()
+					: presentTime;
+
+					nJobs.headMap(lowestKey).values().stream()
+						.map(Job::getId)
+						.forEach(jobs::remove);;
+			}
+			
+			n.cleanUp(presentTime);
+		}
 	}
 
 }

@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.tu_berlin.mailbox.rjasper.constraints.RealSet;
-import de.tu_berlin.mailbox.rjasper.constraints.Singleton;
-
 public class FullRealSetTest {
 
 	@Test

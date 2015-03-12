@@ -24,11 +24,6 @@ import com.google.common.collect.ImmutableList;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeReference;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeUpdate;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.SimpleIntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DecomposedTrajectory;
@@ -178,14 +173,14 @@ public class NodeUpdateTest {
 			spatialPath(0, 0, 0, 1, 1, 1, 1, 0),
 			arcTimePath(0, 0, 1, 1, 1, 2, 2, 3, 2, 4, 3, 5, 3, 6));
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
-		Job t3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
+		Job j3 = new Job(uuid("j3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
 		
 		update.updateTrajectory(traj);
-		update.addJob(t1);
-		update.addJob(t2);
-		update.addJob(t3);
+		update.addJob(j1);
+		update.addJob(j2);
+		update.addJob(j3);
 		
 		update.checkSelfConsistency(); // expect no exception
 	}
@@ -201,15 +196,15 @@ public class NodeUpdateTest {
 			spatialPath(0, 0, 0, 1, 1, 1, 1, 2),
 			arcTimePath(0, 0, 1, 1, 1, 2, 2, 3, 2, 4, 3, 5, 3, 6));
 		
-		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
-		Job t2 = new Job(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
-		// t3 location violated
-		Job t3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
+		Job j1 = new Job(uuid("j1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("j2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
+		// j3 location violated
+		Job j3 = new Job(uuid("j3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
 		
 		update.updateTrajectory(traj);
-		update.addJob(t1);
-		update.addJob(t2);
-		update.addJob(t3);
+		update.addJob(j1);
+		update.addJob(j2);
+		update.addJob(j3);
 		
 		thrown.expect(IllegalStateException.class);
 		

@@ -7,10 +7,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.tu_berlin.mailbox.rjasper.constraints.Interval;
-import de.tu_berlin.mailbox.rjasper.constraints.Relation;
-import de.tu_berlin.mailbox.rjasper.constraints.Singleton;
-import de.tu_berlin.mailbox.rjasper.constraints.Variable;
 import de.tu_berlin.mailbox.rjasper.util.NameProvider;
 
 public class VariableTest {

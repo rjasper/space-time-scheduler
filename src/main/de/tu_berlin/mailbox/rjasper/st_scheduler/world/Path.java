@@ -4,6 +4,7 @@ import static java.util.Spliterator.*;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
@@ -12,56 +13,112 @@ import java.util.stream.StreamSupport;
 // TODO document
 public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>> {
 
-	// TODO should belong to the path (non-static)
-	public static interface Vertex {
-	
+
+	/**
+	 * A {@code Vertex} represent a corner point of a path. Each vertex,
+	 * excluding the first and the last one, have exactly one predecessor vertex
+	 * and one successor vertex. Two neighboring vertices are connected by a
+	 * linear segment. A path has at least two vertices. All vertices and
+	 * segments define the path.
+	 */
+	public static class Vertex {
+		
+		private final Path<?, ?> path;
+		
+		protected final int index;
+
+		public Vertex(Path<?, ?> path, int index) {
+			this.path = Objects.requireNonNull(path, "path");
+			this.index = index;
+			
+			if (index < 0 || index >= path.size())
+				throw new IndexOutOfBoundsException();
+		}
+
 		/**
 		 * @return the index
 		 */
-		public abstract int getIndex();
-	
+		public int getIndex() {
+			return index;
+		}
+
 		/**
 		 * @return whether the vertex is the first one.
 		 */
-		public abstract boolean isFirst();
-	
+		public boolean isFirst() {
+			return index == 0;
+		}
+
 		/**
 		 * @return last whether the vertex is the last one.
 		 */
-		public abstract boolean isLast();
-	
+		public boolean isLast() {
+			return index == path.size()-1;
+		}
+		
 	}
 
-	// TODO should belong to the path (non-static)
-	public static interface Segment<V extends Vertex> {
+	/**
+	 * A {@code Segment} represents an interconnection of two neighboring
+	 * vertices. Each segment, excluding the first and the last one, have
+	 * exactly one predecessor segment and one successor segment. A path has at
+	 * least one segment. All vertices and segments define the path.
+	 */
+	public static class Segment<V extends Vertex> {
+		
+		protected final V startVertex;
+		
+		protected final V finishVertex;
+
+		public Segment(V startVertex, V finishVertex) {
+			this.startVertex = Objects.requireNonNull(startVertex, "startVertex");
+			this.finishVertex = Objects.requireNonNull(finishVertex, "finishVertex");
+		}
 
 		/**
 		 * @return the index
 		 */
-		public default int getIndex() {
-			return getStartVertex().getIndex();
+		public int getIndex() {
+			return startVertex.getIndex();
 		}
-	
+
 		/**
 		 * @return whether the segment is the first one.
 		 */
-		public abstract boolean isFirst();
-	
+		public boolean isFirst() {
+			return startVertex.isFirst();
+		}
+
 		/**
 		 * @return whether the segment is the last one.
 		 */
-		public abstract boolean isLast();
-	
+		public boolean isLast() {
+			return finishVertex.isLast();
+		}
+
 		/**
 		 * @return the start vertex.
 		 */
-		public abstract V getStartVertex();
-	
+		public V getStartVertex() {
+			return startVertex;
+		}
+
 		/**
 		 * @return the finish vertex.
 		 */
-		public abstract V getFinishVertex();
+		public V getFinishVertex() {
+			return finishVertex;
+		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			return String.format("(%s, %s)", getStartVertex(), getFinishVertex());
+		}
+		
 	}
 
 	/**

@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -25,9 +24,9 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.MappedIntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.SimpleIntervalSet;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DecomposedTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
@@ -356,7 +355,7 @@ public class Node {
 	}
 
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
-		if (time.isBefore(initialTime))
+		if (time.isBefore(initialTime)) // throws NPE
 			return null;
 		
 		Job lowerJob = value(jobs.lowerEntry(time));
@@ -387,7 +386,7 @@ public class Node {
 	}
 
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
-		if (time.isBefore(initialTime))
+		if (time.isBefore(initialTime)) // throws NPE
 			return null;
 		
 		Job lowerJob = value(jobs.lowerEntry(time));
@@ -549,12 +548,10 @@ public class Node {
 		
 		// remove past jobs
 		
-		Entry<LocalDateTime, Job> lowerJobEntry = jobs.lowerEntry(presentTime);
+		Job lowerJob = value( jobs.lowerEntry(presentTime) );
 		
 		// determine lowest key not to be removed
-		if (lowerJobEntry != null) {
-			Job lowerJob = lowerJobEntry.getValue();
-			
+		if (lowerJob != null) {
 			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
 				? lowerJob.getStartTime()
 				: presentTime;

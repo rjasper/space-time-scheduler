@@ -10,9 +10,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.io.ParseException;
 
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
-
 public class WorldTest {
 
 	@Test

@@ -94,8 +94,8 @@ public class ScheduleAlternative {
 		if (update == null)
 			throw new IllegalArgumentException("unknown node");
 		
-		for (Job t : update.getJobs())
-			jobs.remove(t.getId());
+		for (Job j : update.getJobs())
+			jobs.remove(j.getId());
 		
 		return update;
 	}
