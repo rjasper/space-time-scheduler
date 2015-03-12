@@ -17,9 +17,9 @@ import world.TrajectoryContainer;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class WorkerUnitUpdate implements Cloneable {
+public class NodeUpdate implements Cloneable {
 	
-	private final WorkerUnit worker;
+	private final Node worker;
 	
 	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 	
@@ -35,7 +35,7 @@ public class WorkerUnitUpdate implements Cloneable {
 	
 	private boolean sealed = false;
 
-	public WorkerUnitUpdate(WorkerUnit worker) {
+	public NodeUpdate(Node worker) {
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 	
@@ -43,7 +43,7 @@ public class WorkerUnitUpdate implements Cloneable {
 		return sealed;
 	}
 
-	public WorkerUnit getWorker() {
+	public Node getWorker() {
 		return worker;
 	}
 
@@ -191,8 +191,8 @@ public class WorkerUnitUpdate implements Cloneable {
 	}
 	
 	@Override
-	public WorkerUnitUpdate clone() {
-		WorkerUnitUpdate clone = new WorkerUnitUpdate(worker);
+	public NodeUpdate clone() {
+		NodeUpdate clone = new NodeUpdate(worker);
 		
 		clone.trajectoryContainer.update(trajectoryContainer);
 		clone.tasks.addAll(tasks);

@@ -12,13 +12,13 @@ import java.util.Objects;
 import jts.geom.immutable.ImmutablePolygon;
 import scheduler.Schedule;
 import scheduler.ScheduleAlternative;
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.DynamicObstacle;
 import world.Trajectory;
 
-public class WorkerUnitObstacleBuilder {
+public class NodeObstacleBuilder {
 	
-	private WorkerUnit worker;
+	private Node worker;
 	
 	private LocalDateTime startTime;
 	
@@ -28,9 +28,9 @@ public class WorkerUnitObstacleBuilder {
 	
 	private ScheduleAlternative alternative = null;
 
-	private Map<WorkerUnit, ImmutablePolygon> shapeLookUp;
+	private Map<Node, ImmutablePolygon> shapeLookUp;
 
-	public void setWorker(WorkerUnit worker) {
+	public void setWorker(Node worker) {
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 
@@ -62,7 +62,7 @@ public class WorkerUnitObstacleBuilder {
 		// TODO make code fancier (a little repetitive right now)
 	
 		// original trajectories
-		for (WorkerUnit w : schedule.getWorkers()) {
+		for (Node w : schedule.getWorkers()) {
 			if (w == worker)
 				continue;
 			
@@ -72,7 +72,7 @@ public class WorkerUnitObstacleBuilder {
 		
 		// alternative trajectories added to schedule
 		for (ScheduleAlternative a : schedule.getAlternatives()) {
-			for (WorkerUnit w : a.getWorkers()) {
+			for (Node w : a.getWorkers()) {
 				if (w == worker)
 					continue;
 				
@@ -82,7 +82,7 @@ public class WorkerUnitObstacleBuilder {
 		}
 	
 		// alternative trajectories of current alternative
-		for (WorkerUnit w : alternative.getWorkers()) {
+		for (Node w : alternative.getWorkers()) {
 			if (w == worker)
 				continue;
 			
@@ -114,7 +114,7 @@ public class WorkerUnitObstacleBuilder {
 		shapeLookUp = null;
 	}
 
-	private DynamicObstacle makeWorkerObstacle(WorkerUnit worker, Trajectory trajectory) {
+	private DynamicObstacle makeWorkerObstacle(Node worker, Trajectory trajectory) {
 		double radius = this.worker.getRadius();
 		
 		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(worker, w ->

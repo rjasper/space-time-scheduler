@@ -8,22 +8,22 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.StaticObstacle;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;
 
-public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeMatcher<WorkerUnit> {
+public class NodeCollidesWithStaticObstacle extends TypeSafeMatcher<Node> {
 	
 	@Factory
-	public static Matcher<WorkerUnit> workerCollideWith(StaticObstacle obstacle) {
-		return new WorkerUnitCollidesWithStaticObstacle(obstacle);
+	public static Matcher<Node> workerCollideWith(StaticObstacle obstacle) {
+		return new NodeCollidesWithStaticObstacle(obstacle);
 	}
 	
 	private final StaticObstacle obstacle;
 	
-	public WorkerUnitCollidesWithStaticObstacle(StaticObstacle obstacle) {
+	public NodeCollidesWithStaticObstacle(StaticObstacle obstacle) {
 		this.obstacle = obstacle;
 	}
 
@@ -35,7 +35,7 @@ public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeMatcher<Worker
 	}
 
 	@Override
-	protected void describeMismatchSafely(WorkerUnit item, Description mismatchDescription) {
+	protected void describeMismatchSafely(Node item, Description mismatchDescription) {
 		mismatchDescription
 			.appendValue(item)
 			.appendText(" is not colliding with ")
@@ -43,7 +43,7 @@ public class WorkerUnitCollidesWithStaticObstacle extends TypeSafeMatcher<Worker
 	}
 
 	@Override
-	protected boolean matchesSafely(WorkerUnit item) {
+	protected boolean matchesSafely(Node item) {
 		StaticObstacle bufferedObstacle = obstacle.buffer(item.getRadius());
 		Geometry shape = bufferedObstacle.getShape();
 		Geometry trace = item.calcTrajectory().trace();

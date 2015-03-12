@@ -45,13 +45,13 @@ import com.vividsolutions.jts.geom.Polygon;
  *
  * <p>An object of this class is not meant to be used by any scheduler unrelated
  * class since it would expose critical methods, such as
- * {@link #addObstacleSection(WorkerUnitObstacle)} or
- * {@link #removeObstacleSection(WorkerUnitObstacle)} which don't check for
+ * {@link #addObstacleSection(NodeObstacle)} or
+ * {@link #removeObstacleSection(NodeObstacle)} which don't check for
  * overall consistency.</p>
  *
  * @author Rico Jasper
  */
-public class WorkerUnit {
+public class Node {
 	
 	/**
 	 * The worker's ID.
@@ -61,7 +61,7 @@ public class WorkerUnit {
 	/**
 	 * The reference to this worker.
 	 */
-	private final WorkerUnitReference reference;
+	private final NodeReference reference;
 
 	/**
 	 * The physical shape of this worker.
@@ -105,9 +105,9 @@ public class WorkerUnit {
 	 * @param spec
 	 *            the specification used to define configure the worker.
 	 */
-	public WorkerUnit(WorkerUnitSpecification spec) {
+	public Node(NodeSpecification spec) {
 		this.id = spec.getWorkerId();
-		this.reference = new WorkerUnitReference(this);
+		this.reference = new NodeReference(this);
 		this.shape = spec.getShape();
 		this.maxSpeed = spec.getMaxSpeed();
 		this.initialLocation = spec.getInitialLocation();
@@ -142,7 +142,7 @@ public class WorkerUnit {
 	/**
 	 * @return the reference to this worker.
 	 */
-	public WorkerUnitReference getReference() {
+	public NodeReference getReference() {
 		return reference;
 	}
 

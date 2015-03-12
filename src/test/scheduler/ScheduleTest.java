@@ -30,11 +30,11 @@ public class ScheduleTest {
 	
 	private static final double WORKER_SPEED = 1.0;
 	
-	private static WorkerUnit workerUnit(String workerId, double x, double y) {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+	private static Node workerUnit(String workerId, double x, double y) {
+		NodeSpecification spec = new NodeSpecification(
 			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
 		
-		return new WorkerUnit(spec);
+		return new Node(spec);
 	}
 
 	private static void scheduleTask(Schedule schedule, Task task) {
@@ -53,7 +53,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskLock() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -73,7 +73,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTrajectoryLock() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -93,7 +93,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalLock() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -116,7 +116,7 @@ public class ScheduleTest {
 
 	@Test
 	public void testUpdatedTrajectoryOriginLocationViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -143,7 +143,7 @@ public class ScheduleTest {
 
 	@Test
 	public void testTaskLockViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -168,7 +168,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTrajectoryLockViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -193,7 +193,7 @@ public class ScheduleTest {
 
 	@Test
 	public void testContinuousTrajectoryViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -211,7 +211,7 @@ public class ScheduleTest {
 	}
 	
 	public void testTaskLocationViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -230,7 +230,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testUpdatedTrajectoryAtTaskPositive() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -252,7 +252,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testUpdateTrajectoryAtTaskNegative() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -276,7 +276,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemoval() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -301,7 +301,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalUnknown() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -324,7 +324,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testTaskRemovalLockViolation() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -352,7 +352,7 @@ public class ScheduleTest {
 
 	@Test
 	public void testUpdateTrajectoryOfRemoval() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -378,7 +378,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testIntegrate() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -433,7 +433,7 @@ public class ScheduleTest {
 	
 	@Test
 	public void testEliminate() {
-		WorkerUnit w = workerUnit("w", 0, 0);
+		Node w = workerUnit("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w);
@@ -488,8 +488,8 @@ public class ScheduleTest {
 	
 	@Test
 	public void testIntegrateEliminatePartial() {
-		WorkerUnit w1 = workerUnit("w1", 0, 0);
-		WorkerUnit w2 = workerUnit("w2", 10, 10);
+		Node w1 = workerUnit("w1", 0, 0);
+		Node w2 = workerUnit("w2", 10, 10);
 		
 		Schedule schedule = new Schedule();
 		schedule.addWorker(w1);

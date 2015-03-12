@@ -14,15 +14,15 @@ import scheduler.Schedule;
 import scheduler.ScheduleAlternative;
 import scheduler.Scheduler;
 import scheduler.TaskPlanner;
-import scheduler.WorkerUnit;
-import scheduler.WorkerUnitSpecification;
+import scheduler.Node;
+import scheduler.NodeSpecification;
 import world.World;
 import world.WorldPerspective;
 import world.pathfinder.StraightEdgePathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class WorkerUnitFactory {
+public class NodeFactory {
 
 	private static final ImmutablePolygon DEFAULT_SHAPE =
 		immutablePolygon(-5., 5., 5., 5., 5., -5., -5., -5., -5., 5.);
@@ -31,9 +31,7 @@ public class WorkerUnitFactory {
 
 	private static final long DEFAULT_INITIAL_SECONDS = 0L;
 
-	private static WorkerUnitFactory instance = null;
-
-//	private TaskPlanner taskPlanner = new TaskPlanner();
+	private static NodeFactory instance = null;
 
 	private ImmutablePolygon shape;
 
@@ -41,7 +39,7 @@ public class WorkerUnitFactory {
 
 	private double initialSeconds;
 
-	public WorkerUnitFactory() {
+	public NodeFactory() {
 		this(
 			DEFAULT_SHAPE,
 			DEFAULT_MAX_SPEED,
@@ -49,15 +47,15 @@ public class WorkerUnitFactory {
 		);
 	}
 
-	public WorkerUnitFactory(ImmutablePolygon shape, double maxSpeed, long initialSeconds) {
+	public NodeFactory(ImmutablePolygon shape, double maxSpeed, long initialSeconds) {
 		this.shape = shape;
 		this.maxSpeed = maxSpeed;
 		this.initialSeconds = initialSeconds;
 	}
 
-	public static WorkerUnitFactory getInstance() {
+	public static NodeFactory getInstance() {
 		if (instance == null)
-			instance = new WorkerUnitFactory();
+			instance = new NodeFactory();
 
 		return instance;
 	}
@@ -90,30 +88,30 @@ public class WorkerUnitFactory {
 		this.initialSeconds = initialSeconds;
 	}
 
-	public WorkerUnit createWorkerUnit(String id, double x, double y) {
-		return createWorkerUnit(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
+	public Node createNode(String id, double x, double y) {
+		return createNode(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnit createWorkerUnit(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
-		return new WorkerUnit(createWorkerUnitSpecification(id, shape, maxSpeed, x, y, t));
+	public Node createNode(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
+		return new Node(createNodeSpecification(id, shape, maxSpeed, x, y, t));
 	}
 
-	public WorkerUnitSpecification createWorkerUnitSpecification(String id, double x, double y) {
-		return createWorkerUnitSpecification(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
+	public NodeSpecification createNodeSpecification(String id, double x, double y) {
+		return createNodeSpecification(id, getShape(), getMaxSpeed(), x, y, getInitialSeconds());
 	}
 
-	public WorkerUnitSpecification createWorkerUnitSpecification(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
+	public NodeSpecification createNodeSpecification(String id, ImmutablePolygon shape, double maxSpeed, double x, double y, double t) {
 		ImmutablePoint initialLocation = immutablePoint(x, y);
 		LocalDateTime initialTime = atSecond(t);
 
-		return new WorkerUnitSpecification(id, shape, maxSpeed, initialLocation, initialTime);
+		return new NodeSpecification(id, shape, maxSpeed, initialLocation, initialTime);
 	}
 
-	public boolean addTask(WorkerUnit worker, UUID taskId, double x, double y, long tStart, long tEnd) {
+	public boolean addTask(Node worker, UUID taskId, double x, double y, long tStart, long tEnd) {
 		return addTaskWithDuration(worker, taskId, x, y, tStart, tEnd - tStart);
 	}
 
-	public boolean addTaskWithDuration(WorkerUnit worker, UUID taskId, double x, double y, long t, long d) {
+	public boolean addTaskWithDuration(Node worker, UUID taskId, double x, double y, long t, long d) {
 		TaskPlanner tp = new TaskPlanner();
 
 		Point location = point(x, y);

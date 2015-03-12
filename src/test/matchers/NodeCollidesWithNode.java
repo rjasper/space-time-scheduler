@@ -9,25 +9,25 @@ import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.DynamicObstacle;
 
-public class WorkerUnitCollidesWithWorkerUnit extends WorkerUnitCollidesWithDynamicObstacles {
+public class NodeCollidesWithNode extends NodeCollidesWithDynamicObstacles {
 	
 	@Factory
-	public static Matcher<WorkerUnit> workerCollidesWith(WorkerUnit worker) {
-		return new WorkerUnitCollidesWithWorkerUnit(worker);
+	public static Matcher<Node> workerCollidesWith(Node worker) {
+		return new NodeCollidesWithNode(worker);
 	}
 	
-	private final WorkerUnit worker;
+	private final Node worker;
 	
-	public WorkerUnitCollidesWithWorkerUnit(WorkerUnit worker) {
+	public NodeCollidesWithNode(Node worker) {
 		super(makeObstacles(worker));
 		
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 
-	private static Collection<? extends DynamicObstacle> makeObstacles(WorkerUnit worker) {
+	private static Collection<? extends DynamicObstacle> makeObstacles(Node worker) {
 		return worker.getTrajectories().stream()
 			.map(t -> new DynamicObstacle(worker.getShape(), t))
 			.collect(toList());
@@ -41,7 +41,7 @@ public class WorkerUnitCollidesWithWorkerUnit extends WorkerUnitCollidesWithDyna
 	}
 
 	@Override
-	protected void describeMismatchSafely(WorkerUnit item, Description mismatchDescription) {
+	protected void describeMismatchSafely(Node item, Description mismatchDescription) {
 		mismatchDescription
 			.appendValue(item)
 			.appendText(" is not colliding with ")

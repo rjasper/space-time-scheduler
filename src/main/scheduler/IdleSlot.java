@@ -8,7 +8,7 @@ import jts.geom.immutable.ImmutablePoint;
 import jts.geom.util.GeometriesRequire;
 
 /**
- * <p>The IdleSlot class represents the idle time of a {@link WorkerUnit} while
+ * <p>The IdleSlot class represents the idle time of a {@link Node} while
  * not being occupied by a task. This also includes the time to drive from
  * one task to the next task.</p>
  *

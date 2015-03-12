@@ -13,26 +13,26 @@ import world.Trajectory;
 
 // TODO document
 /**
- * A reference to the {@link WorkerUnit} representation maintained by the
+ * A reference to the {@link Node} representation maintained by the
  * scheduler.
  * 
  * @author Rico
- * @see WorkerUnit
+ * @see Node
  * @see Scheduler
  */
-public class WorkerUnitReference  {
+public class NodeReference  {
 	
 	/**
 	 * The referenced worker.
 	 */
-	private final WorkerUnit worker;
+	private final Node worker;
 
 	/**
-	 * Constructs a new {@code WorkerUnitReference} of the given worker.
+	 * Constructs a new {@code NodeReference} of the given worker.
 	 * 
 	 * @param worker
 	 */
-	public WorkerUnitReference(WorkerUnit worker) {
+	public NodeReference(Node worker) {
 		this.worker = Objects.requireNonNull(worker, "worker");
 	}
 
@@ -46,7 +46,7 @@ public class WorkerUnitReference  {
 	/**
 	 * @return the actual worker.
 	 */
-	WorkerUnit getActual() {
+	Node getActual() {
 		return worker;
 	}
 

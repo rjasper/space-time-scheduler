@@ -7,16 +7,16 @@ package legacy.matchers;
 //import org.hamcrest.Description;
 //import org.hamcrest.TypeSafeDiagnosingMatcher;
 //
-//import scheduler.WorkerUnit;
-//import world.WorkerUnitObstacle;
+//import scheduler.Node;
+//import world.NodeObstacle;
 //
-//public class WorkerUnitEvadedByNumTimes extends TypeSafeDiagnosingMatcher<Iterable<WorkerUnit>> {
+//public class NodeEvadedByNumTimes extends TypeSafeDiagnosingMatcher<Iterable<Node>> {
 //
-//	private final WorkerUnit operand;
+//	private final Node operand;
 //	
 //	private final int expectedTimes;
 //
-//	public WorkerUnitEvadedByNumTimes(WorkerUnit operand, int expectedTimes) {
+//	public NodeEvadedByNumTimes(Node operand, int expectedTimes) {
 //		if (operand == null)
 //			throw new NullPointerException("operand is null");
 //		
@@ -35,13 +35,13 @@ package legacy.matchers;
 //	}
 //
 //	@Override
-//	protected boolean matchesSafely(Iterable<WorkerUnit> item, Description mismatchDescription) {
+//	protected boolean matchesSafely(Iterable<Node> item, Description mismatchDescription) {
 //		long actualTimes = StreamSupport.stream(item.spliterator(), false)
-//			.map(WorkerUnit::getObstacleSections)
+//			.map(Node::getObstacleSections)
 //			.flatMap(Collection::stream)
-//			.map(WorkerUnitObstacle::getEvaders)
+//			.map(NodeObstacle::getEvaders)
 //			.flatMap(Collection::stream)
-//			.map(WorkerUnitObstacle::getWorkerUnit)
+//			.map(NodeObstacle::getNode)
 //			.filter(operand::equals)
 //			.count();
 //		

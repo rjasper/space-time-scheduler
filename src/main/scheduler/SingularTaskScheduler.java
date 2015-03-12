@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 import scheduler.pickers.LocationIterator;
-import scheduler.pickers.WorkerUnitSlotIterator;
-import scheduler.pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
+import scheduler.pickers.NodeSlotIterator;
+import scheduler.pickers.NodeSlotIterator.NodeSlot;
 import world.World;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
@@ -119,14 +119,14 @@ public class SingularTaskScheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the workers are filtered by the location
 			
-			Iterable<WorkerUnitSlot> workerSlots = () -> new WorkerUnitSlotIterator(
+			Iterable<NodeSlot> workerSlots = () -> new NodeSlotIterator(
 				filterByLocation(location),
 				frozenHorizonTime,
 				location,
 				earliest, latest, duration);
 
-			for (WorkerUnitSlot ws : workerSlots) {
-				WorkerUnit w = ws.getWorkerUnit();
+			for (NodeSlot ws : workerSlots) {
+				Node w = ws.getNode();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
 				
@@ -163,7 +163,7 @@ public class SingularTaskScheduler {
 	 * @param location
 	 * @return the filtered workers which are able to reach the location.
 	 */
-	private Collection<WorkerUnit> filterByLocation(Point location) {
+	private Collection<Node> filterByLocation(Point location) {
 		return schedule.getWorkers().stream()
 			.filter(w -> checkLocationFor(location, w))
 			.collect(toList());
@@ -176,7 +176,7 @@ public class SingularTaskScheduler {
 	 * @param worker
 	 * @return {@code true} iff worker is able to reach the location.
 	 */
-	private boolean checkLocationFor(Point location, WorkerUnit worker) {
+	private boolean checkLocationFor(Point location, Node worker) {
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
 		Geometry map = perspective.getView().getMap();
 	

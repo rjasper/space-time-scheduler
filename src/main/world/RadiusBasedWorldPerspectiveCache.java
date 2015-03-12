@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
@@ -22,7 +22,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	/**
 	 * The perspective references of each known worker.
 	 */
-	private final Map<WorkerUnit, WorldPerspectiveReference> perceiverReferences =
+	private final Map<Node, WorldPerspectiveReference> perceiverReferences =
 		new IdentityHashMap<>();
 
 	/**
@@ -167,7 +167,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * @param perceiver
 	 * @param reference
 	 */
-	private void addPerceiverReference(WorkerUnit perceiver, WorldPerspectiveReference reference) {
+	private void addPerceiverReference(Node perceiver, WorldPerspectiveReference reference) {
 		perceiverReferences.put(perceiver, reference);
 		reference.incrementRef();
 	}
@@ -177,7 +177,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * 
 	 * @param perceiver
 	 */
-	private void removePerceiverReference(WorkerUnit perceiver) {
+	private void removePerceiverReference(Node perceiver) {
 		WorldPerspectiveReference reference = perceiverReferences.remove(perceiver);
 		reference.decrementRef();
 	}
@@ -188,7 +188,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 	 * @param perceiver
 	 * @return the reference.
 	 */
-	private WorldPerspectiveReference lookUpByPerceiver(WorkerUnit perceiver) {
+	private WorldPerspectiveReference lookUpByPerceiver(Node perceiver) {
 		return perceiverReferences.get(perceiver);
 	}
 
@@ -212,10 +212,10 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.WorldPerspectiveCache#getPerspectiveFor(tasks.WorkerUnit)
+	 * @see world.WorldPerspectiveCache#getPerspectiveFor(tasks.Node)
 	 */
 	@Override
-	public WorldPerspective getPerspectiveFor(WorkerUnit perceiver) {
+	public WorldPerspective getPerspectiveFor(Node perceiver) {
 		Objects.requireNonNull(perceiver, "perceiver");
 		
 		WorldPerspectiveReference reference;
@@ -244,10 +244,10 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.WorldPerspectiveCache#removePerceiver(tasks.WorkerUnit)
+	 * @see world.WorldPerspectiveCache#removePerceiver(tasks.Node)
 	 */
 	@Override
-	public void removePerceiver(WorkerUnit perceiver) {
+	public void removePerceiver(Node perceiver) {
 		Objects.requireNonNull(perceiver, "perceiver");
 		
 		WorldPerspectiveReference reference = lookUpByPerceiver(perceiver);

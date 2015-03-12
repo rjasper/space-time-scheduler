@@ -11,7 +11,7 @@ import jts.geom.util.GeometriesRequire;
 import util.NameProvider;
 
 /**
- * <p>A Task represents the smallest assignment of a {@link WorkerUnit} that the
+ * <p>A Task represents the smallest assignment of a {@link Node} that the
  * {@link Scheduler} can manage. Each task is assigned to exactly one
  * worker.</p>
  *
@@ -30,7 +30,7 @@ public class Task {
 	/**
 	 * The worker assigned to this task.
 	 */
-	private final WorkerUnitReference assignedWorker;
+	private final NodeReference assignedWorker;
 
 	/**
 	 * The location where the task is executed.
@@ -75,7 +75,7 @@ public class Task {
 	 */
 	public Task(
 		UUID id,
-		WorkerUnitReference assignedWorker,
+		NodeReference assignedWorker,
 		ImmutablePoint location,
 		LocalDateTime startTime,
 		Duration duration)
@@ -107,7 +107,7 @@ public class Task {
 	/**
 	 * @return the assigned worker.
 	 */
-	public WorkerUnitReference getWorkerReference() {
+	public NodeReference getWorkerReference() {
 		return assignedWorker;
 	}
 

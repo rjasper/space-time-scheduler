@@ -32,7 +32,7 @@ import world.Trajectory;
 
 import com.google.common.collect.ImmutableList;
 
-public class WorkerUnitUpdateTest {
+public class NodeUpdateTest {
 	
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -48,12 +48,12 @@ public class WorkerUnitUpdateTest {
 
 	private static final LocalDateTime WORKER_INITIAL_TIME = atSecond(0);
 	
-	private static WorkerUnitUpdate workerUnitUpdate() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+	private static NodeUpdate workerUnitUpdate() {
+		NodeSpecification spec = new NodeSpecification(
 			WORKER_ID, WORKER_SHAPE, WORKER_SPEED, WORKER_INITIAL_LOCATION, WORKER_INITIAL_TIME);
-		WorkerUnit worker = new WorkerUnit(spec);
+		Node worker = new Node(spec);
 		
-		return new WorkerUnitUpdate(worker);
+		return new NodeUpdate(worker);
 	}
 	
 	private static <T> List<T> toList(Collection<T> collection) {
@@ -69,7 +69,7 @@ public class WorkerUnitUpdateTest {
 
 	@Test
 	public void testUpdateTrajectory() {
-		WorkerUnitUpdate update = workerUnitUpdate();
+		NodeUpdate update = workerUnitUpdate();
 		
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
 		
@@ -85,7 +85,7 @@ public class WorkerUnitUpdateTest {
 
 	@Test
 	public void testUpdateTrajectoryPredate() {
-		WorkerUnitUpdate update = workerUnitUpdate();
+		NodeUpdate update = workerUnitUpdate();
 		
 		Trajectory traj = trajectory(0, 0, 0, 0, -1, 1);
 		
@@ -96,8 +96,8 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testAddTask() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnitReference ref = update.getWorker().getReference();
+		NodeUpdate update = workerUnitUpdate();
+		NodeReference ref = update.getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -113,8 +113,8 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testAddTaskInvalidWorker() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnitReference other = workerUnitUpdate().getWorker().getReference();
+		NodeUpdate update = workerUnitUpdate();
+		NodeReference other = workerUnitUpdate().getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -125,8 +125,8 @@ public class WorkerUnitUpdateTest {
 
 	@Test
 	public void testAddTaskPredate() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnitReference ref = update.getWorker().getReference();
+		NodeUpdate update = workerUnitUpdate();
+		NodeReference ref = update.getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(1));
 		
@@ -137,8 +137,8 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testAddTaskRemoval() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnitReference ref = update.getWorker().getReference();
+		NodeUpdate update = workerUnitUpdate();
+		NodeReference ref = update.getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -153,8 +153,8 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testAddTaskRemovalInvalidWorker() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnitReference other = workerUnitUpdate().getWorker().getReference();
+		NodeUpdate update = workerUnitUpdate();
+		NodeReference other = workerUnitUpdate().getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -165,9 +165,9 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyPositive() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnit worker = update.getWorker();
-		WorkerUnitReference ref = worker.getReference();
+		NodeUpdate update = workerUnitUpdate();
+		Node worker = update.getWorker();
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = new DecomposedTrajectory(
 			atSecond(0),
@@ -188,9 +188,9 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyLocation() {
-		WorkerUnitUpdate update = workerUnitUpdate();
-		WorkerUnit worker = update.getWorker();
-		WorkerUnitReference ref = worker.getReference();
+		NodeUpdate update = workerUnitUpdate();
+		Node worker = update.getWorker();
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = new DecomposedTrajectory(
 			atSecond(0),
@@ -214,7 +214,7 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testCheckSelfConsistencyContinuity() {
-		WorkerUnitUpdate update = workerUnitUpdate();
+		NodeUpdate update = workerUnitUpdate();
 		
 		Trajectory traj1 = new SimpleTrajectory(
 			spatialPath(0, 0, 1, 1),
@@ -233,9 +233,9 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testCloneIdentical() {
-		WorkerUnitUpdate origin = workerUnitUpdate();
-		WorkerUnit worker = origin.getWorker();
-		WorkerUnitReference ref = worker.getReference();
+		NodeUpdate origin = workerUnitUpdate();
+		Node worker = origin.getWorker();
+		NodeReference ref = worker.getReference();
 
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
@@ -245,7 +245,7 @@ public class WorkerUnitUpdateTest {
 		origin.addTask(task);
 		origin.addTaskRemoval(removal);
 		
-		WorkerUnitUpdate clone = origin.clone();
+		NodeUpdate clone = origin.clone();
 		
 		clone.seal();
 		
@@ -265,11 +265,11 @@ public class WorkerUnitUpdateTest {
 	
 	@Test
 	public void testCloneIndependent() {
-		WorkerUnitUpdate origin = workerUnitUpdate();
-		WorkerUnit worker = origin.getWorker();
-		WorkerUnitReference ref = worker.getReference();
+		NodeUpdate origin = workerUnitUpdate();
+		Node worker = origin.getWorker();
+		NodeReference ref = worker.getReference();
 		
-		WorkerUnitUpdate clone = origin.clone();
+		NodeUpdate clone = origin.clone();
 
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));

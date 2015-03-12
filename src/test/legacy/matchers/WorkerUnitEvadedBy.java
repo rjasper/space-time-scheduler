@@ -6,19 +6,19 @@ package legacy.matchers;
 //import org.hamcrest.Description;
 //import org.hamcrest.TypeSafeDiagnosingMatcher;
 //
-//import scheduler.WorkerUnit;
-//import world.WorkerUnitObstacle;
+//import scheduler.Node;
+//import world.NodeObstacle;
 //
-//public class WorkerUnitEvadedBy extends TypeSafeDiagnosingMatcher<WorkerUnit> {
+//public class NodeEvadedBy extends TypeSafeDiagnosingMatcher<Node> {
 //	
-//	private WorkerUnit operand;
+//	private Node operand;
 //	
-//	public WorkerUnitEvadedBy(WorkerUnit operand) {
+//	public NodeEvadedBy(Node operand) {
 //		this.operand = operand;
 //	}
 //
 //	@Override
-//	protected boolean matchesSafely(WorkerUnit item, Description mismatchDescription) {
+//	protected boolean matchesSafely(Node item, Description mismatchDescription) {
 //		mismatchDescription
 //			.appendValue(item)
 //			.appendText(" wasn't evaded by ")
@@ -26,9 +26,9 @@ package legacy.matchers;
 //		
 //		// true if item is evaded by the operand
 //		return item.getObstacleSections().stream()
-//			.map(WorkerUnitObstacle::getEvaders)
+//			.map(NodeObstacle::getEvaders)
 //			.flatMap(Collection::stream)
-//			.map(WorkerUnitObstacle::getWorkerUnit)
+//			.map(NodeObstacle::getNode)
 //			.anyMatch(operand::equals);
 //	}
 //

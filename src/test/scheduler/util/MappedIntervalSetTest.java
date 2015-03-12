@@ -15,8 +15,8 @@ import jts.geom.immutable.StaticGeometryBuilder;
 import org.junit.Test;
 
 import scheduler.Task;
-import scheduler.WorkerUnit;
-import scheduler.factories.WorkerUnitFactory;
+import scheduler.Node;
+import scheduler.factories.NodeFactory;
 import scheduler.util.IntervalSet.Interval;
 import util.UUIDFactory;
 
@@ -24,8 +24,8 @@ public class MappedIntervalSetTest {
 	
 	private static Task task(LocalDateTime startTime, LocalDateTime finishTime) {
 		UUID id = UUIDFactory.uuid("don't care");
-		WorkerUnit worker = WorkerUnitFactory.getInstance()
-			.createWorkerUnit("don't care", 0, 0);
+		Node worker = NodeFactory.getInstance()
+			.createNode("don't care", 0, 0);
 		ImmutablePoint location = StaticGeometryBuilder.immutablePoint(0, 0);
 		Duration duration = Duration.between(startTime, finishTime);
 		

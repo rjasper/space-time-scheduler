@@ -6,16 +6,16 @@ package legacy.matchers;
 //import org.hamcrest.Description;
 //import org.hamcrest.TypeSafeDiagnosingMatcher;
 //
-//import scheduler.WorkerUnit;
-//import world.WorkerUnitObstacle;
+//import scheduler.Node;
+//import world.NodeObstacle;
 //
-//public class WorkerUnitEvadedByAt extends TypeSafeDiagnosingMatcher<WorkerUnit> {
+//public class NodeEvadedByAt extends TypeSafeDiagnosingMatcher<Node> {
 //	
-//	private final WorkerUnit operand;
+//	private final Node operand;
 //	
 //	private final LocalDateTime timeOfSegment;
 //
-//	public WorkerUnitEvadedByAt(WorkerUnit operand, LocalDateTime timeOfSegment) {
+//	public NodeEvadedByAt(Node operand, LocalDateTime timeOfSegment) {
 //		this.operand = operand;
 //		this.timeOfSegment = timeOfSegment;
 //	}
@@ -30,8 +30,8 @@ package legacy.matchers;
 //	}
 //
 //	@Override
-//	protected boolean matchesSafely(WorkerUnit item, Description mismatchDescription) {
-//		WorkerUnitObstacle segment = item.getObstacleSection(timeOfSegment);
+//	protected boolean matchesSafely(Node item, Description mismatchDescription) {
+//		NodeObstacle segment = item.getObstacleSection(timeOfSegment);
 //		
 //		mismatchDescription
 //		.appendValue(item)
@@ -50,7 +50,7 @@ package legacy.matchers;
 //				.appendValue(segment);
 //			
 //			return segment.getEvaders().stream()
-//				.map(WorkerUnitObstacle::getWorkerUnit)
+//				.map(NodeObstacle::getNode)
 //				.anyMatch(operand::equals);
 //		}
 //	}

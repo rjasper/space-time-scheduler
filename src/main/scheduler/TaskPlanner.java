@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import jts.geom.immutable.ImmutablePoint;
-import scheduler.util.WorkerUnitObstacleBuilder;
+import scheduler.util.NodeObstacleBuilder;
 import util.JoinedCollection;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
@@ -30,7 +30,7 @@ import com.vividsolutions.jts.geom.Point;
 // TODO document
 /**
  * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
- * It requires multiple parameters which determine the {@link WorkerUnit worker}
+ * It requires multiple parameters which determine the {@link Node worker}
  * to execute the new task, and the location, duration, and time interval of the
  * execution. It is also responsible for ensuring that the designated worker is
  * able to reach the task's location with colliding with any other object; be it
@@ -58,7 +58,7 @@ public class TaskPlanner {
 	/**
 	 * The current worker.
 	 */
-	private WorkerUnit worker = null;
+	private Node worker = null;
 	
 	/**
 	 * The location of the {@link Task task} to be planned.
@@ -114,7 +114,7 @@ public class TaskPlanner {
 		this.taskId = Objects.requireNonNull(taskId, "taskId");
 	}
 
-	public void setWorker(WorkerUnit workerUnit) {
+	public void setWorker(Node workerUnit) {
 		this.worker = Objects.requireNonNull(workerUnit, "workerUnit");
 	}
 
@@ -251,7 +251,7 @@ public class TaskPlanner {
 	}
 	
 	private void init() {
-		WorkerUnitObstacleBuilder builder = new WorkerUnitObstacleBuilder();
+		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
 		builder.setWorker(worker);
 		builder.setStartTime(idleSlot.getStartTime());

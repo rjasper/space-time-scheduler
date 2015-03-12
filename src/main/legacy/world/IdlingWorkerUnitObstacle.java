@@ -6,7 +6,7 @@
 //import jts.geom.immutable.ImmutablePoint;
 //import jts.geom.util.GeometriesRequire;
 //import scheduler.Scheduler;
-//import scheduler.WorkerUnit;
+//import scheduler.Node;
 //import world.SimpleTrajectory;
 //import world.SpatialPath;
 //import world.Trajectory;
@@ -14,16 +14,16 @@
 //import com.google.common.collect.ImmutableList;
 //
 ///**
-// * An {@code IdlingWorkerUnitObstacle} represents the very last path segment of
+// * An {@code IdlingNodeObstacle} represents the very last path segment of
 // * a worker. When a worker has completed its last task it has not anywhere to
 // * go. Therefore, it stays at its last location.
 // * 
 // * @author Rico
 // */
-//public class IdlingWorkerUnitObstacle extends WorkerUnitObstacle {
+//public class IdlingNodeObstacle extends NodeObstacle {
 //
 //	/**
-//	 * Constructs a new {@code IdlingWorkerUnitObstacle} of a worker which has
+//	 * Constructs a new {@code IdlingNodeObstacle} of a worker which has
 //	 * no further destination. From {@code startTime} onwards the worker will
 //	 * stay at {@code location}.
 //	 * 
@@ -35,7 +35,7 @@
 //	 * @throws NullPointerException if any argument is {@code null}.
 //	 * @throws IllegalArgumentException if the location is empty or invalid.
 //	 */
-//	public IdlingWorkerUnitObstacle(WorkerUnit worker, ImmutablePoint location, LocalDateTime startTime) {
+//	public IdlingNodeObstacle(Node worker, ImmutablePoint location, LocalDateTime startTime) {
 //		// see super and buildTrajectory for @throws
 //		super(worker, buildTrajectory(location, startTime));
 //	}

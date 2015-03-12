@@ -11,8 +11,8 @@ import jts.geom.immutable.ImmutablePolygon;
 import scheduler.ScheduleResult;
 import scheduler.Scheduler;
 import scheduler.TaskSpecification;
-import scheduler.WorkerUnitReference;
-import scheduler.WorkerUnitSpecification;
+import scheduler.NodeReference;
+import scheduler.NodeSpecification;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -80,11 +80,11 @@ public final class Example {
 		// for worker
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 0, 0); // 1/1/2015 12:00 AM
 		// worker actual
-		WorkerUnitSpecification workerSpec =
-			new WorkerUnitSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
+		NodeSpecification workerSpec =
+			new NodeSpecification("worker-id", workerShape, maxSpeed, initialLocation, initialTime);
 		// scheduler actual
 		Scheduler scheduler = new Scheduler(world);
-		WorkerUnitReference workerRef = scheduler.addWorker(workerSpec);
+		NodeReference workerRef = scheduler.addWorker(workerSpec);
 		
 		// specification
 		// for specification

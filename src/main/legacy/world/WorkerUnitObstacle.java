@@ -7,46 +7,46 @@
 //import java.util.Set;
 //
 //import jts.geom.immutable.ImmutablePolygon;
-//import scheduler.WorkerUnit;
+//import scheduler.Node;
 //import world.DynamicObstacle;
 //import world.Trajectory;
 //
 ///**
-// * <p>A {@code WorkerUnitObstacle} is a path section of a worker represented as a
+// * <p>A {@code NodeObstacle} is a path section of a worker represented as a
 // * dynamic obstacle. A worker typically has multiple path sections which form
 // * the entire path the worker follows. Ordinarily one section connects two
 // * locations in time which a worker has to visit. The path between those
 // * locations is interchangeable. This enables to replace singular sections due
 // * to task planning.</p>
 // *
-// * <p>Another property of a {@code WorkerUnitObstacle} are evasions. Workers
+// * <p>Another property of a {@code NodeObstacle} are evasions. Workers
 // * might need to evade another worker to avoid collisions. When a worker changes
 // * one of its sections due to task planning a previous evasion might become
-// * obsolete. A {@code WorkerUnitObstacle} provides the functionality to register
+// * obsolete. A {@code NodeObstacle} provides the functionality to register
 // * the path section of the worker which was evading this one. This enables to
 // * detect any obsolete evasions for further actions.</p>
 // *
 // * @author Rico
 // */
-//public abstract class WorkerUnitObstacle extends DynamicObstacle {
+//public abstract class NodeObstacle extends DynamicObstacle {
 //
 //	/**
 //	 * The worker unit represented as an obstacle.
 //	 */
-//	private final WorkerUnit workerUnit;
+//	private final Node workerUnit;
 //
 //	/**
 //	 * Stores the path sections of worker which where evading this one.
 //	 */
-//	private final Set<MovingWorkerUnitObstacle> evaders = new HashSet<>();
+//	private final Set<MovingNodeObstacle> evaders = new HashSet<>();
 //
 //	/**
 //	 * Stores an unmodifiable view on {@link #evaders}.
 //	 */
-//	private final Set<MovingWorkerUnitObstacle> unmodifiableEvaders = unmodifiableSet(evaders);
+//	private final Set<MovingNodeObstacle> unmodifiableEvaders = unmodifiableSet(evaders);
 //
 //	/**
-//	 * Creates a new {@code WorkerUnitObstacle} for the given worker along the
+//	 * Creates a new {@code NodeObstacle} for the given worker along the
 //	 * trajectory.
 //	 *
 //	 * @param worker
@@ -56,7 +56,7 @@
 //	 * @throws IllegalArgumentException
 //	 *             if the trajectory is empty.
 //	 */
-//	public WorkerUnitObstacle(WorkerUnit worker, Trajectory trajectory) {
+//	public NodeObstacle(Node worker, Trajectory trajectory) {
 //		// retrieveShape throws NullPointerException if worker is null
 //		super(retrieveShape(worker), trajectory);
 //
@@ -70,7 +70,7 @@
 //	 * @return the shape.
 //	 * @throws NullPointerException if the worker is {@code null}.
 //	 */
-//	private static ImmutablePolygon retrieveShape(WorkerUnit worker) {
+//	private static ImmutablePolygon retrieveShape(Node worker) {
 //		Objects.requireNonNull(worker, "worker");
 //
 //		return worker.getShape();
@@ -79,14 +79,14 @@
 //	/**
 //	 * @return the worker unit represented by this obstacle.
 //	 */
-//	public WorkerUnit getWorkerUnit() {
+//	public Node getNode() {
 //		return workerUnit;
 //	}
 //
 //	/**
 //	 * @return other worker's path sections which had to evade this obstacle.
 //	 */
-//	public Set<MovingWorkerUnitObstacle> getEvaders() {
+//	public Set<MovingNodeObstacle> getEvaders() {
 //		return unmodifiableEvaders;
 //	}
 //
@@ -97,7 +97,7 @@
 //	 * @throws NullPointerException if the {@code evader} is {@code null}.
 //	 * @throws IllegalArgumentException if the {@code evader} was already registered.
 //	 */
-//	public void addEvader(MovingWorkerUnitObstacle evader) {
+//	public void addEvader(MovingNodeObstacle evader) {
 //		Objects.requireNonNull(evader, "evader");
 //
 //		boolean status = evaders.add(evader);
@@ -113,7 +113,7 @@
 //	 * @throws NullPointerException if the {@code evader} is {@code null}.
 //	 * @throws IllegalArgumentException if the {@code evader} was not registered.
 //	 */
-//	public void removeEvader(MovingWorkerUnitObstacle evader) {
+//	public void removeEvader(MovingNodeObstacle evader) {
 //		Objects.requireNonNull(evader, "evader");
 //
 //		boolean status = evaders.remove(evader);

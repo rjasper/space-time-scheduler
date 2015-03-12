@@ -7,26 +7,26 @@ package legacy.matchers;
 //
 //import org.hamcrest.Matcher;
 //
-//import scheduler.WorkerUnit;
+//import scheduler.Node;
 //
 //public final class EvasionMatchers {
 //	
 //	private EvasionMatchers() {}
 //	
-//	public static Matcher<WorkerUnit> isEvadedBy(WorkerUnit operand) {
-//		return new WorkerUnitEvadedBy(operand);
+//	public static Matcher<Node> isEvadedBy(Node operand) {
+//		return new NodeEvadedBy(operand);
 //	}
 //	
-//	public static Matcher<Iterable<? super WorkerUnit>> areEvadedBy(WorkerUnit operand) {
+//	public static Matcher<Iterable<? super Node>> areEvadedBy(Node operand) {
 //		return hasItem(isEvadedBy(operand));
 //	}
 //	
-//	public static Matcher<WorkerUnit> isEvadedBy(WorkerUnit operand, LocalDateTime timeOfSegment) {
-//		return new WorkerUnitEvadedByAt(operand, timeOfSegment);
+//	public static Matcher<Node> isEvadedBy(Node operand, LocalDateTime timeOfSegment) {
+//		return new NodeEvadedByAt(operand, timeOfSegment);
 //	}
 //	
-//	public static Matcher<Iterable<WorkerUnit>> evadedByNumTimes(WorkerUnit operand, int times) {
-//		return new WorkerUnitEvadedByNumTimes(operand, times);
+//	public static Matcher<Iterable<Node>> evadedByNumTimes(Node operand, int times) {
+//		return new NodeEvadedByNumTimes(operand, times);
 //	}
 //
 //}

@@ -17,7 +17,7 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.junit.Test;
 
-import scheduler.factories.WorkerUnitFactory;
+import scheduler.factories.NodeFactory;
 import world.DynamicObstacle;
 import world.RadiusBasedWorldPerspectiveCache;
 import world.StaticObstacle;
@@ -32,12 +32,12 @@ import com.vividsolutions.jts.geom.Point;
 
 public class TaskPlannerTest {
 
-	private static final WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
+	private static final NodeFactory wFact = NodeFactory.getInstance();
 	
-	private static Schedule makeSchedule(WorkerUnit... workers) {
+	private static Schedule makeSchedule(Node... workers) {
 		Schedule schedule = new Schedule();
 		
-		for (WorkerUnit w : workers)
+		for (Node w : workers)
 			schedule.addWorker(w);
 		
 		return schedule;
@@ -46,7 +46,7 @@ public class TaskPlannerTest {
 	private static boolean planTask(
 		World world,
 		Schedule schedule,
-		WorkerUnit worker,
+		Node worker,
 		UUID taskId,
 		Point location,
 		LocalDateTime startTime,
@@ -95,7 +95,7 @@ public class TaskPlannerTest {
 	public void testStaticObstacles() {
 		StaticObstacle obstacle = new StaticObstacle(
 			immutableBox(30., 10., 40., 40.));
-		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
+		Node w = wFact.createNode("w", 10.0, 20.0);
 
 		Schedule schedule = makeSchedule(w);
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
@@ -122,7 +122,7 @@ public class TaskPlannerTest {
 			40,  0,
 			 0, 40);
 		DynamicObstacle obstacle = new DynamicObstacle(obstacleShape, obstacleTrajectory);
-		WorkerUnit w = wFact.createWorkerUnit("w", 10.0, 20.0);
+		Node w = wFact.createNode("w", 10.0, 20.0);
 
 		Schedule schedule = makeSchedule(w);
 		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
@@ -144,8 +144,8 @@ public class TaskPlannerTest {
 //	@Test
 //	public void testObsoleteEvasions() {
 //		ImmutablePolygon shape = immutableBox(-0.25, -0.25, 0.25, 0.25);
-//		WorkerUnit w1 = wFact.createWorkerUnit("w1", shape, 1.0, 3.0, 5.0, 0.0);
-//		WorkerUnit w2 = wFact.createWorkerUnit("w2", shape, 1.0, 2.0, 3.0, 5.0);
+//		Node w1 = wFact.createNode("w1", shape, 1.0, 3.0, 5.0, 0.0);
+//		Node w2 = wFact.createNode("w2", shape, 1.0, 2.0, 3.0, 5.0);
 //
 //		Schedule schedule = makeSchedule(w1, w2);
 //		World world = new World();
@@ -200,7 +200,7 @@ public class TaskPlannerTest {
 	
 	@Test
 	public void testTightPlan1() {
-		WorkerUnit w = wFact.createWorkerUnit(
+		Node w = wFact.createNode(
 			"w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 
 		World world = new World();
@@ -219,7 +219,7 @@ public class TaskPlannerTest {
 
 	@Test
 	public void testTightPlan2() {
-		WorkerUnit w = wFact.createWorkerUnit(
+		Node w = wFact.createNode(
 			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 
 		World world = new World();
@@ -252,7 +252,7 @@ public class TaskPlannerTest {
 	
 	@Test
 	public void testTightPlan3() {
-		WorkerUnit w = wFact.createWorkerUnit(
+		Node w = wFact.createNode(
 			"w", immutableBox(-0.5, -0.5, 0.5, 0.5), 1.0, 1.0, 1.0, 0.0);
 
 		World world = new World();

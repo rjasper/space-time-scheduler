@@ -5,7 +5,7 @@
 //
 //import jts.geom.immutable.ImmutablePoint;
 //import scheduler.Task;
-//import scheduler.WorkerUnit;
+//import scheduler.Node;
 //import world.SimpleTrajectory;
 //import world.SpatialPath;
 //import world.Trajectory;
@@ -13,12 +13,12 @@
 //import com.google.common.collect.ImmutableList;
 //
 ///**
-// * An {@code OccupiedWorkerUnitObstacle} represents the stationary path segment
+// * An {@code OccupiedNodeObstacle} represents the stationary path segment
 // * of a worker being occupied with a task.
 // * 
 // * @author Rico
 // */
-//public class OccupiedWorkerUnitObstacle extends WorkerUnitObstacle {
+//public class OccupiedNodeObstacle extends NodeObstacle {
 //
 //	/**
 //	 * The task the worker is occupied with.
@@ -26,14 +26,14 @@
 //	private final Task occupation;
 //
 //	/**
-//	 * Constructs a new {@code OccupiedWorkerUnitObstacle} of the worker having
+//	 * Constructs a new {@code OccupiedNodeObstacle} of the worker having
 //	 * an occupation.
 //	 * 
 //	 * @param worker
 //	 * @param occupation
 //	 * @throws NullPointerException if any argument is {@code null}.
 //	 */
-//	public OccupiedWorkerUnitObstacle(WorkerUnit worker, Task occupation) {
+//	public OccupiedNodeObstacle(Node worker, Task occupation) {
 //		// throws NullPointerException
 //		super(worker, buildTrajectory(occupation));
 //		

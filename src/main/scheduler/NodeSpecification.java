@@ -14,7 +14,7 @@ import jts.geom.util.GeometriesRequire;
  * 
  * @author Rico
  */
-public final class WorkerUnitSpecification {
+public final class NodeSpecification {
 	
 	/**
 	 * The worker's ID.
@@ -63,7 +63,7 @@ public final class WorkerUnitSpecification {
 	 *             <li>the maximum speed is non-finite or non-positive</li>
 	 *             </ul>
 	 */
-	public WorkerUnitSpecification(
+	public NodeSpecification(
 		String workerId,
 		ImmutablePolygon shape,
 		double maxSpeed,

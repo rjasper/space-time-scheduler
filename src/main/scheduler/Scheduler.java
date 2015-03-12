@@ -27,7 +27,7 @@ import world.pathfinder.StraightEdgePathfinder;
 // TODO document
 /**
  * <p>The Scheduler manages the distribution of task to a set of
- * {@link WorkerUnit}s. A new task can be scheduled by providing a
+ * {@link Node}s. A new task can be scheduled by providing a
  * {@link TaskSpecification}. The {@link #schedule(TaskSpecification)} method tries
  * to find a realizable configuration which satisfies the specification. In
  * the successful case a task will be created and assigned to an appropriate
@@ -48,7 +48,7 @@ public class Scheduler {
 
 	/**
 	 * A cache of the {@link WorldPerspective perspectives} of the
-	 * {@link WorkerUnit workers}.
+	 * {@link Node workers}.
 	 */
 	private final WorldPerspectiveCache perspectiveCache;
 
@@ -95,7 +95,7 @@ public class Scheduler {
 	}
 
 	/**
-	 * Adds a new {@link WorkerUnit} to the scheduler. The given specification
+	 * Adds a new {@link Node} to the scheduler. The given specification
 	 * is used to create the worker.
 	 * 
 	 * @param spec
@@ -105,12 +105,12 @@ public class Scheduler {
 	 * @throws IllegalArgumentException
 	 *             if worker ID is already assigned.
 	 */
-	public WorkerUnitReference addWorker(WorkerUnitSpecification spec) {
+	public NodeReference addWorker(NodeSpecification spec) {
 		// also throws NullPointerException
 		if (spec.getInitialTime().isBefore(getFrozenHorizonTime()))
 			throw new IllegalArgumentException("initial time violates frozen horizon");
 		
-		WorkerUnit worker = new WorkerUnit(spec);
+		Node worker = new Node(spec);
 
 		// TODO check validity of worker placement
 		// don't overlap with static or dynamic obstacles or with other workers
@@ -131,12 +131,12 @@ public class Scheduler {
 	 * @throws IllegalArgumentException
 	 *             if worker ID is unassigned.
 	 */
-	public WorkerUnitReference getWorkerReference(String workerId) {
+	public NodeReference getWorkerReference(String workerId) {
 		return schedule.getWorker(workerId).getReference();
 	}
 	
 	public void removeWorker(String workerId) {
-		WorkerUnit worker = schedule.getWorker(workerId);
+		Node worker = schedule.getWorker(workerId);
 		
 		worker.cleanUp(presentTime);
 		
@@ -330,7 +330,7 @@ public class Scheduler {
 	}
 	
 	private boolean unscheduleImpl(Task task, ScheduleAlternative alternative) {
-		WorkerUnit worker = task.getWorkerReference().getActual();
+		Node worker = task.getWorkerReference().getActual();
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
 		
 		// there should be at least one entry
@@ -389,7 +389,7 @@ public class Scheduler {
 		Objects.requireNonNull(transactionId, "transactionId");
 
 		Transaction transaction = transactions.get(transactionId);
-		WorkerUnit worker = schedule.getWorker(workerId);
+		Node worker = schedule.getWorker(workerId);
 		
 		if (transaction == null)
 			throw new IllegalArgumentException("unknown transaction");
@@ -418,7 +418,7 @@ public class Scheduler {
 		Objects.requireNonNull(transactionId, "transactionId");
 
 		Transaction transaction = transactions.get(transactionId);
-		WorkerUnit worker = schedule.getWorker(workerId);
+		Node worker = schedule.getWorker(workerId);
 		
 		if (transaction == null)
 			throw new IllegalArgumentException("unknown transaction");
@@ -434,7 +434,7 @@ public class Scheduler {
 	private ScheduleResult success(ScheduleAlternative alternative) {
 		alternative.seal();
 		
-		Collection<WorkerUnitUpdate> updates = alternative.getUpdates();
+		Collection<NodeUpdate> updates = alternative.getUpdates();
 		
 		// collect result information
 		
@@ -443,18 +443,18 @@ public class Scheduler {
 		while (transactions.containsKey(transactionId)); // just to be sure of uniqueness
 		
 		Map<UUID, Task> tasks = updates.stream()
-			.map(WorkerUnitUpdate::getTasks)
+			.map(NodeUpdate::getTasks)
 			.flatMap(Collection::stream)
 			.collect(toMap(Task::getId, identity()));
 
 		Map<UUID, Task> removals = updates.stream()
-			.map(WorkerUnitUpdate::getTaskRemovals)
+			.map(NodeUpdate::getTaskRemovals)
 			.flatMap(Collection::stream)
 			.collect(toMap(Task::getId, identity()));
 		
 		Collection<TrajectoryUpdate> trajectories = updates.stream()
 			.flatMap(u -> {
-				WorkerUnitReference w = u.getWorker().getReference();
+				NodeReference w = u.getWorker().getReference();
 				
 				// circumvents nested lambda expression
 				// t -> new TrajectoryUpdate(t, w)
@@ -484,7 +484,7 @@ public class Scheduler {
 	}
 	
 	public void cleanUp() {
-		for (WorkerUnit w : schedule.getWorkers())
+		for (Node w : schedule.getWorkers())
 			w.cleanUp(presentTime);
 	}
 

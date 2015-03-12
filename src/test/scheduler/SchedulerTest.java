@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import scheduler.ScheduleResult.TrajectoryUpdate;
-import scheduler.factories.WorkerUnitFactory;
+import scheduler.factories.NodeFactory;
 import util.UUIDFactory;
 import world.StaticObstacle;
 import world.Trajectory;
@@ -40,15 +40,15 @@ public class SchedulerTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
-	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
+	private static NodeFactory wFact = new NodeFactory();
 	
 	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
 	
 	private static final double WORKER_SPEED = 1.0;
 	
-	private static WorkerUnitSpecification workerSpec(String workerId, double x, double y) {
-		return new WorkerUnitSpecification(
+	private static NodeSpecification workerSpec(String workerId, double x, double y) {
+		return new NodeSpecification(
 			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
 	}
 	
@@ -103,8 +103,8 @@ public class SchedulerTest {
 	public void testNoLocation() {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
-		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		NodeSpecification ws =
+			wFact.createNodeSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(world);
 		sc.addWorker(ws);
@@ -123,8 +123,8 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAllBusy() {
-		WorkerUnitSpecification ws =
-			wFact.createWorkerUnitSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		NodeSpecification ws =
+			wFact.createNodeSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -163,10 +163,10 @@ public class SchedulerTest {
 	
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 		
-		WorkerUnitSpecification ws1 =
-			wFact.createWorkerUnitSpecification("w1", shape, 1.0, 11, 31, 0);
-		WorkerUnitSpecification ws2 =
-			wFact.createWorkerUnitSpecification("w2", shape, 1.0, 25, 11, 0);
+		NodeSpecification ws1 =
+			wFact.createNodeSpecification("w1", shape, 1.0, 11, 31, 0);
+		NodeSpecification ws2 =
+			wFact.createNodeSpecification("w2", shape, 1.0, 25, 11, 0);
 	
 		// top right
 		TaskSpecification s1 = new TaskSpecification(
@@ -182,8 +182,8 @@ public class SchedulerTest {
 			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), secondsToDurationSafe(30));
 		
 		Scheduler sc = new Scheduler(world);
-		WorkerUnitReference w1 = sc.addWorker(ws1);
-		WorkerUnitReference w2 = sc.addWorker(ws2);
+		NodeReference w1 = sc.addWorker(ws1);
+		NodeReference w2 = sc.addWorker(ws2);
 
 		ScheduleResult result;
 	
@@ -314,7 +314,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAddWorkerAfterFrozenHorizon() {
-		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+		NodeSpecification ws = new NodeSpecification(
 			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
@@ -325,7 +325,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAddWorkerAtFrozenHorizon() {
-		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+		NodeSpecification ws = new NodeSpecification(
 			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
@@ -336,7 +336,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAddWorkerBeforeFrozenHorizon() {
-		WorkerUnitSpecification ws = new WorkerUnitSpecification(
+		NodeSpecification ws = new NodeSpecification(
 			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
@@ -349,7 +349,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleBeforeFrozenHorizon() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -371,7 +371,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleAfterFrozenHorizon() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -423,7 +423,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleDependenciesSingle() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -452,7 +452,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleDependencyTwo() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -497,7 +497,7 @@ public class SchedulerTest {
 
 	@Test
 	public void testScheduleDependencyInconsistence1() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -517,7 +517,7 @@ public class SchedulerTest {
 
 	@Test
 	public void testScheduleDependencyInconsistence2() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -532,7 +532,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testSchedulePeriodicSameLocation() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -554,7 +554,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testSchedulePeriodicIndependentLocation() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -576,11 +576,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnschedule() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 		
 		scheduleTask(sc, taskSpec("task", 1, 1, 2, 1));
 		
@@ -601,7 +601,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleUnknown() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
@@ -613,11 +613,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleWithinFrozenHorizon() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 		
 		scheduleTask(sc, taskSpec("task", 1, 0, 2, 1));
 		
@@ -641,11 +641,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleBetweenTasks() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 		
 		scheduleTask(sc, taskSpec("t1", 0, 1, 3, 1));
 		scheduleTask(sc, taskSpec("t2", 1, 2, 6, 1));
@@ -671,11 +671,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testRescheduleTask() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 		
 		scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
 		
@@ -699,12 +699,12 @@ public class SchedulerTest {
 	
 	@Test
 	public void testRemoveTask() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
 		
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 
 		ScheduleResult res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
 		
@@ -724,12 +724,12 @@ public class SchedulerTest {
 	
 	@Test
 	public void testRemoveLockedTask() {
-		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		NodeSpecification ws = workerSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addWorker(ws);
 		
-		WorkerUnitReference wref = sc.getWorkerReference("w");
+		NodeReference wref = sc.getWorkerReference("w");
 
 		ScheduleResult res;
 		

@@ -21,7 +21,7 @@ public class ScheduleAlternative {
 	
 	private boolean sealed = false;
 
-	private Map<WorkerUnit, WorkerUnitUpdate> updates =
+	private Map<Node, NodeUpdate> updates =
 		new IdentityHashMap<>();
 	
 	private Map<UUID, Task> tasks = new HashMap<>();
@@ -34,7 +34,7 @@ public class ScheduleAlternative {
 		this.parent = parent;
 		
 		parent.updates.values().stream()
-			.map(WorkerUnitUpdate::clone)
+			.map(NodeUpdate::clone)
 			.forEach(u -> this.updates.put(u.getWorker(), u));
 		
 		this.tasks.putAll(parent.tasks);
@@ -67,14 +67,14 @@ public class ScheduleAlternative {
 		return updates.isEmpty();
 	}
 	
-	public boolean updatesWorker(WorkerUnit worker) {
+	public boolean updatesWorker(Node worker) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
 		return updates.containsKey(worker);
 	}
 
-	public Collection<WorkerUnitUpdate> getUpdates() {
+	public Collection<NodeUpdate> getUpdates() {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		if (!isSealed())
@@ -83,13 +83,13 @@ public class ScheduleAlternative {
 		return unmodifiableCollection(updates.values());
 	}
 	
-	public WorkerUnitUpdate popUpdate(WorkerUnit worker) {
+	public NodeUpdate popUpdate(Node worker) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		if (!isSealed())
 			throw new IllegalStateException("alternative not sealed");
 		
-		WorkerUnitUpdate update = updates.remove(worker);
+		NodeUpdate update = updates.remove(worker);
 		
 		if (update == null)
 			throw new IllegalArgumentException("unknown worker");
@@ -100,11 +100,11 @@ public class ScheduleAlternative {
 		return update;
 	}
 	
-	private WorkerUnitUpdate getUpdate(WorkerUnit worker) {
-		return updates.computeIfAbsent(worker, WorkerUnitUpdate::new);
+	private NodeUpdate getUpdate(Node worker) {
+		return updates.computeIfAbsent(worker, NodeUpdate::new);
 	}
 
-	public void updateTrajectory(WorkerUnit worker, Trajectory trajectory) {
+	public void updateTrajectory(Node worker, Trajectory trajectory) {
 		Objects.requireNonNull(worker, "worker");
 		Objects.requireNonNull(trajectory, "trajectory");
 
@@ -114,14 +114,14 @@ public class ScheduleAlternative {
 		getUpdate(worker).updateTrajectory(trajectory);
 	}
 	
-	public Collection<WorkerUnit> getWorkers() {
+	public Collection<Node> getWorkers() {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
 		return unmodifiableCollection(updates.keySet());
 	}
 	
-	public Collection<Trajectory> getTrajectoryUpdates(WorkerUnit worker) {
+	public Collection<Trajectory> getTrajectoryUpdates(Node worker) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
@@ -221,7 +221,7 @@ public class ScheduleAlternative {
 		if (isSealed())
 			throw new IllegalStateException("alternative is sealed");
 		
-		for (WorkerUnitUpdate u : updates.values())
+		for (NodeUpdate u : updates.values())
 			u.seal();
 		
 		sealed = true;

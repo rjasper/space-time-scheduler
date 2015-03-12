@@ -22,16 +22,16 @@ public class ScheduleAlternativeTest {
 	
 	private static final double WORKER_SPEED = 1.0;
 	
-	private static WorkerUnit workerUnit(String workerId, double x, double y) {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+	private static Node workerUnit(String workerId, double x, double y) {
+		NodeSpecification spec = new NodeSpecification(
 			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
 		
-		return new WorkerUnit(spec);
+		return new Node(spec);
 	}
 	
 	@Test
 	public void testBranch() {
-		WorkerUnit w = workerUnit("w1", 0, 0);
+		Node w = workerUnit("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
 		Task task = new Task(uuid("task"), w.getReference(),
@@ -66,7 +66,7 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchMerge() {
-		WorkerUnit w = workerUnit("w1", 0, 0);
+		Node w = workerUnit("w1", 0, 0);
 		
 		ScheduleAlternative root = new ScheduleAlternative();
 		ScheduleAlternative branch = root.branch();
@@ -107,7 +107,7 @@ public class ScheduleAlternativeTest {
 	
 	@Test
 	public void testBranchDelete() {
-		WorkerUnit w = workerUnit("w1", 0, 0);
+		Node w = workerUnit("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
 		Task task = new Task(uuid("task"), w.getReference(),

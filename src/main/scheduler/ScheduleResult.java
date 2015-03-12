@@ -26,9 +26,9 @@ public class ScheduleResult {
 		
 		private final Trajectory trajectory;
 		
-		private final WorkerUnitReference workerRef;
+		private final NodeReference workerRef;
 
-		public TrajectoryUpdate(Trajectory trajectory, WorkerUnitReference workerRef) {
+		public TrajectoryUpdate(Trajectory trajectory, NodeReference workerRef) {
 			this.trajectory = Objects.requireNonNull(trajectory, "trajectory");
 			this.workerRef  = Objects.requireNonNull(workerRef , "workerRef" );
 		}
@@ -43,7 +43,7 @@ public class ScheduleResult {
 		/**
 		 * @return the worker reference whose trajectory was changed.
 		 */
-		public WorkerUnitReference getWorkerRef() {
+		public NodeReference getWorkerRef() {
 			return workerRef;
 		}
 		

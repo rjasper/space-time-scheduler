@@ -6,8 +6,8 @@ import java.util.Collection;
 
 import org.hamcrest.Matcher;
 
-import scheduler.WorkerUnit;
-import scheduler.WorkerUnitReference;
+import scheduler.Node;
+import scheduler.NodeReference;
 import world.DynamicObstacle;
 import world.StaticObstacle;
 
@@ -16,23 +16,23 @@ public final class CollisionMatchers {
 	
 	private CollisionMatchers() {}
 	
-	public static Matcher<WorkerUnit> workerCollidesWith(StaticObstacle obstacle) {
-		return new WorkerUnitCollidesWithStaticObstacle(obstacle);
+	public static Matcher<Node> workerCollidesWith(StaticObstacle obstacle) {
+		return new NodeCollidesWithStaticObstacle(obstacle);
 	}
 	
-	public static Matcher<WorkerUnit> workerCollidesWith(DynamicObstacle obstacle) {
-		return WorkerUnitCollidesWithDynamicObstacles.workerCollidesWith(singleton(obstacle));
+	public static Matcher<Node> workerCollidesWith(DynamicObstacle obstacle) {
+		return NodeCollidesWithDynamicObstacles.workerCollidesWith(singleton(obstacle));
 	}
 	
-	public static Matcher<WorkerUnit> workerCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
-		return WorkerUnitCollidesWithDynamicObstacles.workerCollidesWith(obstacles);
+	public static Matcher<Node> workerCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
+		return NodeCollidesWithDynamicObstacles.workerCollidesWith(obstacles);
 	}
 	
-	public static Matcher<WorkerUnit> workerCollidesWith(WorkerUnit worker) {
-		return WorkerUnitCollidesWithWorkerUnit.workerCollidesWith(worker);
+	public static Matcher<Node> workerCollidesWith(Node worker) {
+		return NodeCollidesWithNode.workerCollidesWith(worker);
 	}
 	
-	public static Matcher<WorkerUnitReference> workerCollidesWith(WorkerUnitReference worker) {
+	public static Matcher<NodeReference> workerCollidesWith(NodeReference worker) {
 		return WorkerRefCollidesWithWorkerRef.workerCollidesWith(worker);
 	}
 

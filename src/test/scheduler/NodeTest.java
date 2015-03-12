@@ -20,23 +20,23 @@ import org.junit.Test;
 import world.DecomposedTrajectory;
 import world.Trajectory;
 
-public class WorkerUnitTest {
+public class NodeTest {
 	
 	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
 	
 	private static final double WORKER_SPEED = 1.0;
 	
-	private static WorkerUnit workerUnit(String workerId, double x, double y) {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+	private static Node workerUnit(String workerId, double x, double y) {
+		NodeSpecification spec = new NodeSpecification(
 			workerId, WORKER_SHAPE, WORKER_SPEED, immutablePoint(x, y), atSecond(0));
 		
-		return new WorkerUnit(spec);
+		return new Node(spec);
 	}
 	
 //	@Test
 //	public void testIdleSubSet() {
-//		WorkerUnit worker = WorkerUnitFixtures.withThreeTasks();
+//		Node worker = NodeFixtures.withThreeTasks();
 //		
 //		Collection<IdleSlot> slots = worker.idleSlots(
 //			atHour( 0),
@@ -53,8 +53,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCleanUp1() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = trajectory(
 			0, 1, 1, 0,
@@ -79,8 +79,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCleanUp2() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = trajectory(
 			0, 1, 1, 0,
@@ -101,8 +101,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCleanUp3() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = trajectory(
 			0, 1, 1, 0,
@@ -127,7 +127,7 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testIdleSlotsEmptyInterval() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
+		Node worker = workerUnit("worker", 0, 0);
 		
 		Collection<IdleSlot> slots = worker.idleSlots(atSecond(1), atSecond(1));
 		
@@ -136,7 +136,7 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testIdleSlotsEmptyInitialTime() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
+		Node worker = workerUnit("worker", 0, 0);
 		
 		Collection<IdleSlot> slots = worker.idleSlots(LocalDateTime.MIN, atSecond(0));
 		
@@ -145,8 +145,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testIdleSlots() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj = new DecomposedTrajectory(
 			atSecond(0),
@@ -174,8 +174,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testFloorIdleTimeNull() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
@@ -186,8 +186,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testFloorIdleTimeMid() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -200,8 +200,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testFloorIdleTimeLeft() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -214,8 +214,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testFloorIdleTimeRight() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -228,8 +228,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testfloorLeftInitialTime() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -240,8 +240,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCeilingIdleTimeMid() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -254,8 +254,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCeilingIdleTimeLeft() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -268,8 +268,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCeilingIdleTimeRight() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		Task t2 = new Task(uuid("t2"), ref, immutablePoint(0, 0), atSecond(3), secondsToDuration(1));
@@ -282,8 +282,8 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCeilLeftInitialTime() {
-		WorkerUnit worker = workerUnit("worker", 0, 0);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = workerUnit("worker", 0, 0);
+		NodeReference ref = worker.getReference();
 		
 		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
@@ -294,10 +294,10 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCalcLoad() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+		NodeSpecification spec = new NodeSpecification(
 			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
-		WorkerUnit worker = new WorkerUnit(spec);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = new Node(spec);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj1 = trajectory(
 			0, 0  , 3, 3,
@@ -329,10 +329,10 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCalcTaskLoad() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+		NodeSpecification spec = new NodeSpecification(
 			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
-		WorkerUnit worker = new WorkerUnit(spec);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = new Node(spec);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj1 = trajectory(
 			0, 0  , 3, 3,
@@ -364,10 +364,10 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCalcMotionLoad() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+		NodeSpecification spec = new NodeSpecification(
 			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
-		WorkerUnit worker = new WorkerUnit(spec);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = new Node(spec);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj1 = trajectory(
 			0, 0  , 3, 3,
@@ -399,10 +399,10 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCalcStationaryIdleLoad() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+		NodeSpecification spec = new NodeSpecification(
 			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
-		WorkerUnit worker = new WorkerUnit(spec);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = new Node(spec);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj1 = trajectory(
 			0, 0  , 3, 3,
@@ -434,10 +434,10 @@ public class WorkerUnitTest {
 	
 	@Test
 	public void testCalcVelocityLoad() {
-		WorkerUnitSpecification spec = new WorkerUnitSpecification(
+		NodeSpecification spec = new NodeSpecification(
 			"w", WORKER_SHAPE, 4.0, immutablePoint(0, 0), atSecond(-4));
-		WorkerUnit worker = new WorkerUnit(spec);
-		WorkerUnitReference ref = worker.getReference();
+		Node worker = new Node(spec);
+		NodeReference ref = worker.getReference();
 		
 		Trajectory traj1 = trajectory(
 			0, 0  , 3, 3,

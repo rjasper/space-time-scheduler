@@ -7,7 +7,7 @@
 //import java.util.Set;
 //
 //import scheduler.Task;
-//import scheduler.WorkerUnit;
+//import scheduler.Node;
 //import world.ArcTimePath;
 //import world.DecomposedTrajectory;
 //import world.SpatialPath;
@@ -15,13 +15,13 @@
 //import com.vividsolutions.jts.geom.Point;
 //
 ///**
-// * A {@code MovingWorkerUnitObstacle} represents a non-stationary path segment
+// * A {@code MovingNodeObstacle} represents a non-stationary path segment
 // * of a worker. The goal of any moving worker is always a task. The trajectory
 // * is always decomposed.
 // * 
 // * @author Rico
 // */
-//public class MovingWorkerUnitObstacle extends WorkerUnitObstacle {
+//public class MovingNodeObstacle extends NodeObstacle {
 //
 //	/**
 //	 * The destination of this path segment.
@@ -31,15 +31,15 @@
 //	/**
 //	 * Stores the path sections which were evaded by this one.
 //	 */
-//	private final Set<WorkerUnitObstacle> evadees = new HashSet<>();
+//	private final Set<NodeObstacle> evadees = new HashSet<>();
 //	
 //	/**
 //	 * Stores an unmodifiable view on {@link #evadees}.
 //	 */
-//	private final Set<WorkerUnitObstacle> unmodifiableEvadees = unmodifiableSet(evadees);
+//	private final Set<NodeObstacle> unmodifiableEvadees = unmodifiableSet(evadees);
 //	
 //	/**
-//	 * Constructs a new {@code MovingWorkerUnitObstacle} of a worker along a
+//	 * Constructs a new {@code MovingNodeObstacle} of a worker along a
 //	 * trajectory leading to the task.
 //	 * 
 //	 * @param worker
@@ -54,7 +54,7 @@
 //	 *             <li>The trajectory does not lead to the goal.</li>
 //	 *             </ul>
 //	 */
-//	public MovingWorkerUnitObstacle(WorkerUnit worker, DecomposedTrajectory trajectory, Task goal) {
+//	public MovingNodeObstacle(Node worker, DecomposedTrajectory trajectory, Task goal) {
 //		// throws NullPointerException and IllegalArgumentException
 //		super(worker, trajectory);
 //		
@@ -112,7 +112,7 @@
 //	/**
 //	 * @return other worker's path sections which were evaded by this obstacle.
 //	 */
-//	public Set<WorkerUnitObstacle> getEvadees() {
+//	public Set<NodeObstacle> getEvadees() {
 //		return unmodifiableEvadees;
 //	}
 //
@@ -123,7 +123,7 @@
 //	 * @throws NullPointerException if the {@code evadee} is {@code null}.
 //	 * @throws IllegalArgumentException if the {@code evadee} was already registered.
 //	 */
-//	public void addEvadee(WorkerUnitObstacle evadee) {
+//	public void addEvadee(NodeObstacle evadee) {
 //		Objects.requireNonNull(evadee, "evadee");
 //
 //		boolean status = evadees.add(evadee);
@@ -139,7 +139,7 @@
 //	 * @throws NullPointerException if the {@code evadee} is {@code null}.
 //	 * @throws IllegalArgumentException if the {@code evadee} was not registered.
 //	 */
-//	public void removeEvadee(WorkerUnitObstacle evadee) {
+//	public void removeEvadee(NodeObstacle evadee) {
 //		Objects.requireNonNull(evadee, "evadee");
 //
 //		boolean status = evadees.remove(evadee);
@@ -149,7 +149,7 @@
 //	}
 //
 //	/* (non-Javadoc)
-//	 * @see world.WorkerUnitObstacle#silence()
+//	 * @see world.NodeObstacle#silence()
 //	 */
 //	@Override
 //	public void clearEvasions() {

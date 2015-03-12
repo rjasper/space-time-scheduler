@@ -9,19 +9,19 @@ import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.DynamicObstacle;
 
-public class WorkerUnitCollidesWithDynamicObstacles extends MapMatcher<WorkerUnit, DynamicObstacle> {
+public class NodeCollidesWithDynamicObstacles extends MapMatcher<Node, DynamicObstacle> {
 	
 	@Factory
-	public static Matcher<WorkerUnit> workerCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
-		return new WorkerUnitCollidesWithDynamicObstacles(obstacles);
+	public static Matcher<Node> workerCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
+		return new NodeCollidesWithDynamicObstacles(obstacles);
 	}
 	
 	private final Collection<? extends DynamicObstacle> obstacles;
 	
-	public WorkerUnitCollidesWithDynamicObstacles(Collection<? extends DynamicObstacle> obstacles) {
+	public NodeCollidesWithDynamicObstacles(Collection<? extends DynamicObstacle> obstacles) {
 		super(obstaclesCollideWith(obstacles), w ->
 			new DynamicObstacle(w.getShape(), w.calcTrajectory()));
 		

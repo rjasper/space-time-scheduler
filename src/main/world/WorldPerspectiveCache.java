@@ -3,7 +3,7 @@ package world;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import scheduler.WorkerUnit;
+import scheduler.Node;
 import world.pathfinder.AbstractSpatialPathfinder;
 
 /**
@@ -93,7 +93,7 @@ public abstract class WorldPerspectiveCache {
 	 * @return the perspective.
 	 * @throws NullPointerException if {@code perceiver} is {@code null}.
 	 */
-	public abstract WorldPerspective getPerspectiveFor(WorkerUnit perceiver);
+	public abstract WorldPerspective getPerspectiveFor(Node perceiver);
 
 	/**
 	 * Removes the perceiver from the known perceivers. Might triggers to
@@ -102,6 +102,6 @@ public abstract class WorldPerspectiveCache {
 	 * @param perceiver
 	 * @throws NullPointerException if {@code perceiver} is {@code null}.
 	 */
-	public abstract void removePerceiver(WorkerUnit perceiver);
+	public abstract void removePerceiver(Node perceiver);
 
 }

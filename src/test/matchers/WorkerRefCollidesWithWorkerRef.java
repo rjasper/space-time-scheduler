@@ -6,20 +6,20 @@ import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 
-import scheduler.WorkerUnitReference;
+import scheduler.NodeReference;
 import world.DynamicObstacle;
 
 public class WorkerRefCollidesWithWorkerRef
-	extends MapMatcher<WorkerUnitReference, DynamicObstacle>
+	extends MapMatcher<NodeReference, DynamicObstacle>
 {
 	@Factory
-	public static Matcher<WorkerUnitReference> workerCollidesWith(WorkerUnitReference worker) {
+	public static Matcher<NodeReference> workerCollidesWith(NodeReference worker) {
 		return new WorkerRefCollidesWithWorkerRef(worker);
 	}
 	
-	private final WorkerUnitReference workerRef;
+	private final NodeReference workerRef;
 
-	public WorkerRefCollidesWithWorkerRef(WorkerUnitReference workerRef) {
+	public WorkerRefCollidesWithWorkerRef(NodeReference workerRef) {
 		super(
 			obstaclesCollideWith(makeObstacle(workerRef)),
 			WorkerRefCollidesWithWorkerRef::makeObstacle);
@@ -27,7 +27,7 @@ public class WorkerRefCollidesWithWorkerRef
 		this.workerRef = workerRef;
 	}
 	
-	private static DynamicObstacle makeObstacle(WorkerUnitReference workerRef) {
+	private static DynamicObstacle makeObstacle(NodeReference workerRef) {
 		return new DynamicObstacle(workerRef.getShape(), workerRef.calcTrajectory());
 	}
 

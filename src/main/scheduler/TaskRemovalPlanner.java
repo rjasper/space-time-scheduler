@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
-import scheduler.util.WorkerUnitObstacleBuilder;
+import scheduler.util.NodeObstacleBuilder;
 import util.JoinedCollection;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
@@ -39,7 +39,7 @@ public class TaskRemovalPlanner {
 	
 	private boolean fixedEnd = true;
 	
-	private transient WorkerUnit worker;
+	private transient Node worker;
 	
 	private transient LocalDateTime slotStartTime;
 	
@@ -110,7 +110,7 @@ public class TaskRemovalPlanner {
 			idleStartTime == null ? taskStartTime : idleStartTime);
 		slotFinishTime = idleFinishTime == null ? taskFinishTime : idleFinishTime;
 		
-		WorkerUnitObstacleBuilder builder = new WorkerUnitObstacleBuilder();
+		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
 		builder.setWorker(worker);
 		builder.setStartTime(slotStartTime);
