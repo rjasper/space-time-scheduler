@@ -8,9 +8,14 @@ import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
 import jts.geom.immutable.ImmutablePolygon;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ScheduleAlternativeTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
@@ -49,10 +54,12 @@ public class ScheduleAlternativeTest {
 			branch.getTask(uuid("task")), equalTo(task));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testBranchSealed() {
 		ScheduleAlternative root = new ScheduleAlternative();
 		root.seal();
+		
+		thrown.expect(IllegalStateException.class);
 		
 		root.branch();
 	}
@@ -76,12 +83,15 @@ public class ScheduleAlternativeTest {
 			root.getTask(uuid("task")), equalTo(task));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testBranchMergeBranched() {
 		ScheduleAlternative root = new ScheduleAlternative();
 		ScheduleAlternative branch = root.branch();
 		
 		root.branch(); // other branch
+		
+		thrown.expect(IllegalStateException.class);
+		
 		branch.merge();
 	}
 	

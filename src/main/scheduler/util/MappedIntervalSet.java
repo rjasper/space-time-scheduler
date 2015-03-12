@@ -28,10 +28,12 @@ extends AbstractIntervalSet<T>
 	}
 	
 	private Interval<T> interval(Entry<T, U> entry) {
+		// TODO cache?
 		return entry == null ? null : intervalMapper.apply(entry.getValue());
 	}
 	
 	private Interval<T> interval(U obj) {
+		// TODO cache?
 		return obj == null ? null : intervalMapper.apply(obj);
 	}
 	

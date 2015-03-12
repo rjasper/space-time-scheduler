@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 import static util.TimeConv.*;
 import static util.TimeFactory.*;
 import static util.UUIDFactory.*;
+import static world.factories.PathFactory.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -20,18 +21,24 @@ import jts.geom.immutable.ImmutablePolygon;
 
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import scheduler.ScheduleResult.TrajectoryUpdate;
 import scheduler.factories.WorkerUnitFactory;
 import util.UUIDFactory;
 import world.StaticObstacle;
+import world.Trajectory;
 import world.World;
 import world.fixtures.WorldFixtures;
 
 import com.google.common.collect.ImmutableList;
 
 public class SchedulerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private static WorkerUnitFactory wFact = new WorkerUnitFactory();
 	
@@ -236,7 +243,7 @@ public class SchedulerTest {
 			sc.getPresentTime(), equalTo( atSecond(1) ));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testDecreasePresentTime() {
 		Scheduler sc = new Scheduler(new World());
 		
@@ -244,6 +251,8 @@ public class SchedulerTest {
 		
 		assertThat("present was not set",
 			sc.getPresentTime(), equalTo( atSecond(1) ));
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		sc.setPresentTime(atSecond(0)); // should throw exception
 		
@@ -325,13 +334,15 @@ public class SchedulerTest {
 		sc.addWorker(ws); // no exception
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddWorkerBeforeFrozenHorizon() {
 		WorkerUnitSpecification ws = new WorkerUnitSpecification(
 			"w", WORKER_SHAPE, WORKER_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.setPresentTime(atSecond(20));
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		sc.addWorker(ws);
 	}
@@ -484,7 +495,7 @@ public class SchedulerTest {
 			t1.getFinishTime().plus(margin).isAfter(t2.getStartTime()), is(false));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testScheduleDependencyInconsistence1() {
 		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
@@ -499,10 +510,12 @@ public class SchedulerTest {
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		
+		thrown.expect(IllegalStateException.class);
+		
 		sc.schedule(singleton(ts), depGraph);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testScheduleDependencyInconsistence2() {
 		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
@@ -511,6 +524,8 @@ public class SchedulerTest {
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		addDependency(depGraph, "t1");
+		
+		thrown.expect(IllegalStateException.class);
 		
 		sc.schedule(emptyList(), depGraph);
 	}
@@ -560,6 +575,129 @@ public class SchedulerTest {
 	}
 	
 	@Test
+	public void testUnschedule() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+		
+		scheduleTask(sc, taskSpec("task", 1, 1, 2, 1));
+		
+		Task task = sc.getTask(uuid("task"));
+		
+		ScheduleResult res = sc.unschedule(uuid("task"));
+		
+		assertThat("task wasn't unscheduled",
+			res.isSuccess(), is(true));
+		
+		sc.commit(res.getTransactionId());
+		
+		assertThat("task still known",
+			wref.hasTask(task), is(false));
+		assertThat("didn't replan trajectory as expected",
+			wref.interpolateLocation(atSecond(2)), equalTo(immutablePoint(0, 0)));
+	}
+	
+	@Test
+	public void testUnscheduleUnknown() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		
+		thrown.expect(IllegalArgumentException.class);
+		
+		sc.unschedule(uuid("task"));
+	}
+	
+	@Test
+	public void testUnscheduleWithinFrozenHorizon() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+		
+		scheduleTask(sc, taskSpec("task", 1, 0, 2, 1));
+		
+		Task task = sc.getTask(uuid("task"));
+		ImmutablePoint expectedLocation = wref.interpolateLocation(atSecond(1));
+
+		sc.setPresentTime(atSecond(1));
+
+		ScheduleResult res = sc.unschedule(uuid("task"));
+		
+		assertThat("task wasn't unscheduled",
+			res.isSuccess(), is(true));
+		
+		sc.commit(res.getTransactionId());
+		
+		assertThat("task still known",
+			wref.hasTask(task), is(false));
+		assertThat("didn't replan trajectory as expected",
+			wref.interpolateLocation(atSecond(2)), equalTo(expectedLocation));
+	}
+	
+	@Test
+	public void testUnscheduleBetweenTasks() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+		
+		scheduleTask(sc, taskSpec("t1", 0, 1, 3, 1));
+		scheduleTask(sc, taskSpec("t2", 1, 2, 6, 1));
+		scheduleTask(sc, taskSpec("t3", 2, 1, 9, 1));
+		
+		Task t2 = sc.getTask(uuid("t2"));
+
+		ScheduleResult res = sc.unschedule(uuid("t2"));
+		
+		assertThat("task wasn't unscheduled",
+			res.isSuccess(), is(true));
+		
+		sc.commit(res.getTransactionId());
+		
+		assertThat("task still known",
+			wref.hasTask(t2), is(false));
+		
+		Trajectory traj = wref.getTrajectories(atSecond(4), atSecond(9)).iterator().next();
+		
+		assertThat("didn't replan trajectory as expected",
+			traj.getSpatialPath(), equalTo(spatialPath(0, 1, 2, 1)));
+	}
+	
+	@Test
+	public void testRescheduleTask() {
+		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addWorker(ws);
+		WorkerUnitReference wref = sc.getWorkerReference("w");
+		
+		scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		
+		Task task = sc.getTask(uuid("task"));
+
+		TaskSpecification newSpec = taskSpec("task", 0, 0, 20, 1);
+		ScheduleResult res = sc.reschedule(newSpec);
+		
+		assertThat("task wasn't rescheduled",
+			res.isSuccess(), is(true));
+		
+		sc.commit(res.getTransactionId());
+		
+		assertThat("task unknown",
+			wref.hasTask(task), is(false));
+		
+		Task rescheduled = sc.getTask(uuid("task"));
+		
+		assertThat(rescheduled, satisfies(newSpec));
+	}
+	
+	@Test
 	public void testRemoveTask() {
 		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
@@ -578,13 +716,13 @@ public class SchedulerTest {
 		assertThat("task was not assigned to worker",
 			wref.hasTask(task), is(true));
 		
-		sc.removeTask("w", uuid("task"));
+		sc.removeTask(uuid("task"));
 
 		assertThat("task to be removed was not removed",
 			wref.hasTask(task), is(false));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testRemoveLockedTask() {
 		WorkerUnitSpecification ws = workerSpec("w", 0, 0);
 		
@@ -593,7 +731,9 @@ public class SchedulerTest {
 		
 		WorkerUnitReference wref = sc.getWorkerReference("w");
 
-		ScheduleResult res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		ScheduleResult res;
+		
+		res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
 		Task task = res.getTasks().get(uuid("task"));
 		
 		assertThat("task was not scheduled",
@@ -602,9 +742,14 @@ public class SchedulerTest {
 		assertThat("task was not assigned to worker",
 			wref.hasTask(task), is(true));
 		
-		sc.unschedule("w", uuid("task")); // pending task removal
+		res = sc.unschedule(uuid("task")); // pending task removal
 		
-		sc.removeTask("w", uuid("task"));
+		assertThat("task not scheduled for removal",
+			res.isSuccess(), is(true));
+		
+		thrown.expect(IllegalStateException.class);
+		
+		sc.removeTask(uuid("task"));
 	}
 
 }

@@ -14,8 +14,8 @@ import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
 import world.graph.view.GraphViewer;
-import world.pathfinder.SimpleFixTimeMeshBuilder;
 import world.pathfinder.ForbiddenRegion;
+import world.pathfinder.SimpleFixTimeMeshBuilder;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;

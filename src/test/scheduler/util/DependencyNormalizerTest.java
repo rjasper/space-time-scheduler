@@ -17,7 +17,9 @@ import java.util.UUID;
 
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import scheduler.TaskSpecification;
 import scheduler.util.DependencyNormalizer.DependencyNormalizationException;
@@ -25,6 +27,9 @@ import util.TimeFactory;
 import util.UUIDFactory;
 
 public class DependencyNormalizerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private static TaskSpecification spec(
 		String taskIdSeed,
@@ -143,7 +148,7 @@ public class DependencyNormalizerTest {
 		assertThat(ts4Norm.getLatestStartTime  (), equalTo(atSecond(11)));
 	}
 	
-	@Test(expected = DependencyNormalizationException.class)
+	@Test
 	public void testImpossibleDependencies() throws DependencyNormalizationException {
 		Map<UUID, TaskSpecification> specs = specMap(
 			spec("t1", 3, 5, 1),
@@ -152,6 +157,8 @@ public class DependencyNormalizerTest {
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		add(graph, "t1");
 		add(graph, "t2", "t1");
+		
+		thrown.expect(DependencyNormalizationException.class);
 
 		normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
 	}
@@ -171,13 +178,15 @@ public class DependencyNormalizerTest {
 			normalized.get(uuid("t1")).getEarliestStartTime(), is(atSecond(5)));
 	}
 
-	@Test(expected = DependencyNormalizationException.class)
+	@Test
 	public void testImpossibleFrozenHorizon() throws DependencyNormalizationException {
 		Map<UUID, TaskSpecification> specs = specMap(
 			spec("t1", 0, 5, 1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		add(graph, "t1");
+		
+		thrown.expect(DependencyNormalizationException.class);
 	
 		normalizeDependentTaskSpecifications(graph, specs, atSecond(10));
 	}

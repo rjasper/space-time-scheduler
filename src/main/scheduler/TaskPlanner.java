@@ -291,21 +291,6 @@ public class TaskPlanner {
 
 		if (trajFromTask.isEmpty())
 			return false;
-
-//		SpatialPath spatialFromTask = calculateSpatialPath(taskLocation, slotFinishLocation);
-//		if (spatialFromTask.isEmpty())
-//			return false;
-//		
-//		Trajectory trajFromTask = calculateTrajectoryFromTask(spatialFromTask, taskFinishTime);
-//		if (trajFromTask.isEmpty())
-//			return false;
-//		
-//		// TODO use collision detector
-//		// if end location is not fixed a collision detector would be sufficient
-//		
-//		// in case of an open end don't use calculated trajectory since it is inaccurate
-//		if (!fixedEnd)
-//			trajFromTask = makeFinalTrajectory(slotFinishLocation, taskFinishTime);
 		
 		Trajectory trajAtTask = makeTrajectoryAtTask(task);
 		
@@ -355,7 +340,7 @@ public class TaskPlanner {
 		pf.setStartTime         ( idleSlot.getStartTime() );
 		pf.setEarliestFinishTime( earliestStartTime()     );
 		pf.setLatestFinishTime  ( latestStartTime()       );
-		pf.setBufferDuration    ( duration                ); // TODO no fixed end
+		pf.setBufferDuration    ( duration                ); // TODO expand buffer duration if !fixedEnd
 		
 		pf.calculate();
 		

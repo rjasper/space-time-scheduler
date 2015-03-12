@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class RadiusBasedWorldPerspectiveCacheTest {
-
+	
 	private static final WorkerUnitFactory wFact = WorkerUnitFactory.getInstance();
 
 	@Test(expected = NullPointerException.class)

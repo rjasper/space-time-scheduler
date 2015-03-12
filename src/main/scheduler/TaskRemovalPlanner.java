@@ -87,7 +87,7 @@ public class TaskRemovalPlanner {
 	public boolean plan() {
 		checkParameters();
 		
-		if (!task.getFinishTime().isBefore(frozenHorizonTime))
+		if (task.getFinishTime().isBefore(frozenHorizonTime))
 			return false;
 		
 		init();

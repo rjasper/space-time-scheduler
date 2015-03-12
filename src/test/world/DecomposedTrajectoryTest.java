@@ -11,11 +11,16 @@ import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
 public class DecomposedTrajectoryTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	@Test
 	public void testComposeEmpty() {
@@ -74,22 +79,26 @@ public class DecomposedTrajectoryTest {
 			t.composed(), equalTo(expected));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testIsStationaryEmpty() {
 		DecomposedTrajectory traj = new DecomposedTrajectory(
 			atSecond(0),
 			SpatialPath.empty(),
 			ArcTimePath.empty());
+
+		thrown.expect(IllegalStateException.class);
 		
 		traj.isStationary(atSecond(0), atSecond(1));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIsStationaryOutside() {
 		DecomposedTrajectory traj = new DecomposedTrajectory(
 			atSecond(0),
 			spatialPath(0, 0, 1, 0),
 			arcTimePath(0, 0, 1, 1));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		traj.isStationary(atSecond(1), atSecond(2));
 	}
@@ -131,9 +140,11 @@ public class DecomposedTrajectoryTest {
 		assertThat(traj.isStationary(atSecond(0.25), atSecond(0.75)), is(false));
 	}
 	
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testInterpolateLocationEmpty() {
 		Trajectory t = DecomposedTrajectory.empty();
+
+		thrown.expect(NoSuchElementException.class);
 		
 		t.interpolateLocation(atSecond(0));
 	}
@@ -166,29 +177,35 @@ public class DecomposedTrajectoryTest {
 			location, equalTo(expected));
 	}
 	
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testSubTrajectoryEmptyTrajectory() {
 		Trajectory t = DecomposedTrajectory.empty();
+
+		thrown.expect(NoSuchElementException.class);
 		
 		t.subPath(LocalDateTime.MIN, LocalDateTime.MAX);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubTrajectoryEmptyInterval() {
 		Trajectory t = new DecomposedTrajectory(
 			atSecond(0),
 			spatialPath(-4, 3, 4, -3),
 			arcTimePath(0, 0, 10, 10));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		t.subPath(atSecond(10), atSecond(0));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubTrajectoryEmptyIntersection() {
 		Trajectory t = new DecomposedTrajectory(
 			atSecond(0),
 			spatialPath(-4, 3, 4, -3),
 			arcTimePath(0, 0, 10, 10));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		t.subPath(atSecond(10), atSecond(11));
 	}

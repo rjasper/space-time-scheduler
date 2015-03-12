@@ -7,19 +7,19 @@ import static util.Comparables.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 
 import scheduler.pickers.LocationIterator;
 import scheduler.pickers.WorkerUnitSlotIterator;
 import scheduler.pickers.WorkerUnitSlotIterator.WorkerUnitSlot;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-
 import world.World;
 import world.WorldPerspective;
 import world.WorldPerspectiveCache;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 public class SingularTaskScheduler {
 	
@@ -129,7 +129,12 @@ public class SingularTaskScheduler {
 				WorkerUnit w = ws.getWorkerUnit();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
-				boolean fixedEnd = s.getFinishTime().isBefore(Scheduler.END_OF_TIME);
+				
+				Entry<?, Task> lastTaskEntry = w.getNavigableTasks().lastEntry();
+				boolean fixedEnd = lastTaskEntry != null &&
+					lastTaskEntry.getValue().getStartTime().isBefore( s.getFinishTime() );
+				
+//				boolean fixedEnd = s.getFinishTime().isBefore(Scheduler.END_OF_TIME);
 
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);

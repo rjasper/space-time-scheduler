@@ -8,21 +8,32 @@ import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
 public class ArcTimePathTest extends AbstractPointPathTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
+	@Override
+	protected ExpectedException thrown() {
+		return thrown;
+	}
 
 	@Override
 	protected PointPath<?, ?> makePointPath(ImmutableList<ImmutablePoint> points) {
 		return new ArcTimePath(points);
 	}
 
-
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testInterpolateLocationEmpty() {
 		ArcTimePath path = ArcTimePath.empty();
+
+		thrown.expect(NoSuchElementException.class);
 		
 		path.interpolateArc(0);
 	}

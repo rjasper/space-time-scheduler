@@ -2,10 +2,13 @@ package scheduler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.NavigableMap;
 import java.util.Objects;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import scheduler.util.MappedIntervalSet;
 import world.Trajectory;
 
 // TODO document
@@ -84,6 +87,55 @@ public class WorkerUnitReference  {
 
 	public boolean hasTask(Task task) {
 		return worker.hasTask(task);
+	}
+
+	public Collection<Task> getTasks() {
+		return worker.getTasks();
+	}
+
+	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
+		return worker.getNavigableTasks();
+	}
+
+	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
+		return worker.getTaskIntervals();
+	}
+
+	public boolean isIdle() {
+		return worker.isIdle();
+	}
+
+	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
+		return worker.isIdle(from, to);
+	}
+
+	public Collection<Trajectory> getTrajectories() {
+		return worker.getTrajectories();
+	}
+
+	public Collection<Trajectory> getTrajectories(LocalDateTime from,
+		LocalDateTime to) {
+		return worker.getTrajectories(from, to);
+	}
+
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		return worker.interpolateLocation(time);
+	}
+
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		return worker.isStationary(from, to);
+	}
+
+	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
+		return worker.floorIdleTimeOrNull(time);
+	}
+
+	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
+		return worker.ceilingIdleTimeOrNull(time);
+	}
+
+	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
+		return worker.idleSlots(from, to);
 	}
 
 	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {

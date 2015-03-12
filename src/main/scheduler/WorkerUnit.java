@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
 
@@ -218,6 +219,10 @@ public class WorkerUnit {
 	public Collection<Task> getTasks() {
 		return unmodifiableCollection(tasks.values());
 	}
+	
+	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
+		return unmodifiableNavigableMap(tasks);
+	}
 
 	/**
 	 * Assigns a new task to this worker.
@@ -353,7 +358,7 @@ public class WorkerUnit {
 		
 		Task lowerTask = value(tasks.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerTask == null
-			? Scheduler.BEGIN_OF_TIME
+			? initialTime
 			: lowerTask.getFinishTime();
 		
 		// lower.start < time
@@ -365,13 +370,9 @@ public class WorkerUnit {
 			return null;
 		else if (lowerFinishCmpTime == 0) {
 			// time == lower.finish
-			Task ceilTask = value(tasks.ceilingEntry(time));
-			LocalDateTime ceilStart = ceilTask == null
-				? Scheduler.END_OF_TIME
-				: ceilTask.getStartTime();
 
 			// if floorTask and ceilTask touch
-			if (ceilStart.isEqual(time))
+			if (tasks.containsKey(time))
 				// lower.finish == time == ceil.start
 				return null;
 		}
@@ -388,7 +389,7 @@ public class WorkerUnit {
 		
 		Task lowerTask = value(tasks.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerTask == null
-			? Scheduler.BEGIN_OF_TIME
+			? initialTime
 			: lowerTask.getFinishTime();
 		
 		// lower.start < time

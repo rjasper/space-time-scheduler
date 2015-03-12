@@ -13,12 +13,17 @@ import java.util.Iterator;
 
 import jts.geom.immutable.ImmutablePolygon;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import scheduler.util.SimpleIntervalSet;
 import world.Trajectory;
 
 public class ScheduleTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private static final ImmutablePolygon WORKER_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
@@ -109,7 +114,7 @@ public class ScheduleTest {
 		assertThat(removalsLock.hasNext(), is(false));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testUpdatedTrajectoryOriginLocationViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -131,10 +136,12 @@ public class ScheduleTest {
 		sa.updateTrajectory(w, traj);
 		sa.seal();
 		
+		thrown.expect(IllegalArgumentException.class);
+		
 		schedule.addAlternative(sa);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskLockViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -154,10 +161,12 @@ public class ScheduleTest {
 		sa2.seal();
 		
 		schedule.addAlternative(sa1);
+
+		thrown.expect(IllegalArgumentException.class);
 		schedule.addAlternative(sa2);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTrajectoryLockViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -177,10 +186,12 @@ public class ScheduleTest {
 		sa2.seal();
 		
 		schedule.addAlternative(sa1);
+		
+		thrown.expect(IllegalArgumentException.class);
 		schedule.addAlternative(sa2);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testContinuousTrajectoryViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -194,10 +205,11 @@ public class ScheduleTest {
 		sa.updateTrajectory(w, traj1);
 		sa.seal();
 		
+		thrown.expect(IllegalArgumentException.class);
+		
 		schedule.addAlternative(sa);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
 	public void testTaskLocationViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -210,6 +222,8 @@ public class ScheduleTest {
 
 		sa.addTask(task);
 		sa.seal();
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		schedule.addAlternative(sa);
 	}
@@ -236,7 +250,7 @@ public class ScheduleTest {
 		schedule.addAlternative(sa); // no exception
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testUpdateTrajectoryAtTaskNegative() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -254,6 +268,8 @@ public class ScheduleTest {
 		sa.updateTrajectory(w, traj);
 		sa.addTask(task);
 		sa.seal();
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		schedule.addAlternative(sa);
 	}
@@ -283,7 +299,7 @@ public class ScheduleTest {
 		assertThat(w.hasTask(task), is(false));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskRemovalUnknown() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -301,10 +317,12 @@ public class ScheduleTest {
 		sa.addTaskRemoval(task);
 		sa.seal();
 		
+		thrown.expect(IllegalArgumentException.class);
+		
 		schedule.addAlternative(sa);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskRemovalLockViolation() {
 		WorkerUnit w = workerUnit("w", 0, 0);
 		
@@ -327,6 +345,8 @@ public class ScheduleTest {
 		sa2.seal();
 		
 		schedule.addAlternative(sa1);
+
+		thrown.expect(IllegalArgumentException.class);
 		schedule.addAlternative(sa2);
 	}
 

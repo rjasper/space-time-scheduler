@@ -7,9 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.IntersectionMatrix;
-
 import util.CollectionsRequire;
 import world.ArcTimePath;
 import world.DynamicObstacle;
@@ -17,6 +14,9 @@ import world.SpatialPath;
 import world.Trajectory;
 import world.pathfinder.ForbiddenRegion;
 import world.pathfinder.ForbiddenRegionBuilder;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.IntersectionMatrix;
 
 public class DynamicCollisionDetector {
 	

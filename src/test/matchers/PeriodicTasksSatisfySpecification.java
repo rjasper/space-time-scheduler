@@ -14,11 +14,11 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import com.vividsolutions.jts.geom.Point;
-
 import scheduler.PeriodicTaskSpecification;
 import scheduler.Task;
 import scheduler.TaskSpecification;
+
+import com.vividsolutions.jts.geom.Point;
 
 public class PeriodicTasksSatisfySpecification extends TypeSafeMatcher<Collection<Task>> {
 	

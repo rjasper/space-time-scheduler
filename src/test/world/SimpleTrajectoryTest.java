@@ -11,24 +11,33 @@ import java.util.NoSuchElementException;
 
 import jts.geom.immutable.ImmutablePoint;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.ImmutableList;
 
 public class SimpleTrajectoryTest {
 	
-	@Test(expected = IllegalStateException.class)
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+	
+	@Test
 	public void testIsStationaryEmpty() {
 		SimpleTrajectory traj = new SimpleTrajectory(SpatialPath.empty(), ImmutableList.of());
+
+		thrown.expect(IllegalStateException.class);
 		
 		traj.isStationary(atSecond(0), atSecond(1));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIsStationaryOutside() {
 		SimpleTrajectory traj = new SimpleTrajectory(
 			spatialPath(0, 0, 1, 1),
 			ImmutableList.of(atSecond(0), atSecond(1)));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		traj.isStationary(atSecond(1), atSecond(2));
 	}
@@ -69,9 +78,11 @@ public class SimpleTrajectoryTest {
 		assertThat(traj.isStationary(atSecond(0.25), atSecond(0.75)), is(false));
 	}
 	
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testInterpolateLocationEmpty() {
 		Trajectory t = SimpleTrajectory.empty();
+
+		thrown.expect(NoSuchElementException.class);
 		
 		t.interpolateLocation(atSecond(0));
 	}
@@ -102,27 +113,33 @@ public class SimpleTrajectoryTest {
 			location, equalTo(expected));
 	}
 	
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testSubTrajectoryEmptyTrajectory() {
 		Trajectory t = SimpleTrajectory.empty();
+
+		thrown.expect(NoSuchElementException.class);
 		
 		t.subPath(LocalDateTime.MIN, LocalDateTime.MAX);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubTrajectoryEmptyInterval() {
 		Trajectory t = new SimpleTrajectory(
 			spatialPath(-1, 1, 1, -1),
 			ImmutableList.of(atSecond(1), atSecond(2)));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		t.subPath(atSecond(2), atSecond(1));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubTrajectoryEmptyIntersection() {
 		Trajectory t = new SimpleTrajectory(
 			spatialPath(-1, 1, 1, -1),
 			ImmutableList.of(atSecond(1), atSecond(2)));
+
+		thrown.expect(IllegalArgumentException.class);
 		
 		t.subPath(atSecond(2), atSecond(3));
 	}

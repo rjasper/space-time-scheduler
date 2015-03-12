@@ -8,9 +8,14 @@ import static world.factories.TrajectoryFactory.*;
 
 import java.util.Iterator;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TrajectoryContainerTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testEmptyPositive() {
@@ -82,13 +87,15 @@ public class TrajectoryContainerTest {
 			equalTo( trajectory(10, 20, 0, 0, 10, 20) ));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetTrajectoryNegative() {
 		TrajectoryContainer container = new TrajectoryContainer();
 		
 		container.update(trajectory( 0, 10, 0, 0,  0, 10));
 		container.update(trajectory(10, 20, 0, 0, 10, 20));
 		container.update(trajectory(20, 30, 0, 0, 20, 30));
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		container.getTrajectory(atSecond(-10));
 	}
@@ -211,12 +218,14 @@ public class TrajectoryContainerTest {
 			0, 10, 10, 20)));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testCalcTrajectoryNonContinuous() {
 		TrajectoryContainer container = new TrajectoryContainer();
 
 		container.update(trajectory( 0, 10, 0, 0,  0, 10));
 		container.update(trajectory(15, 20, 0, 0, 15, 20));
+		
+		thrown.expect(IllegalStateException.class);
 
 		container.calcTrajectory();
 	}

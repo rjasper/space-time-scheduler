@@ -144,6 +144,14 @@ public class Scheduler {
 		perspectiveCache.removePerceiver(worker);
 	}
 	
+	public Task getTask(UUID taskId) {
+		return schedule.getTask(taskId);
+	}
+	
+	public void removeTask(UUID taskId) {
+		schedule.removeTask(taskId);
+	}
+
 	/**
 	 * @return the present time
 	 */
@@ -234,12 +242,18 @@ public class Scheduler {
 	/**
 	 * Tries to schedule a new task satisfying the given specification.
 	 *
-	 * @param specification
+	 * @param spec
 	 * @return {@code true} iff a task was scheduled. {@code false} iff no task
 	 *         could be scheduled satisfying the specification.
 	 */
-	public ScheduleResult schedule(TaskSpecification specification) {
+	public ScheduleResult schedule(TaskSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
+		boolean status = scheduleImpl(spec, alternative);
+
+		return status ? success(alternative) : error();
+	}
+	
+	private boolean scheduleImpl(TaskSpecification spec, ScheduleAlternative alternative) {
 		SingularTaskScheduler sc = new SingularTaskScheduler();
 		
 		sc.setWorld(world);
@@ -247,12 +261,10 @@ public class Scheduler {
 		sc.setFrozenHorizonTime(frozenHorizonTime);
 		sc.setSchedule(schedule);
 		sc.setAlternative(alternative);
-		sc.setSpecification(specification);
+		sc.setSpecification(spec);
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
-		boolean status = sc.schedule();
-
-		return status ? success(alternative) : error();
+		return sc.schedule();
 	}
 	
 	public ScheduleResult schedule(
@@ -260,6 +272,17 @@ public class Scheduler {
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		boolean status = scheduleImpl(specs, dependencies, alternative);
+
+		return status ? success(alternative) : error();
+	}
+	
+	private boolean scheduleImpl(
+		Collection<TaskSpecification> specs,
+		SimpleDirectedGraph<UUID, DefaultEdge> dependencies,
+		ScheduleAlternative alternative)
+	{
 		DependentTaskScheduler sc = new DependentTaskScheduler();
 		
 		sc.setWorld(world);
@@ -272,13 +295,18 @@ public class Scheduler {
 		sc.setInterDependencyMargin(interDependencyMargin);
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
-		boolean status = sc.schedule();
+		return sc.schedule();
+	}
 
+	public ScheduleResult schedule(PeriodicTaskSpecification spec) {
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		boolean status = scheduleImpl(spec, alternative);
+		
 		return status ? success(alternative) : error();
 	}
 	
-	public ScheduleResult schedule(PeriodicTaskSpecification periodicSpec) {
-		ScheduleAlternative alternative = new ScheduleAlternative();
+	private boolean scheduleImpl(PeriodicTaskSpecification spec, ScheduleAlternative alternative) {
 		PeriodicTaskScheduler sc = new PeriodicTaskScheduler();
 
 		sc.setWorld(world);
@@ -286,28 +314,29 @@ public class Scheduler {
 		sc.setFrozenHorizonTime(frozenHorizonTime);
 		sc.setSchedule(schedule);
 		sc.setAlternative(alternative);
-		sc.setSpecification(periodicSpec);
+		sc.setSpecification(spec);
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 		
-		boolean status = sc.schedule();
+		return sc.schedule();
+	}
+	
+	public ScheduleResult unschedule(UUID taskId) {
+		Task task = schedule.getTask(taskId);
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		boolean status = unscheduleImpl(task, alternative);
 		
 		return status ? success(alternative) : error();
 	}
 	
-	public ScheduleResult reschedule(TaskSpecification spec) {
-		// TODO implement
-		throw new UnsupportedOperationException("nyi");
-	}
-	
-	// TODO test
-	public ScheduleResult unschedule(UUID taskId) {
-		// TODO implement
-		
-		Task task = schedule.getTask(taskId);
+	private boolean unscheduleImpl(Task task, ScheduleAlternative alternative) {
 		WorkerUnit worker = task.getWorkerReference().getActual();
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(worker);
 		
-		ScheduleAlternative alternative = new ScheduleAlternative();
+		// there should be at least one entry
+		Task lastTask = worker.getNavigableTasks().lastEntry().getValue();
+		boolean fixedEnd = lastTask != task;
+		
 		TaskRemovalPlanner pl = new TaskRemovalPlanner();
 		
 		pl.setWorld(world);
@@ -316,13 +345,32 @@ public class Scheduler {
 		pl.setSchedule(schedule);
 		pl.setAlternative(alternative);
 		pl.setTask(task);
-//		pl.setFixedEnd(fixedEnd); // TODO
-		
-		return null;
+		pl.setFixedEnd(fixedEnd);
+
+		return pl.plan();
 	}
 	
-	public void removeTask(String workerId, UUID taskId) {
-		schedule.removeTask(taskId);
+	public ScheduleResult reschedule(TaskSpecification spec) {
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		boolean status = rescheduleImpl(spec, alternative);
+
+		return status ? success(alternative) : error();
+	}
+	
+	private boolean rescheduleImpl(TaskSpecification spec, ScheduleAlternative alternative) {
+		Task task = getTask(spec.getTaskId());
+		
+		boolean status;
+		
+		status = unscheduleImpl(task, alternative);
+		
+		if (!status)
+			return false;
+		
+		status = scheduleImpl(spec, alternative);
+		
+		return status;
 	}
 
 	public void commit(UUID transactionId) {

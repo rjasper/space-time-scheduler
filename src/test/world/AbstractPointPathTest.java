@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import jts.geom.immutable.ImmutablePoint;
 
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import world.factories.PathFactory;
 
@@ -18,27 +19,35 @@ public abstract class AbstractPointPathTest
 	
 	protected abstract PointPath<?, ?> makePointPath(ImmutableList<ImmutablePoint> points);
 	
+	protected abstract ExpectedException thrown();
+	
 	private PointPath<?, ?> pointPath(double... ordinates) {
 		return makePointPath(PathFactory.points(ordinates));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubPathInvalidInterval() {
 		PointPath<?, ?> path = pointPath(0, 0, 8, 6);
+
+		thrown().expect(IllegalArgumentException.class);
 		
 		path.subPath(1, 0);
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSubPathEmptyInterval() {
 		PointPath<?, ?> path = pointPath(0, 0, 8, 6);
+
+		thrown().expect(IllegalArgumentException.class);
 		
 		path.subPath(0, 0);
 	}
 
-	@Test(expected = NoSuchElementException.class)
+	@Test
 	public void testSubPathEmpty() {
 		PointPath<?, ?> path = pointPath();
+
+		thrown().expect(NoSuchElementException.class);
 		
 		path.subPath(0, 1);
 	}

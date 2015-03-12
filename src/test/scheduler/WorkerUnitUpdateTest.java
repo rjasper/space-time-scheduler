@@ -19,7 +19,9 @@ import java.util.List;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import scheduler.util.IntervalSet;
 import scheduler.util.SimpleIntervalSet;
@@ -31,6 +33,9 @@ import world.Trajectory;
 import com.google.common.collect.ImmutableList;
 
 public class WorkerUnitUpdateTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	private static final String WORKER_ID = "worker";
 	
@@ -78,11 +83,13 @@ public class WorkerUnitUpdateTest {
 			equalTo(expected));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testUpdateTrajectoryPredate() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		
 		Trajectory traj = trajectory(0, 0, 0, 0, -1, 1);
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		update.updateTrajectory(traj);
 	}
@@ -104,22 +111,26 @@ public class WorkerUnitUpdateTest {
 			equalTo(expected));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddTaskInvalidWorker() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		WorkerUnitReference other = workerUnitUpdate().getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
+		thrown.expect(IllegalArgumentException.class);
+		
 		update.addTask(task);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddTaskPredate() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		WorkerUnitReference ref = update.getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(1));
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		update.addTask(task);
 	}
@@ -140,12 +151,14 @@ public class WorkerUnitUpdateTest {
 		assertThat(it.hasNext(), is(false));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testAddTaskRemovalInvalidWorker() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		WorkerUnitReference other = workerUnitUpdate().getWorker().getReference();
 		
 		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		
+		thrown.expect(IllegalArgumentException.class);
 		
 		update.addTaskRemoval(task);
 	}
@@ -173,7 +186,7 @@ public class WorkerUnitUpdateTest {
 		update.checkSelfConsistency(); // expect no exception
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testCheckSelfConsistencyLocation() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		WorkerUnit worker = update.getWorker();
@@ -194,10 +207,12 @@ public class WorkerUnitUpdateTest {
 		update.addTask(t2);
 		update.addTask(t3);
 		
+		thrown.expect(IllegalStateException.class);
+		
 		update.checkSelfConsistency();
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testCheckSelfConsistencyContinuity() {
 		WorkerUnitUpdate update = workerUnitUpdate();
 		
@@ -210,6 +225,8 @@ public class WorkerUnitUpdateTest {
 		
 		update.updateTrajectory(traj1);
 		update.updateTrajectory(traj2);
+		
+		thrown.expect(IllegalStateException.class);
 		
 		update.checkSelfConsistency();
 	}

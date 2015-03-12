@@ -11,11 +11,16 @@ import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import scheduler.util.IntervalSet.Interval;
 
 public class SimpleIntervalSetTest {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	@Test
 	public void testIsEmptyPositive() {
@@ -471,15 +476,17 @@ public class SimpleIntervalSetTest {
 			atSecond(0), atSecond(1)));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testSealAddSimple() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
 		set.seal();
 		
+		thrown.expect(IllegalStateException.class);
+		
 		set.add(atSecond(0), atSecond(1));
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealAddSet() {
 		SimpleIntervalSet<LocalDateTime> set1 = new SimpleIntervalSet<>();
 		set1.seal();
@@ -487,18 +494,22 @@ public class SimpleIntervalSetTest {
 		SimpleIntervalSet<LocalDateTime> set2 = new SimpleIntervalSet<>();
 		set2.add(atSecond(0), atSecond(1));
 		
+		thrown.expect(IllegalStateException.class);
+		
 		set1.add(set2);
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealRemoveSimple() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
 		set.seal();
 		
+		thrown.expect(IllegalStateException.class);
+		
 		set.remove(atSecond(0), atSecond(1));
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealRemoveSet() {
 		SimpleIntervalSet<LocalDateTime> set1 = new SimpleIntervalSet<>();
 		set1.seal();
@@ -506,33 +517,40 @@ public class SimpleIntervalSetTest {
 		SimpleIntervalSet<LocalDateTime> set2 = new SimpleIntervalSet<>();
 		set2.add(atSecond(0), atSecond(1));
 		
+		thrown.expect(IllegalStateException.class);
+		
 		set1.remove(set2);
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealIntersectSimple() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
 		set.seal();
 		
+		thrown.expect(IllegalStateException.class);
+		
 		set.intersect(atSecond(0), atSecond(1));
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealIntsectSet() {
 		SimpleIntervalSet<LocalDateTime> set1 = new SimpleIntervalSet<>();
 		set1.seal();
 
 		SimpleIntervalSet<LocalDateTime> set2 = new SimpleIntervalSet<>();
 		set2.add(atSecond(0), atSecond(1));
-		
+
+		thrown.expect(IllegalStateException.class);
 		set1.intersect(set2);
 	}
-	
-	@Test(expected = IllegalStateException.class)
+
+	@Test
 	public void testSealClear() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
 	
 		set.seal();
+		
+		thrown.expect(IllegalStateException.class);
 		set.clear();
 	}
 	
@@ -964,16 +982,20 @@ public class SimpleIntervalSetTest {
 			atSecond(0), atSecond(1)));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testMinValueEmpty() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
+
+		thrown.expect(IllegalStateException.class);
 		
 		set.minValue();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testMaxValueEmpty() {
 		SimpleIntervalSet<LocalDateTime> set = new SimpleIntervalSet<>();
+
+		thrown.expect(IllegalStateException.class);
 		
 		set.maxValue();
 	}

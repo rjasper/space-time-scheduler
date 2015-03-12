@@ -173,7 +173,7 @@ public class WorkerUnitTest {
 	}
 	
 	@Test
-	public void testfloorIdleTimeNull() {
+	public void testFloorIdleTimeNull() {
 		WorkerUnit worker = workerUnit("worker", 0, 0);
 		WorkerUnitReference ref = worker.getReference();
 		
@@ -185,7 +185,7 @@ public class WorkerUnitTest {
 	}
 	
 	@Test
-	public void testfloorIdleTimeMid() {
+	public void testFloorIdleTimeMid() {
 		WorkerUnit worker = workerUnit("worker", 0, 0);
 		WorkerUnitReference ref = worker.getReference();
 		
@@ -199,7 +199,7 @@ public class WorkerUnitTest {
 	}
 	
 	@Test
-	public void testfloorIdleTimeLeft() {
+	public void testFloorIdleTimeLeft() {
 		WorkerUnit worker = workerUnit("worker", 0, 0);
 		WorkerUnitReference ref = worker.getReference();
 		
@@ -213,7 +213,7 @@ public class WorkerUnitTest {
 	}
 	
 	@Test
-	public void testfloorIdleTimeRight() {
+	public void testFloorIdleTimeRight() {
 		WorkerUnit worker = workerUnit("worker", 0, 0);
 		WorkerUnitReference ref = worker.getReference();
 		
@@ -224,6 +224,18 @@ public class WorkerUnitTest {
 		worker.addTask(t2);
 		
 		assertThat(worker.floorIdleTimeOrNull(atSecond(3)), equalTo(atSecond(2)));
+	}
+	
+	@Test
+	public void testfloorLeftInitialTime() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		
+		worker.addTask(t1);
+		
+		assertThat(worker.floorIdleTimeOrNull(atSecond(0)), is(nullValue()));
 	}
 	
 	@Test
@@ -266,6 +278,18 @@ public class WorkerUnitTest {
 		worker.addTask(t2);
 		
 		assertThat(worker.ceilingIdleTimeOrNull(atSecond(3)), equalTo(atSecond(3)));
+	}
+	
+	@Test
+	public void testCeilLeftInitialTime() {
+		WorkerUnit worker = workerUnit("worker", 0, 0);
+		WorkerUnitReference ref = worker.getReference();
+		
+		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		
+		worker.addTask(t1);
+		
+		assertThat(worker.ceilingIdleTimeOrNull(atSecond(0)), is(nullValue()));
 	}
 	
 	@Test
