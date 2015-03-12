@@ -130,5 +130,23 @@ public class ScheduleAlternativeTest {
 		assertThat("root has unexpected job",
 			root.hasJob(uuid("job")), is(false));
 	}
+	
+	@Test
+	public void testDuplicateJobId() {
+		Node w = node("w1", 0, 0);
+		ScheduleAlternative alternative = new ScheduleAlternative();
+		
+		Job j1 = new Job(uuid("duplicate"), w.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job j2 = new Job(uuid("duplicate"), w.getReference(),
+			immutablePoint(10, 10), atSecond(10), secondsToDuration(1));
+		
+		alternative.addJob(j1);
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("duplicate job id");
+		
+		alternative.addJob(j2);
+	}
 
 }

@@ -31,6 +31,8 @@ public class Schedule {
 	
 	private final Map<UUID, Job> jobs = new HashMap<>();
 	
+	private final Set<UUID> jobIdLock = new HashSet<>();
+	
 	private static class NodeLocks {
 		
 		public final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
@@ -222,6 +224,9 @@ public class Schedule {
 				throw new IllegalArgumentException(e);
 			}
 
+			// no duplicate job ids
+			if (!jobs.stream().allMatch(j -> verifyJobId(j, removals)))
+				throw new IllegalArgumentException("duplicate job id");
 			// no mutual trajectory locks with origin disregarding removed jobs
 			if (!trajLockIntervals.intersection(originJobsIntervals)
 				.difference(removalsIntervals).isEmpty())
@@ -244,6 +249,27 @@ public class Schedule {
 			if (removals.stream().anyMatch(nodeLocks.jobRemovalLock::contains))
 				throw new IllegalArgumentException("job removal lock violation");
 		}
+	}
+	
+	private boolean verifyJobId(Job job, Collection<Job> removals) {
+		UUID jobId = job.getId();
+		
+		// if there is a scheduled job with the given id
+		if (jobs.containsKey(jobId)) {
+			boolean toBeRemoved = removals.stream()
+				.map(Job::getId)
+				.anyMatch(id -> id.equals(jobId));
+			
+			// refuse if job is not be rescheduled
+			if (!toBeRemoved)
+				return false;
+		}
+		
+		// refuse if another alternative already uses the job id
+		if (jobIdLock.contains(jobId))
+			return false;
+		
+		return true;
 	}
 
 	private boolean verifyJobLocation(Job job, IntervalSet<LocalDateTime> trajectoryUpdates) {
@@ -340,6 +366,10 @@ public class Schedule {
 		
 		nodeLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
 		nodeLocks.jobRemovalLock.addAll( update.getJobRemovals()     );
+		
+		update.getJobs().stream()
+			.map(Job::getId)
+			.forEach(jobIdLock::add);
 	}
 	
 	private void releaseLocks(ScheduleAlternative alternative) {
@@ -352,6 +382,10 @@ public class Schedule {
 		
 		nodeLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
 		nodeLocks.jobRemovalLock.removeAll( update.getJobRemovals()     );
+		
+		update.getJobs().stream()
+			.map(Job::getId)
+			.forEach(jobIdLock::remove);
 	}
 
 }

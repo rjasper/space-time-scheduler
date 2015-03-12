@@ -147,7 +147,11 @@ public class ScheduleAlternative {
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		jobs.put(job.getId(), job);
+		Job previous = jobs.putIfAbsent(job.getId(), job);
+		
+		if (previous != null)
+			throw new IllegalArgumentException("duplicate job id");
+		
 		getUpdate(job.getNodeReference().getActual())
 			.addJob(job);
 	}

@@ -156,6 +156,26 @@ public class SchedulerTest {
 		assertThat("scheduled job when it shouldn't have",
 			result.isError(), equalTo(true));
 	}
+	
+	@Test
+	public void testScheduleBetweenJobs() {
+		NodeSpecification ns = nodeSpec("w", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+		
+		scheduleJob(sc, jobSpec("job1", 0, 1, 3, 1));
+		scheduleJob(sc, jobSpec("job2", 1, 2, 9, 1));
+		
+		JobSpecification spec = jobSpec("job3", 1, 1, 6, 1);
+		ScheduleResult res = sc.schedule(spec);
+		
+		assertThat("unable to schedule job",
+			res.isSuccess(), is(true));
+		
+		assertThat("job does not satisfy specification",
+			res.getJobs().get(uuid("job3")), satisfies(spec));
+	}
 
 	@Test
 	public void testComplexJobSet() {

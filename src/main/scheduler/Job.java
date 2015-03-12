@@ -147,8 +147,8 @@ public class Job {
 	@Override
 	public String toString() {
 		// lazy evaluation
-		Supplier<String> defaultString = () -> String.format("%s:(%s, %s, %s)",
-			getNodeReference(), getLocation(), getStartTime(), getFinishTime());
+		Supplier<String> defaultString = () -> String.format("%s@%s:(%s, %s, %s)",
+			id, assignedNode, location, startTime, finishTime);
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

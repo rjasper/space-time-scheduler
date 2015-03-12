@@ -7,7 +7,7 @@ import static util.Comparables.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -130,12 +130,11 @@ public class SingularJobScheduler {
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
 				
-				Entry<?, Job> lastJobEntry = w.getNavigableJobs().lastEntry();
-				boolean fixedEnd = lastJobEntry != null &&
-					lastJobEntry.getValue().getStartTime().isBefore( s.getFinishTime() );
+				NavigableMap<LocalDateTime, Job> wJobs = w.getNavigableJobs();
+				// true if there is one job after s.finish
+				boolean fixedEnd = !wJobs.isEmpty() &&
+					!wJobs.lastKey().isBefore( s.getFinishTime() );
 				
-//				boolean fixedEnd = s.getFinishTime().isBefore(Scheduler.END_OF_TIME);
-
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
 				tp.setNode(w);

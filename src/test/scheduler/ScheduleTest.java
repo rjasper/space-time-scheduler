@@ -517,4 +517,58 @@ public class ScheduleTest {
 			w2.hasJob(t2), is(true));
 	}
 	
+	@Test
+	public void testDuplicateJobId1() {
+		Node w1 = node("w1", 0, 0);
+		Node w2 = node("w2", 10, 10);
+		
+		Schedule schedule = new Schedule();
+		schedule.addNode(w1);
+		schedule.addNode(w2);
+
+		Job t1 = new Job(uuid("duplicate"), w1.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job t2 = new Job(uuid("duplicate"), w2.getReference(),
+			immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
+
+		ScheduleAlternative sa1 = new ScheduleAlternative();
+		sa1.addJob(t1);
+		sa1.seal();
+		schedule.addAlternative(sa1);
+
+		ScheduleAlternative sa2 = new ScheduleAlternative();
+		sa2.addJob(t2);
+		sa2.seal();
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("duplicate job id");
+		
+		schedule.addAlternative(sa2);
+	}
+	
+	@Test
+	public void testDuplicateJobId2() {
+		Node w1 = node("w1", 0, 0);
+		Node w2 = node("w2", 10, 10);
+		
+		Schedule schedule = new Schedule();
+		schedule.addNode(w1);
+		schedule.addNode(w2);
+		
+		scheduleJob(schedule, new Job(uuid("duplicate"), w1.getReference(),
+			immutablePoint(0, 0), atSecond(1), secondsToDuration(1)));
+
+		Job job = new Job(uuid("duplicate"), w2.getReference(),
+			immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
+
+		ScheduleAlternative sa2 = new ScheduleAlternative();
+		sa2.addJob(job);
+		sa2.seal();
+		
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("duplicate job id");
+		
+		schedule.addAlternative(sa2);
+	}
+	
 }
