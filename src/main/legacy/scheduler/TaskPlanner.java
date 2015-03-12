@@ -18,7 +18,7 @@
 //import jts.geom.immutable.ImmutablePoint;
 //import jts.geom.util.GeometriesRequire;
 //import scheduler.ScheduleResult.TrajectoryUpdate;
-//import scheduler.Task;
+//import scheduler.Job;
 //import scheduler.Node;
 //import scheduler.NodeReference;
 //import util.CollectionsRequire;
@@ -42,20 +42,20 @@
 //import com.vividsolutions.jts.geom.Point;
 //
 ///**
-// * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
+// * <p>The JobPlanner plans a new {@link Job} into an established set of jobs.
 // * It requires multiple parameters which determine the {@link Node node}
-// * to execute the new task, and the location, duration, and time interval of the
+// * to execute the new job, and the location, duration, and time interval of the
 // * execution. It is also responsible for ensuring that the designated node is
-// * able to reach the task's location with colliding with any other object; be it
+// * able to reach the job's location with colliding with any other object; be it
 // * stationary or another node.</p>
 // *
-// * <p>Should it be impossible to plan the new task then the TaskPlanner will
-// * not change the current task set. This might be the case when the designated
+// * <p>Should it be impossible to plan the new job then the JobPlanner will
+// * not change the current job set. This might be the case when the designated
 // * node is unable to reach the location without violating any time
 // * constraints.</p>
 // *
 // * <p>The planning involves the calculation of a spatial path from the previous
-// * location of the node to the task's location and the successive path to
+// * location of the node to the job's location and the successive path to
 // * the next location the node is required to be. The next step is to calculate
 // * a velocity profile to evade dynamic obstacles. Since the old path which
 // * the node was previously planned to follow will be obsolete other nodes
@@ -63,14 +63,14 @@
 // * path section should update their affected path sections with a new
 // * velocity profile.</p>
 // *
-// * <p>The TaskPlanner creates a job queue to calculate the new velocity profile
+// * <p>The JobPlanner creates a job queue to calculate the new velocity profile
 // * for the new spatial paths of the designated node and all other affected
 // * path sections of other nodes. The jobs are sorted by the
 // * {@link Job#laxity()} to give priority to nodes in a hurry.</p>
 // *
 // * @author Rico Jasper
 // */
-//public class TaskPlanner {
+//public class JobPlanner {
 //
 //	/**
 //	 * The FixTimeVelocityPathfinder to be used.
@@ -100,40 +100,40 @@
 //
 //	/**
 //	 * A changing collection of dynamic obstacles of interest. During the planning of a
-//	 * {@link Task} the list of DynamicObstacles might be extended multiple
+//	 * {@link Job} the list of DynamicObstacles might be extended multiple
 //	 * times.
 //	 */
 //	private Collection<NodeObstacle> nodeObstacles = new LinkedList<>();
 //	
 //	/**
-//	 * The id of the {@link Task task} to be planned.
+//	 * The id of the {@link Job job} to be planned.
 //	 */
-//	private UUID taskId = null;
+//	private UUID jobId = null;
 //
 //	/**
-//	 * The location of the {@link Task task} to be planned.
+//	 * The location of the {@link Job job} to be planned.
 //	 */
 //	private ImmutablePoint location = null;
 //
 //	/**
-//	 * The earliest start time of the {@link Task task} to be planned.
+//	 * The earliest start time of the {@link Job job} to be planned.
 //	 */
 //	private LocalDateTime earliestStartTime = null;
 //
 //	/**
-//	 * The latest start time of the {@link Task task} to be planned.
+//	 * The latest start time of the {@link Job job} to be planned.
 //	 */
 //	private LocalDateTime latestStartTime = null;
 //
 //	/**
-//	 * The duration of the {@link Task task} to be planned.
+//	 * The duration of the {@link Job job} to be planned.
 //	 */
 //	private Duration duration = null;
 //	
 //	/**
-//	 * The planned task.
+//	 * The planned job.
 //	 */
-//	private Task resultTask = null;
+//	private Job resultJob = null;
 //	
 //	/**
 //	 * The trajectory updates.
@@ -162,10 +162,10 @@
 //	}
 //
 //	/**
-//	 * Sets the current node. The TaskPlanner uses this node to plan a
-//	 * {@link Task} which is executed by this node.
+//	 * Sets the current node. The JobPlanner uses this node to plan a
+//	 * {@link Job} which is executed by this node.
 //	 *
-//	 * @param node to execute the task
+//	 * @param node to execute the job
 //	 * @throws NullPointerException if node is null
 //	 */
 //	public void setNode(Node node) {
@@ -248,30 +248,30 @@
 //	}
 //
 //	/**
-//	 * @return the id of the {@link Task task} to be planned.
+//	 * @return the id of the {@link Job job} to be planned.
 //	 */
-//	private UUID getTaskId() {
-//		return taskId;
+//	private UUID getJobId() {
+//		return jobId;
 //	}
 //
 //	/**
-//	 * Sets the id of the {@link Task task} to be planned.
+//	 * Sets the id of the {@link Job job} to be planned.
 //	 * 
-//	 * @param taskId
+//	 * @param jobId
 //	 */
-//	public void setTaskId(UUID taskId) {
-//		this.taskId = taskId;
+//	public void setJobId(UUID jobId) {
+//		this.jobId = jobId;
 //	}
 //
 //	/**
-//	 * @return the location of the {@link Task task} to be planned.
+//	 * @return the location of the {@link Job job} to be planned.
 //	 */
 //	private ImmutablePoint getLocation() {
 //		return location;
 //	}
 //
 //	/**
-//	 * Sets the location of the {@link Task task} to be planned.
+//	 * Sets the location of the {@link Job job} to be planned.
 //	 *
 //	 * @param location
 //	 */
@@ -282,13 +282,13 @@
 //	}
 //
 //	/**
-//	 * <p>Returns the earliest start time of the {@link Task task} to be
+//	 * <p>Returns the earliest start time of the {@link Job job} to be
 //	 * planned.<p>
 //	 *
 //	 * <p>Also consideres the {@link Node#getInitialTime() initial time} of
 //	 * the {@link Node current node}.</p>
 //	 *
-//	 * @return the earliest start time of the task to be planned.
+//	 * @return the earliest start time of the job to be planned.
 //	 */
 //	private LocalDateTime getEarliestStartTime() {
 //		LocalDateTime initialTime = getNode().getInitialTime();
@@ -297,7 +297,7 @@
 //	}
 //
 //	/**
-//	 * Sets the earliest start time of the {@link Task task} to be planned.
+//	 * Sets the earliest start time of the {@link Job job} to be planned.
 //	 *
 //	 * @param earliestStartTime
 //	 */
@@ -306,14 +306,14 @@
 //	}
 //
 //	/**
-//	 * @return the latest start time of the {@link Task task} to be planned.
+//	 * @return the latest start time of the {@link Job job} to be planned.
 //	 */
 //	private LocalDateTime getLatestStartTime() {
 //		return latestStartTime;
 //	}
 //
 //	/**
-//	 * Sets the latest start time of the {@link Task task} to be planned.
+//	 * Sets the latest start time of the {@link Job job} to be planned.
 //	 *
 //	 * @param latestStartTime
 //	 */
@@ -322,14 +322,14 @@
 //	}
 //
 //	/**
-//	 * @return the duration of the {@link Task task} to be planned.
+//	 * @return the duration of the {@link Job job} to be planned.
 //	 */
 //	private Duration getDuration() {
 //		return duration;
 //	}
 //
 //	/**
-//	 * Sets the duration of the {@link Task task} to be planned.
+//	 * Sets the duration of the {@link Job job} to be planned.
 //	 *
 //	 * @param duration
 //	 * @throws IllegalArgumentException
@@ -345,29 +345,29 @@
 //	}
 //	
 //	/**
-//	 * @return a list of newly planned tasks.
+//	 * @return a list of newly planned jobs.
 //	 */
-//	public List<Task> getResultTasks() {
-//		if (resultTask == null)
+//	public List<Job> getResultJobs() {
+//		if (resultJob == null)
 //			return emptyList();
 //		else
-//			return singletonList(resultTask);
+//			return singletonList(resultJob);
 //	}
 //	
 //	/**
-//	 * Resets the {@link #resultTask} to {@code null}.
+//	 * Resets the {@link #resultJob} to {@code null}.
 //	 */
-//	private void resetResultTask() {
-//		resultTask = null;
+//	private void resetResultJob() {
+//		resultJob = null;
 //	}
 //
 //	/**
-//	 * Sets the result task.
+//	 * Sets the result job.
 //	 * 
-//	 * @param resultTask
+//	 * @param resultJob
 //	 */
-//	private void setResultTask(Task resultTask) {
-//		this.resultTask = resultTask;
+//	private void setResultJob(Job resultJob) {
+//		this.resultJob = resultJob;
 //	}
 //
 //	/**
@@ -436,7 +436,7 @@
 //		if (node        == null ||
 //			nodePool        == null ||
 //			perspectiveCache  == null ||
-//			taskId            == null ||
+//			jobId            == null ||
 //			location          == null ||
 //			earliestStartTime == null ||
 //			latestStartTime   == null ||
@@ -455,7 +455,7 @@
 //	}
 //	
 //	/**
-//	 * <p>Plans new path sections of the current node to the new task and
+//	 * <p>Plans new path sections of the current node to the new job and
 //	 * the following one. The old section is replaced by the new ones.</p>
 //	 *
 //	 * <p>Other nodes might also be affected. If a node was previously
@@ -464,12 +464,12 @@
 //	 * nodes might also trigger the recalculation of sections of other
 //	 * nodes recursively.</p>
 //	 *
-//	 * @return {@code true} if the task has been successfully planned.
+//	 * @return {@code true} if the job has been successfully planned.
 //	 */
 //	public boolean plan() {
 //		checkParameters();
 //		
-//		resetResultTask();
+//		resetResultJob();
 //		resetResultTrajectoryUpdates();
 //		
 //		boolean status = planImpl();
@@ -486,27 +486,27 @@
 //	 * is the easier call to {@link #clearCurrentDynamicObstacles() clear}
 //	 * the list of dynamic obstacles.</p>
 //	 *
-//	 * @return {@code true} if the task has been successfully planned.
+//	 * @return {@code true} if the job has been successfully planned.
 //	 */
 //	private boolean planImpl() {
 //		Node node = getNode();
 //
-//		// the section to be replaced by two section to and form the new task
+//		// the section to be replaced by two section to and form the new job
 //		NodeObstacle section = node.getObstacleSection( getEarliestStartTime() );
 //
-//		Point taskLocation = getLocation();
+//		Point jobLocation = getLocation();
 //		Point sectionStartLocation = section.getStartLocation();
 //		Point sectionFinishLocation = section instanceof IdlingNodeObstacle
-//			? taskLocation
+//			? jobLocation
 //			: section.getFinishLocation();
 //
-//		// calculate the path to the new task
-//		SpatialPath toTask = calculateSpatialPath(sectionStartLocation, taskLocation);
-//		if (toTask == null)
+//		// calculate the path to the new job
+//		SpatialPath toJob = calculateSpatialPath(sectionStartLocation, jobLocation);
+//		if (toJob == null)
 //			return false;
-//		// calculate the path from the new task
-//		SpatialPath fromTask = calculateSpatialPath(taskLocation, sectionFinishLocation);
-//		if (fromTask == null)
+//		// calculate the path from the new job
+//		SpatialPath fromJob = calculateSpatialPath(jobLocation, sectionFinishLocation);
+//		if (fromJob == null)
 //			return false;
 //
 //		// determine the path sections to be recalculated
@@ -516,7 +516,7 @@
 //		addAllNodeObstacles( buildNodePoolSegments(evasions, section) );
 //
 //		// make jobs
-//		Stream<Job> createJob = Stream.of(new CreateJob(toTask, fromTask, section));
+//		Stream<Job> createJob = Stream.of(new CreateJob(toJob, fromJob, section));
 //		Stream<Job> updateJobs = evasions.stream().map(UpdateJob::new);
 //
 //		// sort jobs
@@ -640,8 +640,8 @@
 //
 //	/**
 //	 * A CreateJob calculates the velocity profile for the current node
-//	 * to the new task and to the following task. It calculates three entirely
-//	 * new trajectories (toTask, atTask, fromTask) which will replace the
+//	 * to the new job and to the following job. It calculates three entirely
+//	 * new trajectories (toJob, atJob, fromJob) which will replace the
 //	 * old section of the current node.
 //	 */
 //	private class CreateJob extends Job {
@@ -655,14 +655,14 @@
 //		// The first three fields are set by the constructor.
 //
 //		/**
-//		 * The spatial path to the new task.
+//		 * The spatial path to the new job.
 //		 */
-//		private final SpatialPath toTask;
+//		private final SpatialPath toJob;
 //
 //		/**
-//		 * The spatial path from the new task to the next one.
+//		 * The spatial path from the new job to the next one.
 //		 */
-//		private final SpatialPath fromTask;
+//		private final SpatialPath fromJob;
 //
 //		/**
 //		 * The path section to be replaced.
@@ -670,102 +670,102 @@
 //		private final NodeObstacle section;
 //
 //		// dynamicObstacles is set in the very beginning of calculate
-//		// and is used by calculateTrajectoryToTask and
-//		// calculateTrajectoryFromTask which are called by calculate.
+//		// and is used by calculateTrajectoryToJob and
+//		// calculateTrajectoryFromJob which are called by calculate.
 //
 //		/**
 //		 * The view of the current node on the dynamic obstacles.
 //		 */
 //		private Collection<DynamicObstacle> dynamicObstacles;
 //
-//		// The next two fields are set by calculateTrajectoryToTask as its
-//		// result. trajToTask is needed to create the new task.
+//		// The next two fields are set by calculateTrajectoryToJob as its
+//		// result. trajToJob is needed to create the new job.
 //
 //		/**
-//		 * The evaded path sections to the new task.
+//		 * The evaded path sections to the new job.
 //		 */
-//		private Collection<NodeObstacle> evadedToTask;
+//		private Collection<NodeObstacle> evadedToJob;
 //
 //		/**
-//		 * The trajectory to the new task.
+//		 * The trajectory to the new job.
 //		 */
-//		private DecomposedTrajectory trajToTask;
+//		private DecomposedTrajectory trajToJob;
 //
-//		// The task is created after calculateTrajectoryToTask has finished.
-//		// It is needed by calculateTrajectoryFromTask.
+//		// The job is created after calculateTrajectoryToJob has finished.
+//		// It is needed by calculateTrajectoryFromJob.
 //
 //		/**
-//		 * The resulting task.
+//		 * The resulting job.
 //		 */
-//		private Task task;
+//		private Job job;
 //
 //		// The next two fields are set by calculateTrajectoryFrom which is
-//		// called after the task is created.
+//		// called after the job is created.
 //
 //		/**
-//		 * The evaded path sections from the new task to the next one.
+//		 * The evaded path sections from the new job to the next one.
 //		 */
-//		private Collection<NodeObstacle> evadedFromTask;
+//		private Collection<NodeObstacle> evadedFromJob;
 //
 //		/**
-//		 * The trajectory from the new task to the next one.
+//		 * The trajectory from the new job to the next one.
 //		 */
-//		private DecomposedTrajectory trajFromTask;
+//		private DecomposedTrajectory trajFromJob;
 //
 //		// After both trajectories are calculated, the three sections which
 //		// will replace the old section are created. They are needed by
 //		// the commit operation which is called externally.
 //
 //		/**
-//		 * The path section to the new task.
+//		 * The path section to the new job.
 //		 */
-//		private MovingNodeObstacle sectionToTask;
+//		private MovingNodeObstacle sectionToJob;
 //
 //		/**
-//		 * The path section at the new task.
+//		 * The path section at the new job.
 //		 */
-//		private OccupiedNodeObstacle sectionAtTask;
+//		private OccupiedNodeObstacle sectionAtJob;
 //
 //		/**
-//		 * The path section form the new task to the next one.
+//		 * The path section form the new job to the next one.
 //		 */
-//		private NodeObstacle sectionFromTask;
+//		private NodeObstacle sectionFromJob;
 //
 //		/**
-//		 * Constructs a CreateJob using the spatial path to the new task and to
+//		 * Constructs a CreateJob using the spatial path to the new job and to
 //		 * the one after and the section to be replaced.
 //		 *
-//		 * @param toTask
-//		 * @param fromTask
+//		 * @param toJob
+//		 * @param fromJob
 //		 * @param section
 //		 */
-//		public CreateJob(SpatialPath toTask, SpatialPath fromTask, NodeObstacle section) {
+//		public CreateJob(SpatialPath toJob, SpatialPath fromJob, NodeObstacle section) {
 //			// doesn't check inputs since class is private
 //
 //			super(section.getDuration());
 //
-//			this.toTask = toTask;
-//			this.fromTask = fromTask;
+//			this.toJob = toJob;
+//			this.fromJob = fromJob;
 //			this.section = section;
 //		}
 //
 //		/*
 //		 * (non-Javadoc)
 //		 *
-//		 * calcLaxity need toTask and fromTask to be set. This is already done
+//		 * calcLaxity need toJob and fromJob to be set. This is already done
 //		 * by the constructor.
 //		 *
-//		 * @see tasks.TaskPlanner.Job#calcLaxity()
+//		 * @see jobs.JobPlanner.Job#calcLaxity()
 //		 */
 //		@Override
 //		public double calcLaxity() {
 //			Node node = getNode();
 //			double maxSpeed = node.getMaxSpeed();
-//			double length = toTask.length() + fromTask.length();
-//			double taskDuration = inSeconds( getDuration() );
+//			double length = toJob.length() + fromJob.length();
+//			double jobDuration = inSeconds( getDuration() );
 //			double maxDuration = inSeconds( getJobDuration() );
 //
-//			return (maxDuration - taskDuration)/length - 1./maxSpeed;
+//			return (maxDuration - jobDuration)/length - 1./maxSpeed;
 //		}
 //
 //		@Override
@@ -774,28 +774,28 @@
 //			Node node = getNode();
 //			dynamicObstacles = buildDynamicObstaclesFor(node);
 //
-//			// calculate trajectory to task
+//			// calculate trajectory to job
 //
-//			// sets trajToTask and evadedToTask
-//			status = calculateTrajectoryToTask();
+//			// sets trajToJob and evadedToJob
+//			status = calculateTrajectoryToJob();
 //
 //			if (!status)
 //				return false;
 //
-//			// create task
+//			// create job
 //
-//			UUID taskId = getTaskId();
+//			UUID jobId = getJobId();
 //			NodeReference nodeRef = node.getReference();
-//			ImmutablePoint taskLocation = getLocation();
-//			Duration taskDuration = getDuration();
-//			LocalDateTime taskStartTime = trajToTask.getFinishTime();
+//			ImmutablePoint jobLocation = getLocation();
+//			Duration jobDuration = getDuration();
+//			LocalDateTime jobStartTime = trajToJob.getFinishTime();
 //
-//			task = new Task(taskId, nodeRef, taskLocation, taskStartTime, taskDuration);
+//			job = new Job(jobId, nodeRef, jobLocation, jobStartTime, jobDuration);
 //
-//			// calculate trajectory from task
+//			// calculate trajectory from job
 //
-//			// needs task; sets trajFromTask and evadedFromTask
-//			status = calculateTrajectoryFromTask();
+//			// needs job; sets trajFromJob and evadedFromJob
+//			status = calculateTrajectoryFromJob();
 //
 //			if (!status)
 //				return false;
@@ -803,56 +803,56 @@
 //			// create sections
 //
 //			// don't introduce trajectories without duration
-//			sectionToTask = trajToTask.getDuration().isZero() ?
-//				null : new MovingNodeObstacle(node, trajToTask, task);
-//			sectionAtTask = new OccupiedNodeObstacle(node, task);
+//			sectionToJob = trajToJob.getDuration().isZero() ?
+//				null : new MovingNodeObstacle(node, trajToJob, job);
+//			sectionAtJob = new OccupiedNodeObstacle(node, job);
 //
 //			if (section instanceof MovingNodeObstacle) {
-//				Task nextTask = ((MovingNodeObstacle) section).getGoal();
+//				Job nextJob = ((MovingNodeObstacle) section).getGoal();
 //				
 //				// don't introduce trajectories without duration
-//				sectionFromTask = trajFromTask.getDuration().isZero() ?
-//					null : new MovingNodeObstacle(node, trajFromTask, nextTask);
+//				sectionFromJob = trajFromJob.getDuration().isZero() ?
+//					null : new MovingNodeObstacle(node, trajFromJob, nextJob);
 //			} else if (section instanceof IdlingNodeObstacle) {
-//				LocalDateTime taskFinishTime = task.getFinishTime();
-//				sectionFromTask = new IdlingNodeObstacle(node, taskLocation, taskFinishTime);
+//				LocalDateTime jobFinishTime = job.getFinishTime();
+//				sectionFromJob = new IdlingNodeObstacle(node, jobLocation, jobFinishTime);
 //			} else {
 //				throw new RuntimeException("unexpected NodeObstacle");
 //			}
 //
 //			// add sections to current dynamic obstacles
 //
-//			if (sectionToTask != null)
-//				addNodeObstacle(sectionToTask);
-//			addNodeObstacle(sectionAtTask);
-//			if (sectionFromTask != null)
-//				addNodeObstacle(sectionFromTask);
+//			if (sectionToJob != null)
+//				addNodeObstacle(sectionToJob);
+//			addNodeObstacle(sectionAtJob);
+//			if (sectionFromJob != null)
+//				addNodeObstacle(sectionFromJob);
 //
 //			return true;
 //		}
 //
 //		/**
-//		 * <p>Calculates the trajectory to the new task.</p>
+//		 * <p>Calculates the trajectory to the new job.</p>
 //		 *
 //		 * <p>This method makes use of side-effects where it isn't always easy
 //		 * to follow what effects it has on the object. This was done to keep
 //		 * the code more concise since this is only an inner helper class.</p>
 //		 *
-//		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
-//		 * and {@link #section} are already set. It sets {@link #evadedToTask}
-//		 * and {@link #trajToTask} if the path calculation was successful.</p>
+//		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toJob},
+//		 * and {@link #section} are already set. It sets {@link #evadedToJob}
+//		 * and {@link #trajToJob} if the path calculation was successful.</p>
 //		 *
-//		 * @return {@code true} if a trajectory to the new task could be calculated.
+//		 * @return {@code true} if a trajectory to the new job could be calculated.
 //		 */
-//		private boolean calculateTrajectoryToTask() {
+//		private boolean calculateTrajectoryToJob() {
 //			MinimumTimeVelocityPathfinder pf = getMinimumTimeVelocityPathfinder();
 //
 //			pf.setDynamicObstacles  ( dynamicObstacles       );
-//			pf.setSpatialPath       ( toTask                 );
+//			pf.setSpatialPath       ( toJob                 );
 //			pf.setStartArc          ( 0.0                    );
-//			pf.setFinishArc         ( toTask.length()        );
+//			pf.setFinishArc         ( toJob.length()        );
 //			pf.setMinArc            ( 0.0                    );
-//			pf.setMaxArc            ( toTask.length()        );
+//			pf.setMaxArc            ( toJob.length()        );
 //			pf.setMaxSpeed          ( getNode().getMaxSpeed() );
 //			pf.setStartTime         ( section.getStartTime() );
 //			pf.setEarliestFinishTime( getEarliestStartTime() );
@@ -864,38 +864,38 @@
 //			if (!status)
 //				return false;
 //
-//			evadedToTask = onlyNodeObstacles( pf.getResultEvadedObstacles() );
-//			trajToTask = pf.getResultTrajectory();
+//			evadedToJob = onlyNodeObstacles( pf.getResultEvadedObstacles() );
+//			trajToJob = pf.getResultTrajectory();
 //
 //			return true;
 //		}
 //
 //		/**
-//		 * <p>Calculates the trajectory from the new task to the next one.</p>
+//		 * <p>Calculates the trajectory from the new job to the next one.</p>
 //		 *
 //		 * <p>This method makes use of side-effects where it isn't always easy
 //		 * to follow what effects it has on the object. This was done to keep
 //		 * the code more concise since this is only an inner helper class.</p>
 //		 *
-//		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toTask},
-//		 * {@link #task}, and {@link #section} are already set. It sets
-//		 * {@link #evadedFromTask} and {@link #trajFromTask} if the path
+//		 * <p>This methods assumes that {@link #dynamicObstacles}, {@link #toJob},
+//		 * {@link #job}, and {@link #section} are already set. It sets
+//		 * {@link #evadedFromJob} and {@link #trajFromJob} if the path
 //		 * calculation was successful.</p>
 //		 *
-//		 * @return {@code true} if a trajectory from the new task to the next
+//		 * @return {@code true} if a trajectory from the new job to the next
 //		 *         one could be calculated.
 //		 */
-//		private boolean calculateTrajectoryFromTask() {
+//		private boolean calculateTrajectoryFromJob() {
 //			FixTimeVelocityPathfinder pf = getFixTimeVelocityPathfinder();
 //
 //			pf.setDynamicObstacles( dynamicObstacles        );
-//			pf.setSpatialPath     ( fromTask                );
+//			pf.setSpatialPath     ( fromJob                );
 //			pf.setStartArc        ( 0.0                     );
-//			pf.setFinishArc       ( fromTask.length()       );
+//			pf.setFinishArc       ( fromJob.length()       );
 //			pf.setMinArc          ( 0.0                     );
-//			pf.setMaxArc          ( fromTask.length()       );
+//			pf.setMaxArc          ( fromJob.length()       );
 //			pf.setMaxSpeed        ( getNode().getMaxSpeed() );
-//			pf.setStartTime       ( task.getFinishTime()    );
+//			pf.setStartTime       ( job.getFinishTime()    );
 //			pf.setFinishTime      ( section.getFinishTime() );
 //
 //			boolean status = pf.calculate();
@@ -903,8 +903,8 @@
 //			if (!status)
 //				return false;
 //
-//			evadedFromTask = onlyNodeObstacles( pf.getResultEvadedObstacles() );
-//			trajFromTask = pf.getResultTrajectory();
+//			evadedFromJob = onlyNodeObstacles( pf.getResultEvadedObstacles() );
+//			trajFromJob = pf.getResultTrajectory();
 //
 //			return true;
 //		}
@@ -912,43 +912,43 @@
 //		/*
 //		 * (non-Javadoc)
 //		 *
-//		 * commit needs section, evadedToTask, evadedFromTask, sectionToTask,
-//		 * sectionAtTask, sectionFromTask, and task to be set. It expects
+//		 * commit needs section, evadedToJob, evadedFromJob, sectionToJob,
+//		 * sectionAtJob, sectionFromJob, and job to be set. It expects
 //		 * that calculate was called before.
 //		 *
-//		 * @see tasks.TaskPlanner.Job#commit()
+//		 * @see jobs.JobPlanner.Job#commit()
 //		 */
 //		@Override
 //		public void commit() {
 //			// register evasions
-//			if (sectionToTask != null) {
-//				for (NodeObstacle e : evadedToTask)
-//					registerEvasion(sectionToTask, e);
+//			if (sectionToJob != null) {
+//				for (NodeObstacle e : evadedToJob)
+//					registerEvasion(sectionToJob, e);
 //			}
 //
-//			if (sectionFromTask instanceof MovingNodeObstacle) {
-//				for (NodeObstacle e : evadedFromTask)
-//					registerEvasion((MovingNodeObstacle) sectionFromTask, e);
+//			if (sectionFromJob instanceof MovingNodeObstacle) {
+//				for (NodeObstacle e : evadedFromJob)
+//					registerEvasion((MovingNodeObstacle) sectionFromJob, e);
 //			}
 //
-//			// add obstacle sections and task
+//			// add obstacle sections and job
 //			Node node = getNode();
 //			silenceSection(section);
-//			if (sectionToTask != null) {
-//				node.addObstacleSection(sectionToTask);
-//				addTrajectoryUpdate(trajToTask, node);
+//			if (sectionToJob != null) {
+//				node.addObstacleSection(sectionToJob);
+//				addTrajectoryUpdate(trajToJob, node);
 //			}
 //			
-//			node.addObstacleSection(sectionAtTask);
-//			addTrajectoryUpdate(sectionAtTask.getTrajectory(), node);
+//			node.addObstacleSection(sectionAtJob);
+//			addTrajectoryUpdate(sectionAtJob.getTrajectory(), node);
 //			
-//			if (sectionFromTask != null) {
-//				node.addObstacleSection(sectionFromTask);
-//				addTrajectoryUpdate(trajFromTask, node);
+//			if (sectionFromJob != null) {
+//				node.addObstacleSection(sectionFromJob);
+//				addTrajectoryUpdate(trajFromJob, node);
 //			}
 //			
-//			node.addTask(task);
-//			setResultTask(task);
+//			node.addJob(job);
+//			setResultJob(job);
 //		}
 //
 //	}
@@ -1006,7 +1006,7 @@
 //		 *
 //		 * Sets evaded and updatedSegment if path could be found.
 //		 *
-//		 * @see tasks.TaskPlanner.Job#calculate()
+//		 * @see jobs.JobPlanner.Job#calculate()
 //		 */
 //		@Override
 //		public boolean calculate() {
@@ -1044,7 +1044,7 @@
 //		 *
 //		 * Uses all fields. Expects that calculate was already called and successful.
 //		 *
-//		 * @see tasks.TaskPlanner.Job#commit()
+//		 * @see jobs.JobPlanner.Job#commit()
 //		 */
 //		@Override
 //		public void commit() {
@@ -1084,7 +1084,7 @@
 //	 */
 //	private static Collection<MovingNodeObstacle> buildEvasions(NodeObstacle obstacleSegment) {
 //		return obstacleSegment.getEvaders().stream()
-//			.flatMap(TaskPlanner::buildEvasionsStream)
+//			.flatMap(JobPlanner::buildEvasionsStream)
 //			.collect(toList());
 //	}
 //
@@ -1099,7 +1099,7 @@
 //	private static Stream<MovingNodeObstacle> buildEvasionsStream(MovingNodeObstacle obstacleSegment) {
 //		Stream<MovingNodeObstacle> self = Stream.of(obstacleSegment);
 //		Stream<MovingNodeObstacle> ancestors = obstacleSegment.getEvaders().stream()
-//			.flatMap(TaskPlanner::buildEvasionsStream);
+//			.flatMap(JobPlanner::buildEvasionsStream);
 //
 //		return Stream.concat(self, ancestors);
 //	}

@@ -34,10 +34,10 @@ public class ScheduleAlternativeTest {
 		Node w = node("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
-		Task task = new Task(uuid("task"), w.getReference(),
+		Job job = new Job(uuid("job"), w.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
-		root.addTask(task);
+		root.addJob(job);
 		
 		assertThat("root marked as branched",
 			root.isBranched(), is(false));
@@ -50,8 +50,8 @@ public class ScheduleAlternativeTest {
 			root.isRootBranch(), is(true));
 		assertThat("branched marked as root",
 			branch.isRootBranch(), is(false));
-		assertThat("branch does not include task",
-			branch.getTask(uuid("task")), equalTo(task));
+		assertThat("branch does not include job",
+			branch.getJob(uuid("job")), equalTo(job));
 	}
 	
 	@Test
@@ -71,16 +71,16 @@ public class ScheduleAlternativeTest {
 		ScheduleAlternative root = new ScheduleAlternative();
 		ScheduleAlternative branch = root.branch();
 		
-		Task task = new Task(uuid("task"), w.getReference(),
+		Job job = new Job(uuid("job"), w.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
-		branch.addTask(task);
+		branch.addJob(job);
 		branch.merge();
 		
-		assertThat("branch does not have task",
-			root.hasTask(uuid("task")), is(true));
-		assertThat("branch does not have correct task",
-			root.getTask(uuid("task")), equalTo(task));
+		assertThat("branch does not have job",
+			root.hasJob(uuid("job")), is(true));
+		assertThat("branch does not have correct job",
+			root.getJob(uuid("job")), equalTo(job));
 	}
 	
 	@Test
@@ -110,7 +110,7 @@ public class ScheduleAlternativeTest {
 		Node w = node("w1", 0, 0);
 		ScheduleAlternative root = new ScheduleAlternative();
 		
-		Task task = new Task(uuid("task"), w.getReference(),
+		Job job = new Job(uuid("job"), w.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
 		ScheduleAlternative branch = root.branch();
@@ -118,7 +118,7 @@ public class ScheduleAlternativeTest {
 		assertThat("root not marked as branched",
 			root.isBranched(), is(true));
 		
-		branch.addTask(task);
+		branch.addJob(job);
 		branch.delete();
 		
 		root.seal();
@@ -127,8 +127,8 @@ public class ScheduleAlternativeTest {
 			root.isBranched(), is(false));
 		assertThat("branch not invalid",
 			branch.isInvalid(), is(true));
-		assertThat("root has unexpected task",
-			root.hasTask(uuid("task")), is(false));
+		assertThat("root has unexpected job",
+			root.hasJob(uuid("job")), is(false));
 	}
 
 }

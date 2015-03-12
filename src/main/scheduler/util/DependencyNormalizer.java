@@ -15,13 +15,13 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import scheduler.TaskSpecification;
+import scheduler.JobSpecification;
 
 public class DependencyNormalizer {
 	
-	public static Map<UUID, TaskSpecification> normalizeDependentTaskSpecifications(
+	public static Map<UUID, JobSpecification> normalizeDependentJobSpecifications(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
-		Map<UUID, TaskSpecification> specifications,
+		Map<UUID, JobSpecification> specifications,
 		LocalDateTime frozenHorizonTime)
 	throws DependencyNormalizationException
 	{
@@ -31,7 +31,7 @@ public class DependencyNormalizer {
 
 	private final SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph;
 	
-	private final Map<UUID, TaskSpecification> origin;
+	private final Map<UUID, JobSpecification> origin;
 	
 	private final LocalDateTime frozenHorizonTime;
 	
@@ -39,17 +39,17 @@ public class DependencyNormalizer {
 	
 	private static class Intermediate {
 
-		private final TaskSpecification origin;
+		private final JobSpecification origin;
 		private LocalDateTime earliestStartTime;
 		private LocalDateTime latestStartTime;
 		
-		public Intermediate(TaskSpecification origin) {
+		public Intermediate(JobSpecification origin) {
 			this.earliestStartTime = origin.getEarliestStartTime();
 			this.latestStartTime = origin.getLatestStartTime();
 			this.origin = origin;
 		}
 
-		public TaskSpecification getOrigin() {
+		public JobSpecification getOrigin() {
 			return origin;
 		}
 
@@ -81,7 +81,7 @@ public class DependencyNormalizer {
 	
 	public DependencyNormalizer(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
-		Map<UUID, TaskSpecification> specifications,
+		Map<UUID, JobSpecification> specifications,
 		LocalDateTime frozenHorizonTime)
 	{
 		this.dependencyGraph = Objects.requireNonNull(dependencyGraph, "dependencyGraph");
@@ -103,7 +103,7 @@ public class DependencyNormalizer {
 		
 	}
 
-	public Map<UUID, TaskSpecification> normalize() throws DependencyNormalizationException {
+	public Map<UUID, JobSpecification> normalize() throws DependencyNormalizationException {
 		initIntermediate();
 		
 		TopologicalOrderIterator<UUID, DefaultEdge> forwardIterator =
@@ -116,7 +116,7 @@ public class DependencyNormalizer {
 		while (backwardIterator.hasNext())
 			normalizeLatest(backwardIterator.next());
 		
-		Map<UUID, TaskSpecification> normalized;
+		Map<UUID, JobSpecification> normalized;
 		try {
 			// intermediate might include invalid start time intervals
 			normalized = build();
@@ -132,19 +132,19 @@ public class DependencyNormalizer {
 	
 	private void initIntermediate() {
 		intermediate = origin.values().stream()
-			.collect(toMap(TaskSpecification::getTaskId, Intermediate::new));
+			.collect(toMap(JobSpecification::getJobId, Intermediate::new));
 	}
 
 	private void resetIntermediate() {
 		intermediate = null;
 	}
 
-	private void normalizeLatest(UUID taskId) {
-		Intermediate inter = intermediate.get(taskId);
+	private void normalizeLatest(UUID jobId) {
+		Intermediate inter = intermediate.get(jobId);
 		
 		// collect all dependent intermediates and
 		// determine the minimum latest start time
-		LocalDateTime depMin = dependencyGraph.incomingEdgesOf(taskId).stream()
+		LocalDateTime depMin = dependencyGraph.incomingEdgesOf(jobId).stream()
 			.map(dependencyGraph::getEdgeSource)
 			.map(intermediate::get)
 			.map(Intermediate::getLatestStartTime)
@@ -154,12 +154,12 @@ public class DependencyNormalizer {
 		inter.setLatestFinishTime(min(depMin, inter.getLatestFinishTime()));
 	}
 
-	private void normalizeEarliest(UUID taskId) {
-		Intermediate inter = intermediate.get(taskId);
+	private void normalizeEarliest(UUID jobId) {
+		Intermediate inter = intermediate.get(jobId);
 		
 		// collect all required intermediates and
 		// determine the maximum earliest finish time
-		LocalDateTime reqMax = dependencyGraph.outgoingEdgesOf(taskId).stream()
+		LocalDateTime reqMax = dependencyGraph.outgoingEdgesOf(jobId).stream()
 			.map(dependencyGraph::getEdgeTarget)
 			.map(intermediate::get)
 			.map(Intermediate::getEarliestFinishTime)
@@ -169,14 +169,14 @@ public class DependencyNormalizer {
 		inter.setEarliestStartTime(max(reqMax, inter.getEarliestStartTime(), frozenHorizonTime));
 	}
 
-	private Map<UUID, TaskSpecification> build() {
+	private Map<UUID, JobSpecification> build() {
 		return intermediate.values().stream()
 			.map(DependencyNormalizer::makeSpec)
-			.collect(toMap(TaskSpecification::getTaskId, identity()));
+			.collect(toMap(JobSpecification::getJobId, identity()));
 	}
 	
-	private static TaskSpecification makeSpec(Intermediate inter) {
-		TaskSpecification origin = inter.getOrigin();
+	private static JobSpecification makeSpec(Intermediate inter) {
+		JobSpecification origin = inter.getOrigin();
 		
 		// reuse origin if possible
 		if (inter.getEarliestStartTime().isEqual(origin.getEarliestStartTime()) &&
@@ -185,8 +185,8 @@ public class DependencyNormalizer {
 			return origin;
 		}
 		
-		return new TaskSpecification(
-			origin.getTaskId(),
+		return new JobSpecification(
+			origin.getJobId(),
 			origin.getLocationSpace(),
 			inter.getEarliestStartTime(),
 			inter.getLatestStartTime(),

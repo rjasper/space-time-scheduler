@@ -7,32 +7,32 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import scheduler.Task;
-import scheduler.TaskSpecification;
+import scheduler.Job;
+import scheduler.JobSpecification;
 
-public class TaskSatisfiesSpecification extends TypeSafeMatcher<Task> {
+public class JobSatisfiesSpecification extends TypeSafeMatcher<Job> {
 	
 	@Factory
-	public static Matcher<Task> satisfies(TaskSpecification spec) {
-		return new TaskSatisfiesSpecification(spec);
+	public static Matcher<Job> satisfies(JobSpecification spec) {
+		return new JobSatisfiesSpecification(spec);
 	}
 	
-	private final TaskSpecification spec;
+	private final JobSpecification spec;
 
-	public TaskSatisfiesSpecification(TaskSpecification spec) {
+	public JobSatisfiesSpecification(JobSpecification spec) {
 		this.spec = Objects.requireNonNull(spec, "spec");
 	}
 
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("a task satisfying ")
+			.appendText("a job satisfying ")
 			.appendValue(spec);
 	}
 
 	@Override
-	protected boolean matchesSafely(Task item) {
-		if (!item.getId      ().equals   ( spec.getTaskId()            ))
+	protected boolean matchesSafely(Job item) {
+		if (!item.getId      ().equals   ( spec.getJobId()            ))
 			return false;
 		if (!item.getLocation().within   ( spec.getLocationSpace()     ))
 			return false;

@@ -21,7 +21,7 @@ import world.WorldPerspectiveCache;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class SingularTaskScheduler {
+public class SingularJobScheduler {
 	
 	private World world = null;
 	
@@ -33,7 +33,7 @@ public class SingularTaskScheduler {
 	
 	private ScheduleAlternative alternative = null;
 	
-	private TaskSpecification taskSpec = null;
+	private JobSpecification jobSpec = null;
 	
 	private int maxLocationPicks = 0;
 	
@@ -57,8 +57,8 @@ public class SingularTaskScheduler {
 		this.alternative = Objects.requireNonNull(alternative, "alternative");
 	}
 
-	public void setSpecification(TaskSpecification taskSpec) {
-		this.taskSpec = Objects.requireNonNull(taskSpec, "taskSpec");
+	public void setSpecification(JobSpecification jobSpec) {
+		this.jobSpec = Objects.requireNonNull(jobSpec, "jobSpec");
 	}
 
 	public void setMaxLocationPicks(int maxLocationPicks) {
@@ -74,7 +74,7 @@ public class SingularTaskScheduler {
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizonTime");
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(taskSpec, "taskSpec");
+		Objects.requireNonNull(jobSpec, "jobSpec");
 		
 		if (maxLocationPicks <= 0)
 			throw new IllegalStateException("maxLocationPicks undefined");
@@ -83,21 +83,21 @@ public class SingularTaskScheduler {
 	public boolean schedule() {
 		checkParameters();
 		
-		Geometry locationSpace = world.space(taskSpec.getLocationSpace());
-		UUID taskId = taskSpec.getTaskId();
+		Geometry locationSpace = world.space(jobSpec.getLocationSpace());
+		UUID jobId = jobSpec.getJobId();
 		LocalDateTime earliest = max(
-			taskSpec.getEarliestStartTime(), frozenHorizonTime);
-		LocalDateTime latest = taskSpec.getLatestStartTime();
-		Duration duration = taskSpec.getDuration();
+			jobSpec.getEarliestStartTime(), frozenHorizonTime);
+		LocalDateTime latest = jobSpec.getLatestStartTime();
+		Duration duration = jobSpec.getDuration();
 
 		if (latest.isBefore(frozenHorizonTime))
 			return false;
 		
-		TaskPlanner tp = new TaskPlanner();
+		JobPlanner tp = new JobPlanner();
 
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);
-		tp.setTaskId(taskId);
+		tp.setJobId(jobId);
 		tp.setDuration(duration);
 
 		// iterate over possible locations
@@ -130,9 +130,9 @@ public class SingularTaskScheduler {
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(w);
 				
-				Entry<?, Task> lastTaskEntry = w.getNavigableTasks().lastEntry();
-				boolean fixedEnd = lastTaskEntry != null &&
-					lastTaskEntry.getValue().getStartTime().isBefore( s.getFinishTime() );
+				Entry<?, Job> lastJobEntry = w.getNavigableJobs().lastEntry();
+				boolean fixedEnd = lastJobEntry != null &&
+					lastJobEntry.getValue().getStartTime().isBefore( s.getFinishTime() );
 				
 //				boolean fixedEnd = s.getFinishTime().isBefore(Scheduler.END_OF_TIME);
 
@@ -143,7 +143,7 @@ public class SingularTaskScheduler {
 				tp.setEarliestStartTime(earliest);
 				tp.setLatestStartTime(latest);
 
-				// plan the routes of affected nodes and schedule task
+				// plan the routes of affected nodes and schedule job
 				boolean status = tp.plan();
 
 				if (status)
@@ -152,7 +152,7 @@ public class SingularTaskScheduler {
 		}
 
 		// all possible variable combinations are exhausted without being able
-		// to schedule a task
+		// to schedule a job
 		return false;
 	}
 	

@@ -30,7 +30,7 @@ import world.pathfinder.StraightEdgePathfinder;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
-public class TaskPlannerTest {
+public class JobPlannerTest {
 
 	private static final NodeFactory wFact = NodeFactory.getInstance();
 	
@@ -43,11 +43,11 @@ public class TaskPlannerTest {
 		return schedule;
 	}
 	
-	private static boolean planTask(
+	private static boolean planJob(
 		World world,
 		Schedule schedule,
 		Node node,
-		UUID taskId,
+		UUID jobId,
 		Point location,
 		LocalDateTime startTime,
 		Duration duration)
@@ -65,9 +65,9 @@ public class TaskPlannerTest {
 
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
-		TaskPlanner tp = new TaskPlanner();
+		JobPlanner tp = new JobPlanner();
 
-		tp.setTaskId(taskId);
+		tp.setJobId(jobId);
 		tp.setNode(node);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(startTime);
@@ -101,14 +101,14 @@ public class TaskPlannerTest {
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		
 		// P = (60, 20), t = 120, d = 30
-		boolean status = planTask(world, schedule,
+		boolean status = planJob(world, schedule,
 			w,
-			uuid("task"),
+			uuid("job"),
 			point(60., 20.),
 			atSecond(120.),
 			secondsToDurationSafe(30.));
 		
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
 			w, not(nodeCollidesWith(obstacle)));
@@ -128,14 +128,14 @@ public class TaskPlannerTest {
 		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
 		
 		// P = (60, 20), t = 120, d = 30
-		boolean status = planTask(world, schedule,
+		boolean status = planJob(world, schedule,
 			w,
-			uuid("task"),
+			uuid("job"),
 			point(50., 20.),
 			atSecond(60.),
 			secondsToDurationSafe(30.));
 		
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 		assertThat("w collided with obstacle",
 			w, not(nodeCollidesWith(obstacle)));
@@ -153,27 +153,27 @@ public class TaskPlannerTest {
 //		boolean status;
 //	
 //		// w = w1, P = (3, 1), t = 10, d = 2
-//		status = planTask(world, schedule,
+//		status = planJob(world, schedule,
 //			w1,
-//			uuid("task1"),
+//			uuid("job1"),
 //			point(3.0, 1.0),
 //			atSecond(10.0),
 //			ofSeconds(2.0));
 //	
-//		assertThat("unable to plan task",
+//		assertThat("unable to plan job",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
 ////			nodes, not(areEvadedBy(w1)));
 //	
 //		// w = w2, P = (5, 3), t = 10, d = 2
-//		status = planTask(world, schedule,
+//		status = planJob(world, schedule,
 //			w2,
-//			uuid("task2"),
+//			uuid("job2"),
 //			point(5.0, 3.0),
 //			atSecond(10.0),
 //			ofSeconds(2.0));
 //	
-//		assertThat("unable to plan task",
+//		assertThat("unable to plan job",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
 ////			nodes, not(areEvadedBy(w1)));
@@ -183,14 +183,14 @@ public class TaskPlannerTest {
 ////			nodes, evadedByNumTimes(w2, 1));
 //	
 //		// w = w1, P = (1, 3), t = 4, d = 2
-//		status = planTask(world, schedule,
+//		status = planJob(world, schedule,
 //			w1,
-//			uuid("task3"),
+//			uuid("job3"),
 //			point(1.0, 3.0),
 //			atSecond(4.0),
 //			ofSeconds(2.0));
 //	
-//		assertThat("unable to plan task",
+//		assertThat("unable to plan job",
 //			status, equalTo(true));
 ////		assertThat("w1 evaded someone when it shouldn't have",
 ////			nodes, not(areEvadedBy(w1)));
@@ -206,14 +206,14 @@ public class TaskPlannerTest {
 		World world = new World();
 		Schedule schedule = makeSchedule(w);
 		
-		boolean status = planTask(world, schedule,
+		boolean status = planJob(world, schedule,
 			w,
-			uuid("task"),
+			uuid("job"),
 			point(0, 0),
 			atSecond(0),
 			secondsToDurationSafe(10));
 		
-		assertThat("unable to schedule tight task",
+		assertThat("unable to schedule tight job",
 			status, equalTo(true));
 	}
 
@@ -228,25 +228,25 @@ public class TaskPlannerTest {
 		boolean status;
 
 		// P = (3, 1), t = 2, d = 1
-		status = planTask(world, schedule,
+		status = planJob(world, schedule,
 			w,
-			uuid("task1"),
+			uuid("job1"),
 			point(3, 1),
 			atSecond(2),
 			secondsToDurationSafe(1));
 
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 
 		// P = (3, 1), t = 3, d = 1
-		status = planTask(world, schedule,
+		status = planJob(world, schedule,
 			w,
-			uuid("task2"),
+			uuid("job2"),
 			point(3, 1),
 			atSecond(3),
 			secondsToDurationSafe(1));
 
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 	}
 	
@@ -261,25 +261,25 @@ public class TaskPlannerTest {
 		boolean status;
 
 		// P = (3, 1), t = 3, d = 1
-		status = planTask(world, schedule,
+		status = planJob(world, schedule,
 			w,
-			uuid("task1"),
+			uuid("job1"),
 			point(3, 1),
 			atSecond(3),
 			secondsToDurationSafe(1));
 
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 
 		// P = (3, 1), t = 2, d = 1
-		status = planTask(world, schedule,
+		status = planJob(world, schedule,
 			w,
-			uuid("task2"),
+			uuid("job2"),
 			point(3, 1),
 			atSecond(2),
 			secondsToDurationSafe(1));
 
-		assertThat("unable to plan task",
+		assertThat("unable to plan job",
 			status, equalTo(true));
 	}
 

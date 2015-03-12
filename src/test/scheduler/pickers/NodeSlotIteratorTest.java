@@ -23,8 +23,8 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void test() {
-		Node w1 = NodeFixtures.withTwoTasks1();
-		Node w2 = NodeFixtures.withTwoTasks2();
+		Node w1 = NodeFixtures.withTwoJobs1();
+		Node w2 = NodeFixtures.withTwoJobs2();
 		
 		Collection<Node> nodes = Arrays.asList(w1, w2);
 
@@ -44,7 +44,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckStartTimePositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -62,7 +62,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckStartTimeNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -80,7 +80,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFinishTimePositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -98,7 +98,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFinishTimeNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -116,7 +116,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckDurationPositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -134,7 +134,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckDurationNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -152,7 +152,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonStartTimePositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -171,7 +171,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonStartTimeNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -190,7 +190,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonFinishTimePositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -209,7 +209,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonFinishTimeNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -228,7 +228,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonDurationPositive() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 
@@ -247,7 +247,7 @@ public class NodeSlotIteratorTest {
 	
 	@Test
 	public void testCheckFrozenHorizonDurationNegative() {
-		Node w = NodeFixtures.withTwoTasks1();
+		Node w = NodeFixtures.withTwoJobs1();
 		
 		Collection<Node> nodes = Collections.singleton(w);
 

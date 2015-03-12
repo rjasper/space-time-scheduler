@@ -4,7 +4,7 @@
 //import java.util.Objects;
 //
 //import jts.geom.immutable.ImmutablePoint;
-//import scheduler.Task;
+//import scheduler.Job;
 //import scheduler.Node;
 //import world.SimpleTrajectory;
 //import world.SpatialPath;
@@ -14,16 +14,16 @@
 //
 ///**
 // * An {@code OccupiedNodeObstacle} represents the stationary path segment
-// * of a node being occupied with a task.
+// * of a node being occupied with a job.
 // * 
 // * @author Rico
 // */
 //public class OccupiedNodeObstacle extends NodeObstacle {
 //
 //	/**
-//	 * The task the node is occupied with.
+//	 * The job the node is occupied with.
 //	 */
-//	private final Task occupation;
+//	private final Job occupation;
 //
 //	/**
 //	 * Constructs a new {@code OccupiedNodeObstacle} of the node having
@@ -33,7 +33,7 @@
 //	 * @param occupation
 //	 * @throws NullPointerException if any argument is {@code null}.
 //	 */
-//	public OccupiedNodeObstacle(Node node, Task occupation) {
+//	public OccupiedNodeObstacle(Node node, Job occupation) {
 //		// throws NullPointerException
 //		super(node, buildTrajectory(occupation));
 //		
@@ -49,7 +49,7 @@
 //	 * @return the trajectory.
 //	 * @throws NullPointerException if the occupation is {@code null}.
 //	 */
-//	private static Trajectory buildTrajectory(Task occupation) {
+//	private static Trajectory buildTrajectory(Job occupation) {
 //		Objects.requireNonNull(occupation, "occupation");
 //		
 //		ImmutablePoint location = occupation.getLocation();
@@ -64,7 +64,7 @@
 //	/**
 //	 * @return the occupation of the node.
 //	 */
-//	public Task getOccupation() {
+//	public Job getOccupation() {
 //		return occupation;
 //	}
 //

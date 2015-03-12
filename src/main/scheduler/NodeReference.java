@@ -85,20 +85,20 @@ public class NodeReference  {
 		return node.getInitialTime();
 	}
 
-	public boolean hasTask(Task task) {
-		return node.hasTask(task);
+	public boolean hasJob(Job job) {
+		return node.hasJob(job);
 	}
 
-	public Collection<Task> getTasks() {
-		return node.getTasks();
+	public Collection<Job> getJobs() {
+		return node.getJobs();
 	}
 
-	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
-		return node.getNavigableTasks();
+	public NavigableMap<LocalDateTime, Job> getNavigableJobs() {
+		return node.getNavigableJobs();
 	}
 
-	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
-		return node.getTaskIntervals();
+	public MappedIntervalSet<LocalDateTime, Job> getJobIntervals() {
+		return node.getJobIntervals();
 	}
 
 	public boolean isIdle() {
@@ -138,16 +138,16 @@ public class NodeReference  {
 		return node.idleSlots(from, to);
 	}
 
-	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
-		return node.calcTaskDuration(from, to);
+	public Duration calcJobDuration(LocalDateTime from, LocalDateTime to) {
+		return node.calcJobDuration(from, to);
 	}
 
 	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
 		return node.calcMotionDuration(from, to);
 	}
 
-	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
-		return node.calcTaskLoad(from, to);
+	public double calcJobLoad(LocalDateTime from, LocalDateTime to) {
+		return node.calcJobLoad(from, to);
 	}
 
 	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {

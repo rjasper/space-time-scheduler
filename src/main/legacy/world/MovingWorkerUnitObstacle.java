@@ -6,7 +6,7 @@
 //import java.util.Objects;
 //import java.util.Set;
 //
-//import scheduler.Task;
+//import scheduler.Job;
 //import scheduler.Node;
 //import world.ArcTimePath;
 //import world.DecomposedTrajectory;
@@ -16,7 +16,7 @@
 //
 ///**
 // * A {@code MovingNodeObstacle} represents a non-stationary path segment
-// * of a node. The goal of any moving node is always a task. The trajectory
+// * of a node. The goal of any moving node is always a job. The trajectory
 // * is always decomposed.
 // * 
 // * @author Rico
@@ -26,7 +26,7 @@
 //	/**
 //	 * The destination of this path segment.
 //	 */
-//	private final Task goal;
+//	private final Job goal;
 //	
 //	/**
 //	 * Stores the path sections which were evaded by this one.
@@ -40,7 +40,7 @@
 //	
 //	/**
 //	 * Constructs a new {@code MovingNodeObstacle} of a node along a
-//	 * trajectory leading to the task.
+//	 * trajectory leading to the job.
 //	 * 
 //	 * @param node
 //	 * @param trajectory
@@ -54,7 +54,7 @@
 //	 *             <li>The trajectory does not lead to the goal.</li>
 //	 *             </ul>
 //	 */
-//	public MovingNodeObstacle(Node node, DecomposedTrajectory trajectory, Task goal) {
+//	public MovingNodeObstacle(Node node, DecomposedTrajectory trajectory, Job goal) {
 //		// throws NullPointerException and IllegalArgumentException
 //		super(node, trajectory);
 //		
@@ -89,7 +89,7 @@
 //	/**
 //	 * @return the goal which the node is moving to.
 //	 */
-//	public Task getGoal() {
+//	public Job getGoal() {
 //		return goal;
 //	}
 //

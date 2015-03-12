@@ -15,7 +15,7 @@
 //
 ///**
 // * An {@code IdlingNodeObstacle} represents the very last path segment of
-// * a node. When a node has completed its last task it has not anywhere to
+// * a node. When a node has completed its last job it has not anywhere to
 // * go. Therefore, it stays at its last location.
 // * 
 // * @author Rico

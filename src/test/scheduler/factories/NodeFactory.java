@@ -10,12 +10,12 @@ import java.util.UUID;
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
 import scheduler.IdleSlot;
+import scheduler.JobPlanner;
 import scheduler.Node;
 import scheduler.NodeSpecification;
 import scheduler.Schedule;
 import scheduler.ScheduleAlternative;
 import scheduler.Scheduler;
-import scheduler.TaskPlanner;
 import world.World;
 import world.WorldPerspective;
 import world.pathfinder.StraightEdgePathfinder;
@@ -64,8 +64,8 @@ public class NodeFactory {
 		return shape;
 	}
 
-//	private TaskPlanner getTaskPlanner() {
-//		return taskPlanner;
+//	private JobPlanner getJobPlanner() {
+//		return jobPlanner;
 //	}
 
 	public void setShape(ImmutablePolygon shape) {
@@ -107,12 +107,12 @@ public class NodeFactory {
 		return new NodeSpecification(id, shape, maxSpeed, initialLocation, initialTime);
 	}
 
-	public boolean addTask(Node node, UUID taskId, double x, double y, long tStart, long tEnd) {
-		return addTaskWithDuration(node, taskId, x, y, tStart, tEnd - tStart);
+	public boolean addJob(Node node, UUID jobId, double x, double y, long tStart, long tEnd) {
+		return addJobWithDuration(node, jobId, x, y, tStart, tEnd - tStart);
 	}
 
-	public boolean addTaskWithDuration(Node node, UUID taskId, double x, double y, long t, long d) {
-		TaskPlanner tp = new TaskPlanner();
+	public boolean addJobWithDuration(Node node, UUID jobId, double x, double y, long t, long d) {
+		JobPlanner tp = new JobPlanner();
 
 		Point location = point(x, y);
 		LocalDateTime time = atSecond(t);
@@ -131,7 +131,7 @@ public class NodeFactory {
 		
 		schedule.addNode(node);
 
-		tp.setTaskId(taskId);
+		tp.setJobId(jobId);
 		tp.setNode(node);
 		tp.setLocation(location);
 		tp.setEarliestStartTime(time);

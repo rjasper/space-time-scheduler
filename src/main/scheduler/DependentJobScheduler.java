@@ -17,13 +17,13 @@ import java.util.UUID;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-import scheduler.pickers.DependentTaskIterator;
+import scheduler.pickers.DependentJobIterator;
 import scheduler.util.DependencyNormalizer.DependencyNormalizationException;
 import util.CollectionsRequire;
 import world.World;
 import world.WorldPerspectiveCache;
 
-public class DependentTaskScheduler {
+public class DependentJobScheduler {
 	
 	private World world = null;
 	
@@ -35,7 +35,7 @@ public class DependentTaskScheduler {
 	
 	private ScheduleAlternative alternative = null;
 	
-	private Collection<TaskSpecification> taskSpecs = null;
+	private Collection<JobSpecification> jobSpecs = null;
 	
 	private SimpleDirectedGraph<UUID, DefaultEdge> dependencies = null;
 	
@@ -63,8 +63,8 @@ public class DependentTaskScheduler {
 		this.alternative = Objects.requireNonNull(alternative, "alternative");
 	}
 
-	public void setSpecifications(Collection<TaskSpecification> taskSpecs) {
-		this.taskSpecs = CollectionsRequire.requireNonNull(taskSpecs, "taskSpecs");
+	public void setSpecifications(Collection<JobSpecification> jobSpecs) {
+		this.jobSpecs = CollectionsRequire.requireNonNull(jobSpecs, "jobSpecs");
 	}
 
 	public void setDependencies(SimpleDirectedGraph<UUID, DefaultEdge> dependencies) {
@@ -93,7 +93,7 @@ public class DependentTaskScheduler {
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizonTime");
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(taskSpecs, "taskSpecs");
+		Objects.requireNonNull(jobSpecs, "jobSpecs");
 		Objects.requireNonNull(dependencies, "dependencies");
 		Objects.requireNonNull(interDependencyMargin, "interDependencyMargin");
 		
@@ -102,8 +102,8 @@ public class DependentTaskScheduler {
 		
 		// check consistency of specifications and dependencies
 		
-		Set<UUID> specUuids = taskSpecs.stream()
-			.map(TaskSpecification::getTaskId)
+		Set<UUID> specUuids = jobSpecs.stream()
+			.map(JobSpecification::getJobId)
 			.collect(toSet());
 		Set<UUID> depUuids = dependencies.vertexSet();
 		
@@ -114,19 +114,19 @@ public class DependentTaskScheduler {
 	public boolean schedule() {
 		checkParameters();
 		
-		Map<UUID, TaskSpecification> specMap = taskSpecs.stream()
-			.collect(toMap(TaskSpecification::getTaskId, identity()));
+		Map<UUID, JobSpecification> specMap = jobSpecs.stream()
+			.collect(toMap(JobSpecification::getJobId, identity()));
 		
-		Map<UUID, TaskSpecification> normalizedSpecMap;
+		Map<UUID, JobSpecification> normalizedSpecMap;
 		try {
-			normalizedSpecMap = normalizeDependentTaskSpecifications(dependencies, specMap, frozenHorizonTime);
+			normalizedSpecMap = normalizeDependentJobSpecifications(dependencies, specMap, frozenHorizonTime);
 		} catch (DependencyNormalizationException e) {
 			return false;
 		}
 		
-		Iterator<TaskSpecification> it = new DependentTaskIterator(dependencies, normalizedSpecMap);
+		Iterator<JobSpecification> it = new DependentJobIterator(dependencies, normalizedSpecMap);
 		
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+		SingularJobScheduler sc = new SingularJobScheduler();
 
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -136,7 +136,7 @@ public class DependentTaskScheduler {
 		sc.setMaxLocationPicks(maxLocationPicks);
 		
 		while (it.hasNext()) {
-			TaskSpecification constrained = constrain(it.next());
+			JobSpecification constrained = constrain(it.next());
 			
 			if (constrained == null)
 				return false;
@@ -153,12 +153,12 @@ public class DependentTaskScheduler {
 		return true;
 	}
 	
-	private TaskSpecification constrain(TaskSpecification spec) {
-		Optional<LocalDateTime> depMaxOpt = dependencies.outgoingEdgesOf(spec.getTaskId())
+	private JobSpecification constrain(JobSpecification spec) {
+		Optional<LocalDateTime> depMaxOpt = dependencies.outgoingEdgesOf(spec.getJobId())
 			.stream()
 			.map(dependencies::getEdgeTarget)
-			.map(alternative::getTask)
-			.map(Task::getFinishTime)
+			.map(alternative::getJob)
+			.map(Job::getFinishTime)
 			.max((t1, t2) -> t1.compareTo(t2));
 		
 		// if no dependencies
@@ -175,8 +175,8 @@ public class DependentTaskScheduler {
 		if (withMargin.isAfter(spec.getLatestStartTime()))
 			return null;
 		
-		return new TaskSpecification(
-			spec.getTaskId(),
+		return new JobSpecification(
+			spec.getJobId(),
 			spec.getLocationSpace(),
 			withMargin,
 			spec.getLatestStartTime(),

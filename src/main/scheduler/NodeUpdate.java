@@ -23,15 +23,15 @@ public class NodeUpdate implements Cloneable {
 	
 	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
 	
-	private final Set<Task> tasks = new HashSet<>();
+	private final Set<Job> jobs = new HashSet<>();
 	
-	private final Set<Task> taskRemovals = new HashSet<>();
+	private final Set<Job> jobRemovals = new HashSet<>();
 	
 	private final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
 	
-	private final SimpleIntervalSet<LocalDateTime> taskLock = new SimpleIntervalSet<>();
+	private final SimpleIntervalSet<LocalDateTime> jobLock = new SimpleIntervalSet<>();
 	
-	private final SimpleIntervalSet<LocalDateTime> taskRemovalIntervals = new SimpleIntervalSet<>();
+	private final SimpleIntervalSet<LocalDateTime> jobRemovalIntervals = new SimpleIntervalSet<>();
 	
 	private boolean sealed = false;
 
@@ -51,12 +51,12 @@ public class NodeUpdate implements Cloneable {
 		return trajectoryContainer.getTrajectories();
 	}
 
-	public Set<Task> getTasks() {
-		return unmodifiableSet(tasks);
+	public Set<Job> getJobs() {
+		return unmodifiableSet(jobs);
 	}
 
-	public Set<Task> getTaskRemovals() {
-		return unmodifiableSet(taskRemovals);
+	public Set<Job> getJobRemovals() {
+		return unmodifiableSet(jobRemovals);
 	}
 	
 	public IntervalSet<LocalDateTime> getTrajectoryIntervals() {
@@ -67,12 +67,12 @@ public class NodeUpdate implements Cloneable {
 		return unmodifiableIntervalSet(trajectoryLock);
 	}
 	
-	public IntervalSet<LocalDateTime> getTaskLock() {
-		return unmodifiableIntervalSet(taskLock);
+	public IntervalSet<LocalDateTime> getJobLock() {
+		return unmodifiableIntervalSet(jobLock);
 	}
 
-	public IntervalSet<LocalDateTime> getTaskRemovalIntervals() {
-		return unmodifiableIntervalSet(taskRemovalIntervals);
+	public IntervalSet<LocalDateTime> getJobRemovalIntervals() {
+		return unmodifiableIntervalSet(jobRemovalIntervals);
 	}
 
 	public void updateTrajectory(Trajectory trajectory) {
@@ -91,57 +91,57 @@ public class NodeUpdate implements Cloneable {
 		trajectoryContainer.update(trajectory);
 	}
 	
-	public void addTask(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void addJob(Job job) {
+		Objects.requireNonNull(job, "job");
 		
 		if (isSealed())
 			throw new IllegalStateException("update is sealed");
 		
-		LocalDateTime startTime  = task.getStartTime();
-		LocalDateTime finishTime = task.getFinishTime();
+		LocalDateTime startTime  = job.getStartTime();
+		LocalDateTime finishTime = job.getFinishTime();
 		
 		if (startTime.isBefore(node.getInitialTime()))
-			throw new IllegalArgumentException("task predates initial time");
-		if (task.getNodeReference().getActual() != node) // identity comparison
+			throw new IllegalArgumentException("job predates initial time");
+		if (job.getNodeReference().getActual() != node) // identity comparison
 			throw new IllegalArgumentException("invalid assigned node");
-		if (taskLock.intersects(startTime, finishTime))
-			throw new IllegalArgumentException("task lock violation");
+		if (jobLock.intersects(startTime, finishTime))
+			throw new IllegalArgumentException("job lock violation");
 		
 		trajectoryLock.add(startTime, finishTime);
-		taskLock.add(startTime, finishTime);
+		jobLock.add(startTime, finishTime);
 		
-		tasks.add(task);
+		jobs.add(job);
 	}
 	
-	public void addTaskRemoval(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void addJobRemoval(Job job) {
+		Objects.requireNonNull(job, "job");
 		
 		if (isSealed())
 			throw new IllegalStateException("update is sealed");
-		if (task.getNodeReference().getActual() != node) // identity comparison
+		if (job.getNodeReference().getActual() != node) // identity comparison
 			throw new IllegalArgumentException("invalid assigned node");
 		
-		taskRemovalIntervals.add(task.getStartTime(), task.getFinishTime());
-		taskRemovals.add(task);
+		jobRemovalIntervals.add(job.getStartTime(), job.getFinishTime());
+		jobRemovals.add(job);
 	}
 
 	public void checkSelfConsistency() {
-		if (!tasks.stream().allMatch(this::verifyTaskLocation))
-			throw new IllegalStateException("task location violation");
+		if (!jobs.stream().allMatch(this::verifyJobLocation))
+			throw new IllegalStateException("job location violation");
 		if (!verifyTrajectoryContinuity())
 			throw new IllegalStateException("trajectory continuity violation");
 	}
 
-	private boolean verifyTaskLocation(Task task) {
-		Point location = task.getLocation();
-		LocalDateTime taskStart = task.getStartTime();
-		LocalDateTime taskFinish = task.getFinishTime();
+	private boolean verifyJobLocation(Job job) {
+		Point location = job.getLocation();
+		LocalDateTime jobStart = job.getStartTime();
+		LocalDateTime jobFinish = job.getFinishTime();
 		
-		return trajectoryContainer.getTrajectories(taskStart, taskFinish).stream()
+		return trajectoryContainer.getTrajectories(jobStart, jobFinish).stream()
 			.allMatch(t -> {
 				IntervalSet<LocalDateTime> intersection = new SimpleIntervalSet<LocalDateTime>()
 					.add(t.getStartTime(), t.getFinishTime())
-					.intersect(taskStart, taskFinish);
+					.intersect(jobStart, jobFinish);
 				
 				// intersection is either empty or continuous [min, max]
 				
@@ -185,7 +185,7 @@ public class NodeUpdate implements Cloneable {
 			throw new IllegalStateException("alternative is sealed");
 
 		trajectoryLock.seal();
-		taskLock.seal();
+		jobLock.seal();
 		
 		sealed = true;
 	}
@@ -195,11 +195,11 @@ public class NodeUpdate implements Cloneable {
 		NodeUpdate clone = new NodeUpdate(node);
 		
 		clone.trajectoryContainer.update(trajectoryContainer);
-		clone.tasks.addAll(tasks);
-		clone.taskRemovals.addAll(taskRemovals);
+		clone.jobs.addAll(jobs);
+		clone.jobRemovals.addAll(jobRemovals);
 		clone.trajectoryLock.add(trajectoryLock);
-		clone.taskLock.add(taskLock);
-		clone.taskRemovalIntervals.add(taskRemovalIntervals);
+		clone.jobLock.add(jobLock);
+		clone.jobRemovalIntervals.add(jobRemovalIntervals);
 		clone.sealed = sealed;
 		
 		return clone;

@@ -12,23 +12,23 @@ import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import scheduler.TaskSpecification;
+import scheduler.JobSpecification;
 
-public class DependentTaskIterator implements Iterator<TaskSpecification> {
+public class DependentJobIterator implements Iterator<JobSpecification> {
 	
-	private final Map<UUID, TaskSpecification> specifications;
+	private final Map<UUID, JobSpecification> specifications;
 	
 	private final TopologicalOrderIterator<UUID, DefaultEdge> topoIterator;
 	
-	public DependentTaskIterator(
+	public DependentJobIterator(
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencyGraph,
-		Map<UUID, TaskSpecification> specifications)
+		Map<UUID, JobSpecification> specifications)
 	{
 		this.specifications = Objects.requireNonNull(specifications, "specifications");
 		
 		Comparator<UUID> comparator = (uuid1, uuid2) -> {
-			TaskSpecification spec1 = specifications.get(uuid1);
-			TaskSpecification spec2 = specifications.get(uuid2);
+			JobSpecification spec1 = specifications.get(uuid1);
+			JobSpecification spec2 = specifications.get(uuid2);
 			
 			return spec1.getLatestStartTime().compareTo( spec2.getLatestStartTime() );
 		};
@@ -44,7 +44,7 @@ public class DependentTaskIterator implements Iterator<TaskSpecification> {
 	}
 
 	@Override
-	public TaskSpecification next() {
+	public JobSpecification next() {
 		return specifications.get(topoIterator.next());
 	}
 

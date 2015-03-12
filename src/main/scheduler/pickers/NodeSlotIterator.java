@@ -21,9 +21,9 @@ import com.vividsolutions.jts.geom.Point;
 // TODO document
 /**
  * A NodeSlotIterator iterates over all idle slots of nodes which
- * satisfy the given specifications of a task. To satisfy means that a node is
- * capable to reach the task location while driving at maximum speed without
- * violating any time specification of the new task or other tasks. The
+ * satisfy the given specifications of a job. To satisfy means that a node is
+ * capable to reach the job location while driving at maximum speed without
+ * violating any time specification of the new job or other jobs. The
  * avoidance of obstacles are not considered.
  *
  * @author Rico Jasper
@@ -75,22 +75,22 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	private final LocalDateTime frozenHorizonTime;
 
 	/**
-	 * The location of the task specification.
+	 * The location of the job specification.
 	 */
 	private final Point location;
 
 	/**
-	 * The earliest time to execute the task.
+	 * The earliest time to execute the job.
 	 */
 	private final LocalDateTime earliestStartTime;
 
 	/**
-	 * The latest time to execute the task.
+	 * The latest time to execute the job.
 	 */
 	private final LocalDateTime latestStartTime;
 
 	/**
-	 * The duration of the task execution.
+	 * The duration of the job execution.
 	 */
 	private final Duration duration;
 
@@ -126,13 +126,13 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 
 	/**
 	 * Constructs a NodeSlotIterator which iterates over the given set of
-	 * nodes to while checking against the given task specifications.
+	 * nodes to while checking against the given job specifications.
 	 *
 	 * @param nodes the node pool to check
-	 * @param location of the task
-	 * @param earliestStartTime the earliest time to begin the task execution
-	 * @param latestStartTime the latest time to begin the task execution
-	 * @param duration of the task
+	 * @param location of the job
+	 * @param earliestStartTime the earliest time to begin the job execution
+	 * @param latestStartTime the latest time to begin the job execution
+	 * @param duration of the job
 	 *
 	 * @throws NullPointerException if any argument is {@code null}.
 	 * @throws IllegalArgumentException if any of the following is true:
@@ -305,14 +305,14 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	}
 
 	/**
-	 * Checks if a node is able during a given idle slot to drive to a task
-	 * location without violating any time constraints of the new task or
-	 * the next task. It does not considers the presence of any obstacles to
+	 * Checks if a node is able during a given idle slot to drive to a job
+	 * location without violating any time constraints of the new job or
+	 * the next job. It does not considers the presence of any obstacles to
 	 * avoid.
 	 *
 	 * @param node
 	 * @param slot
-	 * @return {@code true} iff node can potentially execute the task in time.
+	 * @return {@code true} iff node can potentially execute the job in time.
 	 */
 	private boolean check(Node node, IdleSlot slot) {
 		double vInv = 1. / node.getMaxSpeed();
@@ -323,21 +323,21 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		double l1 = distance(p1, location);
 		double l2 = p2 == null ? 0. : distance(location, p2);
 
-		// task can be started in time
+		// job can be started in time
 		// t_max - t1 < l1 / v_max
 		if (Duration.between(t1, latestStartTime()).compareTo(
 			secondsToDuration(vInv * l1)) < 0)
 		{
 			return false;
 		}
-		// task can be finished in time
+		// job can be finished in time
 		// t2 - t_min < l2 / v_max + d
 		if (Duration.between(earliestStartTime(node), t2).compareTo(
 			secondsToDuration(vInv * l2).plus(duration)) < 0)
 		{
 			return false;
 		}
-		// enough time to complete task
+		// enough time to complete job
 		// t2 - t1 < (l1 + l2) / v_max + d
 		if (Duration.between(t1, t2).compareTo(
 			secondsToDuration(vInv * (l1 + l2)).plus(duration)) < 0)

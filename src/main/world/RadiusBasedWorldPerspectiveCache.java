@@ -212,7 +212,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.WorldPerspectiveCache#getPerspectiveFor(tasks.Node)
+	 * @see world.WorldPerspectiveCache#getPerspectiveFor(jobs.Node)
 	 */
 	@Override
 	public WorldPerspective getPerspectiveFor(Node perceiver) {
@@ -244,7 +244,7 @@ public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 
 	/*
 	 * (non-Javadoc)
-	 * @see world.WorldPerspectiveCache#removePerceiver(tasks.Node)
+	 * @see world.WorldPerspectiveCache#removePerceiver(jobs.Node)
 	 */
 	@Override
 	public void removePerceiver(Node perceiver) {

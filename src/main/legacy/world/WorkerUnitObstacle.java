@@ -17,11 +17,11 @@
 // * the entire path the node follows. Ordinarily one section connects two
 // * locations in time which a node has to visit. The path between those
 // * locations is interchangeable. This enables to replace singular sections due
-// * to task planning.</p>
+// * to job planning.</p>
 // *
 // * <p>Another property of a {@code NodeObstacle} are evasions. Nodes
 // * might need to evade another node to avoid collisions. When a node changes
-// * one of its sections due to task planning a previous evasion might become
+// * one of its sections due to job planning a previous evasion might become
 // * obsolete. A {@code NodeObstacle} provides the functionality to register
 // * the path section of the node which was evading this one. This enables to
 // * detect any obsolete evasions for further actions.</p>

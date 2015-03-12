@@ -12,9 +12,9 @@ import util.CollectionsRequire;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 
-public final class PeriodicTaskSpecification {
+public final class PeriodicJobSpecification {
 	
-	private final ImmutableList<UUID> taskIds;
+	private final ImmutableList<UUID> jobIds;
 	
 	private final Geometry locationSpace;
 	
@@ -26,22 +26,22 @@ public final class PeriodicTaskSpecification {
 	
 	private final Duration period;
 
-	public <G extends Geometry & ImmutableGeometry> PeriodicTaskSpecification(
-		ImmutableList<UUID> taskIds,
+	public <G extends Geometry & ImmutableGeometry> PeriodicJobSpecification(
+		ImmutableList<UUID> jobIds,
 		G locationSpace,
 		boolean sameLocation,
 		Duration duration,
 		LocalDateTime startTime,
 		Duration period)
 	{
-		this.taskIds       = CollectionsRequire.requireNonNull(taskIds, "taskIds");
+		this.jobIds       = CollectionsRequire.requireNonNull(jobIds, "jobIds");
 		this.locationSpace = GeometriesRequire.requireValidSimple2DGeometry(locationSpace, "locationSpace");
 		this.sameLocation  = sameLocation;
 		this.duration      = Objects.requireNonNull(duration, "duration");
 		this.startTime     = Objects.requireNonNull(startTime, "startTime");
 		this.period        = Objects.requireNonNull(period, "period");
 		
-		if (taskIds.isEmpty())
+		if (jobIds.isEmpty())
 			throw new IllegalArgumentException("no repetitions");
 		if (duration.isNegative() || duration.isZero())
 			throw new IllegalArgumentException("illegal duration");
@@ -49,8 +49,8 @@ public final class PeriodicTaskSpecification {
 			throw new IllegalArgumentException("illegal period");
 	}
 
-	public ImmutableList<UUID> getTaskIds() {
-		return taskIds;
+	public ImmutableList<UUID> getJobIds() {
+		return jobIds;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -77,7 +77,7 @@ public final class PeriodicTaskSpecification {
 	@Override
 	public String toString() {
 		return String.format("(%s, %s, %s, %s, %s, %s)",
-			taskIds, locationSpace, sameLocation, duration, startTime, period);
+			jobIds, locationSpace, sameLocation, duration, startTime, period);
 	}
 
 }

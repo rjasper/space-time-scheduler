@@ -14,61 +14,61 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import scheduler.PeriodicTaskSpecification;
-import scheduler.Task;
-import scheduler.TaskSpecification;
+import scheduler.Job;
+import scheduler.JobSpecification;
+import scheduler.PeriodicJobSpecification;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class PeriodicTasksSatisfySpecification extends TypeSafeMatcher<Collection<Task>> {
+public class PeriodicJobsSatisfySpecification extends TypeSafeMatcher<Collection<Job>> {
 	
 	@Factory
-	public static Matcher<Collection<Task>> satisfy(PeriodicTaskSpecification spec) {
-		return new PeriodicTasksSatisfySpecification(spec);
+	public static Matcher<Collection<Job>> satisfy(PeriodicJobSpecification spec) {
+		return new PeriodicJobsSatisfySpecification(spec);
 	}
 	
-	private final PeriodicTaskSpecification spec;
+	private final PeriodicJobSpecification spec;
 
-	public PeriodicTasksSatisfySpecification(PeriodicTaskSpecification spec) {
+	public PeriodicJobsSatisfySpecification(PeriodicJobSpecification spec) {
 		this.spec = Objects.requireNonNull(spec, "spec");
 	}
 
 	@Override
 	public void describeTo(Description description) {
 		description
-			.appendText("tasks satisfying ")
+			.appendText("jobs satisfying ")
 			.appendValue(spec);
 	}
 
 	@Override
-	protected boolean matchesSafely(Collection<Task> item) {
-		// spec.getTaskIds is not expected to be ever empty
+	protected boolean matchesSafely(Collection<Job> item) {
+		// spec.getJobIds is not expected to be ever empty
 		// but rather be sure since that behavior might be changed
-		if (item.isEmpty() != spec.getTaskIds().isEmpty())
+		if (item.isEmpty() != spec.getJobIds().isEmpty())
 			return false;
 		
-		Map<UUID, Task> lookUp = item.stream()
-			.collect(toMap(Task::getId, identity()));
+		Map<UUID, Job> lookUp = item.stream()
+			.collect(toMap(Job::getId, identity()));
 		
 		LocalDateTime periodStart = spec.getStartTime();
-		for (UUID taskId : spec.getTaskIds()) {
-			Task actual = lookUp.get(taskId);
+		for (UUID jobId : spec.getJobIds()) {
+			Job actual = lookUp.get(jobId);
 			
 			if (actual == null)
 				return false;
 			
 			LocalDateTime periodFinish = periodStart.plus(spec.getPeriod());
 			
-			TaskSpecification taskSpec = new TaskSpecification(
-				taskId,
+			JobSpecification jobSpec = new JobSpecification(
+				jobId,
 				spec.getLocationSpace(),
 				periodStart,
 				periodFinish,
 				spec.getDuration());
 			
-			Matcher<Task> taskMatcher = new TaskSatisfiesSpecification(taskSpec);
+			Matcher<Job> jobMatcher = new JobSatisfiesSpecification(jobSpec);
 			
-			if (!taskMatcher.matches(actual))
+			if (!jobMatcher.matches(actual))
 				return false;
 			
 			periodStart = periodFinish;

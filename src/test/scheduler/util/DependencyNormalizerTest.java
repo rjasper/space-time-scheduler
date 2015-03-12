@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import scheduler.TaskSpecification;
+import scheduler.JobSpecification;
 import scheduler.util.DependencyNormalizer.DependencyNormalizationException;
 import util.TimeFactory;
 import util.UUIDFactory;
@@ -31,36 +31,36 @@ public class DependencyNormalizerTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 	
-	private static TaskSpecification spec(
-		String taskIdSeed,
+	private static JobSpecification spec(
+		String jobIdSeed,
 		double earliestStartTime,
 		double latestFinishTime,
 		double duration)
 	{
-		return new TaskSpecification(
-			uuid(taskIdSeed),
+		return new JobSpecification(
+			uuid(jobIdSeed),
 			immutablePoint(0, 0),
 			secondsToTime(earliestStartTime, TimeFactory.BASE_TIME),
 			secondsToTime(latestFinishTime, TimeFactory.BASE_TIME),
 			secondsToDuration(duration));
 	}
 	
-	private static Map<UUID, TaskSpecification> specMap(TaskSpecification... specs) {
+	private static Map<UUID, JobSpecification> specMap(JobSpecification... specs) {
 		return Arrays.stream(specs)
-			.collect(toMap(TaskSpecification::getTaskId, identity()));
+			.collect(toMap(JobSpecification::getJobId, identity()));
 	}
 	
 	private static void add(
 		SimpleDirectedGraph<UUID, DefaultEdge> graph,
-		String taskIdSeed,
+		String jobIdSeed,
 		String... dependencies)
 	{
-		UUID taskId = uuid(taskIdSeed);
-		graph.addVertex(taskId);
+		UUID jobId = uuid(jobIdSeed);
+		graph.addVertex(jobId);
 		
 		Arrays.stream(dependencies)
 			.map(UUIDFactory::uuid)
-			.forEach(d -> graph.addEdge(taskId, d));
+			.forEach(d -> graph.addEdge(jobId, d));
 	}
 	
 	private static SimpleDirectedGraph<UUID, DefaultEdge> graph() {
@@ -69,11 +69,11 @@ public class DependencyNormalizerTest {
 
 	@Test
 	public void testEmpty() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap();
+		Map<UUID, JobSpecification> specs = specMap();
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		
-		Map<UUID, TaskSpecification> normalized =
-			normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
+		Map<UUID, JobSpecification> normalized =
+			normalizeDependentJobSpecifications(graph, specs, LocalDateTime.MIN);
 		
 		assertThat("normalized specs were not empty",
 			normalized.isEmpty(), is(true));
@@ -81,14 +81,14 @@ public class DependencyNormalizerTest {
 
 	@Test
 	public void testSingle() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 0, 0, 1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		add(graph, "t1");
 
-		Map<UUID, TaskSpecification> normalized =
-			normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
+		Map<UUID, JobSpecification> normalized =
+			normalizeDependentJobSpecifications(graph, specs, LocalDateTime.MIN);
 		
 		assertThat("normalized specs don't include original spec",
 			normalized.get(uuid("t1")), is(specs.get(uuid("t1"))));
@@ -96,7 +96,7 @@ public class DependencyNormalizerTest {
 
 	@Test
 	public void testTwo() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 3, 8, 2),
 			spec("t2", 4, 9, 1));
 		
@@ -104,11 +104,11 @@ public class DependencyNormalizerTest {
 		add(graph, "t1");
 		add(graph, "t2", "t1");
 
-		Map<UUID, TaskSpecification> normalized =
-			normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
+		Map<UUID, JobSpecification> normalized =
+			normalizeDependentJobSpecifications(graph, specs, LocalDateTime.MIN);
 		
-		TaskSpecification ts1Norm = normalized.get(uuid("t1"));
-		TaskSpecification ts2Norm = normalized.get(uuid("t2"));
+		JobSpecification ts1Norm = normalized.get(uuid("t1"));
+		JobSpecification ts2Norm = normalized.get(uuid("t2"));
 		
 		assertThat(ts1Norm.getEarliestStartTime(), equalTo(atSecond(3)));
 		assertThat(ts1Norm.getLatestStartTime(), equalTo(atSecond(7)));
@@ -118,7 +118,7 @@ public class DependencyNormalizerTest {
 
 	@Test
 	public void testMultipleDependencies() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 3, 7, 1),
 			spec("t2", 2, 8, 4),
 			spec("t3", 6, 10, 3),
@@ -130,13 +130,13 @@ public class DependencyNormalizerTest {
 		add(graph, "t3", "t1");
 		add(graph, "t4", "t2", "t3");
 
-		Map<UUID, TaskSpecification> normalized =
-			normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
+		Map<UUID, JobSpecification> normalized =
+			normalizeDependentJobSpecifications(graph, specs, LocalDateTime.MIN);
 		
-		TaskSpecification ts1Norm = normalized.get(uuid("t1"));
-		TaskSpecification ts2Norm = normalized.get(uuid("t2"));
-		TaskSpecification ts3Norm = normalized.get(uuid("t3"));
-		TaskSpecification ts4Norm = normalized.get(uuid("t4"));
+		JobSpecification ts1Norm = normalized.get(uuid("t1"));
+		JobSpecification ts2Norm = normalized.get(uuid("t2"));
+		JobSpecification ts3Norm = normalized.get(uuid("t3"));
+		JobSpecification ts4Norm = normalized.get(uuid("t4"));
 
 		assertThat(ts1Norm.getEarliestStartTime(), equalTo(atSecond( 3)));
 		assertThat(ts1Norm.getLatestStartTime  (), equalTo(atSecond( 6)));
@@ -150,7 +150,7 @@ public class DependencyNormalizerTest {
 	
 	@Test
 	public void testImpossibleDependencies() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 3, 5, 1),
 			spec("t2", 2, 3, 1));
 		
@@ -160,19 +160,19 @@ public class DependencyNormalizerTest {
 		
 		thrown.expect(DependencyNormalizationException.class);
 
-		normalizeDependentTaskSpecifications(graph, specs, LocalDateTime.MIN);
+		normalizeDependentJobSpecifications(graph, specs, LocalDateTime.MIN);
 	}
 	
 	@Test
 	public void testSingleFrozenHorizon() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 0, 10, 1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		add(graph, "t1");
 
-		Map<UUID, TaskSpecification> normalized =
-			normalizeDependentTaskSpecifications(graph, specs, atSecond(5));
+		Map<UUID, JobSpecification> normalized =
+			normalizeDependentJobSpecifications(graph, specs, atSecond(5));
 		
 		assertThat("normalized specs violated frozen horizon",
 			normalized.get(uuid("t1")).getEarliestStartTime(), is(atSecond(5)));
@@ -180,7 +180,7 @@ public class DependencyNormalizerTest {
 
 	@Test
 	public void testImpossibleFrozenHorizon() throws DependencyNormalizationException {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 0, 5, 1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
@@ -188,7 +188,7 @@ public class DependencyNormalizerTest {
 		
 		thrown.expect(DependencyNormalizationException.class);
 	
-		normalizeDependentTaskSpecifications(graph, specs, atSecond(10));
+		normalizeDependentJobSpecifications(graph, specs, atSecond(10));
 	}
 
 }

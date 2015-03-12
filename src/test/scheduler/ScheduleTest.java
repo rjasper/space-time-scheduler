@@ -37,10 +37,10 @@ public class ScheduleTest {
 		return new Node(spec);
 	}
 
-	private static void scheduleTask(Schedule schedule, Task task) {
+	private static void scheduleJob(Schedule schedule, Job job) {
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		sa.addTask(task);
+		sa.addJob(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
@@ -52,7 +52,7 @@ public class ScheduleTest {
 	}
 	
 	@Test
-	public void testTaskLock() {
+	public void testJobLock() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
@@ -60,9 +60,9 @@ public class ScheduleTest {
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
-		sa.addTask(task);
+		sa.addJob(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
@@ -92,25 +92,25 @@ public class ScheduleTest {
 	}
 	
 	@Test
-	public void testTaskRemovalLock() {
+	public void testJobRemovalLock() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, task);
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleJob(schedule, job);
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		sa.addTaskRemoval(task);
+		sa.addJobRemoval(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
 		
-		Iterator<Task> removalsLock = schedule.getTaskRemovalLock(w).iterator();
+		Iterator<Job> removalsLock = schedule.getJobRemovalLock(w).iterator();
 		
-		assertThat(removalsLock.next(), is(task));
+		assertThat(removalsLock.next(), is(job));
 		assertThat(removalsLock.hasNext(), is(false));
 	}
 
@@ -121,10 +121,10 @@ public class ScheduleTest {
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set task
+		// set job
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, task);
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleJob(schedule, job);
 	
 		// add new trajectory
 		Trajectory traj = trajectory(
@@ -142,7 +142,7 @@ public class ScheduleTest {
 	}
 
 	@Test
-	public void testTaskLockViolation() {
+	public void testJobLockViolation() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
@@ -151,11 +151,11 @@ public class ScheduleTest {
 		ScheduleAlternative sa1 = new ScheduleAlternative();
 		ScheduleAlternative sa2 = new ScheduleAlternative();
 		
-		Task t1 = new Task(uuid("t1"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Task t2 = new Task(uuid("t2"), w.getReference(), immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
+		Job t1 = new Job(uuid("t1"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job t2 = new Job(uuid("t2"), w.getReference(), immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
 		
-		sa1.addTask(t1);
-		sa2.addTask(t2);
+		sa1.addJob(t1);
+		sa2.addJob(t2);
 		
 		sa1.seal();
 		sa2.seal();
@@ -210,7 +210,7 @@ public class ScheduleTest {
 		schedule.addAlternative(sa);
 	}
 	
-	public void testTaskLocationViolation() {
+	public void testJobLocationViolation() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
@@ -218,9 +218,9 @@ public class ScheduleTest {
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
 
-		sa.addTask(task);
+		sa.addJob(job);
 		sa.seal();
 		
 		thrown.expect(IllegalArgumentException.class);
@@ -229,7 +229,7 @@ public class ScheduleTest {
 	}
 	
 	@Test
-	public void testUpdatedTrajectoryAtTaskPositive() {
+	public void testUpdatedTrajectoryAtJobPositive() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
@@ -241,17 +241,17 @@ public class ScheduleTest {
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
 
 		sa.updateTrajectory(w, traj);
-		sa.addTask(task);
+		sa.addJob(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa); // no exception
 	}
 	
 	@Test
-	public void testUpdateTrajectoryAtTaskNegative() {
+	public void testUpdateTrajectoryAtJobNegative() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
@@ -263,10 +263,10 @@ public class ScheduleTest {
 			0, 0,
 			0, 0,
 			0, 3);
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
 
 		sa.updateTrajectory(w, traj);
-		sa.addTask(task);
+		sa.addJob(job);
 		sa.seal();
 		
 		thrown.expect(IllegalArgumentException.class);
@@ -275,46 +275,46 @@ public class ScheduleTest {
 	}
 	
 	@Test
-	public void testTaskRemoval() {
+	public void testJobRemoval() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, task);
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleJob(schedule, job);
 		
-		// remove task
+		// remove job
 
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		sa.addTaskRemoval(task);
+		sa.addJobRemoval(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
 		schedule.integrate(sa);
 		
-		assertThat(w.hasTask(task), is(false));
+		assertThat(w.hasJob(job), is(false));
 	}
 	
 	@Test
-	public void testTaskRemovalUnknown() {
+	public void testJobRemovalUnknown() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
 		
-		// remove task
+		// remove job
 
 		ScheduleAlternative sa = new ScheduleAlternative();
 		
-		sa.addTaskRemoval(task);
+		sa.addJobRemoval(job);
 		sa.seal();
 		
 		thrown.expect(IllegalArgumentException.class);
@@ -323,24 +323,24 @@ public class ScheduleTest {
 	}
 	
 	@Test
-	public void testTaskRemovalLockViolation() {
+	public void testJobRemovalLockViolation() {
 		Node w = node("w", 0, 0);
 		
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, task);
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleJob(schedule, job);
 		
-		// remove task
+		// remove job
 
 		ScheduleAlternative sa1 = new ScheduleAlternative();
 		ScheduleAlternative sa2 = new ScheduleAlternative();
 		
-		sa1.addTaskRemoval(task);
-		sa2.addTaskRemoval(task);
+		sa1.addJobRemoval(job);
+		sa2.addJobRemoval(job);
 		sa1.seal();
 		sa2.seal();
 		
@@ -357,10 +357,10 @@ public class ScheduleTest {
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task task = new Task(uuid("task"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, task);
+		Job job = new Job(uuid("job"), w.getReference(), immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		scheduleJob(schedule, job);
 		
 		// plan trajectory and removal		
 		Trajectory traj = trajectory(
@@ -370,7 +370,7 @@ public class ScheduleTest {
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		sa.updateTrajectory(w, traj);
-		sa.addTaskRemoval(task);
+		sa.addJobRemoval(job);
 		sa.seal();
 		
 		schedule.addAlternative(sa); // no exception
@@ -383,43 +383,43 @@ public class ScheduleTest {
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task taskToRemove = new Task(uuid("old task"), w.getReference(),
+		Job jobToRemove = new Job(uuid("old job"), w.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, taskToRemove);
+		scheduleJob(schedule, jobToRemove);
 		
-		// plan trajectory, task and removal
+		// plan trajectory, job and removal
 		Trajectory traj = trajectory(
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
 		
-		Task taskToSchedule = new Task(uuid("new task"), w.getReference(),
+		Job jobToSchedule = new Job(uuid("new job"), w.getReference(),
 			immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		sa.updateTrajectory(w, traj);
-		sa.addTask(taskToSchedule);
-		sa.addTaskRemoval(taskToRemove);
+		sa.addJob(jobToSchedule);
+		sa.addJobRemoval(jobToRemove);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
 		schedule.integrate(sa);
 		
-		assertThat("task not removed",
-			w.hasTask(taskToRemove), is(false));
-		assertThat("task not scheduled",
-			w.hasTask(taskToSchedule), is(true));
+		assertThat("job not removed",
+			w.hasJob(jobToRemove), is(false));
+		assertThat("job not scheduled",
+			w.hasJob(jobToSchedule), is(true));
 		
 		// removed locks
 		assertThat("trajectory lock not removed",
 			schedule.getTrajectoryLock(w)
 			.intersects(atSecond(0), atSecond(3)),
 			is(false));
-		assertThat("task removal lock not removed",
-			schedule.getTaskRemovalLock(w)
-			.contains(taskToRemove),
+		assertThat("job removal lock not removed",
+			schedule.getJobRemovalLock(w)
+			.contains(jobToRemove),
 			is(false));
 		
 		// applied changes
@@ -438,43 +438,43 @@ public class ScheduleTest {
 		Schedule schedule = new Schedule();
 		schedule.addNode(w);
 		
-		// set up task to remove
+		// set up job to remove
 		
-		Task taskToRemove = new Task(uuid("old task"), w.getReference(),
+		Job jobToRemove = new Job(uuid("old job"), w.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		scheduleTask(schedule, taskToRemove);
+		scheduleJob(schedule, jobToRemove);
 		
-		// plan trajectory, task and removal
+		// plan trajectory, job and removal
 		Trajectory traj = trajectory(
 			0, 1, 1, 0,
 			0, 1, 1, 0,
 			0, 1, 2, 3);
 		
-		Task taskToSchedule = new Task(uuid("new task"), w.getReference(),
+		Job jobToSchedule = new Job(uuid("new job"), w.getReference(),
 			immutablePoint(1, 1), atSecond(1), secondsToDuration(1));
 		
 		ScheduleAlternative sa = new ScheduleAlternative();
 		sa.updateTrajectory(w, traj);
-		sa.addTask(taskToSchedule);
-		sa.addTaskRemoval(taskToRemove);
+		sa.addJob(jobToSchedule);
+		sa.addJobRemoval(jobToRemove);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
 		schedule.eliminate(sa);
 		
-		assertThat("task removed when shouldn't have been",
-			w.hasTask(taskToRemove), is(true));
-		assertThat("task scheduled when shouldn't have been",
-			w.hasTask(taskToSchedule), is(false));
+		assertThat("job removed when shouldn't have been",
+			w.hasJob(jobToRemove), is(true));
+		assertThat("job scheduled when shouldn't have been",
+			w.hasJob(jobToSchedule), is(false));
 		
 		// removed locks
 		assertThat("trajectory lock not removed",
 			schedule.getTrajectoryLock(w)
 			.intersects(atSecond(0), atSecond(3)),
 			is(false));
-		assertThat("task removal lock not removed",
-			schedule.getTaskRemovalLock(w)
-			.contains(taskToRemove),
+		assertThat("job removal lock not removed",
+			schedule.getJobRemovalLock(w)
+			.contains(jobToRemove),
 			is(false));
 		
 		// didn't apply changes
@@ -495,14 +495,14 @@ public class ScheduleTest {
 		schedule.addNode(w1);
 		schedule.addNode(w2);
 
-		Task t1 = new Task(uuid("t1"), w1.getReference(),
+		Job t1 = new Job(uuid("t1"), w1.getReference(),
 			immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Task t2 = new Task(uuid("t2"), w2.getReference(),
+		Job t2 = new Job(uuid("t2"), w2.getReference(),
 			immutablePoint(10, 10), atSecond(1), secondsToDuration(1));
 
 		ScheduleAlternative sa = new ScheduleAlternative();
-		sa.addTask(t1);
-		sa.addTask(t2);
+		sa.addJob(t1);
+		sa.addJob(t2);
 		sa.seal();
 		
 		schedule.addAlternative(sa);
@@ -512,9 +512,9 @@ public class ScheduleTest {
 		assertThat("transaction was not removed",
 			schedule.hasAlternative(sa), is(false));
 		assertThat("t1 was not eliminated",
-			w1.hasTask(t1), is(false));
+			w1.hasJob(t1), is(false));
 		assertThat("t2 was not integrated",
-			w2.hasTask(t2), is(true));
+			w2.hasJob(t2), is(true));
 	}
 	
 }

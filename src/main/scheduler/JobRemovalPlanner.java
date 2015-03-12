@@ -23,7 +23,7 @@ import world.pathfinder.SimpleFixTimePathfinder;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Point;
 
-public class TaskRemovalPlanner {
+public class JobRemovalPlanner {
 	
 	private World world = null;
 	
@@ -35,7 +35,7 @@ public class TaskRemovalPlanner {
 	
 	private ScheduleAlternative alternative = null;
 	
-	private Task task = null;
+	private Job job = null;
 	
 	private boolean fixedEnd = true;
 	
@@ -67,8 +67,8 @@ public class TaskRemovalPlanner {
 		this.alternative = Objects.requireNonNull(alternative, "alternative");
 	}
 
-	public void setTask(Task task) {
-		this.task = Objects.requireNonNull(task, "task");
+	public void setJob(Job job) {
+		this.job = Objects.requireNonNull(job, "job");
 	}
 
 	public void setFixedEnd(boolean fixedEnd) {
@@ -81,13 +81,13 @@ public class TaskRemovalPlanner {
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizonTime");
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(task, "task");
+		Objects.requireNonNull(job, "job");
 	}
 	
 	public boolean plan() {
 		checkParameters();
 		
-		if (task.getFinishTime().isBefore(frozenHorizonTime))
+		if (job.getFinishTime().isBefore(frozenHorizonTime))
 			return false;
 		
 		init();
@@ -98,17 +98,17 @@ public class TaskRemovalPlanner {
 	}
 	
 	private void init() {
-		node = task.getNodeReference().getActual();
+		node = job.getNodeReference().getActual();
 		
-		LocalDateTime taskStartTime = task.getStartTime();
-		LocalDateTime taskFinishTime = task.getFinishTime();
-		LocalDateTime idleStartTime = node.floorIdleTimeOrNull(taskStartTime);
-		LocalDateTime idleFinishTime = node.ceilingIdleTimeOrNull(taskFinishTime);
+		LocalDateTime jobStartTime = job.getStartTime();
+		LocalDateTime jobFinishTime = job.getFinishTime();
+		LocalDateTime idleStartTime = node.floorIdleTimeOrNull(jobStartTime);
+		LocalDateTime idleFinishTime = node.ceilingIdleTimeOrNull(jobFinishTime);
 		
 		slotStartTime = max(
 			frozenHorizonTime,
-			idleStartTime == null ? taskStartTime : idleStartTime);
-		slotFinishTime = idleFinishTime == null ? taskFinishTime : idleFinishTime;
+			idleStartTime == null ? jobStartTime : idleStartTime);
+		slotFinishTime = idleFinishTime == null ? jobFinishTime : idleFinishTime;
 		
 		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
@@ -146,7 +146,7 @@ public class TaskRemovalPlanner {
 			return false;
 		
 		alternative.updateTrajectory(node, trajectory);
-		alternative.addTaskRemoval(task);
+		alternative.addJobRemoval(job);
 		
 		return true;
 	}

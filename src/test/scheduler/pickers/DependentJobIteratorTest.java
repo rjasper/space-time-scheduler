@@ -23,39 +23,39 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.junit.Test;
 
-import scheduler.TaskSpecification;
+import scheduler.JobSpecification;
 import util.TimeFactory;
 import util.UUIDFactory;
 
-public class DependentTaskIteratorTest {
+public class DependentJobIteratorTest {
 	
-	private static TaskSpecification spec(String taskIdSeed, double timeInSeconds) {
+	private static JobSpecification spec(String jobIdSeed, double timeInSeconds) {
 		LocalDateTime time = secondsToTime(timeInSeconds, TimeFactory.BASE_TIME);
 		
-		return new TaskSpecification(
-			uuid(taskIdSeed),
+		return new JobSpecification(
+			uuid(jobIdSeed),
 			immutablePoint(0, 0),
 			time,
 			time,
 			Duration.ofSeconds(1));
 	}
 	
-	private static Map<UUID, TaskSpecification> specMap(TaskSpecification... specs) {
+	private static Map<UUID, JobSpecification> specMap(JobSpecification... specs) {
 		return Arrays.stream(specs)
-			.collect(toMap(TaskSpecification::getTaskId, identity()));
+			.collect(toMap(JobSpecification::getJobId, identity()));
 	}
 	
 	private static void add(
 		SimpleDirectedGraph<UUID, DefaultEdge> graph,
-		String taskIdSeed,
+		String jobIdSeed,
 		String... dependencies)
 	{
-		UUID taskId = uuid(taskIdSeed);
-		graph.addVertex(taskId);
+		UUID jobId = uuid(jobIdSeed);
+		graph.addVertex(jobId);
 		
 		Arrays.stream(dependencies)
 			.map(UUIDFactory::uuid)
-			.forEach(d -> graph.addEdge(taskId, d));
+			.forEach(d -> graph.addEdge(jobId, d));
 	}
 	
 	private static SimpleDirectedGraph<UUID, DefaultEdge> graph() {
@@ -68,11 +68,11 @@ public class DependentTaskIteratorTest {
 			.collect(toList());
 	}
 	
-	private static List<UUID> collect(Iterator<TaskSpecification> iterator) {
+	private static List<UUID> collect(Iterator<JobSpecification> iterator) {
 		List<UUID> list = new LinkedList<>();
 		
 		while (iterator.hasNext())
-			list.add(iterator.next().getTaskId());
+			list.add(iterator.next().getJobId());
 		
 		return list;
 	}
@@ -103,30 +103,30 @@ public class DependentTaskIteratorTest {
 
 	@Test
 	public void testEmpty() {
-		Map<UUID, TaskSpecification> specs = specMap();
+		Map<UUID, JobSpecification> specs = specMap();
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		
-		DependentTaskIterator it = new DependentTaskIterator(graph, specs);
+		DependentJobIterator it = new DependentJobIterator(graph, specs);
 		
 		assertThat(collect(it), equalTo(asList()));
 	}
 
 	@Test
 	public void testSingle() {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> graph = graph();
 		add(graph, "t1");
 		
-		DependentTaskIterator it = new DependentTaskIterator(graph, specs);
+		DependentJobIterator it = new DependentJobIterator(graph, specs);
 		
 		assertThat(collect(it), equalTo(asList("t1")));
 	}
 
 	@Test
 	public void testTwo() {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 1),
 			spec("t2", 2));
 		
@@ -134,14 +134,14 @@ public class DependentTaskIteratorTest {
 		add(graph, "t1");
 		add(graph, "t2", "t1");
 		
-		DependentTaskIterator it = new DependentTaskIterator(graph, specs);
+		DependentJobIterator it = new DependentJobIterator(graph, specs);
 		
 		assertThat(collect(it), equalTo(asList("t1", "t2")));
 	}
 
 	@Test
 	public void testEarliestDeadlineFirst() {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 2),
 			spec("t2", 1));
 		
@@ -149,14 +149,14 @@ public class DependentTaskIteratorTest {
 		add(graph, "t1");
 		add(graph, "t2");
 		
-		DependentTaskIterator it = new DependentTaskIterator(graph, specs);
+		DependentJobIterator it = new DependentJobIterator(graph, specs);
 		
 		assertThat(collect(it), equalTo(asList("t2", "t1")));
 	}
 
 	@Test
 	public void testMultipleDependenciesEDF() {
-		Map<UUID, TaskSpecification> specs = specMap(
+		Map<UUID, JobSpecification> specs = specMap(
 			spec("t1", 1),
 			spec("t2", 4),
 			spec("t3", 2),
@@ -168,7 +168,7 @@ public class DependentTaskIteratorTest {
 		add(graph, "t3", "t1");
 		add(graph, "t4", "t2", "t3");
 		
-		DependentTaskIterator it = new DependentTaskIterator(graph, specs);
+		DependentJobIterator it = new DependentJobIterator(graph, specs);
 		
 		assertThat(collect(it), equalTo(asList("t1", "t3", "t2", "t4")));
 	}

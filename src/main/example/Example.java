@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 
 import jts.geom.immutable.ImmutablePoint;
 import jts.geom.immutable.ImmutablePolygon;
+import scheduler.JobSpecification;
 import scheduler.NodeReference;
 import scheduler.NodeSpecification;
 import scheduler.ScheduleResult;
 import scheduler.Scheduler;
-import scheduler.TaskSpecification;
 import world.DynamicObstacle;
 import world.SimpleTrajectory;
 import world.SpatialPath;
@@ -98,7 +98,7 @@ public final class Example {
 		LocalDateTime latestStartTime   = LocalDateTime.of(2015, 1, 1, 0, 4, 0);
 		Duration duration = Duration.ofSeconds(2L * 60L); // 2 minutes
 		// specification actual
-		TaskSpecification spec = new TaskSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
+		JobSpecification spec = new JobSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
 		
 		ScheduleResult result = scheduler.schedule(spec);
 		

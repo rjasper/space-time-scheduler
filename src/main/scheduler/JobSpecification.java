@@ -14,44 +14,44 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
- * <p>An object of this class describes the specifications of a task.</p>
+ * <p>An object of this class describes the specifications of a job.</p>
  *
- * <p>To schedule a new task it is required to pass a specification to the
- * {@link Scheduler}. It will try to find a realizable configuration of a task
+ * <p>To schedule a new job it is required to pass a specification to the
+ * {@link Scheduler}. It will try to find a realizable configuration of a job
  * which satisfies the specification.</p>
  *
- * <p>A specification describes when and where a task has to be executed.
+ * <p>A specification describes when and where a job has to be executed.
  * The locationSpace defines the area of valid locations. The earliestStartTime
- * and latestStartTime define an interval when it is possible to start a task.
- * The duration defines the exact duration of the task.</p>
+ * and latestStartTime define an interval when it is possible to start a job.
+ * The duration defines the exact duration of the job.</p>
  *
  * @author Rico Jasper
  */
-public final class TaskSpecification {
+public final class JobSpecification {
 	
-	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createSF(
-		UUID taskId,
+	public static <G extends Geometry & ImmutableGeometry> JobSpecification createSF(
+		UUID jobId,
 		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestFinishTime,
 		Duration duration)
 	{
 		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
-		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
 	
-	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createSS(
-		UUID taskId,
+	public static <G extends Geometry & ImmutableGeometry> JobSpecification createSS(
+		UUID jobId,
 		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
 	
-	public static <G extends Geometry & ImmutableGeometry> TaskSpecification createFF(
-		UUID taskId,
+	public static <G extends Geometry & ImmutableGeometry> JobSpecification createFF(
+		UUID jobId,
 		G locationSpace,
 		LocalDateTime earliestFinishTime,
 		LocalDateTime latestFinishTime,
@@ -59,13 +59,13 @@ public final class TaskSpecification {
 	{
 		LocalDateTime earliestStartTime = earliestFinishTime.minus(duration);
 		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
-		return new TaskSpecification(taskId, locationSpace, earliestStartTime, latestStartTime, duration);
+		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
 	
 	/**
-	 * The ID of the task.
+	 * The ID of the job.
 	 */
-	private final UUID taskId;
+	private final UUID jobId;
 
 	/**
 	 * The spatial space for a valid location.
@@ -89,9 +89,9 @@ public final class TaskSpecification {
 
 	/**
 	 * Constructs a new Specification defining an interval for the location and
-	 * start time and the duration of a {@link Task task}.
+	 * start time and the duration of a {@link Job job}.
 	 * 
-	 * @param taskId
+	 * @param jobId
 	 * @param locationSpace
 	 * @param earliestStartTime
 	 * @param latestStartTime
@@ -107,14 +107,14 @@ public final class TaskSpecification {
 	 *             <li>the duration is negative or zero</li>
 	 *             </ul>
 	 */
-	public <G extends Geometry & ImmutableGeometry> TaskSpecification(
-		UUID taskId,
+	public <G extends Geometry & ImmutableGeometry> JobSpecification(
+		UUID jobId,
 		G locationSpace,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestStartTime,
 		Duration duration)
 	{
-		Objects.requireNonNull(taskId, "taskId");
+		Objects.requireNonNull(jobId, "jobId");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
@@ -125,7 +125,7 @@ public final class TaskSpecification {
 		if (duration.isNegative() || duration.isZero())
 			throw new IllegalArgumentException("illegal duration");
 
-		this.taskId = taskId;
+		this.jobId = jobId;
 		this.locationSpace = locationSpace;
 		this.earliestStartTime = earliestStartTime;
 		this.latestStartTime = latestStartTime;
@@ -133,10 +133,10 @@ public final class TaskSpecification {
 	}
 
 	/**
-	 * @return the id of the task.
+	 * @return the id of the job.
 	 */
-	public UUID getTaskId() {
-		return taskId;
+	public UUID getJobId() {
+		return jobId;
 	}
 
 	/**
@@ -176,7 +176,7 @@ public final class TaskSpecification {
 	}
 
 	/**
-	 * @return the exact duration of a task.
+	 * @return the exact duration of a job.
 	 */
 	public Duration getDuration() {
 		return duration;

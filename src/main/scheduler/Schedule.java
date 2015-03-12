@@ -29,13 +29,13 @@ public class Schedule {
 	
 	private final Map<Node, NodeLocks> locks = new IdentityHashMap<>();
 	
-	private final Map<UUID, Task> tasks = new HashMap<>();
+	private final Map<UUID, Job> jobs = new HashMap<>();
 	
 	private static class NodeLocks {
 		
 		public final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
 		
-		public final Set<Task> taskRemovalLock = new HashSet<>();
+		public final Set<Job> jobRemovalLock = new HashSet<>();
 		
 	}
 	
@@ -77,31 +77,31 @@ public class Schedule {
 		if (node == null)
 			throw new IllegalArgumentException("unknown node id");
 		if (!node.isIdle())
-			throw new IllegalStateException("node still has scheduled tasks");
+			throw new IllegalStateException("node still has scheduled jobs");
 		
 		nodes.remove(nodeId);
 		locks.remove(node);
 	}
 	
-	public Task getTask(UUID taskId) {
-		Task task = tasks.get(taskId);
+	public Job getJob(UUID jobId) {
+		Job job = jobs.get(jobId);
 		
-		if (task == null)
-			throw new IllegalArgumentException("unknown task id");
+		if (job == null)
+			throw new IllegalArgumentException("unknown job id");
 		
-		return task;
+		return job;
 	}
 	
-	public void removeTask(UUID taskId) {
-		Task task = getTask(taskId);
-		Node node = task.getNodeReference().getActual();
-		Set<Task> lock = getTaskRemovalLock(node);
+	public void removeJob(UUID jobId) {
+		Job job = getJob(jobId);
+		Node node = job.getNodeReference().getActual();
+		Set<Job> lock = getJobRemovalLock(node);
 		
-		if (lock.contains(task))
-			throw new IllegalStateException("given task is locked for removal");
+		if (lock.contains(job))
+			throw new IllegalStateException("given job is locked for removal");
 		
-		node.removeTask(task);
-		tasks.remove(taskId);
+		node.removeJob(job);
+		jobs.remove(jobId);
 	}
 	
 	public IntervalSet<LocalDateTime> getTrajectoryLock(Node node) {
@@ -115,7 +115,7 @@ public class Schedule {
 		return unmodifiableIntervalSet(nodeLocks.trajectoryLock);
 	}
 	
-	public Set<Task> getTaskRemovalLock(Node node) {
+	public Set<Job> getJobRemovalLock(Node node) {
 		Objects.requireNonNull(node, "node");
 		
 		NodeLocks nodeLocks = locks.get(node);
@@ -123,7 +123,7 @@ public class Schedule {
 		if (nodeLocks == null)
 			throw new IllegalArgumentException("unknown node");
 		
-		return unmodifiableSet(nodeLocks.taskRemovalLock);
+		return unmodifiableSet(nodeLocks.jobRemovalLock);
 	}
 	
 	public Collection<ScheduleAlternative> getAlternatives() {
@@ -208,13 +208,13 @@ public class Schedule {
 			if (nodeLocks == null)
 				throw new IllegalArgumentException("unknown node");
 
-			IntervalSet<LocalDateTime> originTasksIntervals = node.getTaskIntervals();
-			IntervalSet<LocalDateTime> removalsIntervals = u.getTaskRemovalIntervals();
+			IntervalSet<LocalDateTime> originJobsIntervals = node.getJobIntervals();
+			IntervalSet<LocalDateTime> removalsIntervals = u.getJobRemovalIntervals();
 			IntervalSet<LocalDateTime> trajIntervals = u.getTrajectoryIntervals();
 			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoryLock();
 			
-			Collection<Task> tasks = u.getTasks();
-			Collection<Task> removals = u.getTaskRemovals();
+			Collection<Job> jobs = u.getJobs();
+			Collection<Job> removals = u.getJobRemovals();
 			
 			try {
 				u.checkSelfConsistency();
@@ -222,8 +222,8 @@ public class Schedule {
 				throw new IllegalArgumentException(e);
 			}
 
-			// no mutual trajectory locks with origin disregarding removed tasks
-			if (!trajLockIntervals.intersection(originTasksIntervals)
+			// no mutual trajectory locks with origin disregarding removed jobs
+			if (!trajLockIntervals.intersection(originJobsIntervals)
 				.difference(removalsIntervals).isEmpty())
 			{
 				throw new IllegalArgumentException("trajectory lock violation");
@@ -234,26 +234,26 @@ public class Schedule {
 			// continuous trajectories
 			if (!verifyTrajectoryContinuity(node, u.getTrajectories()))
 				throw new IllegalArgumentException("trajectory continuity violation");
-			// non-updated original trajectories lead to tasks
-			if (!tasks.stream().allMatch(t -> verifyTaskLocation(t, trajIntervals)))
-				throw new IllegalArgumentException("task location violation");
-			// no unknown task removals
-			if (!removals.stream().allMatch(node::hasTask))
-				throw new IllegalArgumentException("unknown task removal");
-			// no mutual task removals
-			if (removals.stream().anyMatch(nodeLocks.taskRemovalLock::contains))
-				throw new IllegalArgumentException("task removal lock violation");
+			// non-updated original trajectories lead to jobs
+			if (!jobs.stream().allMatch(t -> verifyJobLocation(t, trajIntervals)))
+				throw new IllegalArgumentException("job location violation");
+			// no unknown job removals
+			if (!removals.stream().allMatch(node::hasJob))
+				throw new IllegalArgumentException("unknown job removal");
+			// no mutual job removals
+			if (removals.stream().anyMatch(nodeLocks.jobRemovalLock::contains))
+				throw new IllegalArgumentException("job removal lock violation");
 		}
 	}
 
-	private boolean verifyTaskLocation(Task task, IntervalSet<LocalDateTime> trajectoryUpdates) {
-		Node node = task.getNodeReference().getActual();
-		Point location = task.getLocation();
-		LocalDateTime taskStart = task.getStartTime();
-		LocalDateTime taskFinish = task.getFinishTime();
+	private boolean verifyJobLocation(Job job, IntervalSet<LocalDateTime> trajectoryUpdates) {
+		Node node = job.getNodeReference().getActual();
+		Point location = job.getLocation();
+		LocalDateTime jobStart = job.getStartTime();
+		LocalDateTime jobFinish = job.getFinishTime();
 		
 		IntervalSet<LocalDateTime> originalSections = new SimpleIntervalSet<LocalDateTime>()
-			.add(taskStart, taskFinish)
+			.add(jobStart, jobFinish)
 			.remove(trajectoryUpdates);
 		
 		return originalSections.isEmpty() ||
@@ -318,13 +318,13 @@ public class Schedule {
 	private void applyChanges(NodeUpdate update) {
 		Node node = update.getNode();
 		
-		for (Task t : update.getTaskRemovals()) {
-			node.removeTask(t);
-			tasks.remove(t.getId());
+		for (Job t : update.getJobRemovals()) {
+			node.removeJob(t);
+			jobs.remove(t.getId());
 		}
-		for (Task t : update.getTasks()) {
-			node.addTask(t);
-			tasks.put(t.getId(), t);
+		for (Job t : update.getJobs()) {
+			node.addJob(t);
+			jobs.put(t.getId(), t);
 		}
 		for (Trajectory t : update.getTrajectories())
 			node.updateTrajectory(t);
@@ -339,7 +339,7 @@ public class Schedule {
 		NodeLocks nodeLocks = locks.get(update.getNode());
 		
 		nodeLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
-		nodeLocks.taskRemovalLock.addAll( update.getTaskRemovals()     );
+		nodeLocks.jobRemovalLock.addAll( update.getJobRemovals()     );
 	}
 	
 	private void releaseLocks(ScheduleAlternative alternative) {
@@ -351,7 +351,7 @@ public class Schedule {
 		NodeLocks nodeLocks = locks.get(update.getNode());
 		
 		nodeLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
-		nodeLocks.taskRemovalLock.removeAll( update.getTaskRemovals()     );
+		nodeLocks.jobRemovalLock.removeAll( update.getJobRemovals()     );
 	}
 
 }

@@ -89,9 +89,9 @@ public class Node {
 	private final LocalDateTime initialTime;
 
 	/**
-	 * All tasks which were assigned to this node.
+	 * All jobs which were assigned to this node.
 	 */
-	private TreeMap<LocalDateTime, Task> tasks = new TreeMap<>();
+	private TreeMap<LocalDateTime, Job> jobs = new TreeMap<>();
 	
 	/**
 	 * Contains all consecutive trajectories of this node
@@ -200,76 +200,76 @@ public class Node {
 	}
 	
 	/**
-	 * Determines whether the given task is currently assigned to this node.
+	 * Determines whether the given job is currently assigned to this node.
 	 * 
-	 * @param task
-	 * @return {@code true} if {@code task} is assigned.
+	 * @param job
+	 * @return {@code true} if {@code job} is assigned.
 	 */
-	public boolean hasTask(Task task) {
-		Objects.requireNonNull(task, "task");
+	public boolean hasJob(Job job) {
+		Objects.requireNonNull(job, "job");
 		
-		Task retrieval = tasks.get(task.getStartTime());
+		Job retrieval = jobs.get(job.getStartTime());
 		
-		return retrieval != null && retrieval.equals(task);
+		return retrieval != null && retrieval.equals(job);
 	}
 
 	/**
-	 * @return all tasks this unit is assigned to.
+	 * @return all jobs this unit is assigned to.
 	 */
-	public Collection<Task> getTasks() {
-		return unmodifiableCollection(tasks.values());
+	public Collection<Job> getJobs() {
+		return unmodifiableCollection(jobs.values());
 	}
 	
-	public NavigableMap<LocalDateTime, Task> getNavigableTasks() {
-		return unmodifiableNavigableMap(tasks);
+	public NavigableMap<LocalDateTime, Job> getNavigableJobs() {
+		return unmodifiableNavigableMap(jobs);
 	}
 
 	/**
-	 * Assigns a new task to this node.
+	 * Assigns a new job to this node.
 	 *
-	 * @param task
+	 * @param job
 	 * @throws NullPointerException
-	 *             if {@code task} is {@code null}.
+	 *             if {@code job} is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this node.
+	 *             if {@code job} is not assigned to this node.
 	 */
-	public void addTask(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void addJob(Job job) {
+		Objects.requireNonNull(job, "job");
 		
-		if (task.getNodeReference().getActual() != this)
-			throw new IllegalArgumentException("task not assigned to this node");
+		if (job.getNodeReference().getActual() != this)
+			throw new IllegalArgumentException("job not assigned to this node");
 	
-		tasks.put(task.getStartTime(), task);
+		jobs.put(job.getStartTime(), job);
 	}
 
 	/**
-	 * Removes a task from this node.
+	 * Removes a job from this node.
 	 * 
-	 * @param task
+	 * @param job
 	 * @throws NullPointerException
-	 *             if {@code task} is {@code null}.
+	 *             if {@code job} is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if {@code task} is not assigned to this node.
+	 *             if {@code job} is not assigned to this node.
 	 */
-	public void removeTask(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void removeJob(Job job) {
+		Objects.requireNonNull(job, "job");
 		
-		boolean status = tasks.remove(task.getStartTime(), task);
+		boolean status = jobs.remove(job.getStartTime(), job);
 		
 		if (!status)
-			throw new IllegalArgumentException("unknown task");
+			throw new IllegalArgumentException("unknown job");
 	}
 
 	/**
-	 * @return a view on the tasks as a time interval set.
+	 * @return a view on the jobs as a time interval set.
 	 */
-	public MappedIntervalSet<LocalDateTime, Task> getTaskIntervals() {
-		return new MappedIntervalSet<LocalDateTime, Task>(tasks,
+	public MappedIntervalSet<LocalDateTime, Job> getJobIntervals() {
+		return new MappedIntervalSet<LocalDateTime, Job>(jobs,
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
 	
 	public boolean isIdle() {
-		return tasks.isEmpty();
+		return jobs.isEmpty();
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class Node {
 	 * @return {@code true} if the node is idle.
 	 */
 	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
-		return !getTaskIntervals().intersects(from, to);
+		return !getJobIntervals().intersects(from, to);
 	}
 
 	public Collection<Trajectory> getTrajectories() {
@@ -314,19 +314,19 @@ public class Node {
 		// remove past trajectories
 		trajectoryContainer.deleteBefore(presentTime);
 		
-		// remove past tasks
+		// remove past jobs
 		
-		Entry<LocalDateTime, Task> lowerTaskEntry = tasks.lowerEntry(presentTime);
+		Entry<LocalDateTime, Job> lowerJobEntry = jobs.lowerEntry(presentTime);
 		
 		// determine lowest key not to be removed
-		if (lowerTaskEntry != null) {
-			Task lowerTask = lowerTaskEntry.getValue();
+		if (lowerJobEntry != null) {
+			Job lowerJob = lowerJobEntry.getValue();
 			
-			LocalDateTime lowestKey = lowerTask.getFinishTime().isAfter(presentTime)
-				? lowerTask.getStartTime()
+			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
+				? lowerJob.getStartTime()
 				: presentTime;
 				
-			tasks.headMap(lowestKey).clear();
+			jobs.headMap(lowestKey).clear();
 		}
 	}
 
@@ -356,10 +356,10 @@ public class Node {
 		if (time.isBefore(initialTime))
 			return null;
 		
-		Task lowerTask = value(tasks.lowerEntry(time));
-		LocalDateTime lowerFinish = lowerTask == null
+		Job lowerJob = value(jobs.lowerEntry(time));
+		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
-			: lowerTask.getFinishTime();
+			: lowerJob.getFinishTime();
 		
 		// lower.start < time
 		
@@ -371,8 +371,8 @@ public class Node {
 		else if (lowerFinishCmpTime == 0) {
 			// time == lower.finish
 
-			// if floorTask and ceilTask touch
-			if (tasks.containsKey(time))
+			// if floorJob and ceilJob touch
+			if (jobs.containsKey(time))
 				// lower.finish == time == ceil.start
 				return null;
 		}
@@ -387,28 +387,28 @@ public class Node {
 		if (time.isBefore(initialTime))
 			return null;
 		
-		Task lowerTask = value(tasks.lowerEntry(time));
-		LocalDateTime lowerFinish = lowerTask == null
+		Job lowerJob = value(jobs.lowerEntry(time));
+		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
-			: lowerTask.getFinishTime();
+			: lowerJob.getFinishTime();
 		
 		// lower.start < time
 		
-		// if lowerTask intersects with time
+		// if lowerJob intersects with time
 		if (lowerFinish.compareTo(time) > 0)
 			// lower.start < time < lower.finish
 			return null;
 		
 		// lower.finish <= time
 		
-		Task ceilTask = value(tasks.ceilingEntry(time));
-		LocalDateTime ceilStart = ceilTask == null
+		Job ceilJob = value(jobs.ceilingEntry(time));
+		LocalDateTime ceilStart = ceilJob == null
 			? Scheduler.END_OF_TIME
-			: ceilTask.getStartTime();
+			: ceilJob.getStartTime();
 		
 		// time <= ceil.start
 		
-		// if floorTask and ceilTask touch
+		// if floorJob and ceilJob touch
 		if (lowerFinish.isEqual(ceilStart))
 			// lower.finish == time == ceil.start
 			return null;
@@ -440,10 +440,10 @@ public class Node {
 		if (from.isEqual(to) || !to.isAfter(initialTime))
 			return emptyList();
 		
-		IntervalSet<LocalDateTime> taskIntervals = getTaskIntervals();
+		IntervalSet<LocalDateTime> jobIntervals = getJobIntervals();
 		IntervalSet<LocalDateTime> idleIntervals = new SimpleIntervalSet<LocalDateTime>()
 			.add(max(from, initialTime), to)
-			.remove(taskIntervals);
+			.remove(jobIntervals);
 		
 		return idleIntervals.stream()
 			.map(i -> {
@@ -464,8 +464,8 @@ public class Node {
 			.collect(toList());
 	}
 	
-	public Duration calcTaskDuration(LocalDateTime from, LocalDateTime to) {
-		return calcDuration( getTaskIntervals().intersection(from, to) );
+	public Duration calcJobDuration(LocalDateTime from, LocalDateTime to) {
+		return calcDuration( getJobIntervals().intersection(from, to) );
 	}
 	
 	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
@@ -493,11 +493,11 @@ public class Node {
 				.orElse(Duration.ZERO);
 		}
 
-	public double calcTaskLoad(LocalDateTime from, LocalDateTime to) {
+	public double calcJobLoad(LocalDateTime from, LocalDateTime to) {
 		Duration scopeDuration = Duration.between(from, to);
-		Duration tasksDuration = calcTaskDuration(from, to);
+		Duration jobsDuration = calcJobDuration(from, to);
 		
-		return durationToSeconds(tasksDuration) / durationToSeconds(scopeDuration);
+		return durationToSeconds(jobsDuration) / durationToSeconds(scopeDuration);
 	}
 
 	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
@@ -509,9 +509,9 @@ public class Node {
 
 	public double calcLoad(LocalDateTime from, LocalDateTime to) {
 		Duration scopeDuration = Duration.between(from, to);
-		// assumes that tasks and motions are disjoint
+		// assumes that jobs and motions are disjoint
 		Duration loadDuration =
-			calcTaskDuration(from, to).plus(
+			calcJobDuration(from, to).plus(
 			calcMotionDuration(from, to));
 
 		return durationToSeconds(loadDuration) / durationToSeconds(scopeDuration);
@@ -520,7 +520,7 @@ public class Node {
 	public double calcStationaryIdleLoad(LocalDateTime from, LocalDateTime to) {
 		Duration scopeDuration = Duration.between(from, to);
 		Duration loadDuration =
-			calcTaskDuration(from, to).plus(
+			calcJobDuration(from, to).plus(
 			calcMotionDuration(from, to));
 		
 		return durationToSeconds(scopeDuration.minus(loadDuration)) /

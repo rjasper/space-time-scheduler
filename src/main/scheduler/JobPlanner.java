@@ -29,31 +29,31 @@ import com.vividsolutions.jts.geom.Point;
 
 // TODO document
 /**
- * <p>The TaskPlanner plans a new {@link Task} into an established set of tasks.
+ * <p>The JobPlanner plans a new {@link Job} into an established set of jobs.
  * It requires multiple parameters which determine the {@link Node node}
- * to execute the new task, and the location, duration, and time interval of the
+ * to execute the new job, and the location, duration, and time interval of the
  * execution. It is also responsible for ensuring that the designated node is
- * able to reach the task's location with colliding with any other object; be it
+ * able to reach the job's location with colliding with any other object; be it
  * stationary or another node.</p>
  *
- * <p>Should it be impossible to plan the new task then the TaskPlanner will
- * not change the current task set. This might be the case when the designated
+ * <p>Should it be impossible to plan the new job then the JobPlanner will
+ * not change the current job set. This might be the case when the designated
  * node is unable to reach the location without violating any time
  * constraints.</p>
  *
  * <p>The planning involves the calculation of a spatial path from the previous
- * location of the node to the task's location and the successive path to
+ * location of the node to the job's location and the successive path to
  * the next location the node is required to be. The next step is to calculate
  * a velocity profile to evade dynamic obstacles.</p>
  *
  * @author Rico Jasper
  */
-public class TaskPlanner {
+public class JobPlanner {
 
 	/**
-	 * The id of the {@link Task task} to be planned.
+	 * The id of the {@link Job job} to be planned.
 	 */
-	private UUID taskId = null;
+	private UUID jobId = null;
 
 	/**
 	 * The current node.
@@ -61,27 +61,27 @@ public class TaskPlanner {
 	private Node node = null;
 	
 	/**
-	 * The location of the {@link Task task} to be planned.
+	 * The location of the {@link Job job} to be planned.
 	 */
 	private ImmutablePoint location = null;
 
 	/**
-	 * The earliest start time of the {@link Task task} to be planned.
+	 * The earliest start time of the {@link Job job} to be planned.
 	 */
 	private LocalDateTime earliestStartTime = null;
 
 	/**
-	 * The latest start time of the {@link Task task} to be planned.
+	 * The latest start time of the {@link Job job} to be planned.
 	 */
 	private LocalDateTime latestStartTime = null;
 
 	/**
-	 * The duration of the {@link Task task} to be planned.
+	 * The duration of the {@link Job job} to be planned.
 	 */
 	private Duration duration = null;
 	
 	/**
-	 * The used idle slot to schedule the task.
+	 * The used idle slot to schedule the job.
 	 */
 	private IdleSlot idleSlot = null;
 	
@@ -110,8 +110,8 @@ public class TaskPlanner {
 	 */
 	private boolean fixedEnd = true;
 
-	public void setTaskId(UUID taskId) {
-		this.taskId = Objects.requireNonNull(taskId, "taskId");
+	public void setJobId(UUID jobId) {
+		this.jobId = Objects.requireNonNull(jobId, "jobId");
 	}
 
 	public void setNode(Node node) {
@@ -177,7 +177,7 @@ public class TaskPlanner {
 	 * </p>
 	 * 
 	 * <ul>
-	 * <li>taskId</li>
+	 * <li>jobId</li>
 	 * <li>node</li>
 	 * <li>location</li>
 	 * <li>earliestStartTime</li>
@@ -194,7 +194,7 @@ public class TaskPlanner {
 	 */
 	private void checkParameters() {
 		// assert all parameters set
-		if (taskId              == null ||
+		if (jobId              == null ||
 			node              == null ||
 			location            == null ||
 			earliestStartTime   == null ||
@@ -222,16 +222,16 @@ public class TaskPlanner {
 
 	
 	/**
-	 * <p>Plans new path sections of the current node to the new task and
+	 * <p>Plans new path sections of the current node to the new job and
 	 * the following one. The old section is replaced by the new ones.</p>
 	 *
-	 * @return {@code true} if the task has been successfully planned.
+	 * @return {@code true} if the job has been successfully planned.
 	 */
 	public boolean plan() {
 		checkParameters();
 		
 		// check timing constraints
-		// ensures possibility to start and finish task within slot
+		// ensures possibility to start and finish job within slot
 		LocalDateTime earliestStartTime = earliestStartTime();
 		LocalDateTime latestStartTime   = latestStartTime();
 		LocalDateTime latestFinishTime  = latestStartTime().plus(duration);
@@ -271,38 +271,38 @@ public class TaskPlanner {
 	}
 
 	private boolean planImpl() {
-		// calculate trajectory to task
+		// calculate trajectory to job
 			
-		Trajectory trajToTask = calculateTrajectoryToTask();
-		if (trajToTask.isEmpty())
+		Trajectory trajToJob = calculateTrajectoryToJob();
+		if (trajToJob.isEmpty())
 			return false;
 		
-		// make task
+		// make job
 		
-		LocalDateTime taskStartTime = trajToTask.getFinishTime();
-		Task task = new Task(taskId, node.getReference(), location, taskStartTime, duration);
-		LocalDateTime taskFinishTime = task.getFinishTime();
+		LocalDateTime jobStartTime = trajToJob.getFinishTime();
+		Job job = new Job(jobId, node.getReference(), location, jobStartTime, duration);
+		LocalDateTime jobFinishTime = job.getFinishTime();
 		
-		// calculate trajectory from task
+		// calculate trajectory from job
 		
-		Trajectory trajFromTask = fixedEnd
-			? calculateTrajectoryFromTask(taskFinishTime)
-			: calculateStationaryTrajectory(location, taskFinishTime, idleSlot.getFinishTime());
+		Trajectory trajFromJob = fixedEnd
+			? calculateTrajectoryFromJob(jobFinishTime)
+			: calculateStationaryTrajectory(location, jobFinishTime, idleSlot.getFinishTime());
 
-		if (trajFromTask.isEmpty())
+		if (trajFromJob.isEmpty())
 			return false;
 		
-		Trajectory trajAtTask = makeTrajectoryAtTask(task);
+		Trajectory trajAtJob = makeTrajectoryAtJob(job);
 		
 		// apply changes to scheduleAlternative
 		
-		if (!trajToTask.duration().isZero())
-			alternative.updateTrajectory(node, trajToTask);
-		alternative.updateTrajectory(node, trajAtTask);
-		if (!trajFromTask.duration().isZero())
-			alternative.updateTrajectory(node, trajFromTask);
+		if (!trajToJob.duration().isZero())
+			alternative.updateTrajectory(node, trajToJob);
+		alternative.updateTrajectory(node, trajAtJob);
+		if (!trajFromJob.duration().isZero())
+			alternative.updateTrajectory(node, trajFromJob);
 		
-		alternative.addTask(task);
+		alternative.addJob(job);
 		
 		return true;
 	}
@@ -325,7 +325,7 @@ public class TaskPlanner {
 		return pf.getResultSpatialPath();
 	}
 
-	private Trajectory calculateTrajectoryToTask() {
+	private Trajectory calculateTrajectoryToJob() {
 		SpatialPath path = calculateSpatialPath(idleSlot.getStartLocation(), location);
 		
 		AbstractMinimumTimePathfinder pf = new SimpleMinimumTimePathfinder();
@@ -347,7 +347,7 @@ public class TaskPlanner {
 		return pf.getResultTrajectory();
 	}
 
-	private Trajectory calculateTrajectoryFromTask(LocalDateTime startTime) {
+	private Trajectory calculateTrajectoryFromJob(LocalDateTime startTime) {
 		SpatialPath path = calculateSpatialPath(location, idleSlot.getFinishLocation());
 		
 		AbstractFixTimePathfinder pf = new SimpleFixTimePathfinder();
@@ -387,10 +387,10 @@ public class TaskPlanner {
 			return trajectory;
 	}
 
-	private Trajectory makeTrajectoryAtTask(Task task) {
+	private Trajectory makeTrajectoryAtJob(Job job) {
 		return new SimpleTrajectory(
 			new SpatialPath(ImmutableList.of(location, location)),
-			ImmutableList.of(task.getStartTime(), task.getFinishTime()));
+			ImmutableList.of(job.getStartTime(), job.getFinishTime()));
 	}
 	
 //	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {

@@ -24,7 +24,7 @@ public class ScheduleAlternative {
 	private Map<Node, NodeUpdate> updates =
 		new IdentityHashMap<>();
 	
-	private Map<UUID, Task> tasks = new HashMap<>();
+	private Map<UUID, Job> jobs = new HashMap<>();
 	
 	public ScheduleAlternative() {
 		this.parent = null;
@@ -37,7 +37,7 @@ public class ScheduleAlternative {
 			.map(NodeUpdate::clone)
 			.forEach(u -> this.updates.put(u.getNode(), u));
 		
-		this.tasks.putAll(parent.tasks);
+		this.jobs.putAll(parent.jobs);
 	}
 	
 	public boolean isRootBranch() {
@@ -94,8 +94,8 @@ public class ScheduleAlternative {
 		if (update == null)
 			throw new IllegalArgumentException("unknown node");
 		
-		for (Task t : update.getTasks())
-			tasks.remove(t.getId());
+		for (Job t : update.getJobs())
+			jobs.remove(t.getId());
 		
 		return update;
 	}
@@ -130,36 +130,36 @@ public class ScheduleAlternative {
 			: emptyList();
 	}
 	
-	public boolean hasTask(UUID taskId) {
-		return tasks.containsKey(taskId);
+	public boolean hasJob(UUID jobId) {
+		return jobs.containsKey(jobId);
 	}
 	
-	public Task getTask(UUID taskId) {
+	public Job getJob(UUID jobId) {
 		if (isInvalid())
 			throw new IllegalStateException("alternative is invalid");
 		
-		return tasks.get(taskId);
+		return jobs.get(jobId);
 	}
 
-	public void addTask(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void addJob(Job job) {
+		Objects.requireNonNull(job, "job");
 
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		tasks.put(task.getId(), task);
-		getUpdate(task.getNodeReference().getActual())
-			.addTask(task);
+		jobs.put(job.getId(), job);
+		getUpdate(job.getNodeReference().getActual())
+			.addJob(job);
 	}
 	
-	public void addTaskRemoval(Task task) {
-		Objects.requireNonNull(task, "task");
+	public void addJobRemoval(Job job) {
+		Objects.requireNonNull(job, "job");
 
 		if (!isModifiable())
 			throw new IllegalStateException("alternative is unmodifiable");
 		
-		getUpdate(task.getNodeReference().getActual())
-			.addTaskRemoval(task);
+		getUpdate(job.getNodeReference().getActual())
+			.addJobRemoval(job);
 	}
 	
 	public ScheduleAlternative branch() {
@@ -189,7 +189,7 @@ public class ScheduleAlternative {
 			throw new IllegalStateException("cannot merge while there are multiple branches");
 		
 		updates = branch.updates;
-		tasks = branch.tasks;
+		jobs = branch.jobs;
 		
 		--branches;
 	}
@@ -204,7 +204,7 @@ public class ScheduleAlternative {
 
 		invalid = true;
 		updates = null;
-		tasks = null;
+		jobs = null;
 		
 		return parent;
 	}

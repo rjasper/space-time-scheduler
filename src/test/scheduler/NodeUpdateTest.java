@@ -95,13 +95,13 @@ public class NodeUpdateTest {
 	}
 	
 	@Test
-	public void testAddTask() {
+	public void testAddJob() {
 		NodeUpdate update = nodeUpdate();
 		NodeReference ref = update.getNode().getReference();
 		
-		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
-		update.addTask(task);
+		update.addJob(job);
 		update.seal();
 		
 		SimpleIntervalSet<LocalDateTime> expected = new SimpleIntervalSet<>();
@@ -112,55 +112,55 @@ public class NodeUpdateTest {
 	}
 	
 	@Test
-	public void testAddTaskInvalidNode() {
+	public void testAddJobInvalidNode() {
 		NodeUpdate update = nodeUpdate();
 		NodeReference other = nodeUpdate().getNode().getReference();
 		
-		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
 		thrown.expect(IllegalArgumentException.class);
 		
-		update.addTask(task);
+		update.addJob(job);
 	}
 
 	@Test
-	public void testAddTaskPredate() {
+	public void testAddJobPredate() {
 		NodeUpdate update = nodeUpdate();
 		NodeReference ref = update.getNode().getReference();
 		
-		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(1));
+		Job job = new Job(uuid("job"), ref, immutablePoint(0, 0), atSecond(-1), secondsToDuration(1));
 		
 		thrown.expect(IllegalArgumentException.class);
 		
-		update.addTask(task);
+		update.addJob(job);
 	}
 	
 	@Test
-	public void testAddTaskRemoval() {
+	public void testAddJobRemoval() {
 		NodeUpdate update = nodeUpdate();
 		NodeReference ref = update.getNode().getReference();
 		
-		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
-		update.addTaskRemoval(task);
+		update.addJobRemoval(job);
 		update.seal();
 		
-		Iterator<Task> it = update.getTaskRemovals().iterator();
+		Iterator<Job> it = update.getJobRemovals().iterator();
 		
-		assertThat(it.next(), equalTo(task));
+		assertThat(it.next(), equalTo(job));
 		assertThat(it.hasNext(), is(false));
 	}
 	
 	@Test
-	public void testAddTaskRemovalInvalidNode() {
+	public void testAddJobRemovalInvalidNode() {
 		NodeUpdate update = nodeUpdate();
 		NodeReference other = nodeUpdate().getNode().getReference();
 		
-		Task task = new Task(uuid("task"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), other, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
 		thrown.expect(IllegalArgumentException.class);
 		
-		update.addTaskRemoval(task);
+		update.addJobRemoval(job);
 	}
 	
 	@Test
@@ -174,14 +174,14 @@ public class NodeUpdateTest {
 			spatialPath(0, 0, 0, 1, 1, 1, 1, 0),
 			arcTimePath(0, 0, 1, 1, 1, 2, 2, 3, 2, 4, 3, 5, 3, 6));
 		
-		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
-		Task t2 = new Task(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
-		Task t3 = new Task(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
+		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
+		Job t2 = new Job(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
+		Job t3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
 		
 		update.updateTrajectory(traj);
-		update.addTask(t1);
-		update.addTask(t2);
-		update.addTask(t3);
+		update.addJob(t1);
+		update.addJob(t2);
+		update.addJob(t3);
 		
 		update.checkSelfConsistency(); // expect no exception
 	}
@@ -197,15 +197,15 @@ public class NodeUpdateTest {
 			spatialPath(0, 0, 0, 1, 1, 1, 1, 2),
 			arcTimePath(0, 0, 1, 1, 1, 2, 2, 3, 2, 4, 3, 5, 3, 6));
 		
-		Task t1 = new Task(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
-		Task t2 = new Task(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
+		Job t1 = new Job(uuid("t1"), ref, immutablePoint(0, 1), atSecond(1), secondsToDuration(1));
+		Job t2 = new Job(uuid("t2"), ref, immutablePoint(1, 1), atSecond(3), secondsToDuration(1));
 		// t3 location violated
-		Task t3 = new Task(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
+		Job t3 = new Job(uuid("t3"), ref, immutablePoint(1, 0), atSecond(5), secondsToDuration(1));
 		
 		update.updateTrajectory(traj);
-		update.addTask(t1);
-		update.addTask(t2);
-		update.addTask(t3);
+		update.addJob(t1);
+		update.addJob(t2);
+		update.addJob(t3);
 		
 		thrown.expect(IllegalStateException.class);
 		
@@ -238,12 +238,12 @@ public class NodeUpdateTest {
 		NodeReference ref = node.getReference();
 
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
-		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Task removal = new Task(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job removal = new Job(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
 		origin.updateTrajectory(traj);
-		origin.addTask(task);
-		origin.addTaskRemoval(removal);
+		origin.addJob(job);
+		origin.addJobRemoval(removal);
 		
 		NodeUpdate clone = origin.clone();
 		
@@ -251,16 +251,16 @@ public class NodeUpdateTest {
 		
 		assertThat("different trajectories",
 			toList(clone.getTrajectories()), equalTo(singletonList(traj)));
-		assertThat("different tasks",
-			clone.getTasks(), equalTo(singleton(task)));
+		assertThat("different jobs",
+			clone.getJobs(), equalTo(singleton(job)));
 		assertThat("different removals",
-			clone.getTaskRemovals(), equalTo(singleton(removal)));
+			clone.getJobRemovals(), equalTo(singleton(removal)));
 		assertThat("different trajectory lock",
 			clone.getTrajectoryLock(), equalTo(interval(0, 2)));
-		assertThat("different task lock",
-			clone.getTaskLock(), equalTo(interval(1, 2)));
+		assertThat("different job lock",
+			clone.getJobLock(), equalTo(interval(1, 2)));
 		assertThat("different removal intervals",
-			clone.getTaskRemovalIntervals(), equalTo(interval(0, 1)));
+			clone.getJobRemovalIntervals(), equalTo(interval(0, 1)));
 	}
 	
 	@Test
@@ -272,41 +272,41 @@ public class NodeUpdateTest {
 		NodeUpdate clone = origin.clone();
 
 		Trajectory traj = trajectory(0, 0, 0, 0, 0, 1);
-		Task task = new Task(uuid("task"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
-		Task removal = new Task(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+		Job job = new Job(uuid("job"), ref, immutablePoint(0, 0), atSecond(1), secondsToDuration(1));
+		Job removal = new Job(uuid("removal"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
 		
 		clone.updateTrajectory(traj);
-		clone.addTask(task);
-		clone.addTaskRemoval(removal);
+		clone.addJob(job);
+		clone.addJobRemoval(removal);
 		
 		origin.seal();
 		clone.seal();
 		
 		assertThat("different trajectories",
 			toList(origin.getTrajectories()).isEmpty(), is(true));
-		assertThat("different tasks",
-			origin.getTasks().isEmpty(), is(true));
+		assertThat("different jobs",
+			origin.getJobs().isEmpty(), is(true));
 		assertThat("different removals",
-			origin.getTaskRemovals().isEmpty(), is(true));
+			origin.getJobRemovals().isEmpty(), is(true));
 		assertThat("different trajectory lock",
 			origin.getTrajectoryLock().isEmpty(), is(true));
-		assertThat("different task lock",
-			origin.getTaskLock().isEmpty(), is(true));
+		assertThat("different job lock",
+			origin.getJobLock().isEmpty(), is(true));
 		assertThat("different removal intervals",
-			origin.getTaskRemovalIntervals().isEmpty(), is(true));
+			origin.getJobRemovalIntervals().isEmpty(), is(true));
 		
 		assertThat("different trajectories",
 			toList(clone.getTrajectories()), equalTo(singletonList(traj)));
-		assertThat("different tasks",
-			clone.getTasks(), equalTo(singleton(task)));
+		assertThat("different jobs",
+			clone.getJobs(), equalTo(singleton(job)));
 		assertThat("different removals",
-			clone.getTaskRemovals(), equalTo(singleton(removal)));
+			clone.getJobRemovals(), equalTo(singleton(removal)));
 		assertThat("different trajectory lock",
 			clone.getTrajectoryLock(), equalTo(interval(0, 2)));
-		assertThat("different task lock",
-			clone.getTaskLock(), equalTo(interval(1, 2)));
+		assertThat("different job lock",
+			clone.getJobLock(), equalTo(interval(1, 2)));
 		assertThat("different removal intervals",
-			clone.getTaskRemovalIntervals(), equalTo(interval(0, 1)));
+			clone.getJobRemovalIntervals(), equalTo(interval(0, 1)));
 	}
 
 }

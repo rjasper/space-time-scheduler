@@ -16,9 +16,9 @@ public class ScheduleResult {
 	
 	private final UUID transactionId;
 	
-	private final Map<UUID, Task> tasks;
+	private final Map<UUID, Job> jobs;
 	
-	private final Map<UUID, Task> taskRemovals;
+	private final Map<UUID, Job> jobRemovals;
 	
 	private final Collection<TrajectoryUpdate> trajectories;
 	
@@ -67,27 +67,27 @@ public class ScheduleResult {
 	
 	public static ScheduleResult success(
 		UUID transactionId,
-		Map<UUID, Task> tasks,
-		Map<UUID, Task> removals,
+		Map<UUID, Job> jobs,
+		Map<UUID, Job> removals,
 		Collection<TrajectoryUpdate> trajectories)
 	{
 		Objects.requireNonNull(transactionId, "transactionId");
-		Objects.requireNonNull(tasks, "tasks");
+		Objects.requireNonNull(jobs, "jobs");
 		Objects.requireNonNull(removals, "removals");
 		CollectionsRequire.requireNonNull(trajectories, "trajectories");
 		
-		return new ScheduleResult(transactionId, tasks, removals, trajectories);
+		return new ScheduleResult(transactionId, jobs, removals, trajectories);
 	}
 
 	private ScheduleResult(
 		UUID transactionId,
-		Map<UUID, Task> tasks,
-		Map<UUID, Task> removals,
+		Map<UUID, Job> jobs,
+		Map<UUID, Job> removals,
 		Collection<TrajectoryUpdate> trajectories)
 	{
 		this.transactionId = transactionId;
-		this.tasks         = tasks;
-		this.taskRemovals  = removals;
+		this.jobs         = jobs;
+		this.jobRemovals  = removals;
 		this.trajectories  = trajectories;
 	}
 
@@ -113,20 +113,20 @@ public class ScheduleResult {
 	}
 
 	/**
-	 * @return the scheduled tasks.
+	 * @return the scheduled jobs.
 	 */
-	public Map<UUID, Task> getTasks() {
+	public Map<UUID, Job> getJobs() {
 		if (isError())
 			throw new IllegalStateException("is error");
 		
-		return tasks;
+		return jobs;
 	}
 
-	public Map<UUID, Task> getTaskRemovals() {
+	public Map<UUID, Job> getJobRemovals() {
 		if (isError())
 			throw new IllegalStateException("is error");
 		
-		return taskRemovals;
+		return jobRemovals;
 	}
 
 	/**
@@ -146,8 +146,8 @@ public class ScheduleResult {
 	@Override
 	public String toString() {
 		if (isSuccess())
-			return String.format("success(trajectories=%s, tasks=%s, removales=%s)",
-				trajectories, tasks, taskRemovals);
+			return String.format("success(trajectories=%s, jobs=%s, removales=%s)",
+				trajectories, jobs, jobRemovals);
 		else
 			return "error";
 	}

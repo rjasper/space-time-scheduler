@@ -9,15 +9,15 @@ import jts.geom.util.GeometriesRequire;
 
 /**
  * <p>The IdleSlot class represents the idle time of a {@link Node} while
- * not being occupied by a task. This also includes the time to drive from
- * one task to the next task.</p>
+ * not being occupied by a job. This also includes the time to drive from
+ * one job to the next job.</p>
  *
  * <p>An object of this class stores a quadruple containing the start and end time
  * of this IdleSlot and the locations of the node at those times. The time
  * interval should always be as large as possible, i.e., the node was
  * occupied right before the idle slot started and is occupied again immediately
  * after the slot ended. The two exceptions to this are the times before the
- * initialization of the node and the end of all time after which no task
+ * initialization of the node and the end of all time after which no job
  * can be scheduled.</p>
  *
  * @author Rico Jasper

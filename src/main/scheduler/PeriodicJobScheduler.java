@@ -15,7 +15,7 @@ import world.WorldPerspectiveCache;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-public class PeriodicTaskScheduler {
+public class PeriodicJobScheduler {
 	
 	private World world = null;
 	
@@ -27,7 +27,7 @@ public class PeriodicTaskScheduler {
 	
 	private ScheduleAlternative alternative = null;
 	
-	private PeriodicTaskSpecification periodicSpec = null;
+	private PeriodicJobSpecification periodicSpec = null;
 	
 	private int maxLocationPicks = 0;
 	
@@ -51,7 +51,7 @@ public class PeriodicTaskScheduler {
 		this.alternative = Objects.requireNonNull(alternative, "alternative");
 	}
 
-	public void setSpecification(PeriodicTaskSpecification periodicSpec) {
+	public void setSpecification(PeriodicJobSpecification periodicSpec) {
 		this.periodicSpec = Objects.requireNonNull(periodicSpec, "periodicSpec");
 	}
 
@@ -68,7 +68,7 @@ public class PeriodicTaskScheduler {
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizonTime");
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
-		Objects.requireNonNull(periodicSpec, "taskSpec");
+		Objects.requireNonNull(periodicSpec, "jobSpec");
 		
 		if (maxLocationPicks <= 0)
 			throw new IllegalStateException("maxLocationPicks undefined");
@@ -81,7 +81,7 @@ public class PeriodicTaskScheduler {
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
 		
-		// short cut if first task cannot be scheduled due to frozen horizon
+		// short cut if first job cannot be scheduled due to frozen horizon
 		// startTime + period < frozenHorizonTime + duration
 		if (startTime.plus(period) .isBefore( frozenHorizonTime.plus(duration) ))
 			return false;
@@ -93,13 +93,13 @@ public class PeriodicTaskScheduler {
 	}
 	
 	private boolean scheduleSameLocation() {
-		Collection<UUID> taskIds = periodicSpec.getTaskIds();
+		Collection<UUID> jobIds = periodicSpec.getJobIds();
 		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
 		
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+		SingularJobScheduler sc = new SingularJobScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -116,12 +116,12 @@ public class PeriodicTaskScheduler {
 
 			LocalDateTime periodStart = startTime;
 			boolean noBreak = true;
-			for (UUID taskId : taskIds) {
+			for (UUID jobId : jobIds) {
 				LocalDateTime periodFinish = periodStart.plus(period);
-				TaskSpecification taskSpec = new TaskSpecification(
-					taskId, immutable(location), periodStart, periodFinish, duration);
+				JobSpecification jobSpec = new JobSpecification(
+					jobId, immutable(location), periodStart, periodFinish, duration);
 				
-				sc.setSpecification(taskSpec);
+				sc.setSpecification(jobSpec);
 				
 				boolean status = sc.schedule();
 				
@@ -133,7 +133,7 @@ public class PeriodicTaskScheduler {
 				periodStart = periodFinish;
 			}
 			
-			// indicates successful scheduling of all tasks
+			// indicates successful scheduling of all jobs
 			if (noBreak) {
 				branch.merge();
 				return true;
@@ -146,13 +146,13 @@ public class PeriodicTaskScheduler {
 	}
 	
 	private boolean scheduleIndependentLocation() {
-		Collection<UUID> taskIds = periodicSpec.getTaskIds();
+		Collection<UUID> jobIds = periodicSpec.getJobIds();
 		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
 		
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+		SingularJobScheduler sc = new SingularJobScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -163,12 +163,12 @@ public class PeriodicTaskScheduler {
 
 		LocalDateTime periodStart = startTime;
 		boolean noBreak = true;
-		for (UUID taskId : taskIds) {
+		for (UUID jobId : jobIds) {
 			LocalDateTime periodFinish = periodStart.plus(period);
-			TaskSpecification taskSpec = new TaskSpecification(
-				taskId, immutable(locationSpace), periodStart, periodFinish, duration);
+			JobSpecification jobSpec = new JobSpecification(
+				jobId, immutable(locationSpace), periodStart, periodFinish, duration);
 			
-			sc.setSpecification(taskSpec);
+			sc.setSpecification(jobSpec);
 			
 			boolean status = sc.schedule();
 			
@@ -182,7 +182,7 @@ public class PeriodicTaskScheduler {
 		
 		// TODO alternative might be polluted
 
-		// indicates successful scheduling of all tasks
+		// indicates successful scheduling of all jobs
 		return noBreak;
 	}
 

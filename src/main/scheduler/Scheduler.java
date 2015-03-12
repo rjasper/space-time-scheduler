@@ -26,11 +26,11 @@ import world.pathfinder.StraightEdgePathfinder;
 
 // TODO document
 /**
- * <p>The Scheduler manages the distribution of task to a set of
- * {@link Node}s. A new task can be scheduled by providing a
- * {@link TaskSpecification}. The {@link #schedule(TaskSpecification)} method tries
+ * <p>The Scheduler manages the distribution of job to a set of
+ * {@link Node}s. A new job can be scheduled by providing a
+ * {@link JobSpecification}. The {@link #schedule(JobSpecification)} method tries
  * to find a realizable configuration which satisfies the specification. In
- * the successful case a task will be created and assigned to an appropriate
+ * the successful case a job will be created and assigned to an appropriate
  * node.</p>
  *
  * @author Rico Jasper
@@ -144,12 +144,12 @@ public class Scheduler {
 		perspectiveCache.removePerceiver(node);
 	}
 	
-	public Task getTask(UUID taskId) {
-		return schedule.getTask(taskId);
+	public Job getJob(UUID jobId) {
+		return schedule.getJob(jobId);
 	}
 	
-	public void removeTask(UUID taskId) {
-		schedule.removeTask(taskId);
+	public void removeJob(UUID jobId) {
+		schedule.removeJob(jobId);
 	}
 
 	/**
@@ -240,21 +240,21 @@ public class Scheduler {
 	private static final int MAX_LOCATION_PICKS = 10;
 
 	/**
-	 * Tries to schedule a new task satisfying the given specification.
+	 * Tries to schedule a new job satisfying the given specification.
 	 *
 	 * @param spec
-	 * @return {@code true} iff a task was scheduled. {@code false} iff no task
+	 * @return {@code true} iff a job was scheduled. {@code false} iff no job
 	 *         could be scheduled satisfying the specification.
 	 */
-	public ScheduleResult schedule(TaskSpecification spec) {
+	public ScheduleResult schedule(JobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		boolean status = scheduleImpl(spec, alternative);
 
 		return status ? success(alternative) : error();
 	}
 	
-	private boolean scheduleImpl(TaskSpecification spec, ScheduleAlternative alternative) {
-		SingularTaskScheduler sc = new SingularTaskScheduler();
+	private boolean scheduleImpl(JobSpecification spec, ScheduleAlternative alternative) {
+		SingularJobScheduler sc = new SingularJobScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -268,7 +268,7 @@ public class Scheduler {
 	}
 	
 	public ScheduleResult schedule(
-		Collection<TaskSpecification> specs,
+		Collection<JobSpecification> specs,
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies)
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
@@ -279,11 +279,11 @@ public class Scheduler {
 	}
 	
 	private boolean scheduleImpl(
-		Collection<TaskSpecification> specs,
+		Collection<JobSpecification> specs,
 		SimpleDirectedGraph<UUID, DefaultEdge> dependencies,
 		ScheduleAlternative alternative)
 	{
-		DependentTaskScheduler sc = new DependentTaskScheduler();
+		DependentJobScheduler sc = new DependentJobScheduler();
 		
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -298,7 +298,7 @@ public class Scheduler {
 		return sc.schedule();
 	}
 
-	public ScheduleResult schedule(PeriodicTaskSpecification spec) {
+	public ScheduleResult schedule(PeriodicJobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
 		boolean status = scheduleImpl(spec, alternative);
@@ -306,8 +306,8 @@ public class Scheduler {
 		return status ? success(alternative) : error();
 	}
 	
-	private boolean scheduleImpl(PeriodicTaskSpecification spec, ScheduleAlternative alternative) {
-		PeriodicTaskScheduler sc = new PeriodicTaskScheduler();
+	private boolean scheduleImpl(PeriodicJobSpecification spec, ScheduleAlternative alternative) {
+		PeriodicJobScheduler sc = new PeriodicJobScheduler();
 
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
@@ -320,37 +320,37 @@ public class Scheduler {
 		return sc.schedule();
 	}
 	
-	public ScheduleResult unschedule(UUID taskId) {
-		Task task = schedule.getTask(taskId);
+	public ScheduleResult unschedule(UUID jobId) {
+		Job job = schedule.getJob(jobId);
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
-		boolean status = unscheduleImpl(task, alternative);
+		boolean status = unscheduleImpl(job, alternative);
 		
 		return status ? success(alternative) : error();
 	}
 	
-	private boolean unscheduleImpl(Task task, ScheduleAlternative alternative) {
-		Node node = task.getNodeReference().getActual();
+	private boolean unscheduleImpl(Job job, ScheduleAlternative alternative) {
+		Node node = job.getNodeReference().getActual();
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		
 		// there should be at least one entry
-		Task lastTask = node.getNavigableTasks().lastEntry().getValue();
-		boolean fixedEnd = lastTask != task;
+		Job lastJob = node.getNavigableJobs().lastEntry().getValue();
+		boolean fixedEnd = lastJob != job;
 		
-		TaskRemovalPlanner pl = new TaskRemovalPlanner();
+		JobRemovalPlanner pl = new JobRemovalPlanner();
 		
 		pl.setWorld(world);
 		pl.setWorldPerspective(perspective);
 		pl.setFrozenHorizonTime(frozenHorizonTime);
 		pl.setSchedule(schedule);
 		pl.setAlternative(alternative);
-		pl.setTask(task);
+		pl.setJob(job);
 		pl.setFixedEnd(fixedEnd);
 
 		return pl.plan();
 	}
 	
-	public ScheduleResult reschedule(TaskSpecification spec) {
+	public ScheduleResult reschedule(JobSpecification spec) {
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
 		boolean status = rescheduleImpl(spec, alternative);
@@ -358,12 +358,12 @@ public class Scheduler {
 		return status ? success(alternative) : error();
 	}
 	
-	private boolean rescheduleImpl(TaskSpecification spec, ScheduleAlternative alternative) {
-		Task task = getTask(spec.getTaskId());
+	private boolean rescheduleImpl(JobSpecification spec, ScheduleAlternative alternative) {
+		Job job = getJob(spec.getJobId());
 		
 		boolean status;
 		
-		status = unscheduleImpl(task, alternative);
+		status = unscheduleImpl(job, alternative);
 		
 		if (!status)
 			return false;
@@ -442,15 +442,15 @@ public class Scheduler {
 		do transactionId = randomUUID();
 		while (transactions.containsKey(transactionId)); // just to be sure of uniqueness
 		
-		Map<UUID, Task> tasks = updates.stream()
-			.map(NodeUpdate::getTasks)
+		Map<UUID, Job> jobs = updates.stream()
+			.map(NodeUpdate::getJobs)
 			.flatMap(Collection::stream)
-			.collect(toMap(Task::getId, identity()));
+			.collect(toMap(Job::getId, identity()));
 
-		Map<UUID, Task> removals = updates.stream()
-			.map(NodeUpdate::getTaskRemovals)
+		Map<UUID, Job> removals = updates.stream()
+			.map(NodeUpdate::getJobRemovals)
 			.flatMap(Collection::stream)
-			.collect(toMap(Task::getId, identity()));
+			.collect(toMap(Job::getId, identity()));
 		
 		Collection<TrajectoryUpdate> trajectories = updates.stream()
 			.flatMap(u -> {
@@ -470,7 +470,7 @@ public class Scheduler {
 		
 		// make result
 		ScheduleResult result = ScheduleResult.success(
-			transactionId, tasks, removals, trajectories);
+			transactionId, jobs, removals, trajectories);
 		
 		// store alternative and transaction
 		schedule.addAlternative(alternative);

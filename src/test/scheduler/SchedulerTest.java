@@ -3,7 +3,7 @@ package scheduler;
 import static java.util.Collections.*;
 import static jts.geom.immutable.StaticGeometryBuilder.*;
 import static matchers.CollisionMatchers.*;
-import static matchers.TaskMatchers.*;
+import static matchers.JobMatchers.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static util.TimeConv.*;
@@ -52,23 +52,23 @@ public class SchedulerTest {
 			nodeId, NODE_SHAPE, NODE_SPEED, immutablePoint(x, y), atSecond(0));
 	}
 	
-	private static TaskSpecification taskSpec(String taskIdSeed, double x, double y, double t, double d) {
-		UUID taskId = uuid(taskIdSeed);
+	private static JobSpecification jobSpec(String jobIdSeed, double x, double y, double t, double d) {
+		UUID jobId = uuid(jobIdSeed);
 		ImmutablePoint location = immutablePoint(x, y);
 		LocalDateTime startTime = secondsToTime(t, atSecond(0));
 		Duration duration = secondsToDuration(d);
 		
-		return new TaskSpecification(taskId, location, startTime, startTime, duration);
+		return new JobSpecification(jobId, location, startTime, startTime, duration);
 	}
 
-	private static TaskSpecification taskSpec(
-		String taskIdSeed,
+	private static JobSpecification jobSpec(
+		String jobIdSeed,
 		LocalDateTime earliestStartTime,
 		LocalDateTime latestFinishTime,
 		Duration duration)
 	{
-		return new TaskSpecification(
-			uuid(taskIdSeed),
+		return new JobSpecification(
+			uuid(jobIdSeed),
 			immutablePoint(0, 0),
 			earliestStartTime,
 			latestFinishTime,
@@ -81,19 +81,19 @@ public class SchedulerTest {
 
 	private static void addDependency(
 		SimpleDirectedGraph<UUID, DefaultEdge> graph,
-		String taskIdSeed,
+		String jobIdSeed,
 		String... dependencies)
 	{
-		UUID taskId = uuid(taskIdSeed);
-		graph.addVertex(taskId);
+		UUID jobId = uuid(jobIdSeed);
+		graph.addVertex(jobId);
 		
 		Arrays.stream(dependencies)
 			.map(UUIDFactory::uuid)
-			.forEach(d -> graph.addEdge(taskId, d));
+			.forEach(d -> graph.addEdge(jobId, d));
 	}
 
-	private static ScheduleResult scheduleTask(Scheduler scheduler, TaskSpecification taskSpec) {
-		ScheduleResult res = scheduler.schedule(taskSpec);
+	private static ScheduleResult scheduleJob(Scheduler scheduler, JobSpecification jobSpec) {
+		ScheduleResult res = scheduler.schedule(jobSpec);
 		scheduler.commit(res.getTransactionId());
 		
 		return res;
@@ -109,7 +109,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(world);
 		sc.addNode(ws);
 		
-		TaskSpecification spec = new TaskSpecification(
+		JobSpecification spec = new JobSpecification(
 			uuid("spec"),
 			immutableBox(12, 12, 18, 18),
 			atSecond(0),
@@ -117,7 +117,7 @@ public class SchedulerTest {
 		
 		ScheduleResult result = sc.schedule(spec);
 		
-		assertThat("scheduled task when it shouldn't have",
+		assertThat("scheduled job when it shouldn't have",
 			result.isError(), equalTo(true));
 	}
 	
@@ -129,7 +129,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		TaskSpecification ts1 = new TaskSpecification(
+		JobSpecification ts1 = new JobSpecification(
 			uuid("t1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
@@ -140,12 +140,12 @@ public class SchedulerTest {
 		result = sc.schedule(ts1);
 		sc.commit(result.getTransactionId());
 		
-		assertThat("unable to schedule task",
+		assertThat("unable to schedule job",
 			result.isSuccess(), equalTo(true));
-		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("t1")), satisfies(ts1));
+		assertThat("scheduled job doesn't meet specification",
+			result.getJobs().get(uuid("t1")), satisfies(ts1));
 		
-		TaskSpecification ts2 = new TaskSpecification(
+		JobSpecification ts2 = new JobSpecification(
 			uuid("t2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
@@ -153,12 +153,12 @@ public class SchedulerTest {
 		
 		result = sc.schedule(ts2);
 		
-		assertThat("scheduled task when it shouldn't have",
+		assertThat("scheduled job when it shouldn't have",
 			result.isError(), equalTo(true));
 	}
 
 	@Test
-	public void testComplexTaskSet() {
+	public void testComplexJobSet() {
 		World world = WorldFixtures.twoRooms();
 	
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
@@ -169,16 +169,16 @@ public class SchedulerTest {
 			wFact.createNodeSpecification("w2", shape, 1.0, 25, 11, 0);
 	
 		// top right
-		TaskSpecification s1 = new TaskSpecification(
+		JobSpecification s1 = new JobSpecification(
 			uuid("s1"), immutableBox(21, 27, 27, 33), atSecond(0), atSecond(60), secondsToDurationSafe(30));
 		// bottom left
-		TaskSpecification s2 = new TaskSpecification(
+		JobSpecification s2 = new JobSpecification(
 			uuid("s2"), immutableBox( 9,  7, 15, 13), atSecond(0), atSecond(60), secondsToDurationSafe(30));
 		// bottom right
-		TaskSpecification s3 = new TaskSpecification(
+		JobSpecification s3 = new JobSpecification(
 			uuid("s3"), immutableBox(23,  9, 27, 13), atSecond(60), atSecond(120), secondsToDurationSafe(30));
 		// top left
-		TaskSpecification s4 = new TaskSpecification(
+		JobSpecification s4 = new JobSpecification(
 			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), secondsToDurationSafe(30));
 		
 		Scheduler sc = new Scheduler(world);
@@ -192,8 +192,8 @@ public class SchedulerTest {
 		
 		assertThat("unable to schedule s1",
 			result.isSuccess(), equalTo(true));
-		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("s1")), satisfies(s1));
+		assertThat("scheduled job doesn't meet specification",
+			result.getJobs().get(uuid("s1")), satisfies(s1));
 		assertThat("collision detected",
 			w1, not(nodeCollidesWith(w2)));
 		
@@ -202,8 +202,8 @@ public class SchedulerTest {
 		
 		assertThat("unable to schedule s2",
 			result.isSuccess(), equalTo(true));
-		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("s2")), satisfies(s2));
+		assertThat("scheduled job doesn't meet specification",
+			result.getJobs().get(uuid("s2")), satisfies(s2));
 		assertThat("collision detected",
 			w1, not(nodeCollidesWith(w2)));
 		
@@ -212,8 +212,8 @@ public class SchedulerTest {
 		
 		assertThat("unable to schedule s3",
 			result.isSuccess(), equalTo(true));
-		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("s3")), satisfies(s3));
+		assertThat("scheduled job doesn't meet specification",
+			result.getJobs().get(uuid("s3")), satisfies(s3));
 		assertThat("collision detected",
 			w1, not(nodeCollidesWith(w2)));
 		
@@ -222,8 +222,8 @@ public class SchedulerTest {
 		
 		assertThat("unable to schedule s4",
 			result.isSuccess(), equalTo(true));
-		assertThat("scheduled task doesn't meet specification",
-			result.getTasks().get(uuid("s4")), satisfies(s4));
+		assertThat("scheduled job doesn't meet specification",
+			result.getJobs().get(uuid("s4")), satisfies(s4));
 		assertThat("collision detected",
 			w1, not(nodeCollidesWith(w2)));
 	}
@@ -356,7 +356,7 @@ public class SchedulerTest {
 
 		sc.setPresentTime(atSecond(10));
 		
-		TaskSpecification ts2 = new TaskSpecification(
+		JobSpecification ts2 = new JobSpecification(
 			uuid("t2"),
 			immutablePoint(0, 0),
 			atSecond(0),
@@ -365,7 +365,7 @@ public class SchedulerTest {
 		
 		ScheduleResult res = sc.schedule(ts2);
 		
-		assertThat("scheduled task when it shouldn't have",
+		assertThat("scheduled job when it shouldn't have",
 			res.isError(), is(true));
 	}
 	
@@ -378,15 +378,15 @@ public class SchedulerTest {
 
 		ScheduleResult res;
 		
-		TaskSpecification ts1 = taskSpec("t1", 2, 2, 6, 2);
-		res = scheduleTask(sc, ts1);
+		JobSpecification ts1 = jobSpec("t1", 2, 2, 6, 2);
+		res = scheduleJob(sc, ts1);
 		
 		assertThat(res.isSuccess(), is(true));
 		
 		sc.setPresentTime(atSecond(10));
 		LocalDateTime frozenHorizon = sc.getFrozenHorizonTime(); // atSecond(10)
 		
-		TaskSpecification ts2 = new TaskSpecification(
+		JobSpecification ts2 = new JobSpecification(
 			uuid("t2"),
 			immutablePoint(0, 2),
 			atSecond(0),
@@ -398,9 +398,9 @@ public class SchedulerTest {
 		assertThat("schedule failed",
 			res.isSuccess(), is(true));
 		
-		Task t2 = res.getTasks().get(uuid("t2"));
+		Job t2 = res.getJobs().get(uuid("t2"));
 		
-		assertThat("task start time before frozen horizon",
+		assertThat("job start time before frozen horizon",
 			t2.getStartTime().isBefore(frozenHorizon), is(false));
 		assertThat("no trajectory updates",
 			res.getTrajectoryUpdates().isEmpty(), is(false));
@@ -428,7 +428,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		TaskSpecification ts = taskSpec(
+		JobSpecification ts = jobSpec(
 			"t1",
 			atSecond(0),
 			atSecond(0),
@@ -442,11 +442,11 @@ public class SchedulerTest {
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
 		
-		Task t = res.getTasks().get(uuid("t1"));
+		Job t = res.getJobs().get(uuid("t1"));
 		
-		assertThat("task was not scheduled",
+		assertThat("job was not scheduled",
 			t, not(is(nullValue())));
-		assertThat("task was not correctly scheduled",
+		assertThat("job was not correctly scheduled",
 			t, satisfies(ts));
 	}
 	
@@ -460,12 +460,12 @@ public class SchedulerTest {
 		Duration margin = secondsToDuration(2);
 		sc.setInterDependencyMargin(margin);
 
-		TaskSpecification ts1 = taskSpec(
+		JobSpecification ts1 = jobSpec(
 			"t1",
 			atSecond(0),
 			atSecond(20),
 			secondsToDuration(1));
-		TaskSpecification ts2 = taskSpec(
+		JobSpecification ts2 = jobSpec(
 			"t2",
 			atSecond(0),
 			atSecond(20),
@@ -480,8 +480,8 @@ public class SchedulerTest {
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
 		
-		Task t1 = res.getTasks().get(uuid("t1"));
-		Task t2 = res.getTasks().get(uuid("t2"));
+		Job t1 = res.getJobs().get(uuid("t1"));
+		Job t2 = res.getJobs().get(uuid("t2"));
 		
 		assertThat("t1 was not scheduled",
 			t1, not(is(nullValue())));
@@ -502,7 +502,7 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		TaskSpecification ts = taskSpec(
+		JobSpecification ts = jobSpec(
 			"t1",
 			atSecond(0),
 			atSecond(0),
@@ -537,10 +537,10 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		ImmutableList<UUID> taskIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
 		
-		PeriodicTaskSpecification ps = new PeriodicTaskSpecification(
-			taskIds,
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
 			immutablePoint(0, 0),
 			true,
 			secondsToDuration(1),
@@ -549,7 +549,7 @@ public class SchedulerTest {
 		
 		ScheduleResult res = sc.schedule(ps);
 		
-		assertThat(res.getTasks().values(), satisfy(ps));
+		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 	
 	@Test
@@ -559,10 +559,10 @@ public class SchedulerTest {
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		
-		ImmutableList<UUID> taskIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("t1"), uuid("t2"), uuid("t3"));
 		
-		PeriodicTaskSpecification ps = new PeriodicTaskSpecification(
-			taskIds,
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
 			immutablePoint(0, 0),
 			false,
 			secondsToDuration(1),
@@ -571,7 +571,7 @@ public class SchedulerTest {
 		
 		ScheduleResult res = sc.schedule(ps);
 		
-		assertThat(res.getTasks().values(), satisfy(ps));
+		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 	
 	@Test
@@ -582,19 +582,19 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		NodeReference wref = sc.getNodeReference("w");
 		
-		scheduleTask(sc, taskSpec("task", 1, 1, 2, 1));
+		scheduleJob(sc, jobSpec("job", 1, 1, 2, 1));
 		
-		Task task = sc.getTask(uuid("task"));
+		Job job = sc.getJob(uuid("job"));
 		
-		ScheduleResult res = sc.unschedule(uuid("task"));
+		ScheduleResult res = sc.unschedule(uuid("job"));
 		
-		assertThat("task wasn't unscheduled",
+		assertThat("job wasn't unscheduled",
 			res.isSuccess(), is(true));
 		
 		sc.commit(res.getTransactionId());
 		
-		assertThat("task still known",
-			wref.hasTask(task), is(false));
+		assertThat("job still known",
+			wref.hasJob(job), is(false));
 		assertThat("didn't replan trajectory as expected",
 			wref.interpolateLocation(atSecond(2)), equalTo(immutablePoint(0, 0)));
 	}
@@ -608,7 +608,7 @@ public class SchedulerTest {
 		
 		thrown.expect(IllegalArgumentException.class);
 		
-		sc.unschedule(uuid("task"));
+		sc.unschedule(uuid("job"));
 	}
 	
 	@Test
@@ -619,49 +619,49 @@ public class SchedulerTest {
 		sc.addNode(ws);
 		NodeReference wref = sc.getNodeReference("w");
 		
-		scheduleTask(sc, taskSpec("task", 1, 0, 2, 1));
+		scheduleJob(sc, jobSpec("job", 1, 0, 2, 1));
 		
-		Task task = sc.getTask(uuid("task"));
+		Job job = sc.getJob(uuid("job"));
 		ImmutablePoint expectedLocation = wref.interpolateLocation(atSecond(1));
 
 		sc.setPresentTime(atSecond(1));
 
-		ScheduleResult res = sc.unschedule(uuid("task"));
+		ScheduleResult res = sc.unschedule(uuid("job"));
 		
-		assertThat("task wasn't unscheduled",
+		assertThat("job wasn't unscheduled",
 			res.isSuccess(), is(true));
 		
 		sc.commit(res.getTransactionId());
 		
-		assertThat("task still known",
-			wref.hasTask(task), is(false));
+		assertThat("job still known",
+			wref.hasJob(job), is(false));
 		assertThat("didn't replan trajectory as expected",
 			wref.interpolateLocation(atSecond(2)), equalTo(expectedLocation));
 	}
 	
 	@Test
-	public void testUnscheduleBetweenTasks() {
+	public void testUnscheduleBetweenJobs() {
 		NodeSpecification ws = nodeSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		NodeReference wref = sc.getNodeReference("w");
 		
-		scheduleTask(sc, taskSpec("t1", 0, 1, 3, 1));
-		scheduleTask(sc, taskSpec("t2", 1, 2, 6, 1));
-		scheduleTask(sc, taskSpec("t3", 2, 1, 9, 1));
+		scheduleJob(sc, jobSpec("t1", 0, 1, 3, 1));
+		scheduleJob(sc, jobSpec("t2", 1, 2, 6, 1));
+		scheduleJob(sc, jobSpec("t3", 2, 1, 9, 1));
 		
-		Task t2 = sc.getTask(uuid("t2"));
+		Job t2 = sc.getJob(uuid("t2"));
 
 		ScheduleResult res = sc.unschedule(uuid("t2"));
 		
-		assertThat("task wasn't unscheduled",
+		assertThat("job wasn't unscheduled",
 			res.isSuccess(), is(true));
 		
 		sc.commit(res.getTransactionId());
 		
-		assertThat("task still known",
-			wref.hasTask(t2), is(false));
+		assertThat("job still known",
+			wref.hasJob(t2), is(false));
 		
 		Trajectory traj = wref.getTrajectories(atSecond(4), atSecond(9)).iterator().next();
 		
@@ -670,35 +670,35 @@ public class SchedulerTest {
 	}
 	
 	@Test
-	public void testRescheduleTask() {
+	public void testRescheduleJob() {
 		NodeSpecification ws = nodeSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ws);
 		NodeReference wref = sc.getNodeReference("w");
 		
-		scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		scheduleJob(sc, jobSpec("job", 0, 0, 0, 1));
 		
-		Task task = sc.getTask(uuid("task"));
+		Job job = sc.getJob(uuid("job"));
 
-		TaskSpecification newSpec = taskSpec("task", 0, 0, 20, 1);
+		JobSpecification newSpec = jobSpec("job", 0, 0, 20, 1);
 		ScheduleResult res = sc.reschedule(newSpec);
 		
-		assertThat("task wasn't rescheduled",
+		assertThat("job wasn't rescheduled",
 			res.isSuccess(), is(true));
 		
 		sc.commit(res.getTransactionId());
 		
-		assertThat("task unknown",
-			wref.hasTask(task), is(false));
+		assertThat("job unknown",
+			wref.hasJob(job), is(false));
 		
-		Task rescheduled = sc.getTask(uuid("task"));
+		Job rescheduled = sc.getJob(uuid("job"));
 		
 		assertThat(rescheduled, satisfies(newSpec));
 	}
 	
 	@Test
-	public void testRemoveTask() {
+	public void testRemoveJob() {
 		NodeSpecification ws = nodeSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
@@ -706,24 +706,24 @@ public class SchedulerTest {
 		
 		NodeReference wref = sc.getNodeReference("w");
 
-		ScheduleResult res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
+		ScheduleResult res = scheduleJob(sc, jobSpec("job", 0, 0, 0, 1));
 		
-		assertThat("task was not scheduled",
+		assertThat("job was not scheduled",
 			res.isSuccess(), is(true));
 		
-		Task task = res.getTasks().get(uuid("task"));
+		Job job = res.getJobs().get(uuid("job"));
 		
-		assertThat("task was not assigned to node",
-			wref.hasTask(task), is(true));
+		assertThat("job was not assigned to node",
+			wref.hasJob(job), is(true));
 		
-		sc.removeTask(uuid("task"));
+		sc.removeJob(uuid("job"));
 
-		assertThat("task to be removed was not removed",
-			wref.hasTask(task), is(false));
+		assertThat("job to be removed was not removed",
+			wref.hasJob(job), is(false));
 	}
 	
 	@Test
-	public void testRemoveLockedTask() {
+	public void testRemoveLockedJob() {
 		NodeSpecification ws = nodeSpec("w", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
@@ -733,23 +733,23 @@ public class SchedulerTest {
 
 		ScheduleResult res;
 		
-		res = scheduleTask(sc, taskSpec("task", 0, 0, 0, 1));
-		Task task = res.getTasks().get(uuid("task"));
+		res = scheduleJob(sc, jobSpec("job", 0, 0, 0, 1));
+		Job job = res.getJobs().get(uuid("job"));
 		
-		assertThat("task was not scheduled",
+		assertThat("job was not scheduled",
 			res.isSuccess(), is(true));
 		
-		assertThat("task was not assigned to node",
-			wref.hasTask(task), is(true));
+		assertThat("job was not assigned to node",
+			wref.hasJob(job), is(true));
 		
-		res = sc.unschedule(uuid("task")); // pending task removal
+		res = sc.unschedule(uuid("job")); // pending job removal
 		
-		assertThat("task not scheduled for removal",
+		assertThat("job not scheduled for removal",
 			res.isSuccess(), is(true));
 		
 		thrown.expect(IllegalStateException.class);
 		
-		sc.removeTask(uuid("task"));
+		sc.removeJob(uuid("job"));
 	}
 
 }
