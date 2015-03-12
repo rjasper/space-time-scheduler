@@ -21,7 +21,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>example.Example</mainClass>
+							<mainClass>de.tu_berlin.kbs.swarmos.st_scheduler.example.Example</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
