@@ -1,0 +1,7 @@
+package de.tu_berlin.mailbox.rjasper.util.function;
+
+public interface TriFunction<T, U, V, R> {
+	
+    R apply(T t, U u, V v);
+
+}
