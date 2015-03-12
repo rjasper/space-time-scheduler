@@ -7,7 +7,7 @@ import java.util.function.Supplier;
  * Implements require methods for collections. If requiring condition is not
  * met then an exception is thrown.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class CollectionsRequire {
 	

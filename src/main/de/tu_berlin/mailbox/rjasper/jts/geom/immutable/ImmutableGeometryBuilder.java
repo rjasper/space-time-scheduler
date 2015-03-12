@@ -13,7 +13,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * geometries. Uses a {@link ImmutableGeometryFactory} to assemble the
  * geometries.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableGeometryBuilder extends GeometryBuilder {
 

@@ -8,7 +8,7 @@ import com.vividsolutions.jts.geom.CoordinateFilter;
  * {@code Coordinate} was altered by the underlying filter. Throws an
  * {@link UnsupportedOperationException} if the coordinate was altered.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 class ImmutableCoordinateFilter implements CoordinateFilter {
 	

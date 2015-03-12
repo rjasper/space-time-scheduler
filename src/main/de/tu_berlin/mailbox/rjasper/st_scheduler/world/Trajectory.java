@@ -38,7 +38,7 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * time. Therefore, the time ordinate must increase from point to point.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> {
 

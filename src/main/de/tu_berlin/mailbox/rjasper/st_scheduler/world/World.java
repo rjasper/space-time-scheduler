@@ -22,7 +22,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * independent static or dynamic obstacles. Once created the world cannot be
  * changed.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class World {
 

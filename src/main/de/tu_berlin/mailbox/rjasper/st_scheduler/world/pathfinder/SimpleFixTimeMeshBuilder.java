@@ -16,7 +16,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * points have to be set before building the graph. Since both points are
  * configured in advance the time is also fixated.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class SimpleFixTimeMeshBuilder extends AbstractMeshBuilder {
 	

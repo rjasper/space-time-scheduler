@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Provides collectors for immutable collections of the Guava Library.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class ImmutablesCollectors {
 	

@@ -24,7 +24,7 @@ import de.tu_berlin.mailbox.rjasper.util.NameProvider;
  * the trajectory gives the position of the shape to given time.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class DynamicObstacle implements Cloneable {
 

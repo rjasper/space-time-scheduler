@@ -21,7 +21,7 @@ import com.vividsolutions.jts.geom.LineString;
  * {@link ImmutableLinearRing}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableLineString extends LineString implements ImmutableGeometry {
 

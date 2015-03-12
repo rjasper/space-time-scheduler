@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * Provides a {@link GeometryIterator} and {@link Spliterator} for the
  * encapsulated {@link Geometry}.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class GeometryIterable implements Iterable<Geometry> {
 	

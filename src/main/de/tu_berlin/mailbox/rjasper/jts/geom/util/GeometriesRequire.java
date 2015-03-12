@@ -14,7 +14,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * Provides checks for geometries to ensure preconditions like validity,
  * simplicity or dimensionality.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class GeometriesRequire {
 

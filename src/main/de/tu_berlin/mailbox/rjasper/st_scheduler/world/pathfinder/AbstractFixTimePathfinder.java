@@ -7,7 +7,7 @@ import java.util.Objects;
  * The {@code AbstractFixTimePathfinder} extends the {@link AbstractVelocityPathfinder}
  * by configurable parameters specific for fixated start and finish times.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractFixTimePathfinder extends AbstractVelocityPathfinder {
 	

@@ -16,7 +16,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
  * A reference to the {@link Node} representation maintained by the
  * scheduler.
  * 
- * @author Rico
+ * @author Rico Jasper
  * @see Node
  * @see Scheduler
  */

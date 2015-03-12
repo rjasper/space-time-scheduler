@@ -12,7 +12,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * This class abstracts the physical abilities of the real node, such as its
  * shape and maximum velocity.</p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class NodeSpecification {
 	

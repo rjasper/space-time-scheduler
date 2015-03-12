@@ -13,7 +13,7 @@ import de.tu_berlin.mailbox.rjasper.util.ArraysClone;
  * coordinates of this sequence. Uses an underlying {@code CoordinateSequence}
  * to store the coordinates.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 class ImmutableCoordinateSequence implements CoordinateSequence {
 	

@@ -16,7 +16,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker;
 /**
  * Implements an spatial path.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPath.Segment> {
 	

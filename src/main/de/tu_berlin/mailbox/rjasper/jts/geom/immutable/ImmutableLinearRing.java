@@ -21,7 +21,7 @@ import com.vividsolutions.jts.geom.LinearRing;
  * {@code ImmutableLinearRing}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableLinearRing extends LinearRing implements ImmutableGeometry {
 

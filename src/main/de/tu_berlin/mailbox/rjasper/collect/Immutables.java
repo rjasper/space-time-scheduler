@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableSet;
  * Provides functions to convert regular collections and maps into the 
  * appropriate immutable variant.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class Immutables {
 	

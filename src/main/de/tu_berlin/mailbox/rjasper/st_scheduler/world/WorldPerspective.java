@@ -12,7 +12,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatia
  * node's shape. This enables an easier implementation of navigating through
  * the world.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class WorldPerspective {
 

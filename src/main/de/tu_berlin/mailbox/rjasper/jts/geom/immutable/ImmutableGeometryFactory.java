@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * geometries. Uses a mutable factory to be assigned to the build geometries
  * to avoid unexpected appearances of immutable geometries.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableGeometryFactory extends GeometryFactory {
 	

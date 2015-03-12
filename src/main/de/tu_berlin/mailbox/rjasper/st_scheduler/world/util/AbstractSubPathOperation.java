@@ -11,7 +11,7 @@ import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
 // TODO document
 /**
  * 
- * @author Rico
+ * @author Rico Jasper
  *
  * @param <V> vertex type
  * @param <S> segment type

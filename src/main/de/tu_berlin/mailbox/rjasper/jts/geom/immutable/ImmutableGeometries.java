@@ -22,7 +22,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * immutable version. Optimizes the situation where a object is already of
  * the requested type which does not require to create a new version.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class ImmutableGeometries {
 	

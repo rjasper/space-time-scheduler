@@ -22,7 +22,7 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * Implements an arc-time path. It ensures that the arcs are non-negative and
  * that the time ordinates are in increasing order.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ArcTimePath extends AbstractPointPath<ArcTimePath.Vertex, ArcTimePath.Segment> {
 	

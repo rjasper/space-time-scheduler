@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
  * Extends the {@code GeometryFactory} by new methods to build immutable
  * geometries also.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class MutableImmutableGeometryFactory extends GeometryFactory {
 	

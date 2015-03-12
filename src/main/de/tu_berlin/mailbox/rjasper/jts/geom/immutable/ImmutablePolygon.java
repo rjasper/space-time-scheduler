@@ -13,7 +13,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * Extends the {@code LineString} to be immutable. Any Attempts to alter
  * the geometry trigger an {@link UnsupportedOperationException}.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutablePolygon extends Polygon implements ImmutableGeometry {
 

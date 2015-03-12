@@ -27,7 +27,7 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * finders. A velocity path finder determines the arc-time mapping for
  * trajectories while avoiding any dynamic obstacles.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractVelocityPathfinder {
 	

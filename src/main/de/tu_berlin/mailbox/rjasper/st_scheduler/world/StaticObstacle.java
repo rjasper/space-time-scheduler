@@ -11,7 +11,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * A {@code StaticObstacle} represents a physical object in the real world. It
  * describes the shape of such an object.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class StaticObstacle {
 	

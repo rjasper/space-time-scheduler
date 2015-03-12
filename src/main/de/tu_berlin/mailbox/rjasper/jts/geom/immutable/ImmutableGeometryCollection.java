@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * {@link ImmutableMultiPolygon}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableGeometryCollection extends GeometryCollection implements ImmutableGeometry {
 

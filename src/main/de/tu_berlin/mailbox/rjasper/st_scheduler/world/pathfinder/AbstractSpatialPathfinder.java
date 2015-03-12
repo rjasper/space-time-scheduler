@@ -16,7 +16,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
  * finders. A spatial path finder searches the path connecting two locations
  * while avoiding any static obstacle.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractSpatialPathfinder {
 

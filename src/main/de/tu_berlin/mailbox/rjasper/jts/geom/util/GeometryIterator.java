@@ -14,7 +14,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * Iterates over the contained geometries of a geometry.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class GeometryIterator implements Iterator<Geometry> {
 	
@@ -146,7 +146,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 	 * Helper {@code Iterator} class to iterate over the geometry components of
 	 * a geometry. Does not recursively work on components of components.
 	 * 
-	 * @author Rico
+	 * @author Rico Jasper
 	 */
 	private static class SubGeometryIterator implements Iterator<Geometry> {
 		
@@ -193,7 +193,7 @@ public class GeometryIterator implements Iterator<Geometry> {
 	/**
 	 * Special {@code Iterator} to iterate over the components of a {@link Polygon}
 	 * 
-	 * @author Rico
+	 * @author Rico Jasper
 	 */
 	private static class PolygonComponentIterator implements Iterator<Geometry> {
 		

@@ -23,7 +23,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
  * Utility class to easily distinguish the different kinds of geometries. This
  * removes the need of manually distinguishing the type a geometry.
  * 
- * @author Rico
+ * @author Rico Jasper
  *
  * @param <T>
  *            the return type of {@link #give(Geometry)} and

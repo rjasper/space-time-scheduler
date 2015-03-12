@@ -20,7 +20,7 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
  * Creates a {@link CoordinateSequence} from the coordinates of several
  * geometries while retaining their order.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class GeometrySequencer {
 	

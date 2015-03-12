@@ -24,7 +24,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.ArcTimePath;
  * regions. While this is a very simple solution it may result in unnecessary
  * slow movement instead of stopping and waiting.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class SimpleFixTimePathfinder extends AbstractFixTimePathfinder {
 

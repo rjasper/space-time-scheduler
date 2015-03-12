@@ -12,7 +12,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.StraightEdgePa
 /**
  * Provides static methods to construct {@link PerspectiveCache}s.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class PerspectiveCacheFactory {
 	

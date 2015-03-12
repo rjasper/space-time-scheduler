@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
  * Throws an {@link UnsupportedOperationException} if the sequence was.
  * altered.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 class ImmutableCoordinateSequenceFilter implements CoordinateSequenceFilter {
 

@@ -30,7 +30,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
  * the graph represent possible path segments in the arc-time plane and will
  * avoid any forbidden region.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractMeshBuilder {
 	

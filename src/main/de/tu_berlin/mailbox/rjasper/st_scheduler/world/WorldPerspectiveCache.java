@@ -10,7 +10,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatia
  * Caches the perspectives of multiple node units and takes advantage of
  * similar perspective by reusing existing ones.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class WorldPerspectiveCache {
 

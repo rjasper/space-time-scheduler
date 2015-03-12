@@ -24,7 +24,7 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * profile will reach the finish arc as early as possible. Nevertheless, this
  * might still result in slow movement instead of stopping and waiting.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class SimpleMinimumTimePathfinder extends AbstractMinimumTimePathfinder {
 	

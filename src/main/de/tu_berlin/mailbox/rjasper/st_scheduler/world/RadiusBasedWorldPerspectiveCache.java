@@ -15,7 +15,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatia
  * determined by the radius of the individual node units. Node units of
  * the same radius will perceive the same view on the world.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class RadiusBasedWorldPerspectiveCache extends WorldPerspectiveCache {
 

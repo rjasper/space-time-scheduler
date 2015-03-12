@@ -5,7 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * Immutable geometries implement this interface.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public interface ImmutableGeometry {
 	

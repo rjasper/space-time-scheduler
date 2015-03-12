@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * {@code ImmutableMultiPolygon}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeometry {
 

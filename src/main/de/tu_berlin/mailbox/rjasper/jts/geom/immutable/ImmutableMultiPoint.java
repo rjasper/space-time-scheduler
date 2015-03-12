@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.Point;
  * {@code ImmutableMultiPoint}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry {
 

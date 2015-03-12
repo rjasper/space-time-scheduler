@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Point;
  * trigger an {@link UnsupportedOperationException}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutablePoint extends Point implements ImmutableGeometry {
 

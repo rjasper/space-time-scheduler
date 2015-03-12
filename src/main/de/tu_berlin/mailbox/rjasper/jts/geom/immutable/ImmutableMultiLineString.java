@@ -19,7 +19,7 @@ import com.vividsolutions.jts.geom.MultiLineString;
  * {@code ImmutableMultiLineString}.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ImmutableMultiLineString extends MultiLineString implements ImmutableGeometry {
 

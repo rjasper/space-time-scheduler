@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Provides an array deep clone copy operation.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class ArraysClone {
 	

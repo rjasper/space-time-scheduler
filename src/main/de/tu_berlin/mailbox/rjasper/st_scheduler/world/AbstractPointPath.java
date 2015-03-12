@@ -26,7 +26,7 @@ import de.tu_berlin.mailbox.rjasper.util.SmartArrayCache;
  * validity of the path. All points have to be valid 2-dimensional points.
  * Singular paths of only one point are not allowed while empty paths are.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractPointPath<
 	V extends PointPath.Vertex,

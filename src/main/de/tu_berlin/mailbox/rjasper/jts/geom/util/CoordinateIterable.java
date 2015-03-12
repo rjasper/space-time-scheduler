@@ -12,7 +12,7 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 /**
  * Provides an iterator over the coordinates of a {@link CoordinateSequence}.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class CoordinateIterable implements Iterable<Coordinate> {
 	

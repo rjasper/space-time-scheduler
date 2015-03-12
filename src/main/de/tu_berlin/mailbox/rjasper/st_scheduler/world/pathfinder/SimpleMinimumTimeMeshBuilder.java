@@ -31,7 +31,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * path in respect to time.
  * </p>
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class SimpleMinimumTimeMeshBuilder extends AbstractMeshBuilder {
 	

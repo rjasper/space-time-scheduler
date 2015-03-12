@@ -17,7 +17,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
  * position of a trajectory which is unavailable at certain times due to dynamic
  * obstacles. Such arc-time pairs belong therefore to a forbidden region.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class ForbiddenRegion { 
 	

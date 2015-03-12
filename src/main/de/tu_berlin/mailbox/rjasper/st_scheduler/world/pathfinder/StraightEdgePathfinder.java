@@ -29,7 +29,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
  * implements a minimum distance path finder. It wraps a {@link PathFinder}
  * of the StraightEdge library.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 

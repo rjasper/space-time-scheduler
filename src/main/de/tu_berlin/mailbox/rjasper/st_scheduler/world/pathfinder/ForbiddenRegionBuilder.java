@@ -40,7 +40,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
  * paths introduced by dynamic obstacles.
  * 
  * @see ForbiddenRegion
- * @author Rico
+ * @author Rico Jasper
  */
 public class ForbiddenRegionBuilder {
 

@@ -21,7 +21,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * Provides static methods to construct geometries.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public final class StaticGeometryBuilder {
 	

@@ -12,7 +12,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * Extends the {@code GeometryBuilder} by new methods to build immutable
  * geometries also.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public class MutableImmutableGeometryBuilder extends GeometryBuilder {
 	

@@ -8,7 +8,7 @@ import java.util.Objects;
  * The {@code AbstractMinimumTimePathfinder} extends the {@link AbstractVelocityPathfinder}
  * by configurable parameters specific for determining time minimal paths.
  * 
- * @author Rico
+ * @author Rico Jasper
  */
 public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPathfinder {
 	
