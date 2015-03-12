@@ -217,6 +217,13 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		}
 	
 		/**
+		 * @return the spatial segment.
+		 */
+		public SpatialPath.Segment getSpatialSegment() {
+			return spatialSegment;
+		}
+
+		/**
 		 * @return the start vertex.
 		 */
 		@Override
@@ -276,13 +283,6 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 		 */
 		public double getFinishTimeInSeconds(LocalDateTime baseTime) {
 			return finish.getTimeInSeconds(baseTime);
-		}
-	
-		/**
-		 * @return the spatial segment.
-		 */
-		public SpatialPath.Segment getSpatialSegment() {
-			return spatialSegment;
 		}
 	
 		/**
@@ -365,11 +365,6 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	public abstract LocalDateTime getFinishTime();
 
 	/**
-	 * @return the time difference between the first and last vertex.
-	 */
-	public abstract Duration duration();
-
-	/**
 	 * Determines whether this trajectory is stationary in space during the
 	 * given time interval [{@code from}, {@code to}].
 	 * 
@@ -386,7 +381,7 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	 *             {@link #getFinishTime()}].
 	 */
 	public abstract boolean isStationary(LocalDateTime from, LocalDateTime to);
-	
+
 	/**
 	 * Interpolates the location at the given time.
 	 * 
@@ -407,11 +402,16 @@ public interface Trajectory extends Path<Trajectory.Vertex, Trajectory.Segment> 
 	public abstract double length();
 
 	/**
+	 * @return the time difference between the first and last vertex.
+	 */
+	public abstract Duration duration();
+
+	/**
 	 * @return the trace which is a geometry only including all points of the
 	 *         spatial path.
 	 */
 	public abstract Geometry trace();
-	
+
 	/**
 	 * Calculates the sub trajectory given by a time interval.
 	 * 

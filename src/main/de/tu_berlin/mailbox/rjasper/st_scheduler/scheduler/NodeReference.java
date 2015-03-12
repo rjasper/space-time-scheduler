@@ -101,14 +101,6 @@ public class NodeReference  {
 		return node.getJobIntervals();
 	}
 
-	public boolean isIdle() {
-		return node.isIdle();
-	}
-
-	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
-		return node.isIdle(from, to);
-	}
-
 	public Collection<Trajectory> getTrajectories() {
 		return node.getTrajectories();
 	}
@@ -118,12 +110,16 @@ public class NodeReference  {
 		return node.getTrajectories(from, to);
 	}
 
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		return node.interpolateLocation(time);
+	public boolean isIdle() {
+		return node.isIdle();
 	}
 
-	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
-		return node.isStationary(from, to);
+	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
+		return node.isIdle(from, to);
+	}
+
+	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
+		return node.idleSlots(from, to);
 	}
 
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
@@ -134,8 +130,12 @@ public class NodeReference  {
 		return node.ceilingIdleTimeOrNull(time);
 	}
 
-	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
-		return node.idleSlots(from, to);
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		return node.isStationary(from, to);
+	}
+
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		return node.interpolateLocation(time);
 	}
 
 	public Duration calcJobDuration(LocalDateTime from, LocalDateTime to) {

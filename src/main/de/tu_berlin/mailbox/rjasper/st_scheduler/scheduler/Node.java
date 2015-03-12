@@ -220,10 +220,6 @@ public class Node {
 		return unmodifiableCollection(jobs.values());
 	}
 	
-	public NavigableMap<LocalDateTime, Job> getNavigableJobs() {
-		return unmodifiableNavigableMap(jobs);
-	}
-
 	/**
 	 * Assigns a new job to this node.
 	 *
@@ -260,6 +256,10 @@ public class Node {
 			throw new IllegalArgumentException("unknown job");
 	}
 
+	public NavigableMap<LocalDateTime, Job> getNavigableJobs() {
+		return unmodifiableNavigableMap(jobs);
+	}
+
 	/**
 	 * @return a view on the jobs as a time interval set.
 	 */
@@ -268,21 +268,6 @@ public class Node {
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
 	
-	public boolean isIdle() {
-		return jobs.isEmpty();
-	}
-
-	/**
-	 * Determines whether the node is idle for the given entire interval.
-	 * 
-	 * @param from
-	 * @param to
-	 * @return {@code true} if the node is idle.
-	 */
-	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
-		return !getJobIntervals().intersects(from, to);
-	}
-
 	public Collection<Trajectory> getTrajectories() {
 		return trajectoryContainer.getTrajectories();
 	}
@@ -300,7 +285,7 @@ public class Node {
 	public void updateTrajectory(Trajectory trajectory) {
 		trajectoryContainer.update(trajectory);
 	}
-	
+
 	/**
 	 * Calculates a trajectory from all obstacle sections concatenated together.
 	 *
@@ -309,47 +294,65 @@ public class Node {
 	public Trajectory calcTrajectory() {
 		return trajectoryContainer.calcTrajectory();
 	}
-	
-	public void cleanUp(LocalDateTime presentTime) {
-		// remove past trajectories
-		trajectoryContainer.deleteBefore(presentTime);
-		
-		// remove past jobs
-		
-		Entry<LocalDateTime, Job> lowerJobEntry = jobs.lowerEntry(presentTime);
-		
-		// determine lowest key not to be removed
-		if (lowerJobEntry != null) {
-			Job lowerJob = lowerJobEntry.getValue();
-			
-			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
-				? lowerJob.getStartTime()
-				: presentTime;
-				
-			jobs.headMap(lowestKey).clear();
-		}
+
+	public boolean isIdle() {
+		return jobs.isEmpty();
 	}
 
 	/**
-	 * Interpolates the location of the node at the given time.
-	 * 
-	 * @param time
-	 * @return the interpolated location.
-	 */
-	public ImmutablePoint interpolateLocation(LocalDateTime time) {
-		return trajectoryContainer.interpolateLocation(time);
-	}
-
-	/**
-	 * Determines whether the node unit is following a stationary trajectory
-	 * during the given time interval.
+	 * Determines whether the node is idle for the given entire interval.
 	 * 
 	 * @param from
 	 * @param to
-	 * @return {@code true} if the node is stationary.
+	 * @return {@code true} if the node is idle.
 	 */
-	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
-		return trajectoryContainer.isStationary(from, to);
+	public boolean isIdle(LocalDateTime from, LocalDateTime to) {
+		return !getJobIntervals().intersects(from, to);
+	}
+
+	/**
+	 * Creates a set of idle slots which represent sections of the node
+	 * while idling during a given time period.
+	 *
+	 * @param from the beginning of the time period
+	 * @param to the ending of the time period
+	 * @return the idle slots
+	 * @throws NullPointerException if any argument is null
+	 * @throws IllegalArgumentException if from is after to
+	 */
+	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
+		Objects.requireNonNull(from, "from");
+		Objects.requireNonNull(to, "to");
+	
+		if (from.isAfter(to))
+			throw new IllegalArgumentException("from is after to");
+		
+		// short cut empty interval
+		if (from.isEqual(to) || !to.isAfter(initialTime))
+			return emptyList();
+		
+		IntervalSet<LocalDateTime> jobIntervals = getJobIntervals();
+		IntervalSet<LocalDateTime> idleIntervals = new SimpleIntervalSet<LocalDateTime>()
+			.add(max(from, initialTime), to)
+			.remove(jobIntervals);
+		
+		return idleIntervals.stream()
+			.map(i -> {
+				LocalDateTime startTime  = i.getFromInclusive();
+				LocalDateTime finishTime = i.getToExclusive();
+				
+				Trajectory left = trajectoryContainer.getTrajectory(startTime);
+				Trajectory right = left.getFinishTime().compareTo(finishTime) >= 0
+					? left
+					: trajectoryContainer.getTrajectory(finishTime);
+				
+				return new IdleSlot(
+					left .interpolateLocation(startTime ),
+					right.interpolateLocation(finishTime),
+					startTime,
+					finishTime);
+			})
+			.collect(toList());
 	}
 
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
@@ -370,7 +373,7 @@ public class Node {
 			return null;
 		else if (lowerFinishCmpTime == 0) {
 			// time == lower.finish
-
+	
 			// if floorJob and ceilJob touch
 			if (jobs.containsKey(time))
 				// lower.finish == time == ceil.start
@@ -382,7 +385,7 @@ public class Node {
 		
 		return lowerFinish;
 	}
-	
+
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime))
 			return null;
@@ -418,52 +421,29 @@ public class Node {
 		
 		return ceilStart;
 	}
-	
-	/**
-	 * Creates a set of idle slots which represent sections of the node
-	 * while idling during a given time period.
-	 *
-	 * @param from the beginning of the time period
-	 * @param to the ending of the time period
-	 * @return the idle slots
-	 * @throws NullPointerException if any argument is null
-	 * @throws IllegalArgumentException if from is after to
-	 */
-	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
-		Objects.requireNonNull(from, "from");
-		Objects.requireNonNull(to, "to");
 
-		if (from.isAfter(to))
-			throw new IllegalArgumentException("from is after to");
-		
-		// short cut empty interval
-		if (from.isEqual(to) || !to.isAfter(initialTime))
-			return emptyList();
-		
-		IntervalSet<LocalDateTime> jobIntervals = getJobIntervals();
-		IntervalSet<LocalDateTime> idleIntervals = new SimpleIntervalSet<LocalDateTime>()
-			.add(max(from, initialTime), to)
-			.remove(jobIntervals);
-		
-		return idleIntervals.stream()
-			.map(i -> {
-				LocalDateTime startTime  = i.getFromInclusive();
-				LocalDateTime finishTime = i.getToExclusive();
-				
-				Trajectory left = trajectoryContainer.getTrajectory(startTime);
-				Trajectory right = left.getFinishTime().compareTo(finishTime) >= 0
-					? left
-					: trajectoryContainer.getTrajectory(finishTime);
-				
-				return new IdleSlot(
-					left .interpolateLocation(startTime ),
-					right.interpolateLocation(finishTime),
-					startTime,
-					finishTime);
-			})
-			.collect(toList());
+	/**
+	 * Determines whether the node unit is following a stationary trajectory
+	 * during the given time interval.
+	 * 
+	 * @param from
+	 * @param to
+	 * @return {@code true} if the node is stationary.
+	 */
+	public boolean isStationary(LocalDateTime from, LocalDateTime to) {
+		return trajectoryContainer.isStationary(from, to);
 	}
-	
+
+	/**
+	 * Interpolates the location of the node at the given time.
+	 * 
+	 * @param time
+	 * @return the interpolated location.
+	 */
+	public ImmutablePoint interpolateLocation(LocalDateTime time) {
+		return trajectoryContainer.interpolateLocation(time);
+	}
+
 	public Duration calcJobDuration(LocalDateTime from, LocalDateTime to) {
 		return calcDuration( getJobIntervals().intersection(from, to) );
 	}
@@ -561,6 +541,26 @@ public class Node {
 			.map(di -> di.getToExclusive() - di.getFromInclusive())
 			.reduce((d1, d2) -> d1 + d2)
 			.orElse(0.0);
+	}
+
+	public void cleanUp(LocalDateTime presentTime) {
+		// remove past trajectories
+		trajectoryContainer.deleteBefore(presentTime);
+		
+		// remove past jobs
+		
+		Entry<LocalDateTime, Job> lowerJobEntry = jobs.lowerEntry(presentTime);
+		
+		// determine lowest key not to be removed
+		if (lowerJobEntry != null) {
+			Job lowerJob = lowerJobEntry.getValue();
+			
+			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
+				? lowerJob.getStartTime()
+				: presentTime;
+				
+			jobs.headMap(lowestKey).clear();
+		}
 	}
 
 	/*

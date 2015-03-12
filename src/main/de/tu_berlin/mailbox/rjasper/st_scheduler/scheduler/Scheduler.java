@@ -220,10 +220,6 @@ public class Scheduler {
 		return interDependencyMargin;
 	}
 	
-	public boolean hasTransaction(UUID transactionId) {
-		return transactions.containsKey(transactionId);
-	}
-
 	public void setInterDependencyMargin(Duration interDependencyMargin) {
 		Objects.requireNonNull(interDependencyMargin, "interDependencyMargin");
 		
@@ -231,6 +227,10 @@ public class Scheduler {
 			throw new IllegalArgumentException("negative margin");
 		
 		this.interDependencyMargin = interDependencyMargin;
+	}
+
+	public boolean hasTransaction(UUID transactionId) {
+		return transactions.containsKey(transactionId);
 	}
 
 	/**

@@ -28,7 +28,9 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
  *
  * @author Rico Jasper
  */
-public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
+public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeSlot> {
+	
+	// TODO sort by least detour
 
 	/**
 	 * Helper class to pair a node and one of its idle slots.
@@ -142,7 +144,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	 * <li>The duration is negative.</li>
 	 * </ul>
 	 */
-	public NodeSlotIterator(
+	public NodeIdleSlotIterator(
 		Iterable<Node> nodes,
 		LocalDateTime frozenHorizonTime,
 		Point location,
