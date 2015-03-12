@@ -21,7 +21,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>de.tu_berlin.kbs.swarmos.st_scheduler.example.Example</mainClass>
+							<mainClass>de.tu_berlin.mailbox.rjasper.st_scheduler.example.Example</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
