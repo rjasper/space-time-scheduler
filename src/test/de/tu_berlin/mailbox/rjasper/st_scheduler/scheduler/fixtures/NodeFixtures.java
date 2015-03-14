@@ -9,7 +9,7 @@ public final class NodeFixtures {
 	private static NodeFactory wFact = NodeFactory.getInstance();
 
 	public static Node withTwoJobs1() {
-		Node node = wFact.createNode("unnamed", 0., 0.);
+		Node node = wFact.createNode("withTwoJobs1", 0., 0.);
 
 		wFact.addJobWithDuration(node, uuid("job1"), -3600.,    0., 2L * 3600L, 3L * 3600L);
 		wFact.addJobWithDuration(node, uuid("job2"),     0., 3600., 9L * 3600L, 3L * 3600L);
@@ -18,7 +18,7 @@ public final class NodeFixtures {
 	}
 
 	public static Node withTwoJobs2() {
-		Node node = wFact.createNode("unnamed", 0., 0.);
+		Node node = wFact.createNode("withTwoJobs2", 0., 0.);
 
 		wFact.addJobWithDuration(node, uuid("job1"),    0., -3600., 2L * 3600L, 2L * 3600L);
 		wFact.addJobWithDuration(node, uuid("job2"), 3600.,     0., 9L * 3600L, 2L * 3600L);

@@ -355,11 +355,11 @@ public class Node {
 			})
 			.collect(toList());
 	}
-
+	
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-
+		
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
@@ -390,7 +390,7 @@ public class Node {
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-
+		
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime

@@ -7,11 +7,9 @@ import static java.util.Collections.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.Function;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -249,38 +247,51 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	private Node nextNode() {
 		// sets the next node and initializes an new idle slot iterator
 
-		Node node;
-		LocalDateTime from, to;
+//		Node node;
+//		LocalDateTime from, to;
+//		do {
+//			if (!nodeIterator.hasNext()) {
+//				node = null;
+//				from = null;
+//				to = null;
+//
+//				break;
+//			}
+//
+//			node = nodeIterator.next();
+//
+//			LocalDateTime earliest = earliestStartTime(node);
+//			LocalDateTime latest = latestStartTime();
+//			// FIXME not accurate
+//			LocalDateTime floorIdle = node.floorIdleTimeOrNull(earliest);
+//			LocalDateTime ceilIdle = node.ceilingIdleTimeOrNull(latest);
+//
+//			from = max(
+//				floorIdle != null ? floorIdle : earliest,
+//				frozenHorizonTime);
+//			to = ceilIdle  != null ? ceilIdle  : latest;
+//		} while (from.isAfter(to));
+//
+//
+//		nextNode = node;
+//		slotIterator = node == null // indicates loop break
+//			? emptyIterator()
+//			: slotsGenerator.apply(node, from, to);
+		
 		do {
 			if (!nodeIterator.hasNext()) {
-				node = null;
-				from = null;
-				to = null;
-
+				nextNode = null;
+				slotIterator = emptyIterator();
+				
 				break;
 			}
+			
+			nextNode = nodeIterator.next();
+			
+			slotIterator = slotsGenerator.apply(nextNode, earliestStartTime, latestStartTime);
+		} while (!slotIterator.hasNext());
 
-			node = nodeIterator.next();
-
-			LocalDateTime earliest = earliestStartTime(node);
-			LocalDateTime latest = latestStartTime();
-			// FIXME not accurate
-			LocalDateTime floorIdle = node.floorIdleTimeOrNull(earliest);
-			LocalDateTime ceilIdle = node.ceilingIdleTimeOrNull(latest);
-
-			from = max(
-				floorIdle != null ? floorIdle : earliest,
-				frozenHorizonTime);
-			to = ceilIdle  != null ? ceilIdle  : latest;
-		} while (from.isAfter(to));
-
-
-		nextNode = node;
-		slotIterator = node == null // indicates loop break
-			? emptyIterator()
-			: slotsGenerator.apply(node, from, to);
-
-		return node;
+		return nextNode;
 	}
 
 	/**
@@ -289,7 +300,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 * @return the next idle slot.
 	 */
 	private IdleSlot nextSlot() {
-		Node node = nextNode;
+//		Node node = nextNode;
 		IdleSlot slot = null;
 
 		// iterates over the remaining idle slots of the remaining nodes
@@ -298,13 +309,13 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 			// if there are no more idle slots of the current node
 			// then get the next one
 			if (!slotIterator.hasNext()) {
-				node = nextNode();
+				nextNode();
 			// otherwise check the next idle slot
 			} else {
 				IdleSlot candidate = slotIterator.next();
 
 				// break if the current idle slot is accepted
-				if (check(node, candidate)) {
+				if (check(nextNode, candidate)) {
 					slot = candidate;
 					break;
 				}

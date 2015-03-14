@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
 
 import java.util.Iterator;
@@ -27,6 +28,31 @@ implements IntervalSet<T>
 			throw new IllegalStateException("set is empty");
 		
 		return maxInterval().getToExclusive();
+	}
+	
+	@Override
+	public T floorValue(T obj) {
+		if (obj.compareTo(minValue()) <= 0)
+			throw new IllegalArgumentException("obj too low");
+		
+		Interval<T> lowerInterval = lowerInterval(obj);
+		
+		return min(lowerInterval.getToExclusive(), obj);
+	}
+	
+	@Override
+	public T ceilingValue(T obj) {
+		if (obj.compareTo(maxValue()) >= 0)
+			throw new IllegalArgumentException("obj too high");
+		
+		Interval<T> floorInterval = floorInterval(obj);
+		
+		if (floorInterval.getToExclusive().compareTo(obj) > 0)
+			return obj;
+		
+		Interval<T> higherInterval = higherInterval(obj);
+		
+		return higherInterval.getFromInclusive();
 	}
 	
 	/* (non-Javadoc)

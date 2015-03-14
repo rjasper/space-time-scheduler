@@ -85,6 +85,11 @@ implements ModifiableIntervalSet<T>
 	}
 	
 	@Override
+	public Iterator<Interval<T>> descendingIterator() {
+		return intervals.descendingMap().values().iterator();
+	}
+
+	@Override
 	public Spliterator<Interval<T>> spliterator() {
 		return intervals.values().spliterator();
 	}

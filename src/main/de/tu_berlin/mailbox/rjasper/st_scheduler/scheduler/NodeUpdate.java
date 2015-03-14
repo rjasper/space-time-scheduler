@@ -92,6 +92,10 @@ public class NodeUpdate implements Cloneable {
 		if (startTime.isBefore(node.getInitialTime()))
 			throw new IllegalArgumentException("trajectory predates initial time");
 
+		// TODO only lock different sections
+		// also release locks when trajectory sections follow original trajectory
+		// but don't remove job locks
+		
 		trajectoryLock.add(startTime, finishTime);
 		trajectoryContainer.update(trajectory);
 	}

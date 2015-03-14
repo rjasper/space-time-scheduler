@@ -112,10 +112,13 @@ extends AbstractIntervalSet<T>
 		
 		private final Iterator<Interval<T>> iterator;
 		
+		private final boolean descending;
+		
 		private Interval<T> peek = null;
 		
-		public IntervalIterator(Iterator<Interval<T>> iterator) {
+		public IntervalIterator(Iterator<Interval<T>> iterator, boolean descending) {
 			this.iterator = Objects.requireNonNull(iterator, "iterator");
+			this.descending = descending;
 			this.peek = iterator.hasNext() ? iterator.next() : null;
 		}
 	
@@ -134,18 +137,34 @@ extends AbstractIntervalSet<T>
 			
 			// seek last non-consecutive interval
 			boolean noBreak = true;
-			while (iterator.hasNext()) {
-				peek = iterator.next();
-				
-				T lastTo = last.getToExclusive();
-				T peekFrom = peek.getFromInclusive();
-				
-				if (!peekFrom.equals(lastTo)) {
-					noBreak = false;
-					break;
+			if (!descending) {
+				while (iterator.hasNext()) {
+					peek = iterator.next();
+					
+					T lastTo = last.getToExclusive();
+					T peekFrom = peek.getFromInclusive();
+					
+					if (!peekFrom.equals(lastTo)) {
+						noBreak = false;
+						break;
+					}
+					
+					last = peek;
 				}
-				
-				last = peek;
+			} else {
+				while (iterator.hasNext()) {
+					peek = iterator.next();
+					
+					T lastFrom = last.getFromInclusive();
+					T peekTo = peek.getToExclusive();
+					
+					if (!peekTo.equals(lastFrom)) {
+						noBreak = false;
+						break;
+					}
+					
+					last = peek;
+				}
 			}
 			
 			// !iterator.hasNext() || peek.from != last.to
@@ -155,12 +174,19 @@ extends AbstractIntervalSet<T>
 			if (noBreak)
 				peek = null;
 			
-			if (last == first)
+			if (last == first) {
 				return first; // reuse interval
-			else
-				return new Interval<>(
-					first.getFromInclusive(),
-					last.getToExclusive());
+			} else {
+				if (!descending) {
+					return new Interval<>(
+						first.getFromInclusive(),
+						last.getToExclusive());
+				} else {
+					return new Interval<>(
+						last.getFromInclusive(),
+						first.getToExclusive());
+				}
+			}
 		}
 		
 	}
@@ -171,7 +197,17 @@ extends AbstractIntervalSet<T>
 			.map(this::interval)
 			.iterator();
 		
-		return new IntervalIterator<>(it);
+		return new IntervalIterator<>(it, false);
+	}
+
+	// TODO test
+	@Override
+	public Iterator<Interval<T>> descendingIterator() {
+		Iterator<Interval<T>> it = map.descendingMap().values().stream()
+			.map(this::interval)
+			.iterator();
+		
+		return new IntervalIterator<>(it, true);
 	}
 
 	@Override

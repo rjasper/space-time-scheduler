@@ -441,11 +441,23 @@ public class SchedulerTest {
 
 		ScheduleResult res;
 		
+		// splits the origin trajectory
+		// otherwise j1 would lock the whole trajectory
+		res = scheduleJob(sc, JobSpecification.createSS(
+			uuid("j0"),
+			immutablePoint(0, 0),
+			atSecond(10),
+			atSecond(10),
+			secondsToDuration(1)));
+
+		assertThat("j0 was not scheduled",
+			res.isSuccess(), is(true));
+		
 		JobSpecification js1 = new JobSpecification(
 			uuid("j1"),
 			immutablePoint(1, 1),
-			atSecond(0),
-			atSecond(10),
+			atSecond( 0),
+			atSecond(20),
 			secondsToDuration(1));
 		
 		res = sc.schedule(js1);
@@ -457,8 +469,8 @@ public class SchedulerTest {
 		JobSpecification js2 = new JobSpecification(
 			uuid("j2"),
 			immutablePoint(2, 2),
-			atSecond(0),
-			atSecond(10),
+			atSecond( 0),
+			atSecond(20),
 			secondsToDuration(1));
 		
 		res = sc.schedule(js2);

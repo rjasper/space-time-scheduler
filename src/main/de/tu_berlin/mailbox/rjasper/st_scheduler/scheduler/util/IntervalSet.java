@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -99,9 +100,35 @@ extends Iterable<IntervalSet.Interval<T>>
 	
 	public abstract Interval<T> higherInterval(T obj);
 
+	/**
+	 * @return the lowest value belonging to the set.
+	 */
 	public abstract T minValue();
 
+	/**
+	 * @return the highest value, where there is no lowest epsilon greater than
+	 *         zero with a value equivalent to the value minus epsilon not
+	 *         belonging to this set.
+	 */
 	public abstract T maxValue();
+	
+	/**
+	 * Returns the value lower than or equal to given object, where there is no
+	 * lowest epsilon greater than zero with a value equivalent to the value
+	 * minus epsilon not belonging to this set.
+	 * 
+	 * @param obj
+	 * @return the floor value.
+	 */
+	public abstract T floorValue(T obj);
+	
+	/**
+	 * Returns the value greater or equal to given object, which belongs to this set.
+	 * 
+	 * @param obj
+	 * @return the ceiling value.
+	 */
+	public abstract T ceilingValue(T obj);
 
 	public abstract boolean contains(T obj);
 
@@ -131,6 +158,8 @@ extends Iterable<IntervalSet.Interval<T>>
 	
 	// includes all original intervals which overlap with [fromInclusive, toExclusive]
 	public abstract IntervalSet<T> subSet(T fromInclusive, T toExclusive);
+	
+	public abstract Iterator<Interval<T>> descendingIterator();
 	
 	public abstract Stream<Interval<T>> stream();
 	

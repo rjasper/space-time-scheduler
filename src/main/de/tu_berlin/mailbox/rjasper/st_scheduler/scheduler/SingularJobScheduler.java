@@ -22,7 +22,6 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
-import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
 
 public class SingularJobScheduler {
 
@@ -122,7 +121,6 @@ public class SingularJobScheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the nodes are filtered by the location
 
-			// FIXME ignores alternative changes completely
 			Iterable<NodeIdleSlot> nodeSlots = () -> new NodeIdleSlotIterator(
 				filterByLocation(location),
 				this::makeIdleSlotIterator,
@@ -192,9 +190,11 @@ public class SingularJobScheduler {
 	{
 		NodeSlotBuilder builder = new NodeSlotBuilder();
 
+		builder.setOverlapping(true);
 		builder.setNode(node);
 		builder.setSchedule(schedule);
 		builder.setAlternative(alternative);
+		builder.setFrozenHorizonTime(frozenHorizonTime);
 		builder.setStartTime(from);
 		builder.setFinishTime(to);
 

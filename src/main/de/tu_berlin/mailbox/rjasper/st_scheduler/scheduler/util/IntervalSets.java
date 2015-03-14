@@ -4,7 +4,6 @@ import static java.util.Collections.*;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 public final class IntervalSets {
@@ -74,6 +73,11 @@ public final class IntervalSets {
 		public IntervalSet<T> subSet(T fromInclusive, T toExclusive) {
 			return unmodifiableIntervalSet(intervalSet.subSet(fromInclusive, toExclusive));
 		}
+
+		@Override
+		public Iterator<de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval<T>> descendingIterator() {
+			return intervalSet.descendingIterator();
+		}
 		
 	}
 	
@@ -86,20 +90,6 @@ public final class IntervalSets {
 	}
 	
 	private static class EmptyIntervalSet implements IntervalSet<Comparable<Object>> {
-
-		@Override
-		public Iterator<Interval<Comparable<Object>>> iterator() {
-			return new Iterator<Interval<Comparable<Object>>>() {
-				@Override
-				public boolean hasNext() {
-					return false;
-				}
-				@Override
-				public de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval<Comparable<Object>> next() {
-					throw new NoSuchElementException("set is empty");
-				}
-			};
-		}
 
 		@Override
 		public boolean isEmpty() {
@@ -143,6 +133,16 @@ public final class IntervalSets {
 
 		@Override
 		public Comparable<Object> maxValue() {
+			throw new IllegalStateException("set is empty");
+		}
+
+		@Override
+		public Comparable<Object> floorValue(Comparable<Object> obj) {
+			throw new IllegalStateException("set is empty");
+		}
+
+		@Override
+		public Comparable<Object> ceilingValue(Comparable<Object> obj) {
 			throw new IllegalStateException("set is empty");
 		}
 
@@ -214,6 +214,16 @@ public final class IntervalSets {
 		@Override
 		public IntervalSet<Comparable<Object>> subSet(Comparable<Object> fromInclusive, Comparable<Object> toExclusive) {
 			return this;
+		}
+
+		@Override
+		public Iterator<Interval<Comparable<Object>>> iterator() {
+			return emptyIterator();
+		}
+
+		@Override
+		public Iterator<Interval<Comparable<Object>>> descendingIterator() {
+			return emptyIterator();
 		}
 
 		@Override
