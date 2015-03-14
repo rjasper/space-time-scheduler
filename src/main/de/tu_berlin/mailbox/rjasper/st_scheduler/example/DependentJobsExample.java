@@ -90,8 +90,8 @@ public final class DependentJobsExample {
 	{
 		graph.addVertex(jobId);
 		
-		Arrays.stream(dependencies)
-			.forEach(d -> graph.addEdge(jobId, d));
+		for (UUID d : dependencies)
+			graph.addEdge(jobId, d);
 	}
 
 }
