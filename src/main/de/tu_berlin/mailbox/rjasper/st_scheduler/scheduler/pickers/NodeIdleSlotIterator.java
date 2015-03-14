@@ -11,12 +11,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 
 import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
+import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
 
 // TODO document
 /**
@@ -29,7 +31,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
  * @author Rico Jasper
  */
 public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeIdleSlot> {
-	
+
 	// TODO sort by least detour
 
 	/**
@@ -73,7 +75,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		}
 
 	}
-	
+
 	private final LocalDateTime frozenHorizonTime;
 
 	/**
@@ -95,6 +97,16 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 * The duration of the job execution.
 	 */
 	private final Duration duration;
+
+	/**
+	 * Generates the slot iterator for the given node and time interval.
+	 */
+	private final TriFunction<
+		Node,
+		LocalDateTime,
+		LocalDateTime,
+		Iterator<IdleSlot>>
+	slotsGenerator;
 
 	/**
 	 * An iterator over the nodes to be considered.
@@ -146,6 +158,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 */
 	public NodeIdleSlotIterator(
 		Iterable<Node> nodes,
+		TriFunction<Node, LocalDateTime, LocalDateTime, Iterator<IdleSlot>> slotGenerator,
 		LocalDateTime frozenHorizonTime,
 		Point location,
 		LocalDateTime earliestStartTime,
@@ -153,12 +166,13 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		Duration duration)
 	{
 		Objects.requireNonNull(nodes, "nodes");
+		Objects.requireNonNull(slotGenerator, "slotGenerator");
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizon");
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
 		Objects.requireNonNull(latestStartTime, "latestStartTime");
 		Objects.requireNonNull(duration, "duration");
-		
+
 		GeometriesRequire.requireValid2DPoint(location, "location");
 
 		if (earliestStartTime.compareTo(latestStartTime) > 0)
@@ -167,6 +181,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 			throw new IllegalArgumentException("duration is negative");
 
 		this.nodeIterator = nodes.iterator();
+		this.slotsGenerator = slotGenerator;
 		this.frozenHorizonTime = frozenHorizonTime;
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
@@ -200,11 +215,11 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	public IdleSlot getCurrentSlot() {
 		return currentSlot;
 	}
-	
+
 	private LocalDateTime earliestStartTime(Node node) {
 		return max(earliestStartTime, frozenHorizonTime, node.getInitialTime());
 	}
-	
+
 	private LocalDateTime latestStartTime() {
 		return latestStartTime;
 	}
@@ -217,7 +232,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	public NodeIdleSlot next() {
 		if (!hasNext())
 			throw new NoSuchElementException();
-		
+
 		currentNode = nextNode;
 		currentSlot = nextSlot;
 
@@ -241,29 +256,29 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 				node = null;
 				from = null;
 				to = null;
-				
+
 				break;
 			}
-			
+
 			node = nodeIterator.next();
-			
+
 			LocalDateTime earliest = earliestStartTime(node);
 			LocalDateTime latest = latestStartTime();
+			// FIXME not accurate
 			LocalDateTime floorIdle = node.floorIdleTimeOrNull(earliest);
 			LocalDateTime ceilIdle = node.ceilingIdleTimeOrNull(latest);
-			
+
 			from = max(
 				floorIdle != null ? floorIdle : earliest,
 				frozenHorizonTime);
 			to = ceilIdle  != null ? ceilIdle  : latest;
 		} while (from.isAfter(to));
-		
-		Collection<IdleSlot> slots = node == null // indicates loop break
-			? emptyList()
-			: node.idleSlots(from, to);
+
 
 		nextNode = node;
-		slotIterator = slots.iterator();
+		slotIterator = node == null // indicates loop break
+			? emptyIterator()
+			: slotsGenerator.apply(node, from, to);
 
 		return node;
 	}
@@ -321,7 +336,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		LocalDateTime t1 = slot.getStartTime();
 		LocalDateTime t2 = slot.getFinishTime();
 		Point p1 = slot.getStartLocation();
-		Point p2 = slot.getFinishLocation();
+		Point p2 = slot.getFinishLocation(); // FIXME finish location not mandatory
 		double l1 = distance(p1, location);
 		double l2 = p2 == null ? 0. : distance(location, p2);
 
