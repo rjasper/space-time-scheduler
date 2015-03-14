@@ -35,6 +35,7 @@ public class Schedule {
 	
 	private final Set<UUID> jobIdLock = new HashSet<>();
 	
+	// TODO integrate in node
 	private static class NodeLocks {
 		
 		public final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();

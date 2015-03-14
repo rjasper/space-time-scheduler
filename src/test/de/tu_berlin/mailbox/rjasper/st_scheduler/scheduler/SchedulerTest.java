@@ -433,6 +433,42 @@ public class SchedulerTest {
 	}
 	
 	@Test
+	public void testScheduleMultipleAlternatives() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+
+		ScheduleResult res;
+		
+		JobSpecification js1 = new JobSpecification(
+			uuid("j1"),
+			immutablePoint(1, 1),
+			atSecond(0),
+			atSecond(10),
+			secondsToDuration(1));
+		
+		res = sc.schedule(js1);
+		
+		assertThat("j1 was not scheduled",
+			res.isSuccess(), is(true));
+		assertThat(res.getJobs().get(uuid("j1")), satisfies(js1));
+		
+		JobSpecification js2 = new JobSpecification(
+			uuid("j2"),
+			immutablePoint(2, 2),
+			atSecond(0),
+			atSecond(10),
+			secondsToDuration(1));
+		
+		res = sc.schedule(js2);
+		
+		assertThat("j2 was not scheduled",
+			res.isSuccess(), is(true));
+		assertThat(res.getJobs().get(uuid("j2")), satisfies(js2));
+	}
+	
+	@Test
 	public void testScheduleDependenciesEmpty() {
 		Scheduler sc = new Scheduler(new World());
 		
