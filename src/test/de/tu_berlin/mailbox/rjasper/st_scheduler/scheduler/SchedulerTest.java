@@ -104,11 +104,11 @@ public class SchedulerTest {
 	public void testNoLocation() {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
-		NodeSpecification ws =
-			wFact.createNodeSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		NodeSpecification ns =
+			wFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(world);
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		JobSpecification spec = new JobSpecification(
 			uuid("spec"),
@@ -124,13 +124,13 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAllBusy() {
-		NodeSpecification ws =
-			wFact.createNodeSpecification("w", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+		NodeSpecification ns =
+			wFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
-		JobSpecification ts1 = new JobSpecification(
+		JobSpecification js1 = new JobSpecification(
 			uuid("j1"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(0),
@@ -138,21 +138,21 @@ public class SchedulerTest {
 		
 		ScheduleResult result;
 		
-		result = sc.schedule(ts1);
+		result = sc.schedule(js1);
 		sc.commit(result.getTransactionId());
 		
 		assertThat("unable to schedule job",
 			result.isSuccess(), equalTo(true));
 		assertThat("scheduled job doesn't meet specification",
-			result.getJobs().get(uuid("j1")), satisfies(ts1));
+			result.getJobs().get(uuid("j1")), satisfies(js1));
 		
-		JobSpecification ts2 = new JobSpecification(
+		JobSpecification js2 = new JobSpecification(
 			uuid("j2"),
 			immutableBox(-1, -1, 1, 1),
 			atSecond(20),
 			atSecond(30), secondsToDurationSafe(10));
 		
-		result = sc.schedule(ts2);
+		result = sc.schedule(js2);
 		
 		assertThat("scheduled job when it shouldn't have",
 			result.isError(), equalTo(true));
@@ -160,7 +160,7 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleBetweenJobs() {
-		NodeSpecification ns = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ns);
@@ -184,9 +184,9 @@ public class SchedulerTest {
 	
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 		
-		NodeSpecification ws1 =
+		NodeSpecification ns1 =
 			wFact.createNodeSpecification("w1", shape, 1.0, 11, 31, 0);
-		NodeSpecification ws2 =
+		NodeSpecification ns2 =
 			wFact.createNodeSpecification("w2", shape, 1.0, 25, 11, 0);
 	
 		// top right
@@ -203,8 +203,8 @@ public class SchedulerTest {
 			uuid("s4"), immutableBox( 9, 29, 13, 33), atSecond(60), atSecond(120), secondsToDurationSafe(30));
 		
 		Scheduler sc = new Scheduler(world);
-		NodeReference w1 = sc.addNode(ws1);
-		NodeReference w2 = sc.addNode(ws2);
+		NodeReference w1 = sc.addNode(ns1);
+		NodeReference w2 = sc.addNode(ns2);
 
 		ScheduleResult result;
 	
@@ -335,56 +335,56 @@ public class SchedulerTest {
 	
 	@Test
 	public void testAddNodeAfterFrozenHorizon() {
-		NodeSpecification ws = new NodeSpecification(
-			"w", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
+		NodeSpecification ns = new NodeSpecification(
+			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.setPresentTime(atSecond(5));
 		
-		sc.addNode(ws); // no exception
+		sc.addNode(ns); // no exception
 	}
 	
 	@Test
 	public void testAddNodeAtFrozenHorizon() {
-		NodeSpecification ws = new NodeSpecification(
-			"w", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
+		NodeSpecification ns = new NodeSpecification(
+			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.setPresentTime(atSecond(10));
 		
-		sc.addNode(ws); // no exception
+		sc.addNode(ns); // no exception
 	}
 	
 	@Test
 	public void testAddNodeBeforeFrozenHorizon() {
-		NodeSpecification ws = new NodeSpecification(
-			"w", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
+		NodeSpecification ns = new NodeSpecification(
+			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 		
 		Scheduler sc = new Scheduler(new World());
 		sc.setPresentTime(atSecond(20));
 		
 		thrown.expect(IllegalArgumentException.class);
 		
-		sc.addNode(ws);
+		sc.addNode(ns);
 	}
 	
 	@Test
 	public void testScheduleBeforeFrozenHorizon() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 
 		sc.setPresentTime(atSecond(10));
 		
-		JobSpecification ts2 = new JobSpecification(
+		JobSpecification js2 = new JobSpecification(
 			uuid("j2"),
 			immutablePoint(0, 0),
 			atSecond(0),
 			atSecond(9),
 			secondsToDuration(2));
 		
-		ScheduleResult res = sc.schedule(ts2);
+		ScheduleResult res = sc.schedule(js2);
 		
 		assertThat("scheduled job when it shouldn't have",
 			res.isError(), is(true));
@@ -392,29 +392,29 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleAfterFrozenHorizon() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 
 		ScheduleResult res;
 		
-		JobSpecification ts1 = jobSpec("j1", 2, 2, 6, 2);
-		res = scheduleJob(sc, ts1);
+		JobSpecification js1 = jobSpec("j1", 2, 2, 6, 2);
+		res = scheduleJob(sc, js1);
 		
 		assertThat(res.isSuccess(), is(true));
 		
 		sc.setPresentTime(atSecond(10));
 		LocalDateTime frozenHorizon = sc.getFrozenHorizonTime(); // atSecond(10)
 		
-		JobSpecification ts2 = new JobSpecification(
+		JobSpecification js2 = new JobSpecification(
 			uuid("j2"),
 			immutablePoint(0, 2),
 			atSecond(0),
 			atSecond(20),
 			secondsToDuration(2));
 		
-		res = sc.schedule(ts2);
+		res = sc.schedule(js2);
 		
 		assertThat("schedule failed",
 			res.isSuccess(), is(true));
@@ -444,21 +444,22 @@ public class SchedulerTest {
 	
 	@Test
 	public void testScheduleDependenciesSingle() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
-		
-		JobSpecification ts = jobSpec(
-			"j1",
+		sc.addNode(ns);
+
+		JobSpecification js = JobSpecification.createSS(
+			uuid("j1"),
+			immutablePoint(1, 1),
 			atSecond(0),
-			atSecond(0),
+			atSecond(20),
 			secondsToDuration(1));
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		addDependency(depGraph, "j1");
 		
-		ScheduleResult res = sc.schedule(singleton(ts), depGraph);
+		ScheduleResult res = sc.schedule(singleton(js), depGraph);
 		
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
@@ -468,35 +469,36 @@ public class SchedulerTest {
 		assertThat("job was not scheduled",
 			j, not(is(nullValue())));
 		assertThat("job was not correctly scheduled",
-			j, satisfies(ts));
+			j, satisfies(js));
 	}
 	
 	@Test
 	public void testScheduleDependencyTwo() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
-		Duration margin = secondsToDuration(2);
-		sc.setInterDependencyMargin(margin);
+		JobSpecification js1 = JobSpecification.createSS(
+			uuid("j1"),
+			immutablePoint(1, 1),
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
+		JobSpecification js2 = JobSpecification.createSS(
+			uuid("j2"),
+			immutablePoint(2, 2),
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
 
-		JobSpecification ts1 = jobSpec(
-			"j1",
-			atSecond(0),
-			atSecond(20),
-			secondsToDuration(1));
-		JobSpecification ts2 = jobSpec(
-			"j2",
-			atSecond(0),
-			atSecond(20),
-			secondsToDuration(1));
-		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		addDependency(depGraph, "j1");
 		addDependency(depGraph, "j2", "j1");
 
-		ScheduleResult res = sc.schedule(Arrays.asList(ts1, ts2), depGraph);
+		ScheduleResult res = sc.schedule(Arrays.asList(js1, js2), depGraph);
+		
+		System.out.println( res );
 		
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
@@ -509,21 +511,70 @@ public class SchedulerTest {
 		assertThat("j2 was not scheduled",
 			j2, not(is(nullValue())));
 		assertThat("j1 was not correctly scheduled",
-			j1, satisfies(ts1));
+			j1, satisfies(js1));
 		assertThat("j2 was not correctly scheduled",
-			j2, satisfies(ts2));
+			j2, satisfies(js2));
+		assertThat("j2 was not correctly scheduled after j1",
+			j1.getFinishTime().isAfter(j2.getStartTime()), is(false));
+	}
+	
+	@Test
+	public void testScheduleDependencyTwoMargin() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+		
+		Duration margin = secondsToDuration(2);
+		sc.setInterDependencyMargin(margin);
+
+		JobSpecification js1 = JobSpecification.createSS(
+			uuid("j1"),
+			immutablePoint(1, 1),
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
+		JobSpecification js2 = JobSpecification.createSS(
+			uuid("j2"),
+			immutablePoint(2, 2),
+			atSecond(0),
+			atSecond(20),
+			secondsToDuration(1));
+		
+		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
+		addDependency(depGraph, "j1");
+		addDependency(depGraph, "j2", "j1");
+
+		ScheduleResult res = sc.schedule(Arrays.asList(js1, js2), depGraph);
+		
+		System.out.println( res );
+		
+		assertThat("scheduling was no success",
+			res.isSuccess(), is(true));
+		
+		Job j1 = res.getJobs().get(uuid("j1"));
+		Job j2 = res.getJobs().get(uuid("j2"));
+		
+		assertThat("j1 was not scheduled",
+			j1, not(is(nullValue())));
+		assertThat("j2 was not scheduled",
+			j2, not(is(nullValue())));
+		assertThat("j1 was not correctly scheduled",
+			j1, satisfies(js1));
+		assertThat("j2 was not correctly scheduled",
+			j2, satisfies(js2));
 		assertThat("j2 was not correctly scheduled after j1",
 			j1.getFinishTime().plus(margin).isAfter(j2.getStartTime()), is(false));
 	}
 
 	@Test
 	public void testScheduleDependencyInconsistence1() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
-		JobSpecification ts = jobSpec(
+		JobSpecification js = jobSpec(
 			"j1",
 			atSecond(0),
 			atSecond(0),
@@ -532,31 +583,33 @@ public class SchedulerTest {
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		
 		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("specifications and dependencies inconsistent");
 		
-		sc.schedule(singleton(ts), depGraph);
+		sc.schedule(singleton(js), depGraph);
 	}
 
 	@Test
 	public void testScheduleDependencyInconsistence2() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		addDependency(depGraph, "j1");
 		
 		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage("specifications and dependencies inconsistent");
 		
 		sc.schedule(emptyList(), depGraph);
 	}
 	
 	@Test
 	public void testSchedulePeriodicSameLocation() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
@@ -575,10 +628,10 @@ public class SchedulerTest {
 	
 	@Test
 	public void testSchedulePeriodicIndependentLocation() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
@@ -597,10 +650,10 @@ public class SchedulerTest {
 	
 	@Test
 	public void testSchedulePeriodicSameLocationTight() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
@@ -619,10 +672,10 @@ public class SchedulerTest {
 	
 	@Test
 	public void testSchedulePeriodicIndependentLocationTight() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
 		
@@ -642,10 +695,10 @@ public class SchedulerTest {
 	// TODO define error
 	@Test
 	public void testSchedulePeriodicSameLocationTooTight() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"));
 		
@@ -665,10 +718,10 @@ public class SchedulerTest {
 	// TODO define error
 	@Test
 	public void testSchedulePeriodicIndependentLocationTooTight() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"));
 		
@@ -687,11 +740,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnschedule() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
-		NodeReference wref = sc.getNodeReference("w");
+		sc.addNode(ns);
+		NodeReference wref = sc.getNodeReference("n");
 		
 		scheduleJob(sc, jobSpec("job", 1, 1, 2, 1));
 		
@@ -712,10 +765,10 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleUnknown() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
 		thrown.expect(IllegalArgumentException.class);
 		
@@ -724,11 +777,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleWithinFrozenHorizon() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
-		NodeReference wref = sc.getNodeReference("w");
+		sc.addNode(ns);
+		NodeReference wref = sc.getNodeReference("n");
 		
 		scheduleJob(sc, jobSpec("job", 1, 0, 2, 1));
 		
@@ -752,11 +805,11 @@ public class SchedulerTest {
 	
 	@Test
 	public void testUnscheduleBetweenJobs() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
-		NodeReference wref = sc.getNodeReference("w");
+		sc.addNode(ns);
+		NodeReference wref = sc.getNodeReference("n");
 		
 		scheduleJob(sc, jobSpec("j1", 0, 1, 3, 1));
 		scheduleJob(sc, jobSpec("j2", 1, 2, 6, 1));
@@ -781,18 +834,46 @@ public class SchedulerTest {
 	}
 	
 	@Test
-	public void testRescheduleJob() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+	public void testRescheduleJobDifferentLocation() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
-		NodeReference wref = sc.getNodeReference("w");
+		sc.addNode(ns);
+		NodeReference wref = sc.getNodeReference("n");
 		
-		scheduleJob(sc, jobSpec("job", 0, 0, 0, 1));
+		scheduleJob(sc, jobSpec("job", 1, 1, 10, 1));
 		
 		Job job = sc.getJob(uuid("job"));
 
-		JobSpecification newSpec = jobSpec("job", 0, 0, 20, 1);
+		JobSpecification newSpec = jobSpec("job", 2, 2, 10, 1);
+		ScheduleResult res = sc.reschedule(newSpec);
+		
+		assertThat("job wasn't rescheduled",
+			res.isSuccess(), is(true));
+		
+		sc.commit(res.getTransactionId());
+		
+		assertThat("job unknown",
+			wref.hasJob(job), is(false));
+		
+		Job rescheduled = sc.getJob(uuid("job"));
+		
+		assertThat(rescheduled, satisfies(newSpec));
+	}
+	
+	@Test
+	public void testRescheduleJobDifferentTime() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
+		
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+		NodeReference wref = sc.getNodeReference("n");
+		
+		scheduleJob(sc, jobSpec("job", 1, 1, 10, 1));
+		
+		Job job = sc.getJob(uuid("job"));
+
+		JobSpecification newSpec = jobSpec("job", 1, 1, 20, 1);
 		ScheduleResult res = sc.reschedule(newSpec);
 		
 		assertThat("job wasn't rescheduled",
@@ -810,12 +891,12 @@ public class SchedulerTest {
 	
 	@Test
 	public void testRemoveJob() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
-		NodeReference wref = sc.getNodeReference("w");
+		NodeReference wref = sc.getNodeReference("n");
 
 		ScheduleResult res = scheduleJob(sc, jobSpec("job", 0, 0, 0, 1));
 		
@@ -835,12 +916,12 @@ public class SchedulerTest {
 	
 	@Test
 	public void testRemoveLockedJob() {
-		NodeSpecification ws = nodeSpec("w", 0, 0);
+		NodeSpecification ns = nodeSpec("n", 0, 0);
 		
 		Scheduler sc = new Scheduler(new World());
-		sc.addNode(ws);
+		sc.addNode(ns);
 		
-		NodeReference wref = sc.getNodeReference("w");
+		NodeReference wref = sc.getNodeReference("n");
 
 		ScheduleResult res;
 		
