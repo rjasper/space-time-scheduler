@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,26 +18,28 @@ import com.vividsolutions.jts.geom.Point;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LocationIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator.NodeIdleSlot;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
+import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
 
 public class SingularJobScheduler {
-	
+
 	private World world = null;
-	
+
 	private WorldPerspectiveCache perspectiveCache = null;
-	
+
 	private LocalDateTime frozenHorizonTime = null;
-	
+
 	private Schedule schedule = null;
-	
+
 	private ScheduleAlternative alternative = null;
-	
+
 	private JobSpecification jobSpec = null;
-	
+
 	private int maxLocationPicks = 0;
-	
+
 	public void setWorld(World world) {
 		this.world = Objects.requireNonNull(world, "world");
 	}
@@ -64,7 +67,7 @@ public class SingularJobScheduler {
 	public void setMaxLocationPicks(int maxLocationPicks) {
 		if (maxLocationPicks <= 0)
 			throw new IllegalArgumentException("invalid number of picks");
-		
+
 		this.maxLocationPicks = maxLocationPicks;
 	}
 
@@ -75,14 +78,14 @@ public class SingularJobScheduler {
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(jobSpec, "jobSpec");
-		
+
 		if (maxLocationPicks <= 0)
 			throw new IllegalStateException("maxLocationPicks undefined");
 	}
 
 	public boolean schedule() {
 		checkParameters();
-		
+
 		Geometry locationSpace = world.space(jobSpec.getLocationSpace());
 		UUID jobId = jobSpec.getJobId();
 		LocalDateTime earliest = max(
@@ -92,7 +95,7 @@ public class SingularJobScheduler {
 
 		if (latest.isBefore(frozenHorizonTime))
 			return false;
-		
+
 		JobPlanner tp = new JobPlanner();
 
 		tp.setSchedule(schedule);
@@ -118,10 +121,11 @@ public class SingularJobScheduler {
 			// Node units have different perspectives of the world.
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the nodes are filtered by the location
-			
+
 			// FIXME ignores alternative changes completely
 			Iterable<NodeIdleSlot> nodeSlots = () -> new NodeIdleSlotIterator(
 				filterByLocation(location),
+				this::makeIdleSlotIterator,
 				frozenHorizonTime,
 				location,
 				earliest, latest, duration);
@@ -130,12 +134,12 @@ public class SingularJobScheduler {
 				Node n = ws.getNode();
 				IdleSlot s = ws.getIdleSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(n);
-				
+
 				NavigableMap<LocalDateTime, Job> wJobs = n.getNavigableJobs();
 				// true if there is one job after s.finish
 				boolean fixedEnd = !wJobs.isEmpty() &&
 					!wJobs.lastKey().isBefore( s.getFinishTime() );
-				
+
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
 				tp.setNode(n);
@@ -155,7 +159,7 @@ public class SingularJobScheduler {
 		// to schedule a job
 		return false;
 	}
-	
+
 	/**
 	 * Filters the pool of nodes which are able to reach a location in
 	 * regard to their individual size.
@@ -168,7 +172,7 @@ public class SingularJobScheduler {
 			.filter(w -> checkLocationFor(location, w))
 			.collect(toList());
 	}
-	
+
 	/**
 	 * Checks if a node is able to reach a location in regard to its size.
 	 *
@@ -179,8 +183,22 @@ public class SingularJobScheduler {
 	private boolean checkLocationFor(Point location, Node node) {
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		Geometry map = perspective.getView().getMap();
-	
+
 		return !map.contains(location);
+	}
+
+	private Iterator<IdleSlot> makeIdleSlotIterator(
+		Node node, LocalDateTime from, LocalDateTime to)
+	{
+		NodeSlotBuilder builder = new NodeSlotBuilder();
+
+		builder.setNode(node);
+		builder.setSchedule(schedule);
+		builder.setAlternative(alternative);
+		builder.setStartTime(from);
+		builder.setFinishTime(to);
+
+		return builder.build().iterator();
 	}
 
 }

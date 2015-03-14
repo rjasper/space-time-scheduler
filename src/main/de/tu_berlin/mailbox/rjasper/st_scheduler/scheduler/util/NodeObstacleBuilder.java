@@ -17,18 +17,18 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
 public class NodeObstacleBuilder {
-	
-	private Node node;
-	
-	private LocalDateTime startTime;
-	
-	private LocalDateTime finishTime;
-	
+
+	private Node node = null;
+
+	private LocalDateTime startTime = null;
+
+	private LocalDateTime finishTime = null;
+
 	private Schedule schedule = null;
-	
+
 	private ScheduleAlternative alternative = null;
 
-	private Map<Node, ImmutablePolygon> shapeLookUp;
+	private Map<Node, ImmutablePolygon> shapeLookUp = null;
 
 	public void setNode(Node node) {
 		this.node = Objects.requireNonNull(node, "node");
@@ -53,45 +53,45 @@ public class NodeObstacleBuilder {
 	public Collection<DynamicObstacle> build() {
 		checkParameters();
 		init();
-		
+
 		Collection<DynamicObstacle> nodeObstacles = new LinkedList<>();
-		
+
 		LocalDateTime from = startTime;
 		LocalDateTime to = finishTime;
-		
+
 		// TODO make code fancier (a little repetitive right now)
-	
+
 		// original trajectories
 		for (Node n : schedule.getNodes()) {
 			if (n == node)
 				continue;
-			
+
 			for (Trajectory t : n.getTrajectories(from, to))
 				nodeObstacles.add(makeNodeObstacle(n, t));
 		}
-		
+
 		// alternative trajectories added to schedule
 		for (ScheduleAlternative a : schedule.getAlternatives()) {
 			for (Node n : a.getNodes()) {
 				if (n == node)
 					continue;
-				
+
 				for (Trajectory t : a.getTrajectoryUpdates(n))
 					nodeObstacles.add(makeNodeObstacle(n, t));
 			}
 		}
-	
+
 		// alternative trajectories of current alternative
 		for (Node n : alternative.getNodes()) {
 			if (n == node)
 				continue;
-			
+
 			for (Trajectory t : alternative.getTrajectoryUpdates(n))
 				nodeObstacles.add(makeNodeObstacle(n, t));
 		}
-		
+
 		cleanUp();
-		
+
 		return nodeObstacles;
 	}
 
@@ -101,7 +101,7 @@ public class NodeObstacleBuilder {
 		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
-		
+
 		if (!startTime.isBefore(finishTime))
 			throw new IllegalStateException("startTime is not before finishTime");
 	}
@@ -109,18 +109,18 @@ public class NodeObstacleBuilder {
 	private void init() {
 		shapeLookUp = new HashMap<>();
 	}
-	
+
 	private void cleanUp() {
 		shapeLookUp = null;
 	}
 
 	private DynamicObstacle makeNodeObstacle(Node node, Trajectory trajectory) {
 		double radius = this.node.getRadius();
-		
+
 		ImmutablePolygon shape = shapeLookUp.computeIfAbsent(node, w ->
 			(ImmutablePolygon) immutable(w.getShape().buffer(radius)));
-		
+
 		return new DynamicObstacle(shape, trajectory);
 	}
-	
+
 }

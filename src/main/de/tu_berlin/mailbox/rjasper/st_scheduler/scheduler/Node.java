@@ -51,12 +51,12 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryLengthDura
  * @author Rico Jasper
  */
 public class Node {
-	
+
 	/**
 	 * The node's ID.
 	 */
 	private final String id;
-	
+
 	/**
 	 * The reference to this node.
 	 */
@@ -91,7 +91,7 @@ public class Node {
 	 * All jobs which were assigned to this node.
 	 */
 	private TreeMap<LocalDateTime, Job> jobs = new TreeMap<>();
-	
+
 	/**
 	 * Contains all consecutive trajectories of this node
 	 */
@@ -100,7 +100,7 @@ public class Node {
 	/**
 	 * Constructs a node defining its shape, maximum velocity, initial
 	 * location and initial time.
-	 * 
+	 *
 	 * @param spec
 	 *            the specification used to define configure the node.
 	 */
@@ -127,7 +127,7 @@ public class Node {
 		ImmutableList<LocalDateTime> times = ImmutableList.of(
 			initialTime, Scheduler.END_OF_TIME);
 		Trajectory initialTrajectory = new SimpleTrajectory(spatialPath, times);
-		
+
 		trajectoryContainer.update(initialTrajectory);
 	}
 
@@ -197,18 +197,18 @@ public class Node {
 	public LocalDateTime getInitialTime() {
 		return initialTime;
 	}
-	
+
 	/**
 	 * Determines whether the given job is currently assigned to this node.
-	 * 
+	 *
 	 * @param job
 	 * @return {@code true} if {@code job} is assigned.
 	 */
 	public boolean hasJob(Job job) {
 		Objects.requireNonNull(job, "job");
-		
+
 		Job retrieval = jobs.get(job.getStartTime());
-		
+
 		return retrieval != null && retrieval.equals(job);
 	}
 
@@ -218,7 +218,7 @@ public class Node {
 	public Collection<Job> getJobs() {
 		return unmodifiableCollection(jobs.values());
 	}
-	
+
 	/**
 	 * Assigns a new job to this node.
 	 *
@@ -230,16 +230,16 @@ public class Node {
 	 */
 	public void addJob(Job job) {
 		Objects.requireNonNull(job, "job");
-		
+
 		if (job.getNodeReference().getActual() != this)
 			throw new IllegalArgumentException("job not assigned to this node");
-	
+
 		jobs.put(job.getStartTime(), job);
 	}
 
 	/**
 	 * Removes a job from this node.
-	 * 
+	 *
 	 * @param job
 	 * @throws NullPointerException
 	 *             if {@code job} is {@code null}.
@@ -248,9 +248,9 @@ public class Node {
 	 */
 	public void removeJob(Job job) {
 		Objects.requireNonNull(job, "job");
-		
+
 		boolean status = jobs.remove(job.getStartTime(), job);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("unknown job");
 	}
@@ -266,7 +266,7 @@ public class Node {
 		return new MappedIntervalSet<LocalDateTime, Job>(jobs,
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
-	
+
 	public Collection<Trajectory> getTrajectories() {
 		return trajectoryContainer.getTrajectories();
 	}
@@ -277,7 +277,7 @@ public class Node {
 
 	/**
 	 * Updates the given trajectory.
-	 * 
+	 *
 	 * @param trajectory
 	 * @throws NullPointerException if {@code trajectory} is {@code null}.
 	 */
@@ -300,7 +300,7 @@ public class Node {
 
 	/**
 	 * Determines whether the node is idle for the given entire interval.
-	 * 
+	 *
 	 * @param from
 	 * @param to
 	 * @return {@code true} if the node is idle.
@@ -322,29 +322,31 @@ public class Node {
 	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to, "to");
-	
+
 		if (from.isAfter(to))
 			throw new IllegalArgumentException("from is after to");
-		
+
 		// short cut empty interval
 		if (from.isEqual(to) || !to.isAfter(initialTime))
 			return emptyList();
-		
+
 		IntervalSet<LocalDateTime> jobIntervals = getJobIntervals();
 		IntervalSet<LocalDateTime> idleIntervals = new SimpleIntervalSet<LocalDateTime>()
 			.add(max(from, initialTime), to)
 			.remove(jobIntervals);
-		
+
 		return idleIntervals.stream()
 			.map(i -> {
 				LocalDateTime startTime  = i.getFromInclusive();
 				LocalDateTime finishTime = i.getToExclusive();
-				
+
+				// optimizes the situation where left == right
+				// instead of looking it up twice
 				Trajectory left = trajectoryContainer.getTrajectory(startTime);
 				Trajectory right = left.getFinishTime().compareTo(finishTime) >= 0
 					? left
 					: trajectoryContainer.getTrajectory(finishTime);
-				
+
 				return new IdleSlot(
 					left .interpolateLocation(startTime ),
 					right.interpolateLocation(finishTime),
@@ -357,74 +359,74 @@ public class Node {
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-		
+
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
 			: lowerJob.getFinishTime();
-		
+
 		// lower.start < time
-		
+
 		int lowerFinishCmpTime = lowerFinish.compareTo(time);
-		
+
 		if (lowerFinishCmpTime > 0)
 			// time < lower.finish
 			return null;
 		else if (lowerFinishCmpTime == 0) {
 			// time == lower.finish
-	
+
 			// if floorJob and ceilJob touch
 			if (jobs.containsKey(time))
 				// lower.finish == time == ceil.start
 				return null;
 		}
-		
+
 		// lower.finish <= time <= ceil.start
 		// lower.finish < ceil.start
-		
+
 		return lowerFinish;
 	}
 
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-		
+
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
 			: lowerJob.getFinishTime();
-		
+
 		// lower.start < time
-		
+
 		// if lowerJob intersects with time
 		if (lowerFinish.compareTo(time) > 0)
 			// lower.start < time < lower.finish
 			return null;
-		
+
 		// lower.finish <= time
-		
+
 		Job ceilJob = value(jobs.ceilingEntry(time));
 		LocalDateTime ceilStart = ceilJob == null
 			? Scheduler.END_OF_TIME
 			: ceilJob.getStartTime();
-		
+
 		// time <= ceil.start
-		
+
 		// if floorJob and ceilJob touch
 		if (lowerFinish.isEqual(ceilStart))
 			// lower.finish == time == ceil.start
 			return null;
-		
+
 		// lower.finish <= time <= ceil.start
 		// lower.finish < ceil.start
-		
+
 		return ceilStart;
 	}
 
 	/**
 	 * Determines whether the node unit is following a stationary trajectory
 	 * during the given time interval.
-	 * 
+	 *
 	 * @param from
 	 * @param to
 	 * @return {@code true} if the node is stationary.
@@ -435,7 +437,7 @@ public class Node {
 
 	/**
 	 * Interpolates the location of the node at the given time.
-	 * 
+	 *
 	 * @param time
 	 * @return the interpolated location.
 	 */
@@ -446,23 +448,23 @@ public class Node {
 	public Duration calcJobDuration(LocalDateTime from, LocalDateTime to) {
 		return calcDuration( getJobIntervals().intersection(from, to) );
 	}
-	
+
 	public Duration calcMotionDuration(LocalDateTime from, LocalDateTime to) {
 			return trajectoryContainer.getTrajectories(from, to).stream()
 				.map(t -> {
 					LocalDateTime tFrom = max(from, t.getStartTime());
 					LocalDateTime tTo = min(to, t.getFinishTime());
-					
+
 					if (t instanceof DecomposedTrajectory) {
 						DecomposedTrajectory dt = (DecomposedTrajectory) t;
-						
+
 						LocalDateTime baseTime = dt.getBaseTime();
 						double tFromD = timeToSeconds(tFrom, baseTime);
 						double tToD = timeToSeconds(tTo, baseTime);
-						
+
 						IntervalSet<Double> intervals = calcMotionIntervals(
 							dt.getArcTimePathComponent(), tFromD, tToD);
-						
+
 						return secondsToDuration( calcDouble(intervals) );
 					} else {
 						return calcDuration( calcMotionIntervals(t, tFrom, tTo));
@@ -475,14 +477,14 @@ public class Node {
 	public double calcJobLoad(LocalDateTime from, LocalDateTime to) {
 		Duration scopeDuration = Duration.between(from, to);
 		Duration jobsDuration = calcJobDuration(from, to);
-		
+
 		return durationToSeconds(jobsDuration) / durationToSeconds(scopeDuration);
 	}
 
 	public double calcMotionLoad(LocalDateTime from, LocalDateTime to) {
 		Duration scopeDuration = Duration.between(from, to);
 		Duration motionDuration = calcMotionDuration(from, to);
-		
+
 		return durationToSeconds(motionDuration) / durationToSeconds(scopeDuration);
 	}
 
@@ -501,7 +503,7 @@ public class Node {
 		Duration loadDuration =
 			calcJobDuration(from, to).plus(
 			calcMotionDuration(from, to));
-		
+
 		return durationToSeconds(scopeDuration.minus(loadDuration)) /
 			durationToSeconds(scopeDuration);
 	}
@@ -509,13 +511,13 @@ public class Node {
 	public double calcVelocityLoad(LocalDateTime from, LocalDateTime to) {
 		if (from.isBefore(initialTime))
 			throw new IllegalArgumentException("from is before initial time");
-		
+
 		LengthDuration lengthDuration = trajectoryContainer
 			.getTrajectories(from, to).stream()
 			.map(t -> {
 				LocalDateTime tFrom = max(from, t.getStartTime());
 				LocalDateTime tTo = min(to, t.getFinishTime());
-				
+
 				return calcLengthDuration(t, tFrom, tTo);
 			})
 			.reduce((ld1, ld2) ->
@@ -523,18 +525,18 @@ public class Node {
 					ld1.getLength() + ld2.getLength(),
 					ld1.getDuration().plus(ld2.getDuration()))
 			).get();
-		
+
 		return lengthDuration.getLength() /
 			(getMaxSpeed() * durationToSeconds( lengthDuration.getDuration() ));
 	}
-	
+
 	private static Duration calcDuration(IntervalSet<LocalDateTime> timeIntervals) {
 		return timeIntervals.stream()
 			.map(ti -> Duration.between(ti.getFromInclusive(), ti.getToExclusive()))
 			.reduce(Duration::plus)
 			.orElse(Duration.ZERO);
 	}
-	
+
 	private static double calcDouble(IntervalSet<Double> doubleIntervals) {
 		return doubleIntervals.stream()
 			.map(di -> di.getToExclusive() - di.getFromInclusive())
@@ -545,17 +547,17 @@ public class Node {
 	public void cleanUp(LocalDateTime presentTime) {
 		// remove past trajectories
 		trajectoryContainer.deleteBefore(presentTime);
-		
+
 		// remove past jobs
-		
+
 		Job lowerJob = value( jobs.lowerEntry(presentTime) );
-		
+
 		// determine lowest key not to be removed
 		if (lowerJob != null) {
 			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
 				? lowerJob.getStartTime()
 				: presentTime;
-				
+
 			jobs.headMap(lowestKey).clear();
 		}
 	}
