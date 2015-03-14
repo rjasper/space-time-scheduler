@@ -21,7 +21,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 
-public final class DepencentJobsExample {
+public final class DependentJobsExample {
 	
 	public static void main(String[] args) {
 		Scheduler sc = new Scheduler(new World());
