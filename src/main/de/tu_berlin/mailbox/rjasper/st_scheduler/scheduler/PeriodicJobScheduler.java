@@ -118,12 +118,8 @@ public class PeriodicJobScheduler {
 			boolean noBreak = true;
 			for (UUID jobId : jobIds) {
 				LocalDateTime periodFinish = periodStart.plus(period);
-				// TODO remove this (remains only for failure reproduction)
-				JobSpecification jobSpec = new JobSpecification(
+				JobSpecification jobSpec = JobSpecification.createSF(
 					jobId, immutable(location), periodStart, periodFinish, duration);
-				// FIXME use this
-//				JobSpecification jobSpec = JobSpecification.createSF(
-//					jobId, immutable(location), periodStart, periodFinish, duration);
 				
 				sc.setSpecification(jobSpec);
 				
@@ -169,12 +165,8 @@ public class PeriodicJobScheduler {
 		boolean noBreak = true;
 		for (UUID jobId : jobIds) {
 			LocalDateTime periodFinish = periodStart.plus(period);
-			// TODO remove this (remains only for failure reproduction)
-			JobSpecification jobSpec = new JobSpecification(
+			JobSpecification jobSpec = JobSpecification.createSF(
 				jobId, immutable(locationSpace), periodStart, periodFinish, duration);
-			// FIXME use this
-//			JobSpecification jobSpec = JobSpecification.createSF(
-//				jobId, immutable(locationSpace), periodStart, periodFinish, duration);
 			
 			sc.setSpecification(jobSpec);
 			

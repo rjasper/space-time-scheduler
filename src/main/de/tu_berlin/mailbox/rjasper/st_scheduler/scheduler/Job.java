@@ -30,7 +30,7 @@ public class Job {
 	/**
 	 * The node assigned to this job.
 	 */
-	private final NodeReference assignedNode;
+	private final NodeReference nodeReference;
 
 	/**
 	 * The location where the job is executed.
@@ -57,7 +57,7 @@ public class Job {
 	 * and duration.
 	 * 
 	 * @param id
-	 * @param assignedNode
+	 * @param nodeReference
 	 * @param location
 	 * @param startTime
 	 * @param finishTime
@@ -75,13 +75,13 @@ public class Job {
 	 */
 	public Job(
 		UUID id,
-		NodeReference assignedNode,
+		NodeReference nodeReference,
 		ImmutablePoint location,
 		LocalDateTime startTime,
 		Duration duration)
 	{
 		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(assignedNode, "assignedNode");
+		Objects.requireNonNull(nodeReference, "nodeReference");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(duration, "duration");
 		GeometriesRequire.requireValid2DPoint(location, "location");
@@ -90,7 +90,7 @@ public class Job {
 			throw new IllegalArgumentException("invalid duration");
 
 		this.id = id;
-		this.assignedNode = assignedNode;
+		this.nodeReference = nodeReference;
 		this.location = location;
 		this.startTime = startTime;
 		this.finishTime = startTime.plus(duration);
@@ -103,12 +103,16 @@ public class Job {
 	public UUID getId() {
 		return id;
 	}
+	
+	Node getNode() {
+		return nodeReference.getActual();
+	}
 
 	/**
 	 * @return the assigned node.
 	 */
 	public NodeReference getNodeReference() {
-		return assignedNode;
+		return nodeReference;
 	}
 
 	/**
@@ -148,7 +152,7 @@ public class Job {
 	public String toString() {
 		// lazy evaluation
 		Supplier<String> defaultString = () -> String.format("%s@%s:(%s, %s, %s)",
-			id, assignedNode, location, startTime, finishTime);
+			id, nodeReference, location, startTime, finishTime);
 
 		return NameProvider.nameForOrDefault(this, defaultString);
 	}

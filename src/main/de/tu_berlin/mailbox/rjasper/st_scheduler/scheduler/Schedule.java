@@ -1,14 +1,12 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
 import static de.tu_berlin.mailbox.rjasper.collect.Maps.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
 import static java.util.Collections.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -31,18 +29,7 @@ public class Schedule {
 
 	private final Set<ScheduleAlternative> alternatives = new HashSet<>();
 	
-	private final Map<Node, NodeLocks> locks = new IdentityHashMap<>();
-	
 	private final Set<UUID> jobIdLock = new HashSet<>();
-	
-	// TODO integrate in node
-	private static class NodeLocks {
-		
-		public final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
-		
-		public final Set<Job> jobRemovalLock = new HashSet<>();
-		
-	}
 	
 	public boolean hasAlternative(ScheduleAlternative alternative) {
 		return alternatives.contains(alternative);
@@ -70,8 +57,6 @@ public class Schedule {
 		
 		if (previous != null)
 			throw new IllegalArgumentException("node id already assigned");
-		
-		locks.put(node, new NodeLocks());
 	}
 	
 	public void removeNode(String nodeId) {
@@ -85,7 +70,6 @@ public class Schedule {
 			throw new IllegalStateException("node still has scheduled jobs");
 		
 		nodes.remove(nodeId);
-		locks.remove(node);
 	}
 	
 	public Job getJob(UUID jobId) {
@@ -99,43 +83,13 @@ public class Schedule {
 	
 	public void removeJob(UUID jobId) {
 		Job job = getJob(jobId);
-		
-		if (isJobLockedForRemoval(job))
-			throw new IllegalStateException("job is locked for removal");
-		
 		Node node = job.getNodeReference().getActual();
+		
+		if (node.hasJobLockedForRemoval(job))
+			throw new IllegalStateException("job is locked for removal");
 		
 		node.removeJob(job);
 		jobs.remove(jobId);
-	}
-	
-	public IntervalSet<LocalDateTime> getTrajectoryLock(Node node) {
-		Objects.requireNonNull(node, "node");
-		
-		NodeLocks nodeLocks = locks.get(node);
-		
-		if (nodeLocks == null)
-			throw new IllegalArgumentException("unknown node");
-		
-		return unmodifiableIntervalSet(nodeLocks.trajectoryLock);
-	}
-	
-	public Set<Job> getJobRemovalLock(Node node) {
-		Objects.requireNonNull(node, "node");
-		
-		NodeLocks nodeLocks = locks.get(node);
-		
-		if (nodeLocks == null)
-			throw new IllegalArgumentException("unknown node");
-		
-		return unmodifiableSet(nodeLocks.jobRemovalLock);
-	}
-	
-	public boolean isJobLockedForRemoval(Job job) {
-		Node node = job.getNodeReference().getActual();
-		Set<Job> lock = getJobRemovalLock(node);
-		
-		return lock.contains(job);
 	}
 	
 	public Collection<ScheduleAlternative> getAlternatives() {
@@ -215,10 +169,6 @@ public class Schedule {
 	private void checkCompatibility(ScheduleAlternative alternative) {
 		for (NodeUpdate u : alternative.getUpdates()) {
 			Node node = u.getNode();
-			NodeLocks nodeLocks = locks.get(node);
-			
-			if (nodeLocks == null)
-				throw new IllegalArgumentException("unknown node");
 
 			IntervalSet<LocalDateTime> originJobsIntervals = node.getJobIntervals();
 			IntervalSet<LocalDateTime> removalsIntervals = u.getJobRemovalIntervals();
@@ -244,7 +194,7 @@ public class Schedule {
 				throw new IllegalArgumentException("trajectory lock violation");
 			}
 			// no mutual trajectory locks with other alternatives
-			if (trajLockIntervals.intersects(nodeLocks.trajectoryLock))
+			if (trajLockIntervals.intersects(node.getTrajectoryLock()))
 				throw new IllegalArgumentException("trajectory lock violation");
 			// continuous trajectories
 			if (!verifyTrajectoryContinuity(node, u.getTrajectories()))
@@ -256,7 +206,7 @@ public class Schedule {
 			if (!removals.stream().allMatch(node::hasJob))
 				throw new IllegalArgumentException("unknown job removal");
 			// no mutual job removals
-			if (removals.stream().anyMatch(nodeLocks.jobRemovalLock::contains))
+			if (removals.stream().anyMatch(node.getJobRemovalLock()::contains))
 				throw new IllegalArgumentException("job removal lock violation");
 		}
 	}
@@ -372,10 +322,12 @@ public class Schedule {
 	}
 	
 	private void applyLocks(NodeUpdate update) {
-		NodeLocks nodeLocks = locks.get(update.getNode());
+		Node node = update.getNode();
 		
-		nodeLocks.trajectoryLock .add   ( update.getTrajectoryLock() );
-		nodeLocks.jobRemovalLock.addAll( update.getJobRemovals()     );
+		node.addTrajectoryLock( update.getTrajectoryLock() );
+		
+		for (Job j : update.getJobRemovals())
+			node.addJobRemovalLock(j);
 		
 		update.getJobs().stream()
 			.map(Job::getId)
@@ -388,10 +340,12 @@ public class Schedule {
 	}
 	
 	private void releaseLocks(NodeUpdate update) {
-		NodeLocks nodeLocks = locks.get(update.getNode());
+		Node node = update.getNode();
 		
-		nodeLocks.trajectoryLock .remove   ( update.getTrajectoryLock() );
-		nodeLocks.jobRemovalLock.removeAll( update.getJobRemovals()     );
+		node.removeTrajectoryLock( update.getTrajectoryLock() );
+
+		for (Job j : update.getJobRemovals())
+			node.removeJobRemovalLock(j);
 		
 		update.getJobs().stream()
 			.map(Job::getId)

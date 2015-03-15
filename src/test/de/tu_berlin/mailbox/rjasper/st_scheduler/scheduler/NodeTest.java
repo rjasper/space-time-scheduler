@@ -37,15 +37,15 @@ public class NodeTest {
 //	public void testIdleSubSet() {
 //		Node node = NodeFixtures.withThreeJobs();
 //		
-//		Collection<IdleSlot> slots = node.idleSlots(
+//		Collection<NodeSlot> slots = node.NodeSlots(
 //			atHour( 0),
 //			atHour(18)
 //		);
 //		
-//		Collection<IdleSlot> expected = Arrays.asList(
-//			new IdleSlot(immutablePoint( 0,  0), immutablePoint(10, 10), atHour( 0), atHour( 6)),
-//			new IdleSlot(immutablePoint(10, 10), immutablePoint(20, 10), atHour( 7), atHour(12)),
-//			new IdleSlot(immutablePoint(20, 10), immutablePoint(20, 20), atHour(15), atHour(18)));
+//		Collection<NodeSlot> expected = Arrays.asList(
+//			new NodeSlot(immutablePoint( 0,  0), immutablePoint(10, 10), atHour( 0), atHour( 6)),
+//			new NodeSlot(immutablePoint(10, 10), immutablePoint(20, 10), atHour( 7), atHour(12)),
+//			new NodeSlot(immutablePoint(20, 10), immutablePoint(20, 20), atHour(15), atHour(18)));
 //		
 //		assertThat(slots, equalTo(expected));
 //	}
@@ -125,25 +125,25 @@ public class NodeTest {
 	}
 	
 	@Test
-	public void testIdleSlotsEmptyInterval() {
+	public void testNodeSlotsEmptyInterval() {
 		Node node = node("node", 0, 0);
 		
-		Collection<IdleSlot> slots = node.idleSlots(atSecond(1), atSecond(1));
+		Collection<SpaceTimeSlot> slots = node.NodeSlots(atSecond(1), atSecond(1));
 		
 		assertThat(slots.isEmpty(), is(true));
 	}
 	
 	@Test
-	public void testIdleSlotsEmptyInitialTime() {
+	public void testNodeSlotsEmptyInitialTime() {
 		Node node = node("node", 0, 0);
 		
-		Collection<IdleSlot> slots = node.idleSlots(LocalDateTime.MIN, atSecond(0));
+		Collection<SpaceTimeSlot> slots = node.NodeSlots(LocalDateTime.MIN, atSecond(0));
 		
 		assertThat(slots.isEmpty(), is(true));
 	}
 	
 	@Test
-	public void testIdleSlots() {
+	public void testNodeSlots() {
 		Node node = node("node", 0, 0);
 		NodeReference ref = node.getReference();
 		
@@ -161,12 +161,12 @@ public class NodeTest {
 		node.addJob(j2);
 		node.addJob(j3);
 		
-		Collection<IdleSlot> slots = node.idleSlots(atSecond(0.5), atSecond(4.5));
+		Collection<SpaceTimeSlot> slots = node.NodeSlots(atSecond(0.5), atSecond(4.5));
 		
-		Collection<IdleSlot> expected = Arrays.asList(
-			new IdleSlot(immutablePoint(0, 0.5), immutablePoint(0, 1  ), atSecond(0.5), atSecond(1  )),
-			new IdleSlot(immutablePoint(0, 1  ), immutablePoint(1, 1  ), atSecond(2  ), atSecond(3  )),
-			new IdleSlot(immutablePoint(1, 1  ), immutablePoint(1, 0.5), atSecond(4  ), atSecond(4.5)));
+		Collection<SpaceTimeSlot> expected = Arrays.asList(
+			new SpaceTimeSlot(immutablePoint(0, 0.5), immutablePoint(0, 1  ), atSecond(0.5), atSecond(1  )),
+			new SpaceTimeSlot(immutablePoint(0, 1  ), immutablePoint(1, 1  ), atSecond(2  ), atSecond(3  )),
+			new SpaceTimeSlot(immutablePoint(1, 1  ), immutablePoint(1, 0.5), atSecond(4  ), atSecond(4.5)));
 		
 		assertThat(slots, equalTo(expected));
 	}

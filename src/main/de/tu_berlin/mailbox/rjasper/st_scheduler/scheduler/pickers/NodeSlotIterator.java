@@ -14,9 +14,10 @@ import java.util.Objects;
 import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.SpaceTimeSlot;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
 
 // TODO document
 /**
@@ -28,14 +29,14 @@ import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
  *
  * @author Rico Jasper
  */
-public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeIdleSlot> {
+public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 
 	// TODO sort by least detour
 
 	/**
 	 * Helper class to pair a node and one of its idle slots.
 	 */
-	public static class NodeIdleSlot {
+	public static class NodeSlot {
 
 		/**
 		 * The node of the idle slot.
@@ -45,17 +46,17 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		/**
 		 * The idle slot.
 		 */
-		private final IdleSlot idleSlot;
+		private final SpaceTimeSlot slot;
 
 		/**
 		 * Pairs an idle slot with its node.
 		 *
 		 * @param node
-		 * @param idleSlot
+		 * @param NodeSlot
 		 */
-		public NodeIdleSlot(Node node, IdleSlot idleSlot) {
+		public NodeSlot(Node node, SpaceTimeSlot slot) {
 			this.node = node;
-			this.idleSlot = idleSlot;
+			this.slot = slot;
 		}
 
 		/**
@@ -68,11 +69,13 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		/**
 		 * @return the idle slot.
 		 */
-		public IdleSlot getIdleSlot() {
-			return idleSlot;
+		public SpaceTimeSlot getSlot() {
+			return slot;
 		}
 
 	}
+	
+	private final ScheduleAlternative alternative;
 
 	private final LocalDateTime frozenHorizonTime;
 
@@ -95,16 +98,8 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 * The duration of the job execution.
 	 */
 	private final Duration duration;
-
-	/**
-	 * Generates the slot iterator for the given node and time interval.
-	 */
-	private final TriFunction<
-		Node,
-		LocalDateTime,
-		LocalDateTime,
-		Iterator<IdleSlot>>
-	slotsGenerator;
+	
+	private final NodeSlotBuilder slotBuilder;
 
 	/**
 	 * An iterator over the nodes to be considered.
@@ -114,7 +109,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	/**
 	 * An iterator over the idle slots of the current node.
 	 */
-	private Iterator<IdleSlot> slotIterator;
+	private Iterator<SpaceTimeSlot> slotIterator;
 
 	/**
 	 * The next node to be returned as current node.
@@ -124,7 +119,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	/**
 	 * The next slot to be returned as current slot.
 	 */
-	private IdleSlot nextSlot = null;
+	private SpaceTimeSlot nextSlot = null;
 
 	/**
 	 * The current node of the iteration.
@@ -134,29 +129,38 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	/**
 	 * The current slot of the iteration.
 	 */
-	private IdleSlot currentSlot = null;
+	private SpaceTimeSlot currentSlot = null;
 
 	/**
-	 * Constructs a NodeSlotIterator which iterates over the given set of
-	 * nodes to while checking against the given job specifications.
+	 * Constructs a NodeSlotIterator which iterates over the given set of nodes
+	 * to while checking against the given job specifications.
+	 * 
+	 * @param nodes
+	 *            the node pool to check
+	 * @param alternative
+	 * @param frozenHorizonTime
+	 * @param location
+	 *            of the job
+	 * @param earliestStartTime
+	 *            the earliest time to begin the job execution
+	 * @param latestStartTime
+	 *            the latest time to begin the job execution
+	 * @param duration
+	 *            of the job
 	 *
-	 * @param nodes the node pool to check
-	 * @param location of the job
-	 * @param earliestStartTime the earliest time to begin the job execution
-	 * @param latestStartTime the latest time to begin the job execution
-	 * @param duration of the job
-	 *
-	 * @throws NullPointerException if any argument is {@code null}.
-	 * @throws IllegalArgumentException if any of the following is true:
-	 * <ul>
-	 * <li>The location is empty or invalid.</li>
-	 * <li>The earliestStartTime is after the latestStartTime.</li>
-	 * <li>The duration is negative.</li>
-	 * </ul>
+	 * @throws NullPointerException
+	 *             if any argument is {@code null}.
+	 * @throws IllegalArgumentException
+	 *             if any of the following is true:
+	 *             <ul>
+	 *             <li>The location is empty or invalid.</li>
+	 *             <li>The earliestStartTime is after the latestStartTime.</li>
+	 *             <li>The duration is negative.</li>
+	 *             </ul>
 	 */
-	public NodeIdleSlotIterator(
+	public NodeSlotIterator(
 		Iterable<Node> nodes,
-		TriFunction<Node, LocalDateTime, LocalDateTime, Iterator<IdleSlot>> slotGenerator,
+		ScheduleAlternative alternative,
 		LocalDateTime frozenHorizonTime,
 		Point location,
 		LocalDateTime earliestStartTime,
@@ -164,7 +168,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		Duration duration)
 	{
 		Objects.requireNonNull(nodes, "nodes");
-		Objects.requireNonNull(slotGenerator, "slotGenerator");
+		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(frozenHorizonTime, "frozenHorizon");
 		Objects.requireNonNull(location, "location");
 		Objects.requireNonNull(earliestStartTime, "earliestStartTime");
@@ -179,7 +183,8 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 			throw new IllegalArgumentException("duration is negative");
 
 		this.nodeIterator = nodes.iterator();
-		this.slotsGenerator = slotGenerator;
+		this.alternative = alternative;
+		this.slotBuilder = new NodeSlotBuilder();
 		this.frozenHorizonTime = frozenHorizonTime;
 		this.location = location;
 		this.earliestStartTime = earliestStartTime;
@@ -190,9 +195,19 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 		// requested. This enables an easy check whether or not there is a next
 		// pair.
 		if (!frozenHorizonTime.isAfter(latestStartTime)) {
+			initSlotBuilder();
+			
 			nextNode();
 			nextSlot();
 		}
+	}
+	
+	private void initSlotBuilder() {
+		slotBuilder.setAlternative(alternative);
+		slotBuilder.setFrozenHorizonTime(frozenHorizonTime);
+		slotBuilder.setStartTime(earliestStartTime);
+		slotBuilder.setFinishTime(latestStartTime());
+		slotBuilder.setOverlapping(true);
 	}
 
 	@Override
@@ -210,7 +225,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	/**
 	 * @return the current slot of the iteration.
 	 */
-	public IdleSlot getCurrentSlot() {
+	public SpaceTimeSlot getCurrentSlot() {
 		return currentSlot;
 	}
 
@@ -227,7 +242,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 * @see java.util.Iterator#next()
 	 */
 	@Override
-	public NodeIdleSlot next() {
+	public NodeSlot next() {
 		if (!hasNext())
 			throw new NoSuchElementException();
 
@@ -236,7 +251,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 
 		nextSlot();
 
-		return new NodeIdleSlot(getCurrentNode(), getCurrentSlot());
+		return new NodeSlot(getCurrentNode(), getCurrentSlot());
 	}
 
 	/**
@@ -246,38 +261,8 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 */
 	private Node nextNode() {
 		// sets the next node and initializes an new idle slot iterator
-
-//		Node node;
-//		LocalDateTime from, to;
-//		do {
-//			if (!nodeIterator.hasNext()) {
-//				node = null;
-//				from = null;
-//				to = null;
-//
-//				break;
-//			}
-//
-//			node = nodeIterator.next();
-//
-//			LocalDateTime earliest = earliestStartTime(node);
-//			LocalDateTime latest = latestStartTime();
-//			// FIXME not accurate
-//			LocalDateTime floorIdle = node.floorIdleTimeOrNull(earliest);
-//			LocalDateTime ceilIdle = node.ceilingIdleTimeOrNull(latest);
-//
-//			from = max(
-//				floorIdle != null ? floorIdle : earliest,
-//				frozenHorizonTime);
-//			to = ceilIdle  != null ? ceilIdle  : latest;
-//		} while (from.isAfter(to));
-//
-//
-//		nextNode = node;
-//		slotIterator = node == null // indicates loop break
-//			? emptyIterator()
-//			: slotsGenerator.apply(node, from, to);
 		
+		// seek the next node with available slots
 		do {
 			if (!nodeIterator.hasNext()) {
 				nextNode = null;
@@ -288,7 +273,8 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 			
 			nextNode = nodeIterator.next();
 			
-			slotIterator = slotsGenerator.apply(nextNode, earliestStartTime, latestStartTime);
+			slotBuilder.setNode(nextNode);
+			slotIterator = slotBuilder.build().iterator();
 		} while (!slotIterator.hasNext());
 
 		return nextNode;
@@ -299,9 +285,8 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 *
 	 * @return the next idle slot.
 	 */
-	private IdleSlot nextSlot() {
-//		Node node = nextNode;
-		IdleSlot slot = null;
+	private SpaceTimeSlot nextSlot() {
+		SpaceTimeSlot slot = null;
 
 		// iterates over the remaining idle slots of the remaining nodes
 		// until a valid slot was found
@@ -312,7 +297,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 				nextNode();
 			// otherwise check the next idle slot
 			} else {
-				IdleSlot candidate = slotIterator.next();
+				SpaceTimeSlot candidate = slotIterator.next();
 
 				// break if the current idle slot is accepted
 				if (check(nextNode, candidate)) {
@@ -342,7 +327,7 @@ public class NodeIdleSlotIterator implements Iterator<NodeIdleSlotIterator.NodeI
 	 * @param slot
 	 * @return {@code true} iff node can potentially execute the job in time.
 	 */
-	private boolean check(Node node, IdleSlot slot) {
+	private boolean check(Node node, SpaceTimeSlot slot) {
 		double vInv = 1. / node.getMaxSpeed();
 		LocalDateTime t1 = slot.getStartTime();
 		LocalDateTime t2 = slot.getFinishTime();

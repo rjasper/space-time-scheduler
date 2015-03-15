@@ -11,13 +11,13 @@ import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobPlanner;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Schedule;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.SpaceTimeSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.StraightEdgePathfinder;
@@ -123,7 +123,7 @@ public class NodeFactory {
 		if (floorTime == null || ceilTime == null)
 			return false;
 		
-		IdleSlot idleSlot = node.idleSlots(floorTime, ceilTime).iterator().next();
+		SpaceTimeSlot NodeSlot = node.NodeSlots(floorTime, ceilTime).iterator().next();
 		WorldPerspective perspective = new WorldPerspective(
 			new World(), new StraightEdgePathfinder());
 		Schedule schedule = new Schedule();
@@ -137,7 +137,7 @@ public class NodeFactory {
 		tp.setEarliestStartTime(time);
 		tp.setLatestStartTime(time);
 		tp.setDuration(duration);
-		tp.setIdleSlot(idleSlot);
+		tp.setNodeSlot(NodeSlot);
 		tp.setWorldPerspective(perspective);
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);

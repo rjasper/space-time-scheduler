@@ -66,7 +66,7 @@ public class ScheduleTest {
 		
 		schedule.addAlternative(sa);
 		
-		assertThat(schedule.getTrajectoryLock(n),
+		assertThat(n.getTrajectoryLock(),
 			equalTo(intervalSet(atSecond(1), atSecond(2))));
 	}
 	
@@ -86,7 +86,7 @@ public class ScheduleTest {
 		
 		schedule.addAlternative(sa);
 		
-		assertThat(schedule.getTrajectoryLock(n),
+		assertThat(n.getTrajectoryLock(),
 			equalTo(intervalSet(atSecond(0), atSecond(1))));
 	}
 	
@@ -107,7 +107,7 @@ public class ScheduleTest {
 		
 		schedule.addAlternative(sa);
 		
-		Iterator<Job> removalsLock = schedule.getJobRemovalLock(n).iterator();
+		Iterator<Job> removalsLock = n.getJobRemovalLock().iterator();
 		
 		assertThat(removalsLock.next(), is(job));
 		assertThat(removalsLock.hasNext(), is(false));
@@ -413,12 +413,10 @@ public class ScheduleTest {
 		
 		// removed locks
 		assertThat("trajectory lock not removed",
-			schedule.getTrajectoryLock(n)
-			.intersects(atSecond(0), atSecond(3)),
+			n.getTrajectoryLock().intersects(atSecond(0), atSecond(3)),
 			is(false));
 		assertThat("job removal lock not removed",
-			schedule.getJobRemovalLock(n)
-			.contains(jobToRemove),
+			n.getJobRemovalLock().contains(jobToRemove),
 			is(false));
 		
 		// applied changes
@@ -468,12 +466,10 @@ public class ScheduleTest {
 		
 		// removed locks
 		assertThat("trajectory lock not removed",
-			schedule.getTrajectoryLock(n)
-			.intersects(atSecond(0), atSecond(3)),
+			n.getTrajectoryLock().intersects(atSecond(0), atSecond(3)),
 			is(false));
 		assertThat("job removal lock not removed",
-			schedule.getJobRemovalLock(n)
-			.contains(jobToRemove),
+			n.getJobRemovalLock().contains(jobToRemove),
 			is(false));
 		
 		// didn't apply changes

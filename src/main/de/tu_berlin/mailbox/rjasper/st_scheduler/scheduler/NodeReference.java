@@ -179,8 +179,8 @@ public class NodeReference  {
 	 * @throws IllegalArgumentException
 	 *             if the interval is invalid.
 	 */
-	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
-		return node.idleSlots(from, to);
+	public Collection<SpaceTimeSlot> NodeSlots(LocalDateTime from, LocalDateTime to) {
+		return node.NodeSlots(from, to);
 	}
 
 	/**

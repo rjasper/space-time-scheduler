@@ -8,12 +8,12 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 
 /**
- * <p>The IdleSlot class represents the idle time of a {@link Node} while
+ * <p>The NodeSlot class represents the idle time of a {@link Node} while
  * not being occupied by a job. This also includes the time to drive from
  * one job to the next job.</p>
  *
  * <p>An object of this class stores a quadruple containing the start and end time
- * of this IdleSlot and the locations of the node at those times. The time
+ * of this NodeSlot and the locations of the node at those times. The time
  * interval should always be as large as possible, i.e., the node was
  * occupied right before the idle slot started and is occupied again immediately
  * after the slot ended. The two exceptions to this are the times before the
@@ -22,7 +22,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  *
  * @author Rico Jasper
  */
-public class IdleSlot {
+public class SpaceTimeSlot {
 
 	/**
 	 * The location before idling.
@@ -50,7 +50,7 @@ public class IdleSlot {
 	private transient Duration duration = null;
 
 	/**
-	 * Constructs a new IdleSlot specified by the time interval and locations
+	 * Constructs a new NodeSlot specified by the time interval and locations
 	 * of the start and end.
 	 *
 	 * @param startLocation
@@ -63,7 +63,7 @@ public class IdleSlot {
 	 *             if locations are empty or invalid or
 	 *             the startTime is equal to or before the finishTime
 	 */
-	public IdleSlot(
+	public SpaceTimeSlot(
 		ImmutablePoint startLocation,
 		ImmutablePoint finishLocation,
 		LocalDateTime startTime,
@@ -156,7 +156,7 @@ public class IdleSlot {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		IdleSlot other = (IdleSlot) obj;
+		SpaceTimeSlot other = (SpaceTimeSlot) obj;
 		if (finishLocation == null) {
 			if (other.finishLocation != null)
 				return false;

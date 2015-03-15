@@ -36,8 +36,6 @@ import de.tu_berlin.mailbox.rjasper.util.UUIDFactory;
 
 public class SchedulerTest {
 
-	// TODO test to atomically schedule multiple jobs with overlapping time constraints.
-
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
@@ -546,8 +544,6 @@ public class SchedulerTest {
 
 		ScheduleResult res = sc.schedule(Arrays.asList(js1, js2), depGraph);
 
-		System.out.println( res );
-
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
 
@@ -594,8 +590,6 @@ public class SchedulerTest {
 		addDependency(depGraph, "j2", "j1");
 
 		ScheduleResult res = sc.schedule(Arrays.asList(js1, js2), depGraph);
-
-		System.out.println( res );
 
 		assertThat("scheduling was no success",
 			res.isSuccess(), is(true));
@@ -738,6 +732,52 @@ public class SchedulerTest {
 		ScheduleResult res = sc.schedule(ps);
 
 		assertThat(res.getJobs().values(), satisfy(ps));
+	}
+
+	@Test
+	public void testSchedulePeriodicSameLocationTooTight() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
+
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
+
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			true,
+			secondsToDuration(1),
+			atSecond(-0.5),
+			secondsToDuration(1));
+
+		ScheduleResult res = sc.schedule(ps);
+
+		assertThat("scheduled impossible periodic job",
+			res.isError(), is(true));
+	}
+
+	@Test
+	public void testSchedulePeriodicIndependentLocationTooTight() {
+		NodeSpecification ns = nodeSpec("n", 0, 0);
+
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(ns);
+
+		ImmutableList<UUID> jobIds = ImmutableList.of(uuid("j1"), uuid("j2"), uuid("j3"));
+
+		PeriodicJobSpecification ps = new PeriodicJobSpecification(
+			jobIds,
+			immutablePoint(0, 0),
+			false,
+			secondsToDuration(1),
+			atSecond(-0.5),
+			secondsToDuration(1));
+
+		ScheduleResult res = sc.schedule(ps);
+
+		assertThat("scheduled impossible periodic job",
+			res.isError(), is(true));
 	}
 
 	@Test

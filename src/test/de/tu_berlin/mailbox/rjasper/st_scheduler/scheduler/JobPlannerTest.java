@@ -57,7 +57,7 @@ public class JobPlannerTest {
 		if (floorTime == null || ceilTime == null)
 			return false;
 		
-		IdleSlot idleSlot = node.idleSlots(floorTime, ceilTime).iterator().next();
+		SpaceTimeSlot NodeSlot = node.NodeSlots(floorTime, ceilTime).iterator().next();
 		WorldPerspectiveCache cache = new RadiusBasedWorldPerspectiveCache(
 			world, StraightEdgePathfinder.class);
 		WorldPerspective perspective = cache.getPerspectiveFor(node);
@@ -72,7 +72,7 @@ public class JobPlannerTest {
 		tp.setEarliestStartTime(startTime);
 		tp.setLatestStartTime(startTime);
 		tp.setDuration(duration);
-		tp.setIdleSlot(idleSlot);
+		tp.setNodeSlot(NodeSlot);
 		tp.setWorldPerspective(perspective);
 		tp.setSchedule(schedule);
 		tp.setScheduleAlternative(alternative);

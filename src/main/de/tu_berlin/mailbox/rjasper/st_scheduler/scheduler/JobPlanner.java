@@ -83,7 +83,7 @@ public class JobPlanner {
 	/**
 	 * The used idle slot to schedule the job.
 	 */
-	private IdleSlot idleSlot = null;
+	private SpaceTimeSlot NodeSlot = null;
 	
 	/**
 	 * The world perspective of obstacles as perceived by the {@link #node}.
@@ -134,8 +134,8 @@ public class JobPlanner {
 		this.duration = Objects.requireNonNull(duration, "duration");
 	}
 
-	public void setIdleSlot(IdleSlot idleSlot) {
-		this.idleSlot = Objects.requireNonNull(idleSlot, "idleSlot");
+	public void setNodeSlot(SpaceTimeSlot NodeSlot) {
+		this.NodeSlot = Objects.requireNonNull(NodeSlot, "NodeSlot");
 	}
 
 	public void setWorldPerspective(WorldPerspective worldPerspective) {
@@ -158,13 +158,13 @@ public class JobPlanner {
 		return max(
 			earliestStartTime,
 			node.getInitialTime(),
-			idleSlot.getStartTime());
+			NodeSlot.getStartTime());
 	}
 	
 	private LocalDateTime latestStartTime() {
 		return min(
 			latestStartTime,
-			idleSlot.getFinishTime().minus(duration));
+			NodeSlot.getFinishTime().minus(duration));
 	}
 
 	/**
@@ -183,7 +183,7 @@ public class JobPlanner {
 	 * <li>earliestStartTime</li>
 	 * <li>latestStartTime</li>
 	 * <li>duration</li>
-	 * <li>idleSlot</li>
+	 * <li>NodeSlot</li>
 	 * <li>worldPerspective</li>
 	 * <li>schedule</li>
 	 * </ul>
@@ -200,7 +200,7 @@ public class JobPlanner {
 			earliestStartTime   == null ||
 			latestStartTime     == null ||
 			duration            == null ||
-			idleSlot            == null ||
+			NodeSlot            == null ||
 			worldPerspective    == null ||
 			schedule            == null ||
 			alternative == null)
@@ -254,8 +254,8 @@ public class JobPlanner {
 		NodeObstacleBuilder builder = new NodeObstacleBuilder();
 		
 		builder.setNode(node);
-		builder.setStartTime(idleSlot.getStartTime());
-		builder.setFinishTime(idleSlot.getFinishTime());
+		builder.setStartTime(NodeSlot.getStartTime());
+		builder.setFinishTime(NodeSlot.getFinishTime());
 		builder.setSchedule(schedule);
 		builder.setAlternative(alternative);
 		
@@ -287,7 +287,7 @@ public class JobPlanner {
 		
 		Trajectory trajFromJob = fixedEnd
 			? calculateTrajectoryFromJob(jobFinishTime)
-			: calculateStationaryTrajectory(location, jobFinishTime, idleSlot.getFinishTime());
+			: calculateStationaryTrajectory(location, jobFinishTime, NodeSlot.getFinishTime());
 
 		if (trajFromJob.isEmpty())
 			return false;
@@ -326,7 +326,7 @@ public class JobPlanner {
 	}
 
 	private Trajectory calculateTrajectoryToJob() {
-		SpatialPath path = calculateSpatialPath(idleSlot.getStartLocation(), location);
+		SpatialPath path = calculateSpatialPath(NodeSlot.getStartLocation(), location);
 		
 		AbstractMinimumTimePathfinder pf = new SimpleMinimumTimePathfinder();
 		
@@ -337,7 +337,7 @@ public class JobPlanner {
 		pf.setMinArc            ( 0.0                     );
 		pf.setMaxArc            ( path.length()           );
 		pf.setMaxSpeed          ( node.getMaxSpeed()    );
-		pf.setStartTime         ( idleSlot.getStartTime() );
+		pf.setStartTime         ( NodeSlot.getStartTime() );
 		pf.setEarliestFinishTime( earliestStartTime()     );
 		pf.setLatestFinishTime  ( latestStartTime()       );
 		pf.setBufferDuration    ( duration                ); // TODO expand buffer duration if !fixedEnd
@@ -348,7 +348,7 @@ public class JobPlanner {
 	}
 
 	private Trajectory calculateTrajectoryFromJob(LocalDateTime startTime) {
-		SpatialPath path = calculateSpatialPath(location, idleSlot.getFinishLocation());
+		SpatialPath path = calculateSpatialPath(location, NodeSlot.getFinishLocation());
 		
 		AbstractFixTimePathfinder pf = new SimpleFixTimePathfinder();
 		
@@ -360,7 +360,7 @@ public class JobPlanner {
 		pf.setMaxArc          ( path.length()            );
 		pf.setMaxSpeed        ( node.getMaxSpeed()     );
 		pf.setStartTime       ( startTime                );
-		pf.setFinishTime      ( idleSlot.getFinishTime() );
+		pf.setFinishTime      ( NodeSlot.getFinishTime() );
 		
 		pf.calculate();
 
@@ -396,7 +396,7 @@ public class JobPlanner {
 //	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {
 //		return new SimpleTrajectory(
 //			new SpatialPath(ImmutableList.of(location, location)),
-//			ImmutableList.of(startTime, idleSlot.getFinishTime()));
+//			ImmutableList.of(startTime, NodeSlot.getFinishTime()));
 //	}
 	
 }

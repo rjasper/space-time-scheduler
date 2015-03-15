@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,9 +15,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LocationIterator;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeIdleSlotIterator.NodeIdleSlot;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeSlotIterator;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeSlotIterator.NodeSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
@@ -121,16 +119,16 @@ public class SingularJobScheduler {
 			// The LocationIterator might pick a location which is inaccessible
 			// for a unit. Therefore, the nodes are filtered by the location
 
-			Iterable<NodeIdleSlot> nodeSlots = () -> new NodeIdleSlotIterator(
+			Iterable<NodeSlot> nodeSlots = () -> new NodeSlotIterator(
 				filterByLocation(location),
-				this::makeIdleSlotIterator,
+				alternative,
 				frozenHorizonTime,
 				location,
 				earliest, latest, duration);
 
-			for (NodeIdleSlot ws : nodeSlots) {
+			for (NodeSlot ws : nodeSlots) {
 				Node n = ws.getNode();
-				IdleSlot s = ws.getIdleSlot();
+				SpaceTimeSlot s = ws.getSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(n);
 
 				NavigableMap<LocalDateTime, Job> wJobs = n.getNavigableJobs();
@@ -141,7 +139,7 @@ public class SingularJobScheduler {
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
 				tp.setNode(n);
-				tp.setIdleSlot(s);
+				tp.setNodeSlot(s);
 				tp.setEarliestStartTime(earliest);
 				tp.setLatestStartTime(latest);
 
@@ -183,22 +181,6 @@ public class SingularJobScheduler {
 		Geometry map = perspective.getView().getMap();
 
 		return !map.contains(location);
-	}
-
-	private Iterator<IdleSlot> makeIdleSlotIterator(
-		Node node, LocalDateTime from, LocalDateTime to)
-	{
-		NodeSlotBuilder builder = new NodeSlotBuilder();
-
-		builder.setOverlapping(true);
-		builder.setNode(node);
-		builder.setSchedule(schedule);
-		builder.setAlternative(alternative);
-		builder.setFrozenHorizonTime(frozenHorizonTime);
-		builder.setStartTime(from);
-		builder.setFinishTime(to);
-
-		return builder.build().iterator();
 	}
 
 }

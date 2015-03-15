@@ -11,24 +11,18 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Point;
 
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.IdleSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Schedule;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.fixtures.NodeFixtures;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
-import de.tu_berlin.mailbox.rjasper.util.function.TriFunction;
 
-public class NodeIdleSlotIteratorTest {
+public class NodeSlotIteratorTest {
 	
-	private NodeIdleSlotIterator makeIterator(
+	private NodeSlotIterator makeIterator(
 		Iterable<Node> nodes,
 		LocalDateTime frozenHorizonTime,
 		Point location,
@@ -36,27 +30,10 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest,
 		Duration duration)
 	{
-		Schedule schedule = new Schedule();
-		for (Node n : nodes)
-			schedule.addNode(n);
 		ScheduleAlternative alternative = new ScheduleAlternative();
 		
-		TriFunction<Node, LocalDateTime, LocalDateTime, Iterator<IdleSlot>> slotGenerator = (node, from, to) -> {
-			NodeSlotBuilder builder = new NodeSlotBuilder();
-
-			builder.setOverlapping(true);
-			builder.setNode(node);
-			builder.setSchedule(schedule);
-			builder.setAlternative(alternative);
-			builder.setFrozenHorizonTime(frozenHorizonTime);
-			builder.setStartTime(from);
-			builder.setFinishTime(to);
-
-			return builder.build().iterator();
-		};
-		
-		return new NodeIdleSlotIterator(
-			nodes, slotGenerator, frozenHorizonTime, location, earliest, latest, duration);
+		return new NodeSlotIterator(
+			nodes, alternative, frozenHorizonTime, location, earliest, latest, duration);
 	}
 
 	@Test
@@ -71,7 +48,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(8.0);
 		Duration duration = Duration.ofHours(3L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
@@ -91,7 +68,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(6.5);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
@@ -109,7 +86,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(5.5);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
@@ -127,7 +104,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
@@ -145,7 +122,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
@@ -163,7 +140,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		picker.next();
@@ -181,7 +158,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(3L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, BEGIN_OF_TIME, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
@@ -200,7 +177,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(6.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		picker.next();
@@ -219,7 +196,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(6.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
@@ -238,7 +215,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		picker.next();
@@ -257,7 +234,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(1L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",
@@ -276,7 +253,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(2L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		picker.next();
@@ -295,7 +272,7 @@ public class NodeIdleSlotIteratorTest {
 		LocalDateTime latest = atHour(11.0);
 		Duration duration = Duration.ofHours(2L);
 
-		NodeIdleSlotIterator picker = makeIterator(
+		NodeSlotIterator picker = makeIterator(
 			nodes, frozenHorizon, location, earliest, latest, duration);
 
 		assertThat("picker has next when it shouldn't",

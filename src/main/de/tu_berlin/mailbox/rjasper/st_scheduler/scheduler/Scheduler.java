@@ -521,10 +521,11 @@ public class Scheduler {
 	}
 	
 	private boolean unscheduleImpl(Job job, ScheduleAlternative alternative) {
-		if (schedule.isJobLockedForRemoval(job))
+		Node node = job.getNodeReference().getActual();
+		
+		if (node.hasJobLockedForRemoval(job))
 			throw new IllegalStateException("job is locked for removal");
 		
-		Node node = job.getNodeReference().getActual();
 		WorldPerspective perspective = perspectiveCache.getPerspectiveFor(node);
 		
 		// there should be at least one entry
@@ -584,8 +585,9 @@ public class Scheduler {
 	
 	private boolean rescheduleImpl(JobSpecification spec, ScheduleAlternative alternative) {
 		Job job = getJob(spec.getJobId()); // throws NPE
+		Node node = job.getNodeReference().getActual();
 
-		if (schedule.isJobLockedForRemoval(job))
+		if (node.hasJobLockedForRemoval(job))
 			throw new IllegalStateException("job is locked for removal");
 		
 		boolean status;

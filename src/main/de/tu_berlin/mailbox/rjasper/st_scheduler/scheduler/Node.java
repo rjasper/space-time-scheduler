@@ -2,6 +2,7 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
 import static de.tu_berlin.mailbox.rjasper.collect.Maps.*;
 import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.ArcTimePathMotionIntervalCalculation.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryLengthDurationCalculation.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryMotionIntervalCalculation.*;
@@ -13,8 +14,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.google.common.collect.ImmutableList;
@@ -86,16 +89,20 @@ public class Node {
 	 * The initial time of the node when it begins to 'exist'.
 	 */
 	private final LocalDateTime initialTime;
-
+	
 	/**
 	 * All jobs which were assigned to this node.
 	 */
-	private TreeMap<LocalDateTime, Job> jobs = new TreeMap<>();
+	private final TreeMap<LocalDateTime, Job> jobs = new TreeMap<>();
 
 	/**
 	 * Contains all consecutive trajectories of this node
 	 */
-	private TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
+	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
+	
+	private final Set<Job> jobRemovalLock = new HashSet<>();
+
+	private final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
 
 	/**
 	 * Constructs a node defining its shape, maximum velocity, initial
@@ -211,6 +218,10 @@ public class Node {
 
 		return retrieval != null && retrieval.equals(job);
 	}
+	
+	public boolean hasJobLockedForRemoval(Job job) {
+		return jobRemovalLock.contains( Objects.requireNonNull(job, "job") );
+	}
 
 	/**
 	 * @return all jobs this unit is assigned to.
@@ -266,7 +277,31 @@ public class Node {
 		return new MappedIntervalSet<LocalDateTime, Job>(jobs,
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
+	
+	public Set<Job> getJobRemovalLock() {
+		return unmodifiableSet(jobRemovalLock);
+	}
+	
+	public void addJobRemovalLock(Job job) {
+		if (!hasJob(job))
+			throw new IllegalArgumentException("unknown job");
+		
+		boolean status = jobRemovalLock.add(job);
+		
+		if (!status)
+			throw new IllegalArgumentException("job already locked for removal");
+	}
+	
+	public void removeJobRemovalLock(Job job) {
+		if (!hasJob(job))
+			throw new IllegalArgumentException("unknown job");
 
+		boolean status = jobRemovalLock.remove(job);
+		
+		if (!status)
+			throw new IllegalArgumentException("job not locked for removal");
+	}
+	
 	public Collection<Trajectory> getTrajectories() {
 		return trajectoryContainer.getTrajectories();
 	}
@@ -283,6 +318,30 @@ public class Node {
 	 */
 	public void updateTrajectory(Trajectory trajectory) {
 		trajectoryContainer.update(trajectory);
+	}
+
+	public IntervalSet<LocalDateTime> getTrajectoryLock() {
+		return unmodifiableIntervalSet(trajectoryLock);
+	}
+	
+	public void addTrajectoryLock(IntervalSet<LocalDateTime> intervals) {
+		if (intervals.isEmpty())
+			return;
+		
+		if (intervals.minValue().compareTo(initialTime) < 0)
+			throw new IllegalArgumentException("intervals predate initial time");
+		
+		trajectoryLock.add(intervals);
+	}
+	
+	public void removeTrajectoryLock(IntervalSet<LocalDateTime> intervals) {
+		if (intervals.isEmpty())
+			return;
+		
+		if (intervals.minValue().compareTo(initialTime) < 0)
+			throw new IllegalArgumentException("intervals predate initial time");
+		
+		trajectoryLock.remove(intervals);
 	}
 
 	/**
@@ -319,7 +378,7 @@ public class Node {
 	 * @throws NullPointerException if any argument is null
 	 * @throws IllegalArgumentException if from is after to
 	 */
-	public Collection<IdleSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
+	public Collection<SpaceTimeSlot> NodeSlots(LocalDateTime from, LocalDateTime to) {
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to, "to");
 
@@ -347,7 +406,7 @@ public class Node {
 					? left
 					: trajectoryContainer.getTrajectory(finishTime);
 
-				return new IdleSlot(
+				return new SpaceTimeSlot(
 					left .interpolateLocation(startTime ),
 					right.interpolateLocation(finishTime),
 					startTime,
