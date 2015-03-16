@@ -14,6 +14,7 @@ import java.util.UUID;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LeastDetourNodeSlotIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LocationIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeSlotIterator;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeSlotIterator.NodeSlot;
@@ -126,9 +127,12 @@ public class SingularJobScheduler {
 				location,
 				earliest, latest, duration);
 
-			for (NodeSlot ws : nodeSlots) {
-				Node n = ws.getNode();
-				SpaceTimeSlot s = ws.getSlot();
+			Iterable<NodeSlot> leastDetour = () ->
+				new LeastDetourNodeSlotIterator(nodeSlots, location);
+
+			for (NodeSlot ns : leastDetour) {
+				Node n = ns.getNode();
+				SpaceTimeSlot s = ns.getSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(n);
 
 				NavigableMap<LocalDateTime, Job> wJobs = n.getNavigableJobs();

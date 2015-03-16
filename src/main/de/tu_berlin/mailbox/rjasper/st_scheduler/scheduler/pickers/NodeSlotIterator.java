@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
 import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static java.util.Collections.*;
@@ -8,6 +9,7 @@ import static java.util.Collections.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
+import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -30,8 +32,6 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
  * @author Rico Jasper
  */
 public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
-
-	// TODO sort by least detour
 
 	/**
 	 * Helper class to pair a node and one of its idle slots.
@@ -297,10 +297,23 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 				nextNode();
 			// otherwise check the next idle slot
 			} else {
-				// FIXME check if final slot (no more jobs, open end)
-				// make new candidate with finish location = task location
-
 				SpaceTimeSlot candidate = slotIterator.next();
+
+				if (!slotIterator.hasNext()) {
+					// check if there are no more jobs afterwards (indicates final slot)
+
+					NavigableMap<LocalDateTime, ?> jobs = nextNode.getNavigableJobs();
+
+					// if no more job after candidate
+					if (jobs.isEmpty() || jobs.lastKey() .compareTo( candidate.getStartTime() ) < 0) {
+						// overwrite candidate using the task location as final location
+						candidate = new SpaceTimeSlot(
+							candidate.getStartLocation(),
+							immutable(location),
+							candidate.getStartTime(),
+							candidate.getFinishTime());
+					}
+				}
 
 				// break if the current idle slot is accepted
 				if (check(nextNode, candidate)) {
