@@ -28,11 +28,11 @@ import de.tu_berlin.mailbox.rjasper.util.NameProvider;
  * @author Rico Jasper
  */
 public final class JobSpecification {
-	
+
 	/**
 	 * Creates a JobSpecification defining an interval for the location and
-	 * start time and the duration of a {@link Job job}.
-	 * 
+	 * time and the duration of a {@link Job job}.
+	 *
 	 * @param jobId
 	 * @param locationSpace
 	 * @param earliestStartTime
@@ -64,8 +64,8 @@ public final class JobSpecification {
 
 	/**
 	 * Creates a JobSpecification defining an interval for the location and
-	 * start time and the duration of a {@link Job job}.
-	 * 
+	 * time and the duration of a {@link Job job}.
+	 *
 	 * @param jobId
 	 * @param locationSpace
 	 * @param earliestStartTime
@@ -95,8 +95,8 @@ public final class JobSpecification {
 
 	/**
 	 * Creates a JobSpecification defining an interval for the location and
-	 * start time and the duration of a {@link Job job}.
-	 * 
+	 * time and the duration of a {@link Job job}.
+	 *
 	 * @param jobId
 	 * @param locationSpace
 	 * @param earliestFinishTime
@@ -125,7 +125,7 @@ public final class JobSpecification {
 		LocalDateTime latestStartTime = latestFinishTime.minus(duration);
 		return new JobSpecification(jobId, locationSpace, earliestStartTime, latestStartTime, duration);
 	}
-	
+
 	/**
 	 * The ID of the job.
 	 */
@@ -154,7 +154,7 @@ public final class JobSpecification {
 	/**
 	 * Constructs a {@code JobSpecification} defining an interval for the location and
 	 * start time and the duration of a {@link Job job}.
-	 * 
+	 *
 	 * @param jobId
 	 * @param locationSpace
 	 * @param earliestStartTime
@@ -224,14 +224,14 @@ public final class JobSpecification {
 	public LocalDateTime getLatestStartTime() {
 		return latestStartTime;
 	}
-	
+
 	/**
 	 * @return the earliest possible finish time.
 	 */
 	public LocalDateTime getEarliestFinishTime() {
 		return earliestStartTime.plus(duration);
 	}
-	
+
 	/**
 	 * @return the latest possible finish time.
 	 */
