@@ -74,7 +74,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		}
 
 	}
-	
+
 	private final ScheduleAlternative alternative;
 
 	private final LocalDateTime frozenHorizonTime;
@@ -98,7 +98,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	 * The duration of the job execution.
 	 */
 	private final Duration duration;
-	
+
 	private final NodeSlotBuilder slotBuilder;
 
 	/**
@@ -134,7 +134,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	/**
 	 * Constructs a NodeSlotIterator which iterates over the given set of nodes
 	 * to while checking against the given job specifications.
-	 * 
+	 *
 	 * @param nodes
 	 *            the node pool to check
 	 * @param alternative
@@ -196,12 +196,12 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		// pair.
 		if (!frozenHorizonTime.isAfter(latestStartTime)) {
 			initSlotBuilder();
-			
+
 			nextNode();
 			nextSlot();
 		}
 	}
-	
+
 	private void initSlotBuilder() {
 		slotBuilder.setAlternative(alternative);
 		slotBuilder.setFrozenHorizonTime(frozenHorizonTime);
@@ -261,18 +261,18 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 	 */
 	private Node nextNode() {
 		// sets the next node and initializes an new idle slot iterator
-		
+
 		// seek the next node with available slots
 		do {
 			if (!nodeIterator.hasNext()) {
 				nextNode = null;
 				slotIterator = emptyIterator();
-				
+
 				break;
 			}
-			
+
 			nextNode = nodeIterator.next();
-			
+
 			slotBuilder.setNode(nextNode);
 			slotIterator = slotBuilder.build().iterator();
 		} while (!slotIterator.hasNext());
@@ -297,6 +297,9 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 				nextNode();
 			// otherwise check the next idle slot
 			} else {
+				// FIXME check if final slot (no more jobs, open end)
+				// make new candidate with finish location = task location
+
 				SpaceTimeSlot candidate = slotIterator.next();
 
 				// break if the current idle slot is accepted
@@ -332,7 +335,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		LocalDateTime t1 = slot.getStartTime();
 		LocalDateTime t2 = slot.getFinishTime();
 		Point p1 = slot.getStartLocation();
-		Point p2 = slot.getFinishLocation(); // FIXME finish location not mandatory
+		Point p2 = slot.getFinishLocation();
 		double l1 = distance(p1, location);
 		double l2 = p2 == null ? 0. : distance(location, p2);
 
