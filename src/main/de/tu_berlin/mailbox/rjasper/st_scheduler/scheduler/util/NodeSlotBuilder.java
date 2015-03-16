@@ -16,13 +16,12 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.SpaceTimeSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet.Interval;
 
-// TODO test
 public class NodeSlotBuilder {
 
 	private Node node = null;
 
 	private ScheduleAlternative alternative = null;
-	
+
 	private LocalDateTime frozenHorizonTime = null;
 
 	private LocalDateTime startTime = null;
@@ -30,13 +29,13 @@ public class NodeSlotBuilder {
 	private LocalDateTime finishTime = null;
 
 	private boolean overlapping = false;
-	
+
 	private transient IntervalSet<LocalDateTime> scheduledJobs;
-	
+
 	private transient IntervalSet<LocalDateTime> jobLock;
-	
+
 	private transient IntervalSet<LocalDateTime> trajectoryLock;
-	
+
 	private transient IntervalSet<LocalDateTime> removalIntervals;
 
 	public void setNode(Node node) {
@@ -70,33 +69,33 @@ public class NodeSlotBuilder {
 			return emptyList();
 		if (frozenHorizonTime.compareTo(finishTime) > 0)
 			return emptyList();
-		
+
 		init();
 		List<SpaceTimeSlot> slots = buildImpl();
 		cleanUp();
-		
+
 		return slots;
 	}
-	
+
 	private List<SpaceTimeSlot> buildImpl() {
 		LocalDateTime from = determineLeft();
 		LocalDateTime to = determineRight();
-		
+
 		if (from.compareTo(to) >= 0)
 			return emptyList();
 
 		IntervalSet<LocalDateTime> slotIntervals = calcSlotIntervals(from, to);
 		List<SpaceTimeSlot> slots = makeSlots(slotIntervals);
-		
+
 		return slots;
 	}
-	
+
 	private void checkParameters() {
 		Objects.requireNonNull(node, "node");
 		Objects.requireNonNull(startTime, "startTime");
 		Objects.requireNonNull(finishTime, "finishTime");
 		Objects.requireNonNull(alternative, "alternative");
-		
+
 		if (overlapping)
 			Objects.requireNonNull(frozenHorizonTime, "frozenHorizon");
 		if (startTime.isAfter(finishTime))
@@ -106,7 +105,7 @@ public class NodeSlotBuilder {
 	private void init() {
 		scheduledJobs = node.getJobIntervals();
 		trajectoryLock = node.getTrajectoryLock();
-		
+
 		if (alternative.updatesNode(node)) {
 			jobLock = alternative.getJobLock(node);
 			removalIntervals = alternative.getJobRemovalIntervals(node);
@@ -115,26 +114,26 @@ public class NodeSlotBuilder {
 			removalIntervals = emptyIntervalSet();
 		}
 	}
-	
+
 	private void cleanUp() {
 		scheduledJobs = null;
 		jobLock = null;
 		trajectoryLock = null;
 		removalIntervals = null;
 	}
-	
+
 	private LocalDateTime determineLeft() {
 		LocalDateTime leftLimit = max(node.getInitialTime(), frozenHorizonTime);
-		
+
 		if (startTime.compareTo(leftLimit) < 0)
 			return leftLimit;
-		
+
 		if (overlapping) {
 			LocalDateTime leftMost = max(
 				leftLimit,
 				floorValue(trajectoryLock, startTime),
 				floorValue(jobLock, startTime));
-			
+
 			return determineLeftOverlapping(leftMost);
 		} else {
 			return startTime;
@@ -146,7 +145,7 @@ public class NodeSlotBuilder {
 			LocalDateTime rightMost = min(
 				ceilingValue(trajectoryLock, finishTime),
 				ceilingValue(jobLock, finishTime));
-			
+
 			return determineRightOverlapping(rightMost);
 		} else {
 			return finishTime;
@@ -157,17 +156,17 @@ public class NodeSlotBuilder {
 		Iterator<Interval<LocalDateTime>> it = scheduledJobs
 			.subSet(leftMost, startTime)
 			.descendingIterator();
-		
+
 		while (it.hasNext()) {
 			Interval<LocalDateTime> curr = it.next();
-			
+
 			if (curr.getToExclusive().compareTo(leftMost) <= 0)
 				return leftMost;
-			
+
 			if (!removalIntervals.contains( curr.getFromInclusive() ))
 				return curr.getToExclusive();
 		}
-		
+
 		return leftMost;
 	}
 
@@ -175,31 +174,31 @@ public class NodeSlotBuilder {
 		Iterator<Interval<LocalDateTime>> it = scheduledJobs
 			.subSet(finishTime, rightMost)
 			.iterator();
-		
+
 		while (it.hasNext()) {
 			Interval<LocalDateTime> curr = it.next();
-			
+
 			if (curr.getFromInclusive().compareTo(rightMost) >= 0)
 				return rightMost;
-			
+
 			if (!removalIntervals.contains( curr.getFromInclusive() ))
 				return curr.getFromInclusive();
 		}
-		
+
 		return rightMost;
 	}
 
 	private LocalDateTime floorValue(IntervalSet<LocalDateTime> intervals, LocalDateTime time) {
 		if (intervals.isEmpty() || intervals.minValue().compareTo(time) >= 0)
 			return LocalDateTime.MIN;
-		
+
 		return intervals.floorValue(time);
 	}
 
 	private LocalDateTime ceilingValue(IntervalSet<LocalDateTime> intervals, LocalDateTime time) {
 		if (intervals.isEmpty() || intervals.maxValue().compareTo(time) <= 0)
 			return LocalDateTime.MAX;
-		
+
 		return intervals.ceilingValue(time);
 	}
 
