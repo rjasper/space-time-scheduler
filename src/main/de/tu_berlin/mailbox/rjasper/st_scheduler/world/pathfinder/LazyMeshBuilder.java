@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static java.util.stream.Collectors.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -20,9 +22,11 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
+import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterator;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
 public class LazyMeshBuilder {
@@ -53,7 +57,11 @@ public class LazyMeshBuilder {
 
 	private transient Geometry forbiddenMap;
 
-	private transient Collection<Ray> rays;
+	private transient Collection<Ray> motionRays;
+
+	private transient Collection<Ray> stationaryRays;
+
+	private transient DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;
 
 	private static class Ray {
 		public final ImmutablePoint origin;
@@ -154,11 +162,17 @@ public class LazyMeshBuilder {
 		// TODO implement
 
 		// cast lazy velocity
-		calcRays();
+		calcMotionRays();
+		calcStationaryRays();
+		connectRayIntersections();
 
 		// debug
-		LineString[] lines = rays.stream()
-			.map(r -> r.line)
+//		LineString[] lines = Stream.concat(motionRays.stream(), stationaryRays.stream())
+//			.map(r -> r.line)
+//			.toArray(n -> new LineString[n]);
+
+		LineString[] lines = graph.edgeSet().stream()
+			.map(e -> lineString(graph.getEdgeSource(e), graph.getEdgeTarget(e)))
 			.toArray(n -> new LineString[n]);
 
 		System.out.println( multiLineString(lines) );
@@ -177,7 +191,17 @@ public class LazyMeshBuilder {
 			.map(this::makeVertex)
 			.collect(toSet());
 		forbiddenMap = makeForbiddenMap();
-//		rays = new LinkedList<>();
+
+		initGraph();
+	}
+
+	private void initGraph() {
+		graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+		graph.addVertex(startVertex);
+		graph.addVertex(finishVertex);
+
+		for (ImmutablePoint v : forbiddenRegionVertices)
+			graph.addVertex(v);
 	}
 
 	private void cleanUp() {
@@ -185,7 +209,8 @@ public class LazyMeshBuilder {
 		finishVertex = null;
 		forbiddenRegionVertices = null;
 		forbiddenMap = null;
-		rays = null;
+		motionRays = null;
+		stationaryRays = null;
 	}
 
 	private ImmutablePoint makeVertex(double arc, LocalDateTime time) {
@@ -204,18 +229,17 @@ public class LazyMeshBuilder {
 		return geometryCollection(regions);
 	}
 
-	private void calcRays() {
-		// TODO only cast from tangent points
+	private void calcMotionRays() {
 		Stream<ImmutablePoint> origins = Stream.concat(
 			Stream.of(finishVertex), forbiddenRegionVertices.stream());
 
-		rays = origins
-			.map(this::calcLazyRay)
+		motionRays = origins
+			.map(this::calcMotionRay)
 			.filter(r -> r != null)
 			.collect(toList());
 	}
 
-	private Ray calcLazyRay(ImmutablePoint origin) {
+	private Ray calcMotionRay(ImmutablePoint origin) {
 		double s1 = origin.getX();
 		double s2 = startArc;
 		double ds = s1 - s2;
@@ -229,19 +253,22 @@ public class LazyMeshBuilder {
 		double s3 = s2;
 		double t3 = t2;
 
-		// seek first line string intersection
-		int n = intersection.getNumGeometries();
-		for (int i = 0; i < n; ++i) {
-			Geometry g = intersection.getGeometryN(i);
+		if (!intersection.isEmpty()) {
+			// seek first line string intersection
+			int n = intersection.getNumGeometries();
+			for (int i = 0; i < n; ++i) {
+				Geometry g = intersection.getGeometryN(i);
 
-			if (g instanceof LineString) {
+				if (g.isEmpty() || !(g instanceof LineString))
+					continue;
+
 				LineString line = (LineString) g;
 				Point startPoint = line.getStartPoint();
 
 				if (startPoint.equalsTopo(origin))
 					return null;
 
-				// if earlier collision
+				// if later collision
 				if (startPoint.getY() > t3) {
 					s3 = startPoint.getX();
 					t3 = startPoint.getY();
@@ -250,10 +277,121 @@ public class LazyMeshBuilder {
 		}
 
 		// if no line string intersection
-		if (t3 == t2)
+		if (t3 <= t2)
 			return new Ray(origin, fullLine);
 		else
 			return new Ray(origin, immutableLineString(s1, t1, s3, t3));
+	}
+
+	private void calcStationaryRays() {
+		Stream<ImmutablePoint> origins = Stream.concat(
+			Stream.of(startVertex), forbiddenRegionVertices.stream());
+
+		stationaryRays = origins
+			.map(this::calcStationaryRay)
+			.filter(r -> r != null)
+			.collect(toList());
+	}
+
+	private Ray calcStationaryRay(ImmutablePoint origin) {
+		double s1 = origin.getX();
+		double s2 = s1;
+		double t1 = origin.getY();
+		double t2 = finishVertex.getY();
+
+		if (t1 >= t2)
+			return null;
+
+		LineString fullLine = immutableLineString(s1, t1, s2, t2);
+
+		MultiLineString fullIntersection = toMultiLineString(
+			forbiddenMap.intersection(fullLine));
+		MultiLineString boundaryIntersection = toMultiLineString(
+			boundary(forbiddenMap).intersection(fullLine));
+		Geometry intersection = fullIntersection.difference(boundaryIntersection);
+
+		double s3 = s2;
+		double t3 = t2;
+
+		if (!intersection.isEmpty()) {
+			// seek first line string intersection
+			int n = intersection.getNumGeometries();
+			for (int i = 0; i < n; ++i) {
+				Geometry g = intersection.getGeometryN(i);
+
+				if (g.isEmpty() || !(g instanceof LineString))
+					continue;
+
+				LineString line = (LineString) g;
+				Point startPoint = line.getStartPoint();
+
+				if (startPoint.equalsTopo(origin))
+					return null;
+
+				// if earlier collision
+				if (startPoint.getY() < t3) {
+					s3 = startPoint.getX();
+					t3 = startPoint.getY();
+				}
+			}
+		}
+
+		// if no line string intersection
+		if (t3 >= t2)
+			return new Ray(origin, fullLine);
+		else
+			return new Ray(origin, immutableLineString(s1, t1, s3, t3));
+	}
+
+	private MultiLineString boundary(Geometry geometry) {
+		if (geometry instanceof MultiLineString)
+			return (MultiLineString) geometry;
+
+		GeometryIterator it = new GeometryIterator(geometry, true, true, true);
+		List<LineString> lines = new LinkedList<>();
+
+		while (it.hasNext()) {
+			Geometry g = it.next();
+
+			if (!g.isEmpty() && g instanceof LineString)
+				lines.add((LineString) g);
+		}
+
+		return multiLineString(lines.toArray(new LineString[lines.size()]));
+	}
+
+	private MultiLineString toMultiLineString(Geometry geometry) {
+		if (geometry instanceof MultiLineString)
+			return (MultiLineString) geometry;
+
+		GeometryIterator it = new GeometryIterator(geometry, true, false, false);
+		List<LineString> lines = new LinkedList<>();
+
+		while (it.hasNext()) {
+			Geometry g = it.next();
+
+			if (!g.isEmpty() && g instanceof LineString)
+				lines.add((LineString) g);
+		}
+
+		return multiLineString(lines.toArray(new LineString[lines.size()]));
+	}
+
+	private void connectRayIntersections() {
+		for (Ray mr : motionRays) {
+			for (Ray sr : stationaryRays) {
+				Geometry intersection = mr.line .intersection( sr.line );
+
+				if (intersection.isEmpty())
+					continue;
+
+				ImmutablePoint vertex = immutable((Point) intersection);
+
+				graph.addVertex(vertex);
+				graph.addEdge(sr.origin, vertex);
+				graph.addEdge(vertex, mr.origin);
+			}
+		}
 	}
 
 }
