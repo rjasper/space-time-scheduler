@@ -37,7 +37,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.MinimumTimeVer
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.SimpleVertexConnector;
 import de.tu_berlin.mailbox.rjasper.time.TimeConv;
 
-public class LazyTest {
+public class VertexConnectorExample {
 
 	public static final LocalDateTime BASE_TIME =
 		LocalDateTime.of(2000, 1, 1, 0, 0);
@@ -75,7 +75,7 @@ public class LazyTest {
 			.add( immutableBox(3.5, 3, 4.5, 4) )
 			.add( immutableBox(1, 1, 2, 2) )
 			.build()
-			.map(LazyTest::forbiddenRegion)
+			.map(VertexConnectorExample::forbiddenRegion)
 			.collect(toList());
 
 		ImmutablePoint startVertex = immutablePoint(0, 0);
@@ -270,7 +270,6 @@ public class LazyTest {
 					}
 				}::give);
 		}
-
 
 		/**
 		 * Checks if the vertex is collision free at its arc for at least

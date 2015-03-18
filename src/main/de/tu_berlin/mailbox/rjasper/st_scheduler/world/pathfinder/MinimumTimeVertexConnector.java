@@ -13,7 +13,11 @@ import java.util.function.BiFunction;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.operation.buffer.BufferBuilder;
+
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.experimental.BufferTimeEdgeChecker;
 
 public class MinimumTimeVertexConnector {
 
@@ -62,9 +66,9 @@ public class MinimumTimeVertexConnector {
 		this.maxFinishTime = maxFinishTime;
 	}
 
-	public void setEdgeChecker(BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker) {
-		this.edgeChecker = requireNonNull(edgeChecker, "edgeChecker");
-	}
+//	public void setEdgeChecker(BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker) {
+//		this.edgeChecker = requireNonNull(edgeChecker, "edgeChecker");
+//	}
 
 	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
 		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
@@ -83,7 +87,7 @@ public class MinimumTimeVertexConnector {
 			Double.isNaN(finishArc) ||
 			Double.isNaN(minFinishTime) ||
 			Double.isNaN(maxFinishTime) ||
-			edgeChecker == null ||
+//			edgeChecker == null ||
 			weightCalculator == null ||
 			Double.isNaN(maxVelocity))
 		{
@@ -102,6 +106,7 @@ public class MinimumTimeVertexConnector {
 
 	public Set<ImmutablePoint> connect() {
 		checkParameters();
+		init();
 
 		Set<ImmutablePoint> finishVertices = new HashSet<>();
 
@@ -135,7 +140,31 @@ public class MinimumTimeVertexConnector {
 			}
 		}
 
+		cleanUp();
+
 		return finishVertices;
+	}
+
+	private void init() {
+		SimpleEdgeChecker simpleChecker = new SimpleEdgeChecker(
+			startVertex.getX(),
+			finishArc,
+			startVertex.getY(),
+			maxFinishTime,
+			maxVelocity);
+		VisibilityEdgeChecker visibilityChecker = new VisibilityEdgeChecker(
+				forbiddenMap);
+		BufferTimeEdgeChecker bufferChecker = new BufferTimeEdgeChecker(
+			bufferTime, visibilityChecker::check);
+
+		edgeChecker = (v1, v2) ->
+			simpleChecker.check(v1, v2) &&
+			visibilityChecker.check(v1, v2) &&
+			bufferChecker.check(v2);
+	}
+
+	private void cleanUp() {
+		edgeChecker = null;
 	}
 
 	private boolean within(ImmutablePoint vertex) {
