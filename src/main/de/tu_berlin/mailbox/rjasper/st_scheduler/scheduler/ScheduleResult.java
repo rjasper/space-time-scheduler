@@ -29,7 +29,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
  *
  * <p>
  * Another feature is the transaction ID field which enables to commit/abort the
- * changes of an schedule operation after the changes were calculated.
+ * changes of a successful schedule operation after the changes were calculated.
  * </p>
  *
  * @author Rico Jasper
