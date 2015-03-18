@@ -378,6 +378,8 @@ public class LazyMeshBuilder {
 	}
 
 	private void connectRayIntersections() {
+		double minStop = durationToSeconds(minStopDuration);
+
 		for (Ray mr : motionRays) {
 			for (Ray sr : stationaryRays) {
 				Geometry intersection = mr.line .intersection( sr.line );
@@ -386,6 +388,9 @@ public class LazyMeshBuilder {
 					continue;
 
 				ImmutablePoint vertex = immutable((Point) intersection);
+
+				if (vertex.getY() - sr.origin.getY() < minStop)
+					continue;
 
 				graph.addVertex(vertex);
 				graph.addEdge(sr.origin, vertex);

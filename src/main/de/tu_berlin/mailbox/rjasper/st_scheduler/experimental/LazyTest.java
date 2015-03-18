@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.experimental;
 
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static java.util.stream.Collectors.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static java.util.Collections.*;
@@ -71,6 +72,7 @@ public class LazyTest {
 		builder.setForbiddenRegions(frs);
 		builder.setMaxVelocity(2);
 		builder.setLazyVelocity(1.25);
+//		builder.setMinStopDuration(secondsToDuration(2));
 
 		builder.build();
 	}
