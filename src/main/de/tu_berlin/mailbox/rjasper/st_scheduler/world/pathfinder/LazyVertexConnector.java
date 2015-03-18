@@ -1,25 +1,20 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static java.util.stream.Collectors.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static java.util.Objects.*;
-import static de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire.*;
+import static java.util.stream.Collectors.*;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.function.BiFunction;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -27,41 +22,26 @@ import com.vividsolutions.jts.geom.Point;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterator;
-import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
-public class LazyMeshBuilder {
+public class LazyVertexConnector {
 
-	private double startArc = Double.NaN;
+	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;
 
-	private double finishArc = Double.NaN;
+	private ImmutablePoint startVertex;
 
-	private LocalDateTime startTime = null;
+	private ImmutablePoint finishVertex;
 
-	private LocalDateTime finishTime = null;
+	private BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator = null;
 
-	private LocalDateTime baseTime = null;
-
-	private Collection<ForbiddenRegion> forbiddenRegions = null;
-
-	private double maxVelocity = Double.NaN;
+	private Geometry forbiddenMap;
 
 	private double lazyVelocity = Double.NaN;
 
 	private Duration minStopDuration = Duration.ZERO;
 
-	private transient ImmutablePoint startVertex;
-
-	private transient ImmutablePoint finishVertex;
-
-	private transient Collection<ImmutablePoint> forbiddenRegionVertices;
-
-	private transient Geometry forbiddenMap;
-
 	private transient Collection<Ray> motionRays;
 
 	private transient Collection<Ray> stationaryRays;
-
-	private transient DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;
 
 	private static class Ray {
 		public final ImmutablePoint origin;
@@ -72,41 +52,25 @@ public class LazyMeshBuilder {
 		}
 	}
 
-	public void setStartArc(double startArc) {
-		if (!Double.isFinite(startArc))
-			throw new IllegalArgumentException("illegal arc");
-
-		this.startArc = startArc;
+	public void setGraph(
+		DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph) {
+		this.graph = requireNonNull(graph, "graph");
 	}
 
-	public void setFinishArc(double finishArc) {
-		if (!Double.isFinite(finishArc))
-			throw new IllegalArgumentException("illegal arc");
-
-		this.finishArc = finishArc;
+	public void setStartVertex(ImmutablePoint startVertex) {
+		this.startVertex = requireNonNull(startVertex, "startVertex");
 	}
 
-	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = requireNonNull(startTime, "startTime");
+	public void setFinishVertex(ImmutablePoint finishVertex) {
+		this.finishVertex = requireNonNull(finishVertex, "finishVertex");
 	}
 
-	public void setFinishTime(LocalDateTime finishTime) {
-		this.finishTime = requireNonNull(finishTime, "finishTime");
+	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
+		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
 	}
 
-	public void setBaseTime(LocalDateTime baseTime) {
-		this.baseTime = requireNonNull(baseTime, "baseTime");
-	}
-
-	public void setForbiddenRegions(Collection<ForbiddenRegion> forbiddenRegions) {
-		this.forbiddenRegions = requireNonNull(forbiddenRegions, "forbiddenRegions");;
-	}
-
-	public void setMaxVelocity(double maxVelocity) {
-		if (!Double.isFinite(maxVelocity) || maxVelocity <= 0)
-			throw new IllegalArgumentException("illegal velocity");
-
-		this.maxVelocity = maxVelocity;
+	public void setForbiddenMap(Geometry forbiddenMap) {
+		this.forbiddenMap = requireNonNull(forbiddenMap, "forbiddenMap");
 	}
 
 	public void setLazyVelocity(double lazyVelocity) {
@@ -126,122 +90,60 @@ public class LazyMeshBuilder {
 	}
 
 	private void checkParameters() {
-		if (Double.isNaN(startArc)     ||
-			Double.isNaN(finishArc)    ||
-			startTime        == null   ||
-			finishTime       == null   ||
-			forbiddenRegions == null   ||
-			Double.isNaN(maxVelocity)  ||
+		if (graph == null ||
+			startVertex == null ||
+			finishVertex == null ||
+			weightCalculator == null ||
+			forbiddenMap == null ||
 			Double.isNaN(lazyVelocity))
 		{
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (startArc >= finishArc)
-			throw new IllegalStateException("startArc >= finishArc");
-		if (startTime.compareTo(finishTime) >= 0)
-			throw new IllegalStateException("startTime >= finishTime");
-		if (maxVelocity < lazyVelocity)
-			throw new IllegalStateException("maxVelocity < lazyVelocity");
+		if (startVertex.getX() >= finishVertex.getX() ||
+			startVertex.getY() >= finishVertex.getY())
+		{
+			throw new IllegalStateException("startVertex and finishVertex incompatible");
+		}
 	}
 
-	public DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge>
-	build() {
+	public void connect() {
 		checkParameters();
 
-		init();
-		DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph =
-			buildImpl();
-		cleanUp();
-
-		return graph;
-	}
-
-	public DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge>
-	buildImpl() {
-		// TODO implement
-
-		// cast lazy velocity
 		calcMotionRays();
 		calcStationaryRays();
+
 		connectRayIntersections();
 
-		// debug
-//		LineString[] lines = Stream.concat(motionRays.stream(), stationaryRays.stream())
-//			.map(r -> r.line)
-//			.toArray(n -> new LineString[n]);
-
-		LineString[] lines = graph.edgeSet().stream()
-			.map(e -> lineString(graph.getEdgeSource(e), graph.getEdgeTarget(e)))
-			.toArray(n -> new LineString[n]);
-
-		System.out.println( multiLineString(lines) );
-		System.out.println( forbiddenMap );
-
-		return null; // TODO
-	}
-
-	private void init() {
-		startVertex = makeVertex(startArc, startTime);
-		finishVertex = makeVertex(finishArc, finishTime);
-		forbiddenRegionVertices = forbiddenRegions.stream()
-			.map(ForbiddenRegion::getRegion)
-			.map(Geometry::getCoordinates)
-			.flatMap(Arrays::stream)
-			.map(this::makeVertex)
-			.collect(toSet());
-		forbiddenMap = makeForbiddenMap();
-
-		initGraph();
-	}
-
-	private void initGraph() {
-		graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-		graph.addVertex(startVertex);
-		graph.addVertex(finishVertex);
-
-		for (ImmutablePoint v : forbiddenRegionVertices)
-			graph.addVertex(v);
-	}
-
-	private void cleanUp() {
-		startVertex = null;
-		finishVertex = null;
-		forbiddenRegionVertices = null;
-		forbiddenMap = null;
+		// clean up
 		motionRays = null;
 		stationaryRays = null;
 	}
 
-	private ImmutablePoint makeVertex(double arc, LocalDateTime time) {
-		return immutablePoint(arc, timeToSeconds(time, baseTime));
-	}
-
-	private ImmutablePoint makeVertex(Coordinate coordinate) {
-		return immutablePoint(coordinate.x, coordinate.y);
-	}
-
-	private Geometry makeForbiddenMap() {
-		Geometry[] regions = forbiddenRegions.stream()
-			.map(ForbiddenRegion::getRegion)
-			.toArray(n -> new Geometry[n]);
-
-		return geometryCollection(regions);
-	}
-
 	private void calcMotionRays() {
-		Stream<ImmutablePoint> origins = Stream.concat(
-			Stream.of(finishVertex), forbiddenRegionVertices.stream());
-
-		motionRays = origins
+		motionRays = graph.vertexSet().stream()
+			.filter(this::within)
+			.filter(v -> !v.equals(startVertex))
 			.map(this::calcMotionRay)
 			.filter(r -> r != null)
 			.collect(toList());
 	}
 
+	private boolean within(ImmutablePoint vertex) {
+		double minArc = startVertex.getX();
+		double maxArc = finishVertex.getX();
+		double minTime = startVertex.getY();
+		double maxTime = finishVertex.getY();
+		double arc = vertex.getX();
+		double time = vertex.getY();
+
+		return arc  >= minArc  && arc  <= maxArc
+			&& time >= minTime && time <= maxTime;
+	}
+
 	private Ray calcMotionRay(ImmutablePoint origin) {
 		double s1 = origin.getX();
-		double s2 = startArc;
+		double s2 = startVertex.getX();
 		double ds = s1 - s2;
 		double t1 = origin.getY();
 		double t2 = t1 - ds/lazyVelocity;
@@ -284,10 +186,9 @@ public class LazyMeshBuilder {
 	}
 
 	private void calcStationaryRays() {
-		Stream<ImmutablePoint> origins = Stream.concat(
-			Stream.of(startVertex), forbiddenRegionVertices.stream());
-
-		stationaryRays = origins
+		stationaryRays = graph.vertexSet().stream()
+			.filter(this::within)
+			.filter(v -> !v.equals(finishVertex))
 			.map(this::calcStationaryRay)
 			.filter(r -> r != null)
 			.collect(toList());
@@ -380,23 +281,32 @@ public class LazyMeshBuilder {
 	private void connectRayIntersections() {
 		double minStop = durationToSeconds(minStopDuration);
 
-		for (Ray mr : motionRays) {
-			for (Ray sr : stationaryRays) {
-				Geometry intersection = mr.line .intersection( sr.line );
+		for (Ray sr : stationaryRays) {
+			for (Ray mr : motionRays) {
+				Geometry intersection = sr.line .intersection( mr.line );
 
 				if (intersection.isEmpty())
 					continue;
 
 				ImmutablePoint vertex = immutable((Point) intersection);
 
+				// don't stop for small durations
 				if (vertex.getY() - sr.origin.getY() < minStop)
 					continue;
 
 				graph.addVertex(vertex);
-				graph.addEdge(sr.origin, vertex);
-				graph.addEdge(vertex, mr.origin);
+				connect(sr.origin, vertex);
+				connect(vertex, mr.origin);
 			}
 		}
+	}
+
+	private void connect(ImmutablePoint source, ImmutablePoint target) {
+		DefaultWeightedEdge e = graph.addEdge(source, target);
+
+		// if new edge
+		if (e != null)
+			graph.setEdgeWeight(e, weightCalculator.apply(source, target));
 	}
 
 }
