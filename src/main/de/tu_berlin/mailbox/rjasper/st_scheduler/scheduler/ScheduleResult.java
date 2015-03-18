@@ -14,61 +14,62 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 /**
  * <p>
  * An Object of the class {@code ScheduleResult} describes the result of a
- * schedule operation. Schedule operations do not always succeed and therefore
- * need to indicate whether or not the operation succeeded. Additionally, the
- * changes of a schedule operations are not easily traceable unless they are
- * actively and separately recorded.
+ * schedule operation. There are two kinds of results: error and success.
+ * Schedule operations do not always succeed and therefore need to indicate
+ * whether or not the operation succeeded. Additionally, the changes of a
+ * schedule operations are not easily traceable unless they are actively and
+ * separately recorded.
  * </p>
- * 
+ *
  * <p>
  * An {@code ScheduleResult} provides the means to both inform the caller
  * whether the intended effect was accomplished and which changes were
  * calculated.
  * </p>
- * 
+ *
  * <p>
  * Another feature is the transaction ID field which enables to commit/abort the
  * changes of an schedule operation after the changes were calculated.
  * </p>
- * 
+ *
  * @author Rico Jasper
  */
 public class ScheduleResult {
-	
+
 	/**
 	 * The transaction ID.
 	 */
 	private final UUID transactionId;
-	
+
 	/**
 	 * The jobs to be added.
 	 */
 	private final Map<UUID, Job> jobs;
-	
+
 	/**
 	 * The jobs to be removed.
 	 */
 	private final Map<UUID, Job> jobRemovals;
-	
+
 	/**
 	 * The trajectory updates.
 	 */
 	private final Collection<TrajectoryUpdate> trajectories;
-	
+
 	/**
 	 * An {@code TrajectoryUpdate} is simply a pair of a trajectory and a node
 	 * reference.
-	 * 
+	 *
 	 * The node reference denotes on which node the new trajectory will be
 	 * applied.
 	 */
 	public static class TrajectoryUpdate {
-		
+
 		/**
 		 * The trajectory.
 		 */
 		private final Trajectory trajectory;
-		
+
 		/**
 		 * The node reference.
 		 */
@@ -76,7 +77,7 @@ public class ScheduleResult {
 
 		/**
 		 * Constructs a {@code TrajectoryUpdate}.
-		 * 
+		 *
 		 * @param trajectory
 		 * @param nodeRef
 		 */
@@ -98,7 +99,7 @@ public class ScheduleResult {
 		public NodeReference getNodeRef() {
 			return nodeRef;
 		}
-		
+
 		/*
 		 * (non-Javadoc)
 		 * @see java.lang.Object#toString()
@@ -109,24 +110,24 @@ public class ScheduleResult {
 				nodeRef, trajectory);
 		}
 	}
-	
+
 	/**
 	 * Stores a erroneous {@code ScheduleResult}.
 	 */
 	private static final ScheduleResult ERRONEOUS_SCHEDULE_RESULT =
 		new ScheduleResult(null, emptyMap(), emptyMap(), emptyList());
-	
+
 	/**
 	 * @return a erroneous {@code ScheduleResult}.
 	 */
 	public static ScheduleResult error() {
 		return ERRONEOUS_SCHEDULE_RESULT;
 	}
-	
+
 	/**
 	 * Returns {@code ScheduleResult} indicating a successful schedule
 	 * operation.
-	 * 
+	 *
 	 * @param transactionId
 	 * @param jobs
 	 *            to be added
@@ -146,14 +147,14 @@ public class ScheduleResult {
 		Objects.requireNonNull(jobs, "jobs");
 		Objects.requireNonNull(removals, "removals");
 		CollectionsRequire.requireNonNull(trajectories, "trajectories");
-		
+
 		return new ScheduleResult(transactionId, jobs, removals, trajectories);
 	}
 
 	/**
 	 * Constructs a {@code ScheduleResult}. An erroneous result is indicated
 	 * by a {@code null} transaction ID.
-	 * 
+	 *
 	 * @param transactionId
 	 * @param jobs
 	 * @param removals
@@ -177,7 +178,7 @@ public class ScheduleResult {
 	public boolean isError() {
 		return transactionId == null;
 	}
-	
+
 	/**
 	 * @return {@code true} if the scheduling was successful.
 	 */
@@ -186,46 +187,54 @@ public class ScheduleResult {
 	}
 
 	/**
+	 * Note that erroneous results don't have an transaction ID.
+	 *
 	 * @return the transaction ID.
 	 * @throws IllegalStateException if is error.
 	 */
 	public UUID getTransactionId() {
 		if (isError())
 			throw new IllegalStateException("is error");
-		
+
 		return transactionId;
 	}
 
 	/**
+	 * Note that erroneous results don't have jobs.
+	 *
 	 * @return the scheduled jobs.
 	 * @throws IllegalStateException if is error.
 	 */
 	public Map<UUID, Job> getJobs() {
 		if (isError())
 			throw new IllegalStateException("is error");
-		
+
 		return jobs;
 	}
 
 	/**
+	 * Note that erroneous results don't have job removals.
+	 *
 	 * @return the jobs to be removed.
 	 * @throws IllegalStateException if is error.
 	 */
 	public Map<UUID, Job> getJobRemovals() {
 		if (isError())
 			throw new IllegalStateException("is error");
-		
+
 		return jobRemovals;
 	}
 
 	/**
+	 * Note that erroneous results don't update trajectories.
+	 *
 	 * @return the updated trajectories.
 	 * @throws IllegalStateException if is error.
 	 */
 	public Collection<TrajectoryUpdate> getTrajectoryUpdates() {
 		if (isError())
 			throw new IllegalStateException("is error");
-		
+
 		return trajectories;
 	}
 
@@ -241,5 +250,5 @@ public class ScheduleResult {
 		else
 			return "error";
 	}
-	
+
 }
