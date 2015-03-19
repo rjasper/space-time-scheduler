@@ -168,7 +168,7 @@ public class LazyMinimumTimeMesher {
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (startVertex.getX()  >= finishArc || startVertex.getY() >  minFinishTime)
+		if (startVertex.getX() > finishArc || startVertex.getY() > minFinishTime)
 			throw new IllegalStateException("illegal bounds");
 		if (minFinishTime > maxFinishTime)
 			throw new IllegalStateException("minFinishTime > maxFinishTime");

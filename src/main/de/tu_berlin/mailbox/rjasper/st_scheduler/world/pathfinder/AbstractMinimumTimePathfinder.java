@@ -7,32 +7,32 @@ import java.util.Objects;
 /**
  * The {@code AbstractMinimumTimePathfinder} extends the {@link AbstractVelocityPathfinder}
  * by configurable parameters specific for determining time minimal paths.
- * 
+ *
  * @author Rico Jasper
  */
 public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPathfinder {
-	
+
 	/**
 	 * The start time.
 	 */
 	private LocalDateTime startTime = null;
-	
+
 	/**
 	 * The earliest finish time.
 	 */
 	private LocalDateTime earliestFinishTime = null;
-	
+
 	/**
 	 * The latest finish time.
 	 */
 	private LocalDateTime latestFinishTime = null;
-	
+
 	/**
 	 * The duration ahead of the finish vertex without colliding with dynamic
 	 * obstacles.
 	 */
 	private Duration bufferDuration = null;
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.pathfinder.VelocityPathfinder#getBaseTime()
@@ -51,7 +51,7 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 
 	/**
 	 * Sets the start time.
-	 * 
+	 *
 	 * @param startTime
 	 * @throws NullPointerException
 	 *             if startTime is {@code null}.
@@ -69,7 +69,7 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 
 	/**
 	 * Sets the earliest finish time.
-	 * 
+	 *
 	 * @param earliestFinishTime
 	 * @throws NullPointerException
 	 *             if earliestFinishTime is {@code null}.
@@ -88,7 +88,7 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 
 	/**
 	 * Sets the latest finish time.
-	 * 
+	 *
 	 * @param latestFinishTime
 	 * @throws NullPointerException
 	 *             if latestFinishTime is {@code null}.
@@ -109,12 +109,12 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 	 * <p>
 	 * Sets the buffer duration.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * For at least the buffer duration there will be no collision with any
 	 * dynamic obstacles at the finish of the path.
 	 * </p>
-	 * 
+	 *
 	 * @param bufferDuration
 	 * @throws NullPointerException
 	 *             if bufferDuratioin is {@code null}.
@@ -123,16 +123,16 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 	 */
 	public void setBufferDuration(Duration bufferDuration) {
 		Objects.requireNonNull(bufferDuration, "bufferDuration");
-		
+
 		if (bufferDuration.isNegative())
 			throw new IllegalArgumentException("bufferDuration cannot be negative");
-		
+
 		this.bufferDuration = bufferDuration;
 	}
-	
+
 	/**
 	 * Checks if all parameters are properly set. Throws an exception otherwise.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if any parameter is not set or {@code earliestFinishTime} is
 	 *             after latest {@code latestFinishTime}.
@@ -140,17 +140,17 @@ public abstract class AbstractMinimumTimePathfinder extends AbstractVelocityPath
 	@Override
 	protected void checkParameters() {
 		super.checkParameters();
-		
+
 		if (startTime          == null ||
 			earliestFinishTime == null ||
 			latestFinishTime   == null ||
 			bufferDuration     == null)
 		{
-			throw new IllegalStateException("some parameters are not set");
+			throw new IllegalStateException("unset parameters");
 		}
-		
+
 		if (earliestFinishTime.compareTo(latestFinishTime) > 0)
-			throw new IllegalStateException("earliestFinishTime is after latestFinishTime");
+			throw new IllegalStateException("earliestFinishTime > latestFinishTime");
 	}
 
 }

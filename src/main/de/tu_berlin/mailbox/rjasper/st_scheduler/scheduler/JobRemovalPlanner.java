@@ -3,6 +3,7 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
@@ -19,32 +20,31 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractFixTimePathfinder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatialPathfinder;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.SimpleFixTimePathfinder;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.LazyFixTimePathfinder;
 
 public class JobRemovalPlanner {
-	
+
 	private World world = null;
-	
+
 	private WorldPerspective worldPerspective = null;
-	
+
 	private LocalDateTime frozenHorizonTime = null;
-	
+
 	private Schedule schedule = null;
-	
+
 	private ScheduleAlternative alternative = null;
-	
+
 	private Job job = null;
-	
+
 	private boolean fixedEnd = true;
-	
+
 	private transient Node node;
-	
+
 	private transient LocalDateTime slotStartTime;
-	
+
 	private transient LocalDateTime slotFinishTime;
-	
+
 	private transient Collection<DynamicObstacle> dynamicObstacles;
 
 	public void setWorld(World world) {
@@ -83,45 +83,45 @@ public class JobRemovalPlanner {
 		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(job, "job");
 	}
-	
+
 	public boolean plan() {
 		checkParameters();
-		
+
 		if (job.getFinishTime().isBefore(frozenHorizonTime))
 			return false;
-		
+
 		init();
 		boolean status = planImpl();
 		cleanUp();
-		
+
 		return status;
 	}
-	
+
 	private void init() {
 		node = job.getNodeReference().getActual();
-		
+
 		LocalDateTime jobStartTime = job.getStartTime();
 		LocalDateTime jobFinishTime = job.getFinishTime();
 		LocalDateTime idleStartTime = node.floorIdleTimeOrNull(jobStartTime);
 		LocalDateTime idleFinishTime = node.ceilingIdleTimeOrNull(jobFinishTime);
-		
+
 		slotStartTime = max(
 			frozenHorizonTime,
 			idleStartTime == null ? jobStartTime : idleStartTime);
 		slotFinishTime = idleFinishTime == null ? jobFinishTime : idleFinishTime;
-		
+
 		NodeObstacleBuilder builder = new NodeObstacleBuilder();
-		
+
 		builder.setNode(node);
 		builder.setStartTime(slotStartTime);
 		builder.setFinishTime(slotFinishTime);
 		builder.setSchedule(schedule);
 		builder.setAlternative(alternative);
-		
+
 		Collection<DynamicObstacle>
 			worldObstacles = worldPerspective.getView().getDynamicObstacles(),
 			nodeObstacles = builder.build();
-		
+
 		dynamicObstacles = JoinedCollection.of(worldObstacles, nodeObstacles);
 	}
 
@@ -131,23 +131,23 @@ public class JobRemovalPlanner {
 		slotStartTime = null;
 		slotFinishTime = null;
 	}
-	
+
 	private boolean planImpl() {
 		ImmutablePoint startLocation = node.interpolateLocation(slotStartTime);
 		ImmutablePoint finishLocation = fixedEnd
 			? node.interpolateLocation(slotFinishTime)
 			: null;
-		
+
 		Trajectory trajectory = fixedEnd
 			? calculateTrajectory(startLocation, finishLocation, slotStartTime, slotFinishTime)
 			: calculateStationaryTrajectory(startLocation, slotStartTime, slotFinishTime);
-		
+
 		if (trajectory.isEmpty())
 			return false;
-		
+
 		alternative.updateTrajectory(node, trajectory);
 		alternative.addJobRemoval(job);
-		
+
 		return true;
 	}
 
@@ -157,14 +157,14 @@ public class JobRemovalPlanner {
 		LocalDateTime finishTime)
 	{
 		// make stationary obstacle
-		
+
 		SpatialPath spatialPath = new SpatialPath( ImmutableList.of(location, location) );
 		ImmutableList<LocalDateTime> times = ImmutableList.of(startTime, finishTime);
-		
+
 		Trajectory trajectory = new SimpleTrajectory(spatialPath, times);
-		
+
 		// check for dynamic collisions
-		
+
 		if (collides(trajectory, dynamicObstacles))
 			return SimpleTrajectory.empty();
 		else
@@ -176,23 +176,23 @@ public class JobRemovalPlanner {
 		LocalDateTime startTime, LocalDateTime finishTime)
 	{
 		// calculate spatial path
-		
+
 		AbstractSpatialPathfinder spf = worldPerspective.getSpatialPathfinder();
-	
+
 		spf.setStartLocation(startLocation);
 		spf.setFinishLocation(finishLocation);
-		
+
 		boolean status = spf.calculate();
-		
+
 		if (!status)
 			return SimpleTrajectory.empty(); // not sure if this could ever happen
-	
+
 		SpatialPath spatialPath = spf.getResultSpatialPath();
-		
+
 		// calculate trajectory
-		
-		AbstractFixTimePathfinder vpf = new SimpleFixTimePathfinder();
-		
+
+		LazyFixTimePathfinder vpf = new LazyFixTimePathfinder();
+
 		vpf.setDynamicObstacles( dynamicObstacles     );
 		vpf.setSpatialPath     ( spatialPath          );
 		vpf.setStartArc        ( 0.0                  );
@@ -200,9 +200,10 @@ public class JobRemovalPlanner {
 		vpf.setMinArc          ( 0.0                  );
 		vpf.setMaxArc          ( spatialPath.length() );
 		vpf.setMaxSpeed        ( node.getMaxSpeed() );
+		vpf.setMinStopDuration( Duration.ZERO ); // TODO use appropriate value
 		vpf.setStartTime       ( startTime            );
 		vpf.setFinishTime      ( finishTime           );
-		
+
 		vpf.calculate();
 
 		return vpf.getResultTrajectory();

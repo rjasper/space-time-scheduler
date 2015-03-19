@@ -102,7 +102,7 @@ public class SimpleVertexConnector {
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (minArc >= maxArc || minTime >= maxTime)
+		if (minArc > maxArc || minTime > maxTime)
 			throw new IllegalStateException("illegal bounds");
 	}
 
@@ -112,6 +112,9 @@ public class SimpleVertexConnector {
 
 		for (ImmutablePoint source : vertices) {
 			for (ImmutablePoint target : vertices) {
+				if (source.equalsTopo(target))
+					continue;
+
 				if (edgeChecker.apply(source, target)) {
 					DefaultWeightedEdge edge = graph.addEdge(source, target);
 

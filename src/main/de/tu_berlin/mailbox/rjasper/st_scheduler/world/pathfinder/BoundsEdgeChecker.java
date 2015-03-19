@@ -17,10 +17,10 @@ public class BoundsEdgeChecker {
 		this.minTime = checkDouble(minTime, "startTime");
 		this.maxTime = checkDouble(maxTime, "finishTime");
 
-		if (minArc >= maxArc)
-			throw new IllegalArgumentException("startArc >= finishArc");
-		if (minTime >= maxTime)
-			throw new IllegalArgumentException("startTime >= finishTime");
+		if (minArc > maxArc)
+			throw new IllegalArgumentException("startArc > finishArc");
+		if (minTime > maxTime)
+			throw new IllegalArgumentException("startTime > finishTime");
 	}
 
 	private static double checkDouble(double value, String name) {
@@ -46,9 +46,6 @@ public class BoundsEdgeChecker {
 	 * @return
 	 */
 	public boolean check(Point from, Point to) {
-		if (from.equalsTopo(to))
-			return false;
-
 		double s1 = from.getX(), s2 = to.getX(), t1 = from.getY(), t2 = to.getY();
 
 		// if vertex is not on path

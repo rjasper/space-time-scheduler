@@ -378,7 +378,7 @@ public class Node {
 	 * @throws NullPointerException if any argument is null
 	 * @throws IllegalArgumentException if from is after to
 	 */
-	public Collection<SpaceTimeSlot> NodeSlots(LocalDateTime from, LocalDateTime to) {
+	public Collection<SpaceTimeSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to, "to");
 

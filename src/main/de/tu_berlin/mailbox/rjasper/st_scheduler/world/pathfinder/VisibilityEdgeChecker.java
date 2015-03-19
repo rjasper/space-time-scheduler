@@ -31,6 +31,9 @@ public class VisibilityEdgeChecker {
 	 * @return {@code true} if no forbidden region blocks the view
 	 */
 	public boolean check(Point from, Point to) {
+		if (from.equalsTopo(to) && !from.within(forbiddenMap))
+			return true;
+
 		LineString line = lineString(from, to);
 
 		return new GeometryIterable(forbiddenMap, true, false, false).stream()

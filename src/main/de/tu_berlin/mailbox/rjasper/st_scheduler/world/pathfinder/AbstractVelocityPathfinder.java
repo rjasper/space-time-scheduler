@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire;
@@ -26,11 +27,14 @@ import de.tu_berlin.mailbox.rjasper.time.TimeConv;
  * The {@code AbstractVelocityPathfinder} is the abstract base class for velocity path
  * finders. A velocity path finder determines the arc-time mapping for
  * trajectories while avoiding any dynamic obstacles.
- * 
+ *
  * @author Rico Jasper
  */
 public abstract class AbstractVelocityPathfinder {
-	
+
+	protected static final BiFunction<ImmutablePoint, ImmutablePoint, Double> WEIGHT_CALCULATOR =
+		(s, t) -> s.getX() == t.getX() ? 0.0 : t.getY() - s.getY();
+
 	/**
 	 * The forbidden region builder.
 	 */
@@ -60,22 +64,22 @@ public abstract class AbstractVelocityPathfinder {
 	 * The dynamic obstacles.
 	 */
 	private Collection<DynamicObstacle> dynamicObstacles = Collections.emptyList();
-	
+
 	/**
 	 * The spatial path component of the trajectory.
 	 */
 	private SpatialPath spatialPath = null;
-	
+
 	/**
 	 * The maximum speed.
 	 */
 	private double maxSpeed = Double.NaN;
-	
+
 	/**
 	 * The calculated trajectory.
 	 */
 	private DecomposedTrajectory resultTrajectory = null;
-	
+
 	/**
 	 * The directly evaded dynamic obstacles.
 	 */
@@ -92,10 +96,10 @@ public abstract class AbstractVelocityPathfinder {
 	private ForbiddenRegionBuilder getForbiddenRegionBuilder() {
 		return forbiddenRegionBuilder;
 	}
-	
+
 	/**
 	 * Sets the minimum arc value.
-	 * 
+	 *
 	 * @param minArc the startArc to set
 	 * @throws IllegalArgumentException
 	 *             if the minArc is not non-negative finite.
@@ -103,7 +107,7 @@ public abstract class AbstractVelocityPathfinder {
 	public void setMinArc(double minArc) {
 		if (!Double.isFinite(minArc) || minArc < 0.0)
 			throw new IllegalArgumentException("startArc is not non-negative finite");
-		
+
 		this.minArc = minArc;
 	}
 
@@ -116,7 +120,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the maximum arc value.
-	 * 
+	 *
 	 * @param maxArc
 	 * @throws IllegalArgumentException
 	 *             if the maxArc is not non-negative finite.
@@ -124,7 +128,7 @@ public abstract class AbstractVelocityPathfinder {
 	public void setMaxArc(double maxArc) {
 		if (!Double.isFinite(maxArc) || maxArc < 0.0)
 			throw new IllegalArgumentException("finishArc is not non-negative finite");
-		
+
 		this.maxArc = maxArc;
 	}
 
@@ -134,7 +138,7 @@ public abstract class AbstractVelocityPathfinder {
 	protected double getMaxArc() {
 		return maxArc;
 	}
-	
+
 	/**
 	 * @return the start arc value.
 	 */
@@ -144,7 +148,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the start arc value.
-	 * 
+	 *
 	 * @param startArc the startArc to set
 	 * @throws IllegalArgumentException
 	 *             if the maxArc is not non-negative finite.
@@ -152,7 +156,7 @@ public abstract class AbstractVelocityPathfinder {
 	public void setStartArc(double startArc) {
 		if (!Double.isFinite(startArc) || startArc < 0.0)
 			throw new IllegalArgumentException("startArc is not non-negative finite");
-		
+
 		this.startArc = startArc;
 	}
 
@@ -165,7 +169,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the finish arc value.
-	 * 
+	 *
 	 * @param finishArc the startArc to set
 	 * @throws IllegalArgumentException
 	 *             if the maxArc is not non-negative finite.
@@ -173,7 +177,7 @@ public abstract class AbstractVelocityPathfinder {
 	public void setFinishArc(double finishArc) {
 		if (!Double.isFinite(finishArc) || finishArc < 0.0)
 			throw new IllegalArgumentException("startArc is not non-negative finite");
-		
+
 		this.finishArc = finishArc;
 	}
 
@@ -186,14 +190,14 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the dynamic obstacles.
-	 * 
+	 *
 	 * @param dynamicObstacles
 	 * @throws NullPointerException
 	 *             if dynamicObstacles is {@code null}.
 	 */
 	public void setDynamicObstacles(Collection<DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
-		
+
 		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}
 
@@ -206,7 +210,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the spatial path component of the trajectory to be calculated.
-	 * 
+	 *
 	 * @param spatialPath
 	 * @throws NullPointerException
 	 *             if spatialPath is {@code null}.
@@ -226,7 +230,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the maximum speed.
-	 * 
+	 *
 	 * @param maxSpeed
 	 * @throws IllegalArgumentException
 	 *             if the maxSpeed is not positive finite.
@@ -234,7 +238,7 @@ public abstract class AbstractVelocityPathfinder {
 	public void setMaxSpeed(double maxSpeed) {
 		if (!Double.isFinite(maxSpeed) || maxSpeed <= 0.0)
 			throw new IllegalArgumentException("invalid maximum speed value");
-		
+
 		this.maxSpeed = maxSpeed;
 	}
 
@@ -247,7 +251,7 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the calculated trajectory.
-	 * 
+	 *
 	 * @param resultTrajectory
 	 */
 	private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
@@ -263,16 +267,16 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Sets the evaded dynamic obstacles.
-	 * 
+	 *
 	 * @param resultEvadedObstacles
 	 */
 	private void setResultEvadedObstacles(Collection<DynamicObstacle> resultEvadedObstacles) {
 		this.resultEvadedObstacles = resultEvadedObstacles;
 	}
-	
+
 	/**
 	 * Checks if all parameters are properly set. Throws an exception otherwise.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if any parameter is not set.
 	 */
@@ -293,28 +297,28 @@ public abstract class AbstractVelocityPathfinder {
 	/**
 	 * Calculates the velocity profile and trajectory from start to finish arc
 	 * while avoiding all dynamic obstacles.
-	 * 
+	 *
 	 * @return true if a trajectory could be calculated.
 	 */
 	public final boolean calculate() {
 		checkParameters();
-		
+
 		Collection<ForbiddenRegion> forbiddenRegions;
 		ArcTimePath arcTimePath;
 		boolean reachable;
-		
+
 		if (getSpatialPath().isEmpty()) {
 			// null since never used in this case
 			forbiddenRegions = null;
 			arcTimePath = null;
-			
+
 			reachable = false;
 		} else {
 			forbiddenRegions = calculateForbiddenRegions();
 			arcTimePath = calculateArcTimePath(forbiddenRegions);
 			reachable = !arcTimePath.isEmpty();
 		}
-		
+
 		if (reachable) {
 			setResultTrajectory(
 				buildTrajectory(arcTimePath));
@@ -326,42 +330,42 @@ public abstract class AbstractVelocityPathfinder {
 			setResultEvadedObstacles(
 				emptyList());
 		}
-		
+
 		return reachable;
 	}
-	
+
 	/**
 	 * Calculates the forbidden regions.
-	 * 
+	 *
 	 * @return the forbidden regions.
 	 */
 	private Collection<ForbiddenRegion> calculateForbiddenRegions() {
 		LocalDateTime baseTime = getBaseTime();
 		Collection<DynamicObstacle> dynamicObstacles = getDynamicObstacles();
 		SpatialPath spatialPath = getSpatialPath();
-		
+
 		ForbiddenRegionBuilder builder = getForbiddenRegionBuilder();
-		
+
 		builder.setBaseTime(baseTime);
 		builder.setDynamicObstacles(dynamicObstacles);
 		builder.setSpatialPath(spatialPath);
-		
+
 		builder.calculate();
-		
+
 		return builder.getResultForbiddenRegions();
 	}
 
 	/**
 	 * Calculates the arc-time path avoiding the forbidden regions.
-	 * 
+	 *
 	 * @param forbiddenRegions
 	 * @return the arc-time path.
 	 */
 	protected abstract ArcTimePath calculateArcTimePath(Collection<ForbiddenRegion> forbiddenRegions);
-	
+
 	/**
 	 * Calculates the evaded dynamic obstacles.
-	 * 
+	 *
 	 * @param forbiddenRegions
 	 * @param arcTimePath
 	 * @return the evaded dynamic obstacles.
@@ -378,7 +382,7 @@ public abstract class AbstractVelocityPathfinder {
 			.map(c -> immutablePoint(c.x, c.y))                      // map to a point
 			.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle()))) // map to an entry
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
-		
+
 		// return a list of each obstacle met by a point in the path
 		return arcTimePath.getPoints().stream()
 			.map(lookup::get)
@@ -387,20 +391,20 @@ public abstract class AbstractVelocityPathfinder {
 
 	/**
 	 * Builds the trajectory with the given velocity profile.
-	 * 
+	 *
 	 * @param arcTimePath the velocity profile.
 	 * @return the trajectory.
 	 */
 	private DecomposedTrajectory buildTrajectory(ArcTimePath arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		SpatialPath spatialPath = getSpatialPath();
-		
+
 		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath);
 	}
 
 	/**
 	 * Converts the given time into a double value of seconds.
-	 * 
+	 *
 	 * @param time
 	 * @return the seconds.
 	 */
@@ -408,5 +412,5 @@ public abstract class AbstractVelocityPathfinder {
 //		return TimeConv.timeToSecondsExact(time, getBaseTime());
 		return TimeConv.timeToSeconds(time, getBaseTime());
 	}
-	
+
 }

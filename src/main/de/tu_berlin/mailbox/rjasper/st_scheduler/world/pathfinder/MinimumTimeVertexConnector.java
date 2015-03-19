@@ -6,7 +6,6 @@ import static java.util.Objects.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -120,7 +119,7 @@ public class MinimumTimeVertexConnector {
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (minArc  >= finishArc || minTime >  minFinishTime)
+		if (minArc > finishArc || minTime > minFinishTime)
 			throw new IllegalStateException("illegal bounds");
 		if (minFinishTime > maxFinishTime)
 			throw new IllegalStateException("minFinishTime > maxFinishTime");
@@ -134,7 +133,6 @@ public class MinimumTimeVertexConnector {
 
 		ImmutablePoint minFinishVertex = immutablePoint(finishArc, minFinishTime);
 		graph.addVertex(minFinishVertex);
-		finishVertices.add(minFinishVertex);
 
 		Collection<ImmutablePoint> vertices = new ArrayList<>(graph.vertexSet());
 
@@ -142,21 +140,14 @@ public class MinimumTimeVertexConnector {
 		for (ImmutablePoint v : vertices) {
 			ImmutablePoint candidate = calcCandidate(v);
 			graph.addVertex(candidate);
-			finishVertices.add(candidate);
 
-			connectHelper(v, minFinishVertex, fullEdgeChecker);
-			connectHelper(v, candidate, nonVelocityEdgeChecker);
-		}
-
-		// remove unconnected finish vertices
-		Iterator<ImmutablePoint> it = finishVertices.iterator();
-		while (it.hasNext()) {
-			ImmutablePoint v = it.next();
-
-			if (graph.inDegreeOf(v) == 0) {
-				graph.removeVertex(v);
-				it.remove();
-			}
+			boolean status;
+			status = connectHelper(v, minFinishVertex, fullEdgeChecker);
+			if (status)
+				finishVertices.add(minFinishVertex);
+			status = connectHelper(v, candidate, nonVelocityEdgeChecker);
+			if (status)
+				finishVertices.add(candidate);
 		}
 
 		cleanUp();
@@ -173,33 +164,43 @@ public class MinimumTimeVertexConnector {
 			bufferDuration, visibilityChecker::check);
 
 		fullEdgeChecker = (v1, v2) ->
+			checkMinFinishBound(v2) &&
 			boundsChecker.check(v1, v2) &&
 			velocityChecker.check(v1, v2) &&
 			visibilityChecker.check(v1, v2) &&
 			bufferChecker.check(v2);
 
 		nonVelocityEdgeChecker = (v1, v2) ->
+			checkMinFinishBound(v2) &&
 			boundsChecker.check(v1, v2) &&
 			visibilityChecker.check(v1, v2) &&
 			bufferChecker.check(v2);
+	}
+
+	private boolean checkMinFinishBound(ImmutablePoint vertex) {
+		return vertex.getY() >= minFinishTime;
 	}
 
 	private void cleanUp() {
 		nonVelocityEdgeChecker = null;
 	}
 
-	private void connectHelper(
+	private boolean connectHelper(
 		ImmutablePoint source,
 		ImmutablePoint target,
 		BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker)
 	{
 		if (!edgeChecker.apply(source, target))
-			return;
+			return false;
 
-		DefaultWeightedEdge edge = graph.addEdge(source, target);
+		if (!source.equalsTopo(target)) {
+			DefaultWeightedEdge edge = graph.addEdge(source, target);
 
-		if (edge != null)
-			graph.setEdgeWeight(edge, weightCalculator.apply(source, target));
+			if (edge != null)
+				graph.setEdgeWeight(edge, weightCalculator.apply(source, target));
+		}
+
+		return true;
 	}
 
 	private ImmutablePoint calcCandidate(ImmutablePoint origin) {

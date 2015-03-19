@@ -122,7 +122,7 @@ public class LazyVertexConnector {
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (minArc >= maxArc || minTime >= maxTime)
+		if (minArc > maxArc || minTime > maxTime)
 			throw new IllegalStateException("illegal bounds");
 	}
 
@@ -319,6 +319,9 @@ public class LazyVertexConnector {
 	}
 
 	private void connect(ImmutablePoint source, ImmutablePoint target) {
+		if (source.equalsTopo(target))
+			return;
+
 		DefaultWeightedEdge e = graph.addEdge(source, target);
 
 		// if new edge

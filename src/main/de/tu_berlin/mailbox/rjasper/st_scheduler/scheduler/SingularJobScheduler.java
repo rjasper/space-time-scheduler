@@ -143,7 +143,7 @@ public class SingularJobScheduler {
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);
 				tp.setNode(n);
-				tp.setNodeSlot(s);
+				tp.setSlot(s);
 				tp.setEarliestStartTime(earliest);
 				tp.setLatestStartTime(latest);
 

@@ -171,7 +171,6 @@ public class SchedulerTest {
 
 		assertThat("unable to schedule job",
 			res.isSuccess(), is(true));
-
 		assertThat("job does not satisfy specification",
 			res.getJobs().get(uuid("job3")), satisfies(spec));
 	}
@@ -433,12 +432,12 @@ public class SchedulerTest {
 	@Test
 	public void testScheduleMultipleAlternatives() {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
-		
+
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ns);
 
 		ScheduleResult res;
-		
+
 		// splits the origin trajectory
 		// otherwise j1 would lock the whole trajectory
 		res = scheduleJob(sc, JobSpecification.createSS(
@@ -450,34 +449,34 @@ public class SchedulerTest {
 
 		assertThat("j0 was not scheduled",
 			res.isSuccess(), is(true));
-		
+
 		JobSpecification js1 = new JobSpecification(
 			uuid("j1"),
 			immutablePoint(1, 1),
 			atSecond( 0),
 			atSecond(20),
 			secondsToDuration(1));
-		
+
 		res = sc.schedule(js1);
-		
+
 		assertThat("j1 was not scheduled",
 			res.isSuccess(), is(true));
 		assertThat(res.getJobs().get(uuid("j1")), satisfies(js1));
-		
+
 		JobSpecification js2 = new JobSpecification(
 			uuid("j2"),
 			immutablePoint(2, 2),
 			atSecond( 0),
 			atSecond(20),
 			secondsToDuration(1));
-		
+
 		res = sc.schedule(js2);
-		
+
 		assertThat("j2 was not scheduled",
 			res.isSuccess(), is(true));
 		assertThat(res.getJobs().get(uuid("j2")), satisfies(js2));
 	}
-	
+
 	@Test
 	public void testScheduleDependenciesEmpty() {
 		Scheduler sc = new Scheduler(new World());
@@ -665,6 +664,8 @@ public class SchedulerTest {
 
 		ScheduleResult res = sc.schedule(ps);
 
+		assertThat("unable to schedule job",
+			res.isSuccess(), equalTo(true));
 		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 
@@ -687,6 +688,8 @@ public class SchedulerTest {
 
 		ScheduleResult res = sc.schedule(ps);
 
+		assertThat("unable to schedule job",
+			res.isSuccess(), equalTo(true));
 		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 
@@ -709,6 +712,8 @@ public class SchedulerTest {
 
 		ScheduleResult res = sc.schedule(ps);
 
+		assertThat("unable to schedule job",
+			res.isSuccess(), equalTo(true));
 		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 
@@ -731,6 +736,8 @@ public class SchedulerTest {
 
 		ScheduleResult res = sc.schedule(ps);
 
+		assertThat("unable to schedule job",
+			res.isSuccess(), equalTo(true));
 		assertThat(res.getJobs().values(), satisfy(ps));
 	}
 
@@ -872,7 +879,7 @@ public class SchedulerTest {
 		Trajectory traj = wref.getTrajectories(atSecond(4), atSecond(9)).iterator().next();
 
 		assertThat("didn't replan trajectory as expected",
-			traj.getSpatialPath(), equalTo(spatialPath(0, 1, 2, 1)));
+			traj.getSpatialPath().trace(), equalTo(spatialPath(0, 1, 2, 1).trace()));
 	}
 
 	@Test

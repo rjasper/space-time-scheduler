@@ -180,7 +180,7 @@ public class NodeReference  {
 	 *             if the interval is invalid.
 	 */
 	public Collection<SpaceTimeSlot> NodeSlots(LocalDateTime from, LocalDateTime to) {
-		return node.NodeSlots(from, to);
+		return node.idleSlots(from, to);
 	}
 
 	/**

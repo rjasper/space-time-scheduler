@@ -14,7 +14,7 @@ public class VelocityEdgeChecker {
 	}
 	public boolean check(Point from, Point to) {
 		if (from.equalsTopo(to))
-			return false;
+			return true;
 
 		double s1 = from.getX(), s2 = to.getX(), t1 = from.getY(), t2 = to.getY();
 

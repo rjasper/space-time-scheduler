@@ -52,7 +52,7 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		 * Pairs an idle slot with its node.
 		 *
 		 * @param node
-		 * @param NodeSlot
+		 * @param slot
 		 */
 		public NodeSlot(Node node, SpaceTimeSlot slot) {
 			this.node = node;

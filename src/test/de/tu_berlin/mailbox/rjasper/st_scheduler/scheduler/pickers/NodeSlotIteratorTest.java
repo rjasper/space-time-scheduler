@@ -2,7 +2,10 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;
+import static de.tu_berlin.mailbox.rjasper.util.UUIDFactory.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -16,12 +19,63 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Point;
 
+import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Job;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.fixtures.NodeFixtures;
 
 public class NodeSlotIteratorTest {
-	
+
+	private static final ImmutablePolygon NODE_SHAPE = immutableBox(
+		-0.5, -0.5, 0.5, 0.5);
+
+	private static final double NODE_SPEED = 1.0;
+
+	private static Node node(String nodeId, double x, double y) {
+		NodeSpecification spec = new NodeSpecification(
+			nodeId, NODE_SHAPE, NODE_SPEED, immutablePoint(x, y), atSecond(0));
+
+		return new Node(spec);
+	}
+
+	private static Job job(String jobIdSeed, Node node, double x, double y, double t, double d) {
+		return new Job(
+			uuid(jobIdSeed),
+			node.getReference(),
+			immutablePoint(x, y),
+			atSecond(t),
+			secondsToDuration(d));
+	}
+
+	private static int H = 3600;
+
+	private static Node withTwoJobs1() {
+		Node node = node("withTwoJobs1", 0., 0.);
+
+		node.updateTrajectory(trajectory(
+			0, -3600, -3600,    0,    0,    0,
+			0,      0,    0, 3600, 3600,    0,
+			0,    2*H,  3*H,  9*H, 12*H, 14*H));
+		node.addJob(job("job1", node, -3600.,    0., 2*H, 3*H));
+		node.addJob(job("job2", node,     0., 3600., 9*H, 3*H));
+
+		return node;
+	}
+
+	private static Node withTwoJobs2() {
+		Node node = node("withTwoJobs2", 0., 0.);
+
+		node.updateTrajectory(trajectory(
+			0,    0,    0, -3600, -3600,    0,
+			0, 3600, 3600,     0,     0,    0,
+			0,  2*H,  3*H,   9*H,  12*H, 14*H));
+		node.addJob(job("job1", node, -3600.,    0., 2*H, 2*H));
+		node.addJob(job("job2", node,     0., 3600., 9*H, 2*H));
+
+		return node;
+	}
+
 	private NodeSlotIterator makeIterator(
 		Iterable<Node> nodes,
 		LocalDateTime frozenHorizonTime,
@@ -31,15 +85,15 @@ public class NodeSlotIteratorTest {
 		Duration duration)
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
-		
+
 		return new NodeSlotIterator(
 			nodes, alternative, frozenHorizonTime, location, earliest, latest, duration);
 	}
 
 	@Test
 	public void test() {
-		Node n1 = NodeFixtures.withTwoJobs1();
-		Node n2 = NodeFixtures.withTwoJobs2();
+		Node n1 = withTwoJobs1();
+		Node n2 = withTwoJobs2();
 
 		Collection<Node> nodes = Arrays.asList(n1, n2);
 
@@ -59,7 +113,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckStartTimePositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -77,7 +131,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckStartTimeNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -95,7 +149,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFinishTimePositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -113,7 +167,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFinishTimeNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -131,7 +185,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckDurationPositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -149,7 +203,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckDurationNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -167,7 +221,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonStartTimePositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -186,7 +240,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonStartTimeNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -205,7 +259,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonFinishTimePositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -224,7 +278,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonFinishTimeNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -243,7 +297,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonDurationPositive() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 
@@ -262,7 +316,7 @@ public class NodeSlotIteratorTest {
 
 	@Test
 	public void testCheckFrozenHorizonDurationNegative() {
-		Node n = NodeFixtures.withTwoJobs1();
+		Node n = withTwoJobs1();
 
 		Collection<Node> nodes = Collections.singleton(n);
 

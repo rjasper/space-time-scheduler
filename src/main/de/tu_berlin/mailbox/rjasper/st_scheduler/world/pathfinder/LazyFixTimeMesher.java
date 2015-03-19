@@ -104,18 +104,6 @@ public class LazyFixTimeMesher {
 		return result;
 	}
 
-	private boolean checkReachability() {
-		DepthFirstIterator<ImmutablePoint, DefaultWeightedEdge> it =
-			new DepthFirstIterator<>(graph, startVertex);
-
-		while (it.hasNext()) {
-			if (it.next().equals(finishVertex))
-				return true;
-		}
-
-		return false;
-	}
-
 	private void checkParameters() {
 		if (startVertex == null ||
 			finishVertex == null ||
@@ -128,8 +116,20 @@ public class LazyFixTimeMesher {
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (startVertex.getX() >= finishVertex.getX() || startVertex.getY() >  finishVertex.getY())
+		if (startVertex.getX() > finishVertex.getX() || startVertex.getY() > finishVertex.getY())
 			throw new IllegalStateException("illegal bounds");
+	}
+
+	private boolean checkReachability() {
+		DepthFirstIterator<ImmutablePoint, DefaultWeightedEdge> it =
+			new DepthFirstIterator<>(graph, startVertex);
+
+		while (it.hasNext()) {
+			if (it.next().equals(finishVertex))
+				return true;
+		}
+
+		return false;
 	}
 
 	private void init() {
