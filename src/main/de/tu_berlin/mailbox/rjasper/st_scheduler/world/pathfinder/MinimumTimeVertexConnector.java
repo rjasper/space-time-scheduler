@@ -13,8 +13,7 @@ import java.util.function.BiFunction;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.operation.buffer.BufferBuilder;
+import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.experimental.BufferTimeEdgeChecker;
@@ -23,26 +22,37 @@ public class MinimumTimeVertexConnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;
 
-	private ImmutablePoint startVertex;
+	private double minArc = Double.NaN;
 
 	private double finishArc = Double.NaN;
+
+	private double minTime = Double.NaN;
 
 	private double minFinishTime = Double.NaN;
 
 	private double maxFinishTime = Double.NaN;
 
-	private BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker = null;
+	private double bufferDuration = Double.NaN;
+
+	private double maxVelocity = Double.NaN;
+
+	private Geometry forbiddenMap = null;
 
 	private BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator = null;
 
-	private double maxVelocity = Double.NaN;
+	private transient BiFunction<ImmutablePoint, ImmutablePoint, Boolean> fullEdgeChecker = null;
+
+	private transient BiFunction<ImmutablePoint, ImmutablePoint, Boolean> nonVelocityEdgeChecker = null;
 
 	public void setGraph(DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph) {
 		this.graph = requireNonNull(graph, "graph");
 	}
 
-	public void setStartVertex(ImmutablePoint startVertex) {
-		this.startVertex = requireNonNull(startVertex, "startVertex");
+	public void setMinArc(double minArc) {
+		if (!Double.isFinite(minArc))
+			throw new IllegalArgumentException("illegal minArc");
+
+		this.minArc = minArc;
 	}
 
 	public void setFinishArc(double finishArc) {
@@ -50,6 +60,13 @@ public class MinimumTimeVertexConnector {
 			throw new IllegalArgumentException("illegal finishArc");
 
 		this.finishArc = finishArc;
+	}
+
+	public void setMinTime(double minTime) {
+		if (!Double.isFinite(minTime))
+			throw new IllegalArgumentException("illegal minTime");
+
+		this.minTime = minTime;
 	}
 
 	public void setMinFinishTime(double minFinishTime) {
@@ -66,12 +83,11 @@ public class MinimumTimeVertexConnector {
 		this.maxFinishTime = maxFinishTime;
 	}
 
-//	public void setEdgeChecker(BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker) {
-//		this.edgeChecker = requireNonNull(edgeChecker, "edgeChecker");
-//	}
+	public void setBufferDuration(double bufferDuration) {
+		if (!Double.isFinite(bufferDuration) || bufferDuration < 0.0)
+			throw new IllegalArgumentException("illegal bufferDuration");
 
-	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
-		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
+		this.bufferDuration = bufferDuration;
 	}
 
 	public void setMaxVelocity(double maxVelocity) {
@@ -81,25 +97,31 @@ public class MinimumTimeVertexConnector {
 		this.maxVelocity = maxVelocity;
 	}
 
+	public void setForbiddenMap(Geometry forbiddenMap) {
+		this.forbiddenMap = requireNonNull(forbiddenMap, "forbiddenMap");
+	}
+
+	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
+		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
+	}
+
 	private void checkParameters() {
 		if (graph == null ||
-			startVertex == null ||
+			Double.isNaN(minArc) ||
 			Double.isNaN(finishArc) ||
+			Double.isNaN(minTime) ||
 			Double.isNaN(minFinishTime) ||
 			Double.isNaN(maxFinishTime) ||
-//			edgeChecker == null ||
-			weightCalculator == null ||
-			Double.isNaN(maxVelocity))
+			Double.isNaN(bufferDuration) ||
+			Double.isNaN(maxVelocity) ||
+			forbiddenMap == null ||
+			weightCalculator == null)
 		{
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (startVertex.getX() >= finishArc ||
-			startVertex.getY() >  minFinishTime)
-		{
-			throw new IllegalStateException("startVertex and finishVertex incompatible");
-		}
-
+		if (minArc  >= finishArc || minTime >  minFinishTime)
+			throw new IllegalStateException("illegal bounds");
 		if (minFinishTime > maxFinishTime)
 			throw new IllegalStateException("minFinishTime > maxFinishTime");
 	}
@@ -118,15 +140,12 @@ public class MinimumTimeVertexConnector {
 
 		// connect finish vertices
 		for (ImmutablePoint v : vertices) {
-			if (!within(v))
-				continue;
-
 			ImmutablePoint candidate = calcCandidate(v);
 			graph.addVertex(candidate);
 			finishVertices.add(candidate);
 
-			connectHelper(v, minFinishVertex);
-			connectHelper(v, candidate);
+			connectHelper(v, minFinishVertex, fullEdgeChecker);
+			connectHelper(v, candidate, nonVelocityEdgeChecker);
 		}
 
 		// remove unconnected finish vertices
@@ -146,40 +165,34 @@ public class MinimumTimeVertexConnector {
 	}
 
 	private void init() {
-		SimpleEdgeChecker simpleChecker = new SimpleEdgeChecker(
-			startVertex.getX(),
-			finishArc,
-			startVertex.getY(),
-			maxFinishTime,
-			maxVelocity);
-		VisibilityEdgeChecker visibilityChecker = new VisibilityEdgeChecker(
-				forbiddenMap);
+		BoundsEdgeChecker boundsChecker = new BoundsEdgeChecker(
+			minArc, finishArc, minTime, maxFinishTime);
+		VelocityEdgeChecker velocityChecker = new VelocityEdgeChecker(maxVelocity);
+		VisibilityEdgeChecker visibilityChecker = new VisibilityEdgeChecker(forbiddenMap);
 		BufferTimeEdgeChecker bufferChecker = new BufferTimeEdgeChecker(
-			bufferTime, visibilityChecker::check);
+			bufferDuration, visibilityChecker::check);
 
-		edgeChecker = (v1, v2) ->
-			simpleChecker.check(v1, v2) &&
+		fullEdgeChecker = (v1, v2) ->
+			boundsChecker.check(v1, v2) &&
+			velocityChecker.check(v1, v2) &&
+			visibilityChecker.check(v1, v2) &&
+			bufferChecker.check(v2);
+
+		nonVelocityEdgeChecker = (v1, v2) ->
+			boundsChecker.check(v1, v2) &&
 			visibilityChecker.check(v1, v2) &&
 			bufferChecker.check(v2);
 	}
 
 	private void cleanUp() {
-		edgeChecker = null;
+		nonVelocityEdgeChecker = null;
 	}
 
-	private boolean within(ImmutablePoint vertex) {
-		double minArc = startVertex.getX();
-		double maxArc = finishArc;
-		double minTime = startVertex.getY();
-		double maxTime = maxFinishTime;
-		double arc = vertex.getX();
-		double time = vertex.getY();
-
-		return arc  >= minArc  && arc  < maxArc
-			&& time >= minTime && time < maxTime;
-	}
-
-	private void connectHelper(ImmutablePoint source, ImmutablePoint target) {
+	private void connectHelper(
+		ImmutablePoint source,
+		ImmutablePoint target,
+		BiFunction<ImmutablePoint, ImmutablePoint, Boolean> edgeChecker)
+	{
 		if (!edgeChecker.apply(source, target))
 			return;
 

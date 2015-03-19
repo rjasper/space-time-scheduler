@@ -1,11 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static java.util.Objects.*;
 import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
 import static com.vividsolutions.jts.geom.Location.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-
-import javax.management.modelmbean.RequiredModelMBean;
+import static java.util.Objects.*;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;

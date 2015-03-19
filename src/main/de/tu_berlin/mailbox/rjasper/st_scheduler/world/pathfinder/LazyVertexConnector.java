@@ -1,12 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static java.util.Objects.*;
 import static java.util.stream.Collectors.*;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,17 +24,21 @@ public class LazyVertexConnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;
 
-	private ImmutablePoint startVertex;
+	private double minArc = Double.NaN;
 
-	private ImmutablePoint finishVertex;
+	private double maxArc = Double.NaN;
 
-	private BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator = null;
+	private double minTime = Double.NaN;
 
-	private Geometry forbiddenMap;
+	private double maxTime = Double.NaN;
+
+	private double minStopDuration = Double.NaN;
 
 	private double lazyVelocity = Double.NaN;
 
-	private Duration minStopDuration = Duration.ZERO;
+	private Geometry forbiddenMap;
+
+	private BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator = null;
 
 	private transient Collection<Ray> motionRays;
 
@@ -57,20 +58,39 @@ public class LazyVertexConnector {
 		this.graph = requireNonNull(graph, "graph");
 	}
 
-	public void setStartVertex(ImmutablePoint startVertex) {
-		this.startVertex = requireNonNull(startVertex, "startVertex");
+	public void setMinArc(double minArc) {
+		if (!Double.isFinite(minArc))
+			throw new IllegalArgumentException("illegal minArc");
+
+		this.minArc = minArc;
 	}
 
-	public void setFinishVertex(ImmutablePoint finishVertex) {
-		this.finishVertex = requireNonNull(finishVertex, "finishVertex");
+	public void setMaxArc(double maxArc) {
+		if (!Double.isFinite(maxArc))
+			throw new IllegalArgumentException("illegal maxArc");
+
+		this.maxArc = maxArc;
 	}
 
-	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
-		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
+	public void setMinTime(double minTime) {
+		if (!Double.isFinite(minTime))
+			throw new IllegalArgumentException("illegal minTime");
+
+		this.minTime = minTime;
 	}
 
-	public void setForbiddenMap(Geometry forbiddenMap) {
-		this.forbiddenMap = requireNonNull(forbiddenMap, "forbiddenMap");
+	public void setMaxTime(double maxTime) {
+		if (!Double.isFinite(maxTime))
+			throw new IllegalArgumentException("illegal maxTime");
+
+		this.maxTime = maxTime;
+	}
+
+	public void setMinStopDuration(double minStopDuration) {
+		if (!Double.isFinite(minStopDuration) || minStopDuration < 0)
+			throw new IllegalArgumentException("illegal minStopDuration");
+
+		this.minStopDuration = minStopDuration;
 	}
 
 	public void setLazyVelocity(double lazyVelocity) {
@@ -80,31 +100,30 @@ public class LazyVertexConnector {
 		this.lazyVelocity = lazyVelocity;
 	}
 
-	public void setMinStopDuration(Duration minStopDuration) {
-		requireNonNull(minStopDuration, "minStopDuration");
+	public void setForbiddenMap(Geometry forbiddenMap) {
+		this.forbiddenMap = requireNonNull(forbiddenMap, "forbiddenMap");
+	}
 
-		if (minStopDuration.isNegative())
-			throw new IllegalArgumentException("illegal duration");
-
-		this.minStopDuration = minStopDuration;
+	public void setWeightCalculator(BiFunction<ImmutablePoint, ImmutablePoint, Double> weightCalculator) {
+		this.weightCalculator = requireNonNull(weightCalculator, "weightCalculator");
 	}
 
 	private void checkParameters() {
 		if (graph == null ||
-			startVertex == null ||
-			finishVertex == null ||
+			Double.isNaN(minArc) ||
+			Double.isNaN(maxArc) ||
+			Double.isNaN(minTime) ||
+			Double.isNaN(maxTime) ||
 			weightCalculator == null ||
 			forbiddenMap == null ||
+			Double.isNaN(minStopDuration) ||
 			Double.isNaN(lazyVelocity))
 		{
 			throw new IllegalStateException("unset parameters");
 		}
 
-		if (startVertex.getX() >= finishVertex.getX() ||
-			startVertex.getY() >= finishVertex.getY())
-		{
-			throw new IllegalStateException("startVertex and finishVertex incompatible");
-		}
+		if (minArc >= maxArc || minTime >= maxTime)
+			throw new IllegalStateException("illegal bounds");
 	}
 
 	public void connect() {
@@ -123,27 +142,14 @@ public class LazyVertexConnector {
 	private void calcMotionRays() {
 		motionRays = graph.vertexSet().stream()
 			.filter(this::within)
-			.filter(v -> !v.equals(startVertex))
 			.map(this::calcMotionRay)
 			.filter(r -> r != null)
 			.collect(toList());
 	}
 
-	private boolean within(ImmutablePoint vertex) {
-		double minArc = startVertex.getX();
-		double maxArc = finishVertex.getX();
-		double minTime = startVertex.getY();
-		double maxTime = finishVertex.getY();
-		double arc = vertex.getX();
-		double time = vertex.getY();
-
-		return arc  >= minArc  && arc  <= maxArc
-			&& time >= minTime && time <= maxTime;
-	}
-
 	private Ray calcMotionRay(ImmutablePoint origin) {
 		double s1 = origin.getX();
-		double s2 = startVertex.getX();
+		double s2 = minArc;
 		double ds = s1 - s2;
 		double t1 = origin.getY();
 		double t2 = t1 - ds/lazyVelocity;
@@ -188,7 +194,6 @@ public class LazyVertexConnector {
 	private void calcStationaryRays() {
 		stationaryRays = graph.vertexSet().stream()
 			.filter(this::within)
-			.filter(v -> !v.equals(finishVertex))
 			.map(this::calcStationaryRay)
 			.filter(r -> r != null)
 			.collect(toList());
@@ -198,7 +203,7 @@ public class LazyVertexConnector {
 		double s1 = origin.getX();
 		double s2 = s1;
 		double t1 = origin.getY();
-		double t2 = finishVertex.getY();
+		double t2 = maxTime;
 
 		if (t1 >= t2)
 			return null;
@@ -244,6 +249,14 @@ public class LazyVertexConnector {
 			return new Ray(origin, immutableLineString(s1, t1, s3, t3));
 	}
 
+	private boolean within(ImmutablePoint vertex) {
+		double arc = vertex.getX();
+		double time = vertex.getY();
+
+		return arc  >= minArc  && arc  <= maxArc
+			&& time >= minTime && time <= maxTime;
+	}
+
 	private MultiLineString boundary(Geometry geometry) {
 		if (geometry instanceof MultiLineString)
 			return (MultiLineString) geometry;
@@ -279,19 +292,23 @@ public class LazyVertexConnector {
 	}
 
 	private void connectRayIntersections() {
-		double minStop = durationToSeconds(minStopDuration);
-
 		for (Ray sr : stationaryRays) {
 			for (Ray mr : motionRays) {
+				if (sr.origin.equals(mr.origin))
+					continue;
+
 				Geometry intersection = sr.line .intersection( mr.line );
 
 				if (intersection.isEmpty())
 					continue;
 
-				ImmutablePoint vertex = immutable((Point) intersection);
+				Point intersectionPoint = (Point) intersection;
+
+				// using origin arc ordinate to ensure stationary path segment
+				ImmutablePoint vertex = immutablePoint(sr.origin.getX(), intersectionPoint.getY());
 
 				// don't stop for small durations
-				if (vertex.getY() - sr.origin.getY() < minStop)
+				if (vertex.getY() - sr.origin.getY() < minStopDuration)
 					continue;
 
 				graph.addVertex(vertex);

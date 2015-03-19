@@ -2,33 +2,25 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 
-public class SimpleEdgeChecker {
+public class BoundsEdgeChecker {
 
-	private final double startArc;
-	private final double finishArc;
-	private final double startTime;
-	private final double finishTime;
-	private final double maxVelocity;
+	private final double minArc;
+	private final double maxArc;
+	private final double minTime;
+	private final double maxTime;
 
-	public SimpleEdgeChecker(
-		double startArc,
-		double finishArc,
-		double startTime,
-		double finishTime,
-		double maxVelocity)
+	public BoundsEdgeChecker(
+		double minArc, double maxArc, double minTime, double maxTime)
 	{
-		this.startArc = checkDouble(startArc, "startArc");
-		this.finishArc = checkDouble(finishArc, "finishArc");
-		this.startTime = checkDouble(startTime, "startTime");
-		this.finishTime = checkDouble(finishTime, "finishTime");
-		this.maxVelocity = checkDouble(maxVelocity, "maxVelocity");
+		this.minArc = checkDouble(minArc, "startArc");
+		this.maxArc = checkDouble(maxArc, "finishArc");
+		this.minTime = checkDouble(minTime, "startTime");
+		this.maxTime = checkDouble(maxTime, "finishTime");
 
-		if (startArc >= finishArc)
+		if (minArc >= maxArc)
 			throw new IllegalArgumentException("startArc >= finishArc");
-		if (startTime >= finishTime)
+		if (minTime >= maxTime)
 			throw new IllegalArgumentException("startTime >= finishTime");
-		if (maxVelocity <= 0.0)
-			throw new IllegalArgumentException("illegal maxVelocity");
 	}
 
 	private static double checkDouble(double value, String name) {
@@ -48,32 +40,27 @@ public class SimpleEdgeChecker {
 	 * <li>Both vertices' arc-ordinates are within [minArc, maxArc].</li>
 	 * <li>Both vertices' time-ordinates are within [minTime, maxTime].</li>
 	 * <li>The first vertex' time is before the second vertex' time.</li>
-	 * <li>The maximum speed is not exceeded.</li>
 	 * </ul>
 	 * @param from
 	 * @param to
 	 * @return
 	 */
 	public boolean check(Point from, Point to) {
+		if (from.equalsTopo(to))
+			return false;
+
 		double s1 = from.getX(), s2 = to.getX(), t1 = from.getY(), t2 = to.getY();
 
 		// if vertex is not on path
-		if (s1 < startArc || s1 > finishArc || s2 < startArc || s2 > finishArc)
+		if (s1 < minArc || s1 > maxArc || s2 < minArc || s2 > maxArc)
 			return false;
 
 		// if vertex is not within time window
-		if (t1 < startTime || t1 > finishTime || t2 < startTime || t2 > finishTime)
+		if (t1 < minTime || t1 > maxTime || t2 < minTime || t2 > maxTime)
 			return false;
 
 		// if 'from' happens after 'to'
 		if (t1 > t2)
-			return false;
-
-		if (from.equals(to))
-			return false;
-
-		// if maximum speed is exceeded
-		if (Math.abs((s2 - s1) / (t2 - t1)) > maxVelocity)
 			return false;
 
 		return true;

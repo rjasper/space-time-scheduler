@@ -5,25 +5,22 @@ import static java.util.Objects.*;
 
 import java.util.function.BiFunction;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-
-import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
 public class BufferTimeEdgeChecker {
 
-	private final double bufferTime;
+	private final double bufferDuration;
 
 	private final BiFunction<Point, Point, Boolean> edgeChecker;
 
 	public BufferTimeEdgeChecker(
-		double bufferTime,
+		double bufferDuration,
 		BiFunction<Point, Point, Boolean> edgeChecker)
 	{
-		this.bufferTime = bufferTime;
+		this.bufferDuration = bufferDuration;
 		this.edgeChecker = requireNonNull(edgeChecker, "edgeChecker");
 
-		if (!Double.isFinite(bufferTime) || bufferTime < 0.0)
+		if (!Double.isFinite(bufferDuration) || bufferDuration < 0.0)
 			throw new IllegalArgumentException("illegal bufferTime");
 	}
 
@@ -38,7 +35,7 @@ public class BufferTimeEdgeChecker {
 		double s = vertex.getX(), t = vertex.getY();
 
 		Point p1 = vertex;
-		Point p2 = point(s, t + bufferTime);
+		Point p2 = point(s, t + bufferDuration);
 
 		return edgeChecker.apply(p1, p2);
 	}
