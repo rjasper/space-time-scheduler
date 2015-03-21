@@ -1,4 +1,4 @@
-package de.tu_berlin.mailbox.rjasper.st_scheduler.experimental;
+package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static java.util.Objects.*;

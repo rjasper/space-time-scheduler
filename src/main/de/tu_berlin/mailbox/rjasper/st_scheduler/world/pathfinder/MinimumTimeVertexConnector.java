@@ -15,7 +15,6 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.experimental.BufferTimeEdgeChecker;
 
 public class MinimumTimeVertexConnector {
 
