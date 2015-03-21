@@ -72,11 +72,6 @@ public class World {
 	 * @return the map.
 	 */
 	private static Geometry makeMap(Collection<StaticObstacle> staticObstacles) {
-		// for some reason the geometry combiner returns null when receiving
-		// an empty list instead of some empty geometry
-		if (staticObstacles.size() == 0)
-			return immutableMultiPolygon();
-
 		Polygon[] shapes = staticObstacles.stream()
 			.map(StaticObstacle::getShape)
 			.toArray(n -> new Polygon[n]);
