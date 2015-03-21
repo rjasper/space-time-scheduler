@@ -13,18 +13,18 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 
 public class NodeCollidesWithDynamicObstacles extends MapMatcher<Node, DynamicObstacle> {
-	
+
 	@Factory
-	public static Matcher<Node> nodeCollidesWith(Collection<? extends DynamicObstacle> obstacles) {
+	public static Matcher<Node> nodeCollidesWith(Collection<DynamicObstacle> obstacles) {
 		return new NodeCollidesWithDynamicObstacles(obstacles);
 	}
-	
+
 	private final Collection<? extends DynamicObstacle> obstacles;
-	
-	public NodeCollidesWithDynamicObstacles(Collection<? extends DynamicObstacle> obstacles) {
+
+	public NodeCollidesWithDynamicObstacles(Collection<DynamicObstacle> obstacles) {
 		super(obstaclesCollideWith(obstacles), w ->
 			new DynamicObstacle(w.getShape(), w.calcTrajectory()));
-		
+
 		this.obstacles = Objects.requireNonNull(obstacles, "obstacles");
 	}
 

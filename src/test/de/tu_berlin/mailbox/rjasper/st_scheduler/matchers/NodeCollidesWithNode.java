@@ -13,21 +13,21 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 
 public class NodeCollidesWithNode extends NodeCollidesWithDynamicObstacles {
-	
+
 	@Factory
 	public static Matcher<Node> nodeCollidesWith(Node node) {
 		return new NodeCollidesWithNode(node);
 	}
-	
+
 	private final Node node;
-	
+
 	public NodeCollidesWithNode(Node node) {
 		super(makeObstacles(node));
-		
+
 		this.node = Objects.requireNonNull(node, "node");
 	}
 
-	private static Collection<? extends DynamicObstacle> makeObstacles(Node node) {
+	private static Collection<DynamicObstacle> makeObstacles(Node node) {
 		return node.getTrajectories().stream()
 			.map(t -> new DynamicObstacle(node.getShape(), t))
 			.collect(toList());
@@ -47,5 +47,5 @@ public class NodeCollidesWithNode extends NodeCollidesWithDynamicObstacles {
 			.appendText(" is not colliding with ")
 			.appendValue(node);
 	}
-	
+
 }

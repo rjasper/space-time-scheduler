@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
@@ -21,9 +22,9 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 
 public abstract class AbstractFixTimePathfinderTest {
-	
+
 	protected abstract AbstractFixTimePathfinder createPathfinder();
-	
+
 	private boolean calcPath(
 		AbstractFixTimePathfinder pf,
 		Collection<DynamicObstacle> dynObst,
@@ -41,10 +42,10 @@ public abstract class AbstractFixTimePathfinderTest {
 		pf.setFinishArc(path.length());
 		pf.setStartTime(startTime);
 		pf.setFinishTime(finishTime);
-		
+
 		return pf.calculate();
 	}
-	
+
 	@Test
 	public void test() {
 		double maxSpeed = 1.0;
@@ -62,7 +63,7 @@ public abstract class AbstractFixTimePathfinderTest {
 			immutablePoint(1., 1.)));
 		LocalDateTime startTime = atSecond(0);
 		LocalDateTime finishTime = atSecond(11);
-		
+
 		AbstractFixTimePathfinder pf = createPathfinder();
 
 		boolean validPath = calcPath(pf,
@@ -71,25 +72,32 @@ public abstract class AbstractFixTimePathfinderTest {
 			maxSpeed,
 			startTime,
 			finishTime);
-		
+
 		assertTrue(validPath);
-		
+
 		SimpleTrajectory trajectory = pf.getResultTrajectory().composed();
-		
-		SimpleTrajectory expected = trajectory(
-			1, 2,      4,      4, 3,  1,
-			4, 4,      4,      1, 1,  1,
-			0, 2, 13./3., 47./6., 9, 11);
-		
-		assertThat(trajectory, equalTo(expected));
+
+		assertThat("trajectory is empty",
+			trajectory.isEmpty(), is(false));
+		assertThat("invalid trace",
+			trajectory.trace().equalsTopo(spatialPath.trace()), is(true));
+		assertThat("invalid start location",
+			trajectory.getStartLocation(), equalTo(spatialPath.getFirstPoint()));
+		assertThat("invalid finish location",
+			trajectory.getFinishLocation(), equalTo(spatialPath.getLastPoint()));
+		assertThat("invalid start time",
+			trajectory.getStartTime(), equalTo(startTime));
+		assertThat("invalid finish time",
+			trajectory.getFinishTime(), equalTo(finishTime));
+		assertThat(trajectory, not(trajectoryCollidesWith(dynamicObstacles)));
 	}
-	
+
 	@Test
 	public void testInsufficientTime() {
 		AbstractFixTimePathfinder pf = createPathfinder();
-		
+
 		SpatialPath spatialPath = spatialPath(0, 0, 10, 0);
-		
+
 		boolean status = calcPath(pf,
 			emptyList(),
 			spatialPath,
