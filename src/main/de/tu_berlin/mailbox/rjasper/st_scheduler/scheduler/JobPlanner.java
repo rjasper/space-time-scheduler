@@ -393,10 +393,4 @@ public class JobPlanner {
 			ImmutableList.of(job.getStartTime(), job.getFinishTime()));
 	}
 
-//	private Trajectory makeFinalTrajectory(ImmutablePoint location, LocalDateTime startTime) {
-//		return new SimpleTrajectory(
-//			new SpatialPath(ImmutableList.of(location, location)),
-//			ImmutableList.of(startTime, NodeSlot.getFinishTime()));
-//	}
-
 }
