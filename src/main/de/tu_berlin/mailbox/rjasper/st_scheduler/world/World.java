@@ -2,9 +2,7 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
 import static de.tu_berlin.mailbox.rjasper.collect.Immutables.*;
 import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static java.util.stream.Collectors.*;
 
 import java.util.Collection;
 
@@ -12,7 +10,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.util.GeometryCombiner;
 
 import de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
@@ -21,7 +18,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * The {@code World} represents the physical outside world containing any
  * independent static or dynamic obstacles. Once created the world cannot be
  * changed.
- * 
+ *
  * @author Rico Jasper
  */
 public class World {
@@ -30,7 +27,7 @@ public class World {
 	 * The stationary obstacles of this world.
 	 */
 	private final ImmutableCollection<StaticObstacle> staticObstacles;
-	
+
 	/**
 	 * The moving obstacles of this world.
 	 */
@@ -50,7 +47,7 @@ public class World {
 
 	/**
 	 * Constructs a new {@code World} with static and dynamic obstacles.
-	 * 
+	 *
 	 * @param staticObstacles
 	 * @param dynamicObstacles
 	 * @throws NullPointerException
@@ -62,7 +59,7 @@ public class World {
 	{
 		CollectionsRequire.requireNonNull(staticObstacles, "staticObstacles");
 		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
-		
+
 		this.staticObstacles = immutable(staticObstacles);
 		this.dynamicObstacles = immutable(dynamicObstacles);
 		this.map = makeMap(staticObstacles);
@@ -70,7 +67,7 @@ public class World {
 
 	/**
 	 * Creates the map geometry from static obstacles.
-	 * 
+	 *
 	 * @param staticObstacles
 	 * @return the map.
 	 */
@@ -78,14 +75,13 @@ public class World {
 		// for some reason the geometry combiner returns null when receiving
 		// an empty list instead of some empty geometry
 		if (staticObstacles.size() == 0)
-			return immutablePolygon();
-		
-		Collection<Polygon> shapes = staticObstacles.stream()
-			.map(StaticObstacle::getShape)
-			.collect(toList());
+			return immutableMultiPolygon();
 
-		GeometryCombiner combinder = new GeometryCombiner(shapes);
-		Geometry map = immutable(combinder.combine());
+		Polygon[] shapes = staticObstacles.stream()
+			.map(StaticObstacle::getShape)
+			.toArray(n -> new Polygon[n]);
+
+		Geometry map = immutableMultiPolygon(shapes);
 
 		return map;
 	}
@@ -113,7 +109,7 @@ public class World {
 
 	/**
 	 * Calculates the free space of an area of the worlds map.
-	 * 
+	 *
 	 * @param mask
 	 *            the area of interest
 	 * @return the free space within the mask.
@@ -124,7 +120,7 @@ public class World {
 	 */
 	public Geometry space(Geometry mask) {
 		GeometriesRequire.requireValidSimple2DGeometry(mask, "mask");
-		
+
 		Geometry map = getMap();
 		Geometry space = mask.difference(map);
 
@@ -133,7 +129,7 @@ public class World {
 
 	/**
 	 * Calculates a new World with all obstacles buffer by a given amount.
-	 * 
+	 *
 	 * @param distance of the buffer
 	 * @return the buffered world.
 	 * @throws IllegalArgumentException if {@code distance} is not finite.
@@ -141,7 +137,7 @@ public class World {
 	public World buffer(double distance) {
 		if (!Double.isFinite(distance))
 			throw new IllegalArgumentException("distance is not finite");
-		
+
 		ImmutableList<StaticObstacle> staticObstacles = getStaticObstacles().stream()
 			.map(o -> o.buffer(distance)) // buffer always returns a polygon
 			.collect(toImmutableList());
