@@ -455,7 +455,6 @@ public class Scheduler {
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
 
-		// TODO delegate IllegalStateException to IllegalArgumentException
 		boolean status = scheduleImpl(specs, dependencies, alternative);
 
 		return status ? success(alternative) : error();
