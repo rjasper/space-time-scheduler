@@ -4,6 +4,7 @@ import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuil
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.JobMatchers.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;
 import static de.tu_berlin.mailbox.rjasper.util.UUIDFactory.*;
@@ -28,6 +29,7 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult.TrajectoryUpdate;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories.NodeFactory;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
@@ -99,7 +101,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testNoLocation() {
+	public void testNoLocation() throws CollisionException {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		NodeSpecification ns =
@@ -121,7 +123,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testAllBusy() {
+	public void testAllBusy() throws CollisionException {
 		NodeSpecification ns =
 			wFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 
@@ -157,7 +159,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleBetweenJobs() {
+	public void testScheduleBetweenJobs() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -176,7 +178,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testComplexJobSet() {
+	public void testComplexJobSet() throws CollisionException {
 		World world = WorldFixtures.twoRooms();
 
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
@@ -331,7 +333,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testAddNodeAfterFrozenHorizon() {
+	public void testAddNodeAfterFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = new NodeSpecification(
 			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 
@@ -342,7 +344,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testAddNodeAtFrozenHorizon() {
+	public void testAddNodeAtFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = new NodeSpecification(
 			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 
@@ -353,7 +355,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testAddNodeBeforeFrozenHorizon() {
+	public void testAddNodeBeforeFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = new NodeSpecification(
 			"n", NODE_SHAPE, NODE_SPEED, immutablePoint(0, 0), atSecond(10));
 
@@ -361,12 +363,49 @@ public class SchedulerTest {
 		sc.setPresentTime(atSecond(20));
 
 		thrown.expect(IllegalArgumentException.class);
-
 		sc.addNode(ns);
 	}
 
 	@Test
-	public void testScheduleBeforeFrozenHorizon() {
+	public void testAddNodeWithinStaticObstacle() throws CollisionException {
+		StaticObstacle obstacle = new StaticObstacle(immutableBox(-1, -1, 1, 1));
+		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
+		Scheduler sc = new Scheduler(world);
+
+		NodeSpecification spec = nodeSpec("node", 0, 0);
+
+		thrown.expect(CollisionException.class);
+		sc.addNode(spec);
+	}
+
+	@Test
+	public void testAddNodeWithinDynamicObstacle() throws CollisionException {
+		DynamicObstacle obstacle = new DynamicObstacle(
+			immutableBox(-1, -1, 1, 1),
+			trajectory(-1, 1, -1, 1, -1, 1));
+		World world = new World(ImmutableList.of(), ImmutableList.of(obstacle));
+		Scheduler sc = new Scheduler(world);
+
+		NodeSpecification spec = nodeSpec("node", 0, 0);
+
+		thrown.expect(CollisionException.class);
+		sc.addNode(spec);
+	}
+
+	@Test
+	public void testAddNodeWithinNodeObstacle() throws CollisionException {
+		NodeSpecification spec1 = nodeSpec("node1", 0, 0);
+		NodeSpecification spec2 = nodeSpec("node2", 0, 0);
+
+		Scheduler sc = new Scheduler(new World());
+		sc.addNode(spec1);
+
+		thrown.expect(CollisionException.class);
+		sc.addNode(spec2);
+	}
+
+	@Test
+	public void testScheduleBeforeFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -388,7 +427,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleAfterFrozenHorizon() {
+	public void testScheduleAfterFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -430,7 +469,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleMultipleAlternatives() {
+	public void testScheduleMultipleAlternatives() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -488,7 +527,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleDependenciesSingle() {
+	public void testScheduleDependenciesSingle() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -518,7 +557,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleDependencyTwo() {
+	public void testScheduleDependencyTwo() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -562,7 +601,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleDependencyTwoMargin() {
+	public void testScheduleDependencyTwoMargin() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -609,7 +648,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleDependencyInconsistence1() {
+	public void testScheduleDependencyInconsistence1() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -630,7 +669,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testScheduleDependencyInconsistence2() {
+	public void testScheduleDependencyInconsistence2() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -646,7 +685,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicSameLocation() {
+	public void testSchedulePeriodicSameLocation() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -670,7 +709,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicIndependentLocation() {
+	public void testSchedulePeriodicIndependentLocation() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -694,7 +733,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicSameLocationTight() {
+	public void testSchedulePeriodicSameLocationTight() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -718,7 +757,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicIndependentLocationTight() {
+	public void testSchedulePeriodicIndependentLocationTight() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -742,7 +781,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicSameLocationTooTight() {
+	public void testSchedulePeriodicSameLocationTooTight() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -765,7 +804,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testSchedulePeriodicIndependentLocationTooTight() {
+	public void testSchedulePeriodicIndependentLocationTooTight() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -788,7 +827,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testUnschedule() {
+	public void testUnschedule() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -813,7 +852,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testUnscheduleUnknown() {
+	public void testUnscheduleUnknown() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -825,7 +864,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testUnscheduleWithinFrozenHorizon() {
+	public void testUnscheduleWithinFrozenHorizon() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -853,7 +892,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testUnscheduleBetweenJobs() {
+	public void testUnscheduleBetweenJobs() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -883,7 +922,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testRescheduleJobDifferentLocation() {
+	public void testRescheduleJobDifferentLocation() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -911,7 +950,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testRescheduleJobDifferentTime() {
+	public void testRescheduleJobDifferentTime() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -939,7 +978,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testRemoveJob() {
+	public void testRemoveJob() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
@@ -964,7 +1003,7 @@ public class SchedulerTest {
 	}
 
 	@Test
-	public void testRemoveLockedJob() {
+	public void testRemoveLockedJob() throws CollisionException {
 		NodeSpecification ns = nodeSpec("n", 0, 0);
 
 		Scheduler sc = new Scheduler(new World());

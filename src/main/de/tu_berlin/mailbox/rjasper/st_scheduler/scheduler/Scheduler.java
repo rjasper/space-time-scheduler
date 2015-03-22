@@ -1,5 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.StaticCollisionDetector.*;
 import static java.util.UUID.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
@@ -17,6 +19,8 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult.TrajectoryUpdate;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeObstacleBuilder;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.RadiusBasedWorldPerspectiveCache;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
@@ -114,20 +118,61 @@ public class Scheduler {
 	 * @throws IllegalArgumentException
 	 *             if node ID is already assigned.
 	 */
-	public NodeReference addNode(NodeSpecification spec) {
+	public NodeReference addNode(NodeSpecification spec) throws CollisionException {
 		// also throws NullPointerException
 		if (spec.getInitialTime().isBefore(getFrozenHorizonTime()))
 			throw new IllegalArgumentException("initial time violates frozen horizon");
 
 		Node node = new Node(spec);
 
-		// TODO check validity of node placement
-		// don't overlap with static or dynamic obstacles or with other nodes
-		// only allow after frozen horizon
+		checkNodePlacement(node);
 
 		schedule.addNode(node);
 
 		return node.getReference();
+	}
+
+	private void checkNodePlacement(Node node) throws CollisionException {
+		World view = perspectiveCache.getPerspectiveFor(node).getView();
+
+		boolean status = checkNodePlacementImpl(node, view);
+
+		if (!status) {
+			perspectiveCache.removePerceiver(node);
+
+			throw new CollisionException();
+		}
+	}
+
+	private boolean checkNodePlacementImpl(Node node, World view) {
+		Trajectory trajectory = node.calcTrajectory();
+
+		// check static obstacles
+
+		if (collides(trajectory, view.getStaticObstacles()))
+			return false;
+
+		// check world's dynamic obstacles
+
+		if (collides(trajectory, view.getDynamicObstacles()))
+			return false;
+
+		// check other nodes
+
+		NodeObstacleBuilder obstacleBuilder = new NodeObstacleBuilder();
+
+		obstacleBuilder.setSchedule(schedule);
+		obstacleBuilder.setAlternative(new ScheduleAlternative());
+		obstacleBuilder.setNode(node);
+		obstacleBuilder.setStartTime(node.getInitialTime());
+		obstacleBuilder.setFinishTime(END_OF_TIME);
+
+		Collection<DynamicObstacle> nodeObstacles = obstacleBuilder.build();
+
+		if (collides(trajectory, nodeObstacles))
+			return false;
+
+		return true;
 	}
 
 	/**
@@ -412,6 +457,7 @@ public class Scheduler {
 	{
 		ScheduleAlternative alternative = new ScheduleAlternative();
 
+		// TODO delegate IllegalStateException to IllegalArgumentException
 		boolean status = scheduleImpl(specs, dependencies, alternative);
 
 		return status ? success(alternative) : error();

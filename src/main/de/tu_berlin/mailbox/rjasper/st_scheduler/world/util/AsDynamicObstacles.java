@@ -11,8 +11,13 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
 // TODO test
-// XXX last edition
 public class AsDynamicObstacles extends AbstractCollection<DynamicObstacle> {
+
+	public static Collection<DynamicObstacle> asDynamicObstacles(
+		ImmutablePolygon shape, Collection<Trajectory> trajectories)
+	{
+		return new AsDynamicObstacles(shape, trajectories);
+	}
 
 	private final ImmutablePolygon shape;
 

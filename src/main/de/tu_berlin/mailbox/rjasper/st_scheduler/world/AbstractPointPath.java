@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySequencer.*;
 import static java.lang.Double.*;
@@ -25,7 +26,7 @@ import de.tu_berlin.mailbox.rjasper.util.SmartArrayCache;
  * A {@code Path} is an immutable list of immutable {@link Point}s. It ensures
  * validity of the path. All points have to be valid 2-dimensional points.
  * Singular paths of only one point are not allowed while empty paths are.
- * 
+ *
  * @author Rico Jasper
  */
 public abstract class AbstractPointPath<
@@ -35,45 +36,45 @@ extends AbstractPath<V, S>
 implements PointPath<V, S>
 {
 
-	
+
 	/**
 	 * The points of the path.
 	 */
 	private final ImmutableList<ImmutablePoint> points;
-	
+
 	/**
 	 * Constructs a path of the given points.
-	 * 
+	 *
 	 * @param points
 	 * @throws NullPointerException
 	 *             if {@code points} are {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code points} contain invalid points.
-	 * 
+	 *
 	 * @param points
 	 */
 	public AbstractPointPath(ImmutableList<ImmutablePoint> points) {
 		checkVertices(points);
-		
+
 		this.points = points;
 	}
 
 	/**
 	 * Creates a new path containing the given points.
-	 * 
+	 *
 	 * @param points
 	 * @return the new path.
 	 */
 	protected abstract PointPath<V, S> create(ImmutableList<ImmutablePoint> points);
-	
+
 	/**
 	 * @return an empty path.
 	 */
 	protected abstract PointPath<V, S> getEmpty();
-	
+
 	/**
 	 * Checks for validity of the given points.
-	 * 
+	 *
 	 * @param points
 	 * @throws NullPointerException
 	 *             if the {@code points} are {@code null}.
@@ -82,10 +83,10 @@ implements PointPath<V, S>
 	 */
 	protected void checkVertices(List<? extends Point> points) {
 		Objects.requireNonNull(points, "points");
-		
+
 		if (points.size() == 1)
 			throw new IllegalArgumentException("invalid size");
-		
+
 		points.forEach(p ->
 			GeometriesRequire.requireValid2DPoint((Point) p, "points"));
 	}
@@ -97,10 +98,10 @@ implements PointPath<V, S>
 	protected final V makeVertex(int index) {
 		return makeVertex(index, getPoint(index));
 	}
-	
+
 	/**
 	 * Makes a vertex for the given index.
-	 * 
+	 *
 	 * @param index
 	 * @param point at the given index
 	 * @return the vertex.
@@ -135,7 +136,7 @@ implements PointPath<V, S>
 	public V getVertex(int index) {
 		if (verticesCache == null)
 			verticesCache = new SmartArrayCache<>(super::getVertex, size());
-		
+
 		return verticesCache.get(index);
 	}
 
@@ -151,7 +152,7 @@ implements PointPath<V, S>
 	public S getSegment(int index) {
 		if (segmentsCache == null)
 			segmentsCache = new SmartArrayCache<>(super::getSegment, size()-1);
-		
+
 		return segmentsCache.get(index);
 	}
 
@@ -162,7 +163,7 @@ implements PointPath<V, S>
 	public ImmutablePoint getPoint(int index) {
 		return points.get(index);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see world.Path#getPoints()
 	 */
@@ -170,7 +171,7 @@ implements PointPath<V, S>
 	public ImmutableList<ImmutablePoint> getPoints() {
 		return points;
 	}
-	
+
 	/**
 	 * Caches the point path's envelope.
 	 */
@@ -180,30 +181,30 @@ implements PointPath<V, S>
 	public Envelope getEnvelope() {
 		if (isEmpty())
 			throw new IllegalStateException("path is empty");
-		
+
 		Envelope envelope = envelopeCache == null ? null : envelopeCache.get();
-		
+
 		if (envelope == null) {
 			double
 				minX = POSITIVE_INFINITY,
 				maxX = NEGATIVE_INFINITY,
 				minY = POSITIVE_INFINITY,
 				maxY = NEGATIVE_INFINITY;
-			
+
 			for (Point p : points) {
 				double x = p.getX(), y = p.getY();
-				
+
 				minX = min(minX, x);
 				maxX = max(maxX, x);
 				minY = min(minY, y);
 				maxY = max(maxY, y);
 			}
-			
+
 			envelope = new Envelope(minX, maxX, minY, maxY);
-			
+
 			envelopeCache = new SoftReference<>(envelope);
 		}
-		
+
 		return envelope;
 	}
 
@@ -227,7 +228,7 @@ implements PointPath<V, S>
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * Caches the trace of the path.
 	 */
@@ -240,37 +241,37 @@ implements PointPath<V, S>
 	public Geometry trace() {
 		if (isEmpty())
 			return immutableLineString();
-		
+
 		Geometry trace = null;
-		
+
 		if (traceCache != null)
 			trace = traceCache.get();
-		
+
 		if (trace == null) {
 			List<ImmutablePoint> points = new LinkedList<>(getPoints());
 			Iterator<ImmutablePoint> it = points.iterator();
-	
+
 			// removes points which are identical to their predecessor
 			Point last = null;
 			while (it.hasNext()) {
 				Point p = it.next();
-	
+
 				if (last != null && p.equals(last))
 					it.remove();
-	
+
 				last = p;
 			}
-	
+
 			// construct LineString
-			
+
 			if (points.size() == 1)
 				trace = points.get(0);
 			else
-				trace = immutableLineString(sequence(points));
-	
+				trace = immutable( lineString(sequence(points)).union() );
+
 			traceCache = new SoftReference<>(trace);
 		}
-		
+
 		return trace;
 	}
 
@@ -281,20 +282,20 @@ implements PointPath<V, S>
 	public PointPath<V, S> concat(Path<? extends V, ? extends S> other) {
 		if (!(other instanceof PointPath))
 			throw new IllegalArgumentException("incompatible type");
-		
+
 		ImmutableList<ImmutablePoint> lhsVertices = this.getPoints();
 		ImmutableList<ImmutablePoint> rhsVertices = ((PointPath<?, ?>) other).getPoints();
-		
+
 		Builder<ImmutablePoint> builder = ImmutableList.builder();
-		
+
 		ImmutableList<ImmutablePoint> points = builder
 			.addAll(lhsVertices)
 			.addAll(rhsVertices)
 			.build();
-		
+
 		return create(points);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see world.Path#subPath(java.util.function.Function, double, double)
 	 */

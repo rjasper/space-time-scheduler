@@ -6,6 +6,7 @@ import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollis
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
@@ -261,7 +262,7 @@ public class JobPlanner {
 			worldObstacles = worldPerspective.getView().getDynamicObstacles(),
 			nodeObstacles = builder.build();
 
-		dynamicObstacles = JoinedCollection.of(worldObstacles, nodeObstacles);
+		dynamicObstacles = JoinedCollection.of(Arrays.asList(worldObstacles, nodeObstacles));
 	}
 
 	private void cleanUp() {

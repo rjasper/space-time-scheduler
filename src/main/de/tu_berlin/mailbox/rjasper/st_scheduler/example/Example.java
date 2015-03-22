@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.CollisionException;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobSpecification;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeReference;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
@@ -24,9 +25,9 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 
 public final class Example {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws CollisionException {
 		// scheduler
-		
+
 		// world for scheduler
 		// static obstacle for world
 		// for static obstacle
@@ -59,7 +60,7 @@ public final class Example {
 		// trajectory actual
 		Trajectory dynamicObstacleTrajectory =
 			new SimpleTrajectory(dynamicObstacleTrajectorySpatialPath, dynamicObstacleTrajectoryTimes);
-		
+
 		// dynamic obstacle actual
 		DynamicObstacle dynamicObstacle =
 			new DynamicObstacle(dynamicObstacleShape, dynamicObstacleTrajectory);
@@ -85,7 +86,7 @@ public final class Example {
 		// scheduler actual
 		Scheduler scheduler = new Scheduler(world);
 		NodeReference nodeRef = scheduler.addNode(nodeSpec);
-		
+
 		// specification
 		// for specification
 		ImmutablePolygon locationSpace = immutablePolygon(
@@ -99,11 +100,11 @@ public final class Example {
 		Duration duration = Duration.ofSeconds(2L * 60L); // 2 minutes
 		// specification actual
 		JobSpecification spec = new JobSpecification(randomUUID(), locationSpace, earliestStartTime, latestStartTime, duration);
-		
+
 		ScheduleResult result = scheduler.schedule(spec);
-		
+
 		scheduler.commit(result.getTransactionId());
-		
+
 		System.out.println(result);
 		System.out.println(nodeRef.calcTrajectory());
 	}

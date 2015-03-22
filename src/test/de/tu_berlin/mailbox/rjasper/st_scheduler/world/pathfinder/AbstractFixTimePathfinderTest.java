@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
 import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;

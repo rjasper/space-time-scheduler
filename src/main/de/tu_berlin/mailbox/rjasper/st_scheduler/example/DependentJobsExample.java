@@ -14,6 +14,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.CollisionException;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.JobSpecification;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeReference;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.NodeSpecification;
@@ -22,11 +23,11 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 
 public final class DependentJobsExample {
-	
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws CollisionException {
 		Scheduler sc = new Scheduler(new World());
 		NodeReference nref = sc.addNode( makeNodeSpec() );
-		
+
 		JobSpecification js1 = JobSpecification.createSF(
 			uuid("j1"),
 			immutablePoint(10, 10),
@@ -40,19 +41,19 @@ public final class DependentJobsExample {
 			atSecond(60),
 			atSecond(120),
 			ofSeconds(5));
-		
+
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph =
 			new SimpleDirectedGraph<>(DefaultEdge.class);
-		
+
 		Collection<JobSpecification> specs = Arrays.asList(js1, js2);
-		
+
 		// js2 depends on js1
 		addDependencies(depGraph, uuid("j1"));
 		addDependencies(depGraph, uuid("j2"), uuid("j1"));
-		
+
 		ScheduleResult res = sc.schedule(specs, depGraph);
 		sc.commit(res.getTransactionId());
-		
+
 		System.out.println( nref.calcTrajectory() );
 		System.out.println( nref.getJobs() );
 	}
@@ -63,11 +64,11 @@ public final class DependentJobsExample {
 		double maxSpeed = 1.0;
 		ImmutablePoint initialLocation = immutablePoint(0.0, 0.0);
 		LocalDateTime initialTime = atSecond(0.0);
-		
+
 		return new NodeSpecification(
 			id, shape, maxSpeed, initialLocation, initialTime);
 	}
-	
+
 	private static UUID uuid(String name) {
 		return UUID.nameUUIDFromBytes(name.getBytes());
 	}
@@ -89,7 +90,7 @@ public final class DependentJobsExample {
 		UUID... dependencies)
 	{
 		graph.addVertex(jobId);
-		
+
 		for (UUID d : dependencies)
 			graph.addEdge(jobId, d);
 	}
