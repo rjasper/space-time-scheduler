@@ -1,5 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
+import static de.tu_berlin.mailbox.rjasper.util.Throwables.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.StaticCollisionDetector.*;
 import static java.util.UUID.*;
@@ -148,17 +149,14 @@ public class Scheduler {
 		Trajectory trajectory = node.calcTrajectory();
 
 		// check static obstacles
-
 		if (collides(trajectory, view.getStaticObstacles()))
 			return false;
 
 		// check world's dynamic obstacles
-
 		if (collides(trajectory, view.getDynamicObstacles()))
 			return false;
 
 		// check other nodes
-
 		NodeObstacleBuilder obstacleBuilder = new NodeObstacleBuilder();
 
 		obstacleBuilder.setSchedule(schedule);
@@ -480,7 +478,14 @@ public class Scheduler {
 		sc.setInterDependencyMargin(interDependencyMargin);
 		sc.setMaxLocationPicks(MAX_LOCATION_PICKS);
 
-		return sc.schedule();
+		try {
+			return sc.schedule();
+		} catch (IllegalStateException e) {
+			if (thrownBy(e, DependentJobScheduler.class))
+				throw new IllegalArgumentException(e);
+			else
+				throw e;
+		}
 	}
 
 	/**

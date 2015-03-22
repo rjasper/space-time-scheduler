@@ -662,7 +662,7 @@ public class SchedulerTest {
 
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 
-		thrown.expect(IllegalStateException.class);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("specifications and dependencies inconsistent");
 
 		sc.schedule(singleton(js), depGraph);
@@ -678,7 +678,7 @@ public class SchedulerTest {
 		SimpleDirectedGraph<UUID, DefaultEdge> depGraph = depGraph();
 		addDependency(depGraph, "j1");
 
-		thrown.expect(IllegalStateException.class);
+		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("specifications and dependencies inconsistent");
 
 		sc.schedule(emptyList(), depGraph);
