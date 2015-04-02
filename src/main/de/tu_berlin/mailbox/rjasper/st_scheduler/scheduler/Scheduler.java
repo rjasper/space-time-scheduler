@@ -109,6 +109,20 @@ public class Scheduler {
 	}
 
 	/**
+	 * Returns the reference to the node with the given ID.
+	 *
+	 * @param nodeId
+	 * @return the reference.
+	 * @throws NullPointerException
+	 *             if {@code nodeId} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if node ID is unassigned.
+	 */
+	public NodeReference getNodeReference(String nodeId) {
+		return schedule.getNode(nodeId).getReference();
+	}
+
+	/**
 	 * Adds a new {@link Node} to the scheduler. The given specification
 	 * is used to create the node.
 	 *
@@ -171,20 +185,6 @@ public class Scheduler {
 			return false;
 
 		return true;
-	}
-
-	/**
-	 * Returns the reference to the node with the given ID.
-	 *
-	 * @param nodeId
-	 * @return the reference.
-	 * @throws NullPointerException
-	 *             if {@code nodeId} is {@code null}
-	 * @throws IllegalArgumentException
-	 *             if node ID is unassigned.
-	 */
-	public NodeReference getNodeReference(String nodeId) {
-		return schedule.getNode(nodeId).getReference();
 	}
 
 	/**
