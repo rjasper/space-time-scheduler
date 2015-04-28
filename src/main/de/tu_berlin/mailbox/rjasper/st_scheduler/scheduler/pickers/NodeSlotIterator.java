@@ -352,21 +352,21 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 		double l1 = distance(p1, location);
 		double l2 = p2 == null ? 0. : distance(location, p2);
 
-		// job can be started in time
+		// job cannot be started in time
 		// t_max - t1 < l1 / v_max
 		if (Duration.between(t1, latestStartTime()).compareTo(
 			secondsToDuration(vInv * l1)) < 0)
 		{
 			return false;
 		}
-		// job can be finished in time
+		// job cannot be finished in time
 		// t2 - t_min < l2 / v_max + d
 		if (Duration.between(earliestStartTime(node), t2).compareTo(
 			secondsToDuration(vInv * l2).plus(duration)) < 0)
 		{
 			return false;
 		}
-		// enough time to complete job
+		// insufficient time to complete job
 		// t2 - t1 < (l1 + l2) / v_max + d
 		if (Duration.between(t1, t2).compareTo(
 			secondsToDuration(vInv * (l1 + l2)).plus(duration)) < 0)
