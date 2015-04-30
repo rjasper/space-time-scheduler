@@ -68,6 +68,8 @@ public class NodeTest {
 		assertThat(slots, equalTo(expected));
 	}
 
+	// FIXME reproduce bug #2206
+
 	@Test
 	public void testCleanUp1() {
 		Node node = node("node", 0, 0);
