@@ -297,7 +297,7 @@ public class LazyVertexConnector {
 				if (sr.origin.equals(mr.origin))
 					continue;
 
-				Geometry intersection = sr.line .intersection( mr.line );
+				Geometry intersection = sr.line.intersection( mr.line );
 
 				if (intersection.isEmpty())
 					continue;
