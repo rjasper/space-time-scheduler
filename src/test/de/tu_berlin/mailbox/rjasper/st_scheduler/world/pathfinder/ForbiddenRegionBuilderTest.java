@@ -24,21 +24,23 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.time.TimeFactory;
 
 public class ForbiddenRegionBuilderTest {
-	
+
 	private static Collection<ForbiddenRegion> buildRegions(
 		SpatialPath spatialPath,
 		Collection<DynamicObstacle> dynamicObstacles)
 	{
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
-		
+
 		builder.setBaseTime(TimeFactory.BASE_TIME);
 		builder.setSpatialPath(spatialPath);
 		builder.setDynamicObstacles(dynamicObstacles);
-		
+
 		builder.calculate();
-		
+
 		return builder.getResultForbiddenRegions();
 	}
+
+	// FIXME reproduce bug #2208
 
 	@Test
 	public void testStationaryCase() {
@@ -50,12 +52,12 @@ public class ForbiddenRegionBuilderTest {
 				2, 2,
 				5, 1,
 				0, 4));
-		
+
 		Collection<ForbiddenRegion> regions =
 			buildRegions(path, singleton(obstacle));
-		
+
 		Geometry region = regions.iterator().next().getRegion();
-		
+
 		assertThat("forbidden region did not contain essential area",
 			region, contains( lineString(0, 1, 0, 3) ));
 		assertThat("forbidden region did contain more than essential area",
@@ -72,27 +74,27 @@ public class ForbiddenRegionBuilderTest {
 			0, 1);
 		ImmutablePolygon shape = immutablePolygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
-	
+
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
 		builder.setBaseTime(TimeFactory.BASE_TIME);
 		builder.setSpatialPath(path);
 		builder.setDynamicObstacles(Collections.singleton(obstacle));
-	
+
 		builder.calculate();
-	
+
 		Collection<ForbiddenRegion> regions = builder.getResultForbiddenRegions();
-	
+
 		assertEquals(1, regions.size());
-	
+
 		ForbiddenRegion region = regions.iterator().next();
-	
+
 		Geometry expected = immutablePolygon(
 			4., 0.,
 			4., 1.,
 			8., 1.,
 			8., 0.,
 			4., 0.);
-	
+
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
@@ -164,7 +166,7 @@ public class ForbiddenRegionBuilderTest {
 			6.*sqrt2, 2.,
 			4.*sqrt2, 1.,
 			2.*sqrt2, 2.);
-		
+
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
@@ -206,7 +208,7 @@ public class ForbiddenRegionBuilderTest {
 				8., 4.,
 				6., 4.)
 		);
-		
+
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 

@@ -38,7 +38,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 /**
  * The {@code ForbiddenRegion} calculates the forbidden regions for spatial
  * paths introduced by dynamic obstacles.
- * 
+ *
  * @see ForbiddenRegion
  * @author Rico Jasper
  */
@@ -75,11 +75,11 @@ public class ForbiddenRegionBuilder {
 	 * <p>
 	 * Sets the dynamic obstacles.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Any obstacle crossing the spatial path introduces a forbidden region.
 	 * </p>
-	 * 
+	 *
 	 * @param dynamicObstacles
 	 * @throws NullPointerException
 	 *             if {@code dynamicObstacles} is {@code null} or contains
@@ -87,7 +87,7 @@ public class ForbiddenRegionBuilder {
 	 */
 	public void setDynamicObstacles(Collection<? extends DynamicObstacle> dynamicObstacles) {
 		CollectionsRequire.requireNonNull(dynamicObstacles, "dynamicObstacles");
-		
+
 		this.dynamicObstacles = unmodifiableCollection(dynamicObstacles);
 	}
 
@@ -102,13 +102,13 @@ public class ForbiddenRegionBuilder {
 	 * <p>
 	 * Sets the spatial path.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The spatial path might be blocked by dynamic obstacles at certain times.
 	 * The times and arc position on the path are represented by forbidden
 	 * regions.
 	 * </p>
-	 * 
+	 *
 	 * @param spatialPath
 	 * @throws NullPointerException
 	 *             if {@code spatialPath} is {@code null}.
@@ -121,12 +121,12 @@ public class ForbiddenRegionBuilder {
 	 * <p>
 	 * Returns the calculated forbidden regions.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * A forbidden region marks the arc positions of the spatial path which
 	 * are blocked by dynamic obstacles at certain times.
 	 * </p>
-	 * 
+	 *
 	 * @return the calculated forbidden regions.
 	 */
 	public Collection<ForbiddenRegion> getResultForbiddenRegions() {
@@ -135,7 +135,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Sets the calculated forbidden regions.
-	 * 
+	 *
 	 * @param resultForbiddenRegions
 	 */
 	private void setResultForbiddenRegions(List<ForbiddenRegion> resultForbiddenRegions) {
@@ -153,22 +153,22 @@ public class ForbiddenRegionBuilder {
 	 * <p>
 	 * Sets the base time.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The base time is used represent time in seconds as a double value.
 	 * Forbidden regions use seconds instead of {@link LocalDateTime} to allow
 	 * regular number arithmetic.
 	 * </p>
-	 * 
+	 *
 	 * @param baseTime
 	 */
 	public void setBaseTime(LocalDateTime baseTime) {
 		this.baseTime = baseTime;
 	}
-	
+
 	/**
 	 * Checks if all parameters are properly set. Throws an exception otherwise.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             if any parameter is not set.
 	 */
@@ -185,7 +185,7 @@ public class ForbiddenRegionBuilder {
 	 * <p>
 	 * Calculates the forbidden regions.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Any dynamic obstacle which crosses the spatial path will result in one
 	 * forbidden region. Such a region marks the position and the time where and
@@ -205,10 +205,10 @@ public class ForbiddenRegionBuilder {
 		for (DynamicObstacle obstacle : getDynamicObstacles()) {
 			if (!quickObstacleEnvelopeCheck(obstacle))
 				continue;
-			
+
 			Iterable<Trajectory.Segment> obstacleTrajectorySegments = () ->
 				obstacle.getTrajectory().segmentIterator();
-			
+
 			Polygon obstacleShape = obstacle.getShape();
 
 			// Stores the sub regions of a forbidden region. Each trajectory
@@ -218,11 +218,11 @@ public class ForbiddenRegionBuilder {
 			for (Trajectory.Segment obstacleTrajectorySegment : obstacleTrajectorySegments) {
 				if (!quickObstacleTrajectorySegmentCheck(obstacle, obstacleTrajectorySegment))
 					continue;
-				
+
 				for (SpatialPath.Segment spatialPathSegment : spatialPathSegments) {
 					if (!quickSpatialPathSegmentCheck(obstacle, obstacleTrajectorySegment, spatialPathSegment))
 						continue;
-					
+
 					// The current spatial path segments unit vector.
 					// Also the direction and unit length of the arc dimension.
 					Vector arcUnitVector = makeUnitVector(
@@ -272,11 +272,11 @@ public class ForbiddenRegionBuilder {
 
 		setResultForbiddenRegions(forbiddenRegions);
 	}
-	
+
 	/**
 	 * Checks if the obstacle's envelope intersects with the spatial path's
 	 * envelope.
-	 * 
+	 *
 	 * @param obstacle
 	 * @return {@code true} if the envelopes intersect.
 	 */
@@ -284,10 +284,10 @@ public class ForbiddenRegionBuilder {
 		Envelope obstacleTrajectoryEnvelope = obstacle.getSpatialPath().getEnvelope();
 		Envelope obstacleShapeEnvelope = obstacle.getShape().getEnvelopeInternal();
 		Envelope spatialPathEnvelope = getSpatialPath().getEnvelope();
-		
+
 		Envelope obstacleEnvelope = convolveEnvelope(
 			obstacleTrajectoryEnvelope, obstacleShapeEnvelope);
-		
+
 		return obstacleEnvelope.intersects(spatialPathEnvelope);
 	}
 
@@ -299,7 +299,7 @@ public class ForbiddenRegionBuilder {
 			.getSpatialSegment().getEnvelope();
 		Envelope obstacleShapeEnvelope = obstacle.getShape().getEnvelopeInternal();
 		Envelope spatialPathEnvelope = getSpatialPath().getEnvelope();
-		
+
 		Envelope obstacleEnvelope = convolveEnvelope(
 			obstacleSegmentEnvelope, obstacleShapeEnvelope);
 
@@ -321,7 +321,7 @@ public class ForbiddenRegionBuilder {
 
 		return obstacleEnvelope.intersects(spatialPathSegmentEnvelope);
 	}
-	
+
 	private static Envelope convolveEnvelope(Envelope lhs, Envelope rhs) {
 		return new Envelope(
 			lhs.getMinX() + rhs.getMinX(),
@@ -334,27 +334,27 @@ public class ForbiddenRegionBuilder {
 	 * The threshold used by {@link #isParallel(Matrix)}.
 	 */
 	private static double PARALLEL_THRESHOLD = 1e-10;
-	
+
 	/**
 	 * Determines whether both spanning vectors of the given base are considered
 	 * parallel. This function calculates tan(alpha) where alpha is the angle
 	 * between both vectors. {@code true} is returned if tan(alpha) is equal or
 	 * below {@link #PARALLEL_THRESHOLD}.
-	 * 
+	 *
 	 * @param base
 	 * @return whether the spanning vectors are parallel.
 	 */
 	private static boolean isParallel(Matrix base) {
 		double xArc = base.get(0, 0), yArc = base.get(0, 1);
 		double xVelocity = base.get(1, 0), yVelocity = base.get(1, 1);
-		
+
 		double numerator = xArc * yVelocity - yArc * xVelocity;
-		
+
 		if (numerator == 0.0)
 			return true;
-		
+
 		double denominator = xArc * xVelocity + yArc * yVelocity;
-		
+
 		return abs(numerator / denominator) <= PARALLEL_THRESHOLD;
 	}
 
@@ -371,12 +371,12 @@ public class ForbiddenRegionBuilder {
 	 * area to the sides. Otherwise the ArcTimeMesher could connect vertices
 	 * through moving obstacles.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * If the obstacle's trajectory segment is stationary the result would be a
 	 * time parallel line at most which can be disregarded.
 	 * </p>
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @param obstacleShape
@@ -397,13 +397,13 @@ public class ForbiddenRegionBuilder {
 		Polygon moved = translateGeometry(
 			obstacleShape,
 			obstacleTrajectorySegment.getStartLocation());
-		
+
 		Geometry transformed;
 		if (obstacleTrajectorySegment.isStationary()) {
 			// check if stationary location is within obstacle
 			if (!spatialPathSegment.getStartPoint().within(moved))
 				return polygon();
-			
+
 			transformed = lineString(
 				spatialPathSegment.getStartVertex().getArc(),
 				obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime()),
@@ -413,26 +413,26 @@ public class ForbiddenRegionBuilder {
 			LineString mask = makePointTraceMask(
 				spatialPathSegment,
 				obstacleTrajectorySegment);
-	
+
 			// boundary is expected to be composed of 1-dimensional components
 			Geometry boundary = moved.getBoundary();
-	
+
 			// calculate intersection with obstacle's interior
-	
+
 			// A = mask, B = movedObstacleShape
 			// I* = A \cap int(B) = (A \cap B) \ (A \cap bdy(B))
 			// I = I* \wedge bdy(I*)
-	
+
 			Geometry fullIntersection = moved.intersection(mask); // (A \cap B)
 			// JTS' difference operation can't handle general GeometryCollections
 			// therefore, remove points
 			Geometry boundaryIntersection = onlyLines( boundary.intersection(mask) ); // (A \cap bdy(B))
 			// JTS geometries always include own boundary
 			Geometry masked = fullIntersection.difference(boundaryIntersection); // I
-	
+
 			if (masked.isEmpty())
 				return masked; // empty geometry
-	
+
 			transformed = transformStationaryObstacle(
 				spatialPathSegment,
 				obstacleTrajectorySegment,
@@ -447,7 +447,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates a mask for a spatial point segment. The point is traced along
 	 * the trajectory segment.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @return the mask.
@@ -460,7 +460,7 @@ public class ForbiddenRegionBuilder {
 		// equal to getFinishPoint()
 		Point spatialPathPoint = spatialPathSegment.getStartPoint();
 		Vector s = makeVector(spatialPathPoint);
-		
+
 		// first and last point are expected to differ
 		Vector vt = makeVector(
 			obstacleTrajectorySegment.getStartLocation(),
@@ -474,7 +474,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates the subregion by transforming the masked obstacle's shape in
 	 * the stationary case.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @param maskedMovedObstacleShape
@@ -500,11 +500,13 @@ public class ForbiddenRegionBuilder {
 		Geometry transformed = (Geometry) maskedMovedObstacleShape.clone();
 
 		transformed.apply((Coordinate c) -> {
-			// translated xy-vector with (x0, y1) as origin
+			// translated xy-vector with (x0, y0) as origin
 			Vector xyT = new BasicVector(new double[] {c.x - x0, c.y - y0});
 
 			// s = s0
 			c.x = s0;
+
+			// FIXME formular is wrong; should be t = t0 + vt/vt^2 * (xy - xy0)
 			// t = t0 + vt*(xy - xy0)
 			c.y = t0 + pointTraceUnitRowMatrix.multiply(xyT).get(0);
 		});
@@ -514,7 +516,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Buffers a line string to the left and right.
-	 * 
+	 *
 	 * @param geometry
 	 * @param left
 	 *            if {@code true} the line is buffered to the left
@@ -524,7 +526,7 @@ public class ForbiddenRegionBuilder {
 	 */
 	private static Geometry bufferLineStrings(Geometry geometry, boolean left, boolean right) {
 		// left and right are not expected to be both unset
-		
+
 		@SuppressWarnings("unchecked") // getLines returns raw List
 		Collection<LineString> lines = LineStringExtracter.getLines(geometry);
 
@@ -537,7 +539,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Helper method to buffer a line string.
-	 * 
+	 *
 	 * @param lineString
 	 *            to buffer
 	 * @param left
@@ -549,7 +551,7 @@ public class ForbiddenRegionBuilder {
 	 */
 	private static Polygon bufferLineString(LineString lineString, boolean left, boolean right) {
 		// left and right are not expected to be both unset
-		
+
 		// However, if they might be in the future, this is guarded since the
 		// method would break otherwise.
 		if (!left && !right)
@@ -603,7 +605,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates the forbidden subregion for the case that the trajectory
 	 * segment and the spatial path segment are parallel to each other.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @param arcUnitVector
@@ -636,7 +638,7 @@ public class ForbiddenRegionBuilder {
 			arcUnitVector,
 			obstacleTrajectorySegment,
 			obstaclePathIntersection);
-		
+
 		// note that the arc mask already includes a buffer along the arc
 		Geometry region = transformedObstacleShape.intersection(arcMask);
 
@@ -647,7 +649,7 @@ public class ForbiddenRegionBuilder {
 	 * Calculates the mask in case of a spatial segment parallel to the
 	 * trajectory segment. The mask reassembles the spatial segment but is also
 	 * extended by the length of the trajectory segment.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @return the mask.
@@ -687,11 +689,11 @@ public class ForbiddenRegionBuilder {
 	 * Calculates the mask scoping the relevant area in the arc-time plane of
 	 * the transformed obstacle shape in the parallel case.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Also includes a buffer if the segment is the first or last one.
 	 * </p>
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstTrajectorySegment
 	 * @return the mask.
@@ -718,7 +720,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates the subregion by transforming the masked obstacle's shape in
 	 * the parallel case.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param arcUnitVector
 	 * @param obstacleTrajectorySegment
@@ -787,7 +789,7 @@ public class ForbiddenRegionBuilder {
 	 * Calculates the forbidden subregion for the regular case were both the
 	 * spatial path segment and the trajectory segment have a positive length
 	 * and are not parallel to each other.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @param transformationMatrix
@@ -819,11 +821,11 @@ public class ForbiddenRegionBuilder {
 	 * result is a parallelogram spanned by the spatial path segment and
 	 * trajectory segment.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Also includes a buffer if the segment is the first or last one.
 	 * </p>
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @return
@@ -866,7 +868,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates the subregion by transforming the masked obstacle's shape in
 	 * the regular case.
-	 * 
+	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
 	 * @param maskedMovedObstacleShape
@@ -885,7 +887,7 @@ public class ForbiddenRegionBuilder {
 			spatialPathSegment.getStartVertex().getArc(),
 			obstacleTrajectorySegment.getStartTimeInSeconds(getBaseTime())
 		});
-		
+
 		region.apply((Coordinate c) -> {
 			Vector spatialVector = new BasicVector(new double[] {c.x, c.y});
 
@@ -902,7 +904,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Converts a vector to a point.
-	 * 
+	 *
 	 * @param vector
 	 * @return the point.
 	 */
@@ -912,7 +914,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Converts a point to a vector.
-	 * 
+	 *
 	 * @param point
 	 * @return the vector.
 	 */
@@ -922,7 +924,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Converts two point to a vector connecting both points.
-	 * 
+	 *
 	 * @param startPoint
 	 * @param finishPoint
 	 * @return the vector.
@@ -938,7 +940,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the unit vector between to points.
-	 * 
+	 *
 	 * @param startPoint
 	 * @param finishPoint
 	 * @return the unit vector.
@@ -956,7 +958,7 @@ public class ForbiddenRegionBuilder {
 	/**
 	 * Calculates the velocity vector {@code s/t} where {@code s} is the
 	 * distance vector between two points and {@code t} is the duration.
-	 * 
+	 *
 	 * @param startPoint
 	 * @param finishPoint
 	 * @param duration
@@ -970,7 +972,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the arc-velocity base.
-	 * 
+	 *
 	 * @param arcUnitVector
 	 * @param obstacleTrajectorySegment
 	 * @return
@@ -997,7 +999,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the inverted arc-velocity base.
-	 * 
+	 *
 	 * @param arcVelocityBase
 	 * @return the inverted matrix. {@code null} if no inversion exists.
 	 */
@@ -1009,7 +1011,7 @@ public class ForbiddenRegionBuilder {
 				arcVelocityBase.withInverter(LinearAlgebra.INVERTER).inverse();
 		} catch (IllegalArgumentException e) {
 			// what an appropriate exception to catch :P
-			
+
 			if (e.getMessage().equals("This matrix is not invertible."))
 				transformationMatrix = null;
 			else
@@ -1021,7 +1023,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Translates a geometry by an offset given by a point.
-	 * 
+	 *
 	 * @param geometry
 	 * @param translation
 	 * @return the translated geometry.
@@ -1042,7 +1044,7 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the left buffered value of the given arc.
-	 * 
+	 *
 	 * @param s the arc value
 	 * @return the buffered left side.
 	 */
@@ -1052,19 +1054,19 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the left buffered vector of the given one.
-	 * 
+	 *
 	 * @param v the vector
 	 * @return the buffered left vector.
 	 */
 	private static Vector leftBuffer(Vector v) {
 		double s = v.get(0), t = v.get(1);
-		
+
 		return new BasicVector(new double[] {leftBuffer(s), t});
 	}
 
 	/**
 	 * Calculates the right buffered value of the given arc.
-	 * 
+	 *
 	 * @param s the arc value
 	 * @return the buffered right side.
 	 */
@@ -1074,19 +1076,19 @@ public class ForbiddenRegionBuilder {
 
 	/**
 	 * Calculates the right buffered vector of the given one.
-	 * 
+	 *
 	 * @param v the vector
 	 * @return the buffered right vector.
 	 */
 	private static Vector rightBuffer(Vector v) {
 		double s = v.get(0), t = v.get(1);
-		
+
 		return new BasicVector(new double[] {rightBuffer(s), t});
 	}
 
 	/**
 	 * Extracts all line strings from a geometry.
-	 * 
+	 *
 	 * @param geometry
 	 * @return the line strings as a single geometry.
 	 * @see LineMerger
