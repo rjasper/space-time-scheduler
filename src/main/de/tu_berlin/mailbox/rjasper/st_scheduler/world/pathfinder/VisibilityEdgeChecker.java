@@ -14,6 +14,9 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterable;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
+// TODO test
+// FIXME reproduce bug #2209
+
 public class VisibilityEdgeChecker {
 
 	private final Geometry forbiddenMap;
@@ -31,7 +34,9 @@ public class VisibilityEdgeChecker {
 	 * @return {@code true} if no forbidden region blocks the view
 	 */
 	public boolean check(Point from, Point to) {
+		// FIXME cannot test within using a geometry collection
 		if (from.equalsTopo(to) && !from.within(forbiddenMap))
+//		if (from.equalsTopo(to) && !within(from))
 			return true;
 
 		LineString line = lineString(from, to);
@@ -55,6 +60,11 @@ public class VisibilityEdgeChecker {
 					return !isTrue(matrix.get(INTERIOR, INTERIOR));
 				}
 			}::give);
+	}
+
+	private boolean within(Point point) {
+		return new GeometryIterable(forbiddenMap, true, false, false).stream()
+			.anyMatch(g -> point.within(g));
 	}
 
 }
