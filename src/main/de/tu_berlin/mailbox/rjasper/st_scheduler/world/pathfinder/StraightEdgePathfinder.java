@@ -28,7 +28,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
  * The {@code StraightEdgePathfinder} is a {@link AbstractSpatialPathfinder} which
  * implements a minimum distance path finder. It wraps a {@link PathFinder}
  * of the StraightEdge library.
- * 
+ *
  * @author Rico Jasper
  */
 public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
@@ -67,42 +67,42 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 	@Override
 	public void setStaticObstacles(Collection<StaticObstacle> staticObstacles) {
 		super.setStaticObstacles(staticObstacles);
-		
+
 		// Convertes the static obstacles to PathBlockingObstacles and
 		// configures the node connector.
-		
+
 		NodeConnector<PathBlockingObstacle> nc = new NodeConnector<>();
 		PolygonConverter conv = new PolygonConverter();
 
 		double maxConnectionDistance = getMaxConnectionDistance();
 
 		ArrayList<PathBlockingObstacle> pathBlockingObstacles = new ArrayList<>(staticObstacles.size());
-		
+
 		Stream<PathBlockingObstacle> shells = staticObstacles.stream()
 			.map(StaticObstacle::getShape)
 			.map(conv::makeKPolygonFromExterior)
 			.map(PathBlockingObstacleImpl::createObstacleFromInnerPolygon);
-		
+
 		Stream<PathBlockingObstacle> holes = staticObstacles.stream()
 			.map(StaticObstacle::getShape)
 			.filter(p -> p.getNumInteriorRing() > 0)
 			.flatMap(p -> {
 				Stream.Builder<LineString> builder = Stream.builder();
-				
+
 				for (int i = 0; i < p.getNumInteriorRing(); ++i)
 					builder.add(p.getInteriorRingN(i));
-				
+
 				return builder.build();
 			})
 			.map(conv::makeKPolygonFrom)
 			.map(PathBlockingObstacleImpl::createObstacleFromOuterPolygon);
-		
+
 		Stream.concat(shells, holes)
 			.forEach(pbo -> {
 				pathBlockingObstacles.add(pbo);
 				nc.addObstacle(pbo, pathBlockingObstacles, maxConnectionDistance);
 			});
-		
+
 		setNodeConnector(nc);
 		setPathBlockingObstacles(pathBlockingObstacles);
 	}
@@ -116,7 +116,7 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 
 	/**
 	 * Sets the node connector.
-	 * 
+	 *
 	 * @param nodeConnector
 	 */
 	private void setNodeConnector(NodeConnector<PathBlockingObstacle> nodeConnector) {
@@ -132,7 +132,7 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 
 	/**
 	 * Sets the path blocking obstacles.
-	 * 
+	 *
 	 * @param pathBlockingObstacles
 	 */
 	private void setPathBlockingObstacles(
@@ -152,11 +152,11 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 	 * <p>
 	 * Sets the maximum connection distance.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * The default value is {@link Double#POSITIVE_INFINITY}.
 	 * </p>
-	 * 
+	 *
 	 * @param maxConnectionDistance
 	 * @throws IllegalArgumentException
 	 *             if maxConnectionDistance is not positive.
@@ -164,7 +164,7 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 	public void setMaxConnectionDistance(double maxConnectionDistance) {
 		if (Double.isNaN(maxConnectionDistance) || maxConnectionDistance <= 0.0)
 			throw new IllegalArgumentException("maxConnectionDistance is not positive");
-		
+
 		this.maxConnectionDistance = maxConnectionDistance;
 	}
 
@@ -188,13 +188,13 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 			return SpatialPath.empty();
 
 		SpatialPath path = makeSpatialPath(pathData);
-		
+
 		return path;
 	}
 
 	/**
 	 * Converts a JTS Point to a KPoint.
-	 * 
+	 *
 	 * @param point the JTS Point
 	 * @return the KPoint
 	 */
@@ -204,7 +204,7 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 
 	/**
 	 * Converts a KPoint to a JTS Point
-	 * 
+	 *
 	 * @param point the KPoint
 	 * @return the JTS Point
 	 */
@@ -214,16 +214,16 @@ public class StraightEdgePathfinder extends AbstractSpatialPathfinder {
 
 	/**
 	 * Converts the PathData to a path.
-	 * 
+	 *
 	 * @param path
 	 * @return the converted path
 	 */
 	private SpatialPath makeSpatialPath(PathData path) {
 		List<KPoint> points = path.getPoints();
 		ImmutableList<ImmutablePoint> jtsPoints = points.stream()
-			.map((p) -> makeJtsPoint(p))
+			.map(StraightEdgePathfinder::makeJtsPoint)
 			.collect(toImmutableList());
-		
+
 		return new SpatialPath(jtsPoints);
 	}
 
