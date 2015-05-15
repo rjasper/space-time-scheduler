@@ -779,7 +779,7 @@ public class Scheduler {
 
 		Collection<TrajectoryUpdate> trajectories = updates.stream()
 			.flatMap(u -> {
-				NodeReference w = u.getNode().getReference();
+				NodeReference n = u.getNode().getReference();
 
 				// circumvents nested lambda expression
 				// t -> new TrajectoryUpdate(t, w)
@@ -787,7 +787,7 @@ public class Scheduler {
 					.map(new Function<Trajectory, TrajectoryUpdate>() {
 						@Override
 						public TrajectoryUpdate apply(Trajectory t) {
-							return new TrajectoryUpdate(t, w);
+							return new TrajectoryUpdate(t, n);
 						}
 					});
 			})
