@@ -859,7 +859,6 @@ public class ForbiddenRegionBuilder {
 		Point p4 = makePoint(v4);
 
 		// make polygon
-
 		LinearRing shell = linearRing(p1, p2, p3, p4, p1);
 
 		return polygon(shell);
