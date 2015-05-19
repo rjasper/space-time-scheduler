@@ -161,6 +161,22 @@ public class LazyFixTimeMesher {
 		forbiddenMap = null;
 	}
 
+	private void meshLazy() {
+		LazyVertexConnector connector = new LazyVertexConnector();
+	
+		connector.setGraph(graph);
+		connector.setMinArc(startVertex.getX());
+		connector.setMaxArc(finishVertex.getX());
+		connector.setMinTime(startVertex.getY());
+		connector.setMaxTime(finishVertex.getY());
+		connector.setMinStopDuration(minStopDuration);
+		connector.setLazyVelocity(lazyVelocity);
+		connector.setForbiddenMap(forbiddenMap);
+		connector.setWeightCalculator(weightCalculator);
+	
+		connector.connect();
+	}
+
 	private void meshInterconnection() {
 		SimpleVertexConnector connector = new SimpleVertexConnector();
 
@@ -171,22 +187,6 @@ public class LazyFixTimeMesher {
 		connector.setMinTime(startVertex.getY());
 		connector.setMaxTime(finishVertex.getY());
 		connector.setMaxVelocity(maxVelocity);
-		connector.setForbiddenMap(forbiddenMap);
-		connector.setWeightCalculator(weightCalculator);
-
-		connector.connect();
-	}
-
-	private void meshLazy() {
-		LazyVertexConnector connector = new LazyVertexConnector();
-
-		connector.setGraph(graph);
-		connector.setMinArc(startVertex.getX());
-		connector.setMaxArc(finishVertex.getX());
-		connector.setMinTime(startVertex.getY());
-		connector.setMaxTime(finishVertex.getY());
-		connector.setMinStopDuration(minStopDuration);
-		connector.setLazyVelocity(lazyVelocity);
 		connector.setForbiddenMap(forbiddenMap);
 		connector.setWeightCalculator(weightCalculator);
 
