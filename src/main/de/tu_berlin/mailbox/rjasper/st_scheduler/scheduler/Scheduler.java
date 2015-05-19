@@ -686,7 +686,7 @@ public class Scheduler {
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code transactionId} is unknown or if there is no node
-	 *             updated for the node given by {@code nodeId}.
+	 *             update for the node given by {@code nodeId}.
 	 */
 	public void commit(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
@@ -737,7 +737,7 @@ public class Scheduler {
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code transactionId} is unknown or if there is no node
-	 *             updated for the node given by {@code nodeId}.
+	 *             update for the node given by {@code nodeId}.
 	 */
 	public void abort(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");

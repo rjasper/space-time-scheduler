@@ -141,21 +141,6 @@ public class DependencyNormalizer {
 		intermediate = null;
 	}
 
-	private void normalizeLatest(UUID jobId) {
-		Intermediate inter = intermediate.get(jobId);
-
-		// collect all dependent intermediates and
-		// determine the minimum latest start time
-		LocalDateTime depMin = dependencyGraph.incomingEdgesOf(jobId).stream()
-			.map(dependencyGraph::getEdgeSource)
-			.map(intermediate::get)
-			.map(Intermediate::getLatestStartTime)
-			.min(TIME_COMPARATOR)
-			.orElse(LocalDateTime.MAX);
-
-		inter.setLatestFinishTime(min(depMin, inter.getLatestFinishTime()));
-	}
-
 	private void normalizeEarliest(UUID jobId) {
 		Intermediate inter = intermediate.get(jobId);
 
@@ -169,6 +154,21 @@ public class DependencyNormalizer {
 			.orElse(LocalDateTime.MIN);
 
 		inter.setEarliestStartTime(max(reqMax, inter.getEarliestStartTime(), frozenHorizonTime));
+	}
+
+	private void normalizeLatest(UUID jobId) {
+		Intermediate inter = intermediate.get(jobId);
+	
+		// collect all dependent intermediates and
+		// determine the minimum latest start time
+		LocalDateTime depMin = dependencyGraph.incomingEdgesOf(jobId).stream()
+			.map(dependencyGraph::getEdgeSource)
+			.map(intermediate::get)
+			.map(Intermediate::getLatestStartTime)
+			.min(TIME_COMPARATOR)
+			.orElse(LocalDateTime.MAX);
+	
+		inter.setLatestFinishTime(min(depMin, inter.getLatestFinishTime()));
 	}
 
 	private Map<UUID, JobSpecification> build() {
