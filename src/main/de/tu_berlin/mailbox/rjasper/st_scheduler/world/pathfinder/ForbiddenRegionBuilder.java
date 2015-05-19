@@ -1048,7 +1048,7 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered left side.
 	 */
 	private static double leftBuffer(double s) {
-		return s - ulp(s);
+		return s - 8.*ulp(s); // quick and dirty hot fix for #2277
 	}
 
 	/**
@@ -1070,7 +1070,7 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered right side.
 	 */
 	private static double rightBuffer(double s) {
-		return s + ulp(s);
+		return s + 8.*ulp(s); // quick and dirty hot fix for #2277
 	}
 
 	/**
