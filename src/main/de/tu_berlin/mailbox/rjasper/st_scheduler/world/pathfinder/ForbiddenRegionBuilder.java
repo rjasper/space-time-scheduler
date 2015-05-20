@@ -1041,6 +1041,8 @@ public class ForbiddenRegionBuilder {
 		return clone;
 	}
 
+	// FIXME buffers too small (see bug #2277)
+
 	/**
 	 * Calculates the left buffered value of the given arc.
 	 *

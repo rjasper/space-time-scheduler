@@ -16,21 +16,21 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
 
 public class PeriodicJobScheduler {
-	
+
 	private World world = null;
-	
+
 	private WorldPerspectiveCache perspectiveCache = null;
-	
+
 	private LocalDateTime frozenHorizonTime = null;
-	
+
 	private Schedule schedule = null;
-	
+
 	private ScheduleAlternative alternative = null;
-	
+
 	private PeriodicJobSpecification periodicSpec = null;
-	
+
 	private int maxLocationPicks = 0;
-	
+
 	public void setWorld(World world) {
 		this.world = Objects.requireNonNull(world, "world");
 	}
@@ -58,7 +58,7 @@ public class PeriodicJobScheduler {
 	public void setMaxLocationPicks(int maxLocationPicks) {
 		if (maxLocationPicks <= 0)
 			throw new IllegalArgumentException("invalid number of picks");
-		
+
 		this.maxLocationPicks = maxLocationPicks;
 	}
 
@@ -69,44 +69,44 @@ public class PeriodicJobScheduler {
 		Objects.requireNonNull(schedule, "schedule");
 		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(periodicSpec, "jobSpec");
-		
+
 		if (maxLocationPicks <= 0)
 			throw new IllegalStateException("maxLocationPicks undefined");
 	}
-	
+
 	public boolean schedule() {
 		checkParameters();
-		
+
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
-		
+
 		// short cut if first job cannot be scheduled due to frozen horizon
 		// startTime + period < frozenHorizonTime + duration
 		if (startTime.plus(period) .isBefore( frozenHorizonTime.plus(duration) ))
 			return false;
-		
+
 		if (periodicSpec.isSameLocation())
 			return scheduleSameLocation();
 		else
 			return scheduleIndependentLocation();
 	}
-	
+
 	private boolean scheduleSameLocation() {
 		Collection<UUID> jobIds = periodicSpec.getJobIds();
 		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
-		
+
 		SingularJobScheduler sc = new SingularJobScheduler();
-		
+
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
 		sc.setFrozenHorizonTime(frozenHorizonTime);
 		sc.setSchedule(schedule);
 		sc.setMaxLocationPicks(1); // using external location picker
-		
+
 		Iterable<Point> locations = () -> new LocationIterator(
 			locationSpace, maxLocationPicks);
 
@@ -120,19 +120,19 @@ public class PeriodicJobScheduler {
 				LocalDateTime periodFinish = periodStart.plus(period);
 				JobSpecification jobSpec = JobSpecification.createSF(
 					jobId, immutable(location), periodStart, periodFinish, duration);
-				
+
 				sc.setSpecification(jobSpec);
-				
+
 				boolean status = sc.schedule();
-				
+
 				if (!status) {
 					noBreak = false;
 					break;
 				}
-				
+
 				periodStart = periodFinish;
 			}
-			
+
 			// indicates successful scheduling of all jobs
 			if (noBreak) {
 				branch.merge();
@@ -141,19 +141,19 @@ public class PeriodicJobScheduler {
 				branch.delete();
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private boolean scheduleIndependentLocation() {
 		Collection<UUID> jobIds = periodicSpec.getJobIds();
-		Geometry locationSpace = world.space(periodicSpec.getLocationSpace());
+		Geometry locationSpace = periodicSpec.getLocationSpace();
 		Duration duration = periodicSpec.getDuration();
 		LocalDateTime startTime = periodicSpec.getStartTime();
 		Duration period = periodicSpec.getPeriod();
-		
+
 		SingularJobScheduler sc = new SingularJobScheduler();
-		
+
 		sc.setWorld(world);
 		sc.setPerspectiveCache(perspectiveCache);
 		sc.setFrozenHorizonTime(frozenHorizonTime);
@@ -167,19 +167,19 @@ public class PeriodicJobScheduler {
 			LocalDateTime periodFinish = periodStart.plus(period);
 			JobSpecification jobSpec = JobSpecification.createSF(
 				jobId, immutable(locationSpace), periodStart, periodFinish, duration);
-			
+
 			sc.setSpecification(jobSpec);
-			
+
 			boolean status = sc.schedule();
-			
+
 			if (!status) {
 				noBreak = false;
 				break;
 			}
-			
+
 			periodStart = periodFinish;
 		}
-		
+
 		// TODO alternative might be polluted
 
 		// indicates successful scheduling of all jobs
