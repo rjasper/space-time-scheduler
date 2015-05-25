@@ -41,6 +41,7 @@ public class ForbiddenRegionBuilderTest {
 	}
 
 	// FIXME reproduce bug #2208
+	// FIXME reproduce bug #2277
 
 	@Test
 	public void testStationaryCase() {
