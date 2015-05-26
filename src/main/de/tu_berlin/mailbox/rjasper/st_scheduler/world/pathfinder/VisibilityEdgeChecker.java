@@ -35,8 +35,8 @@ public class VisibilityEdgeChecker {
 	 */
 	public boolean check(Point from, Point to) {
 		// FIXME cannot test within using a geometry collection
-		if (from.equalsTopo(to) && !from.within(forbiddenMap))
-//		if (from.equalsTopo(to) && !within(from))
+//		if (from.equalsTopo(to) && !from.within(forbiddenMap))
+		if (from.equalsTopo(to) && !within(from)) // fix
 			return true;
 
 		LineString line = lineString(from, to);
