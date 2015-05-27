@@ -97,8 +97,8 @@ public class SingularJobSchedulerSlotNumber2SuccessBenchmark implements Benchmar
 				ref,
 				location,
 				atSecond(4*i),
-				secondsToDurationSafe(2));
-			Trajectory traj = trajectory(3, 3, 0, 0, 4*i, 4*i+2);
+				secondsToDurationSafe(4));
+			Trajectory traj = trajectory(3, 3, 0, 0, 4*i, 4*i+4);
 
 			node2.addJob(job);
 			node2.updateTrajectory(traj);

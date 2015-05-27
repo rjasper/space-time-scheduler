@@ -18,11 +18,11 @@ public class Benchmark {
 //		benchmarks.add(MinimumTimeVertexConnectorBenchmark.class);
 //		benchmarks.add(SpatialPathfinderBenchmark.class);
 //		benchmarks.add(SingularJobSchedulerNodeNumberSuccessBenchmark.class);
-		benchmarks.add(SingularJobSchedulerNodeNumberErrorBenchmark.class);
+//		benchmarks.add(SingularJobSchedulerNodeNumberErrorBenchmark.class);
 //		benchmarks.add(SingularJobSchedulerSlotNumber1SuccessBenchmark.class);
 //		benchmarks.add(SingularJobSchedulerSlotNumber1ErrorBenchmark.class);
-//		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
-//		benchmarks.add(SingularJobSchedulerSlotNumber2ErrorBenchmark.class);
+		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
+		benchmarks.add(SingularJobSchedulerSlotNumber2ErrorBenchmark.class);
 //		benchmarks.add(PeriodicJobSchedulerSameLocationBenchmark.class);
 //		benchmarks.add(PeriodicJobSchedulerIndependentLocationBenchmark.class);
 //		benchmarks.add(DependentJobSchedulerBenchmark.class);
@@ -35,9 +35,9 @@ public class Benchmark {
 			e.printStackTrace();
 		}
 
-//		Benchmarkable benchmark = new SingularJobSchedulerNodeNumberSuccessBenchmark();
+//		Benchmarkable benchmark = new FrbObstacleTrajectorySegmentsBenchmark();
 //
-//		benchmark.benchmark(20);
+//		benchmark.benchmark(10);
 	}
 
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
@@ -17,6 +18,7 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.ForbiddenRegion;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.ForbiddenRegionBuilder;
 
 public class FrbObstacleTrajectorySegmentsBenchmark implements Benchmarkable {
@@ -66,8 +68,10 @@ public class FrbObstacleTrajectorySegmentsBenchmark implements Benchmarkable {
 		ImmutableList.Builder<ImmutablePoint> pathBuilder = ImmutableList.builder();
 		ImmutableList.Builder<LocalDateTime> timeBuilder = ImmutableList.builder();
 
-		ImmutablePoint top = immutablePoint(2, 2);
-		ImmutablePoint bot = immutablePoint(2, -2);
+		ImmutablePoint top = immutablePoint(2, 0.5);
+		ImmutablePoint bot = immutablePoint(2, -0.5);
+//		ImmutablePoint top = immutablePoint(2, 2);
+//		ImmutablePoint bot = immutablePoint(2, -2);
 
 		pathBuilder.add(top);
 		timeBuilder.add(atSecond(0));
