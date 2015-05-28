@@ -7,6 +7,7 @@ import java.util.LinkedList;
 public class Benchmark {
 
 	public static void main(String[] args) {
+
 		Collection<Class<? extends Benchmarkable>> benchmarks = new LinkedList<>();
 
 //		benchmarks.add(FrbObstacleNumberBenchmark.class);

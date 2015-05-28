@@ -13,16 +13,16 @@ public class StopWatch {
 	}
 
 	public void start() {
-		startTime = System.currentTimeMillis();
+		startTime = System.nanoTime();
 	}
 
 	public void stop() {
-		long endTime = System.currentTimeMillis();
+		long endTime = System.nanoTime();
 
 		if (startTime < 0)
 			throw new IllegalStateException("no start time captured");
 
-		duration = duration.plusMillis(endTime - startTime);
+		duration = duration.plusNanos(endTime - startTime);
 		startTime = -1;
 	}
 
