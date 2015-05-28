@@ -11,9 +11,13 @@ import java.util.Collection;
 
 public class BenchmarkExecutor {
 
-	private static final int REPETITIONS = 20;
+	private static final int MIN_REPETITIONS = 5;
+	private static final int MAX_REPETITIONS = 20;
+	private static final Duration MIN_REPETITION_DURATION = Duration.ofSeconds(1);
 
 	private final Collection<Benchmarkable> benchmarks;
+
+	private StopWatch sw = new StopWatch();
 
 	public BenchmarkExecutor(Collection<Class<? extends Benchmarkable>> benchmarks) {
 		int n = benchmarks.size();
@@ -29,7 +33,7 @@ public class BenchmarkExecutor {
 		this.benchmarks = instances;
 	}
 
-	private static final Duration MIN_DURATION = Duration.ofSeconds(Long.MIN_VALUE, 0);
+//	private static final Duration MIN_DURATION = Duration.ofSeconds(Long.MIN_VALUE, 0);
 	private static final Duration MAX_DURATION = Duration.ofSeconds(Long.MAX_VALUE, 999_999_999L);
 
 	private static final DateTimeFormatter FILE_TIME_FORMATTER =
@@ -55,33 +59,42 @@ public class BenchmarkExecutor {
 				benchmarkName, creationTime.format(FILE_TIME_FORMATTER));
 			Writer writer = new PrintWriter(fileName, "UTF-8");
 
-			for (int i = min; i <= max; i += step) {
-				Duration dmin = MAX_DURATION;
-				Duration dmax = MIN_DURATION;
-				Duration dtotal = Duration.ZERO;
+			Duration benchTotal = Duration.ZERO;
 
-				for (int j = 0; j < REPETITIONS; ++j) {
+			for (int i = min; i <= max; i += step) {
+				sw.reset();
+				Duration dmin = MAX_DURATION;
+
+				for (
+					int j = 0;
+					(j < MIN_REPETITIONS ||
+						sw.duration().compareTo(MIN_REPETITION_DURATION) < 0) &&
+						j < MAX_REPETITIONS;
+					++j)
+				{
+					sw.start();
 					Duration d = b.benchmark(i);
+					sw.stop();
 
 					if (d.compareTo(dmin) < 0)
 						dmin = d;
-					if (d.compareTo(dmax) > 0)
-						dmax = d;
-					dtotal = dtotal.plus(d);
 				}
 
-				Duration davr = Duration.ofMillis(dtotal.toMillis() / REPETITIONS);
+				Duration dtotal = sw.duration();
+				benchTotal = benchTotal.plus(dtotal);
 
-				System.out.printf("%d: min = %.3f, max = %.3f, avr = %.3f\n",
+				System.out.printf("%d: min = %.3fs, total = %.1fs\n",
 					i,
 					dmin.toMillis() / 1000.,
-					dmax.toMillis() / 1000.,
-					davr.toMillis() / 1000.);
+					dtotal.toMillis() / 1000.);
 
 				writer.write(String.format(
-					"%d; %d; %d; %d\n",
-					i, dmin.toMillis(), dmax.toMillis(), davr.toMillis()));
+					"%d; %d;\n",
+					i, dmin.toMillis()));
 			}
+
+			System.out.printf("bench total = %.1fs\n",
+				benchTotal.toMillis() / 1000.);
 
 			writer.close();
 
