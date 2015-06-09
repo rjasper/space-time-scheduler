@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.tu-berlin.kbs</groupId>
 	<artifactId>space-time-scheduler</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -19,6 +19,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.6</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -30,10 +31,11 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.5.5</version>
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>de.tu_berlin.mailbox.rjasper.st_scheduler.example.Example</mainClass>
+							<mainClass>de.tu_berlin.mailbox.rjasper.st_scheduler.example.BasicExample</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
