@@ -2,6 +2,11 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Checks if two points can be connected without violating the maximum velocity.
+ *
+ * @author Rico Jasper
+ */
 public class VelocityEdgeChecker {
 
 	private final double maxVelocity;

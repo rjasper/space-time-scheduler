@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
@@ -89,7 +90,7 @@ public class Node {
 	 * The initial time of the node when it begins to 'exist'.
 	 */
 	private final LocalDateTime initialTime;
-	
+
 	/**
 	 * All jobs which were assigned to this node.
 	 */
@@ -99,7 +100,7 @@ public class Node {
 	 * Contains all consecutive trajectories of this node
 	 */
 	private final TrajectoryContainer trajectoryContainer = new TrajectoryContainer();
-	
+
 	private final Set<Job> jobRemovalLock = new HashSet<>();
 
 	private final SimpleIntervalSet<LocalDateTime> trajectoryLock = new SimpleIntervalSet<>();
@@ -218,7 +219,7 @@ public class Node {
 
 		return retrieval != null && retrieval.equals(job);
 	}
-	
+
 	public boolean hasJobLockedForRemoval(Job job) {
 		return jobRemovalLock.contains( Objects.requireNonNull(job, "job") );
 	}
@@ -277,31 +278,31 @@ public class Node {
 		return new MappedIntervalSet<LocalDateTime, Job>(jobs,
 			t -> new Interval<LocalDateTime>(t.getStartTime(), t.getFinishTime()));
 	}
-	
+
 	public Set<Job> getJobRemovalLock() {
 		return unmodifiableSet(jobRemovalLock);
 	}
-	
+
 	public void addJobRemovalLock(Job job) {
 		if (!hasJob(job))
 			throw new IllegalArgumentException("unknown job");
-		
+
 		boolean status = jobRemovalLock.add(job);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("job already locked for removal");
 	}
-	
+
 	public void removeJobRemovalLock(Job job) {
 		if (!hasJob(job))
 			throw new IllegalArgumentException("unknown job");
 
 		boolean status = jobRemovalLock.remove(job);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("job not locked for removal");
 	}
-	
+
 	public Collection<Trajectory> getTrajectories() {
 		return trajectoryContainer.getTrajectories();
 	}
@@ -323,24 +324,24 @@ public class Node {
 	public IntervalSet<LocalDateTime> getTrajectoryLock() {
 		return unmodifiableIntervalSet(trajectoryLock);
 	}
-	
+
 	public void addTrajectoryLock(IntervalSet<LocalDateTime> intervals) {
 		if (intervals.isEmpty())
 			return;
-		
+
 		if (intervals.minValue().compareTo(initialTime) < 0)
 			throw new IllegalArgumentException("intervals predate initial time");
-		
+
 		trajectoryLock.add(intervals);
 	}
-	
+
 	public void removeTrajectoryLock(IntervalSet<LocalDateTime> intervals) {
 		if (intervals.isEmpty())
 			return;
-		
+
 		if (intervals.minValue().compareTo(initialTime) < 0)
 			throw new IllegalArgumentException("intervals predate initial time");
-		
+
 		trajectoryLock.remove(intervals);
 	}
 
@@ -414,11 +415,11 @@ public class Node {
 			})
 			.collect(toList());
 	}
-	
+
 	public LocalDateTime floorIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-		
+
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
@@ -449,7 +450,7 @@ public class Node {
 	public LocalDateTime ceilingIdleTimeOrNull(LocalDateTime time) {
 		if (time.isBefore(initialTime)) // throws NPE
 			return null;
-		
+
 		Job lowerJob = value(jobs.lowerEntry(time));
 		LocalDateTime lowerFinish = lowerJob == null
 			? initialTime
@@ -609,15 +610,17 @@ public class Node {
 
 		// remove past jobs
 
-		Job lowerJob = value( jobs.lowerEntry(presentTime) );
+		Iterator<Job> it = jobs.values().iterator();
 
-		// determine lowest key not to be removed
-		if (lowerJob != null) {
-			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
-				? lowerJob.getStartTime()
-				: presentTime;
+		while (it.hasNext()) {
+			Job j = it.next();
 
-			jobs.headMap(lowestKey).clear();
+			// until job lies in the future
+			if (j.getFinishTime().compareTo(presentTime) > 0)
+				break;
+
+			if (!hasJobLockedForRemoval(j))
+				it.remove();
 		}
 	}
 

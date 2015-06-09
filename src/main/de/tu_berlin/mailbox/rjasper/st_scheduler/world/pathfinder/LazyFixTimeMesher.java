@@ -19,6 +19,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Builds a navigation graph from forbidden regions.
+ *
+ * @author Rico Jasper
+ */
 public class LazyFixTimeMesher {
 
 	private ImmutablePoint startVertex = null;
@@ -161,22 +166,6 @@ public class LazyFixTimeMesher {
 		forbiddenMap = null;
 	}
 
-	private void meshInterconnection() {
-		SimpleVertexConnector connector = new SimpleVertexConnector();
-
-		connector.setGraph(graph);
-		connector.setVertices(originalVertices);
-		connector.setMinArc(startVertex.getX());
-		connector.setMaxArc(finishVertex.getX());
-		connector.setMinTime(startVertex.getY());
-		connector.setMaxTime(finishVertex.getY());
-		connector.setMaxVelocity(maxVelocity);
-		connector.setForbiddenMap(forbiddenMap);
-		connector.setWeightCalculator(weightCalculator);
-
-		connector.connect();
-	}
-
 	private void meshLazy() {
 		LazyVertexConnector connector = new LazyVertexConnector();
 
@@ -187,6 +176,22 @@ public class LazyFixTimeMesher {
 		connector.setMaxTime(finishVertex.getY());
 		connector.setMinStopDuration(minStopDuration);
 		connector.setLazyVelocity(lazyVelocity);
+		connector.setForbiddenMap(forbiddenMap);
+		connector.setWeightCalculator(weightCalculator);
+
+		connector.connect();
+	}
+
+	private void meshInterconnection() {
+		SimpleVertexConnector connector = new SimpleVertexConnector();
+
+		connector.setGraph(graph);
+		connector.setVertices(originalVertices);
+		connector.setMinArc(startVertex.getX());
+		connector.setMaxArc(finishVertex.getX());
+		connector.setMinTime(startVertex.getY());
+		connector.setMaxTime(finishVertex.getY());
+		connector.setMaxVelocity(maxVelocity);
 		connector.setForbiddenMap(forbiddenMap);
 		connector.setWeightCalculator(weightCalculator);
 

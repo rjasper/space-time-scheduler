@@ -22,6 +22,11 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
 
+/**
+ * Specialized scheduler to schedule a singular job.
+ *
+ * @author Rico Jasper
+ */
 public class SingularJobScheduler {
 
 	private World world = null;

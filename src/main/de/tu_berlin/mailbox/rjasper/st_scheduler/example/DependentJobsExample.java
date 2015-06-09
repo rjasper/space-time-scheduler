@@ -22,19 +22,24 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleResult;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 
+/**
+ * Demonstrates how to schedule a set of dependent jobs.
+ *
+ * @author Rico Jasper
+ */
 public final class DependentJobsExample {
 
 	public static void main(String[] args) throws CollisionException {
 		Scheduler sc = new Scheduler(new World());
-		NodeReference nref = sc.addNode( makeNodeSpec() );
+		NodeReference nref = sc.addNode( nodeSpec() );
 
+		// specifications for each job to be scheduled
 		JobSpecification js1 = JobSpecification.createSF(
 			uuid("j1"),
 			immutablePoint(10, 10),
 			atSecond(60),
 			atSecond(120),
 			ofSeconds(5));
-
 		JobSpecification js2 = JobSpecification.createSF(
 			uuid("j2"),
 			immutablePoint(20, 20),
@@ -42,23 +47,29 @@ public final class DependentJobsExample {
 			atSecond(120),
 			ofSeconds(5));
 
-		SimpleDirectedGraph<UUID, DefaultEdge> depGraph =
-			new SimpleDirectedGraph<>(DefaultEdge.class);
-
 		Collection<JobSpecification> specs = Arrays.asList(js1, js2);
 
-		// js2 depends on js1
-		addDependencies(depGraph, uuid("j1"));
-		addDependencies(depGraph, uuid("j2"), uuid("j1"));
+		// construction of dependency graph
+		SimpleDirectedGraph<UUID, DefaultEdge> dependencies =
+			new SimpleDirectedGraph<>(DefaultEdge.class);
 
-		ScheduleResult res = sc.schedule(specs, depGraph);
+		// js2 depends on js1
+		addDependencies(dependencies, uuid("j1"));
+		addDependencies(dependencies, uuid("j2"), uuid("j1"));
+
+		// pass specifications and dependencies to scheduler
+		ScheduleResult res = sc.schedule(specs, dependencies);
+		// commit changes
 		sc.commit(res.getTransactionId());
 
-		System.out.println( nref.calcTrajectory() );
+		System.out.println("scheduled jobs:");
 		System.out.println( nref.getJobs() );
+		System.out.println();
+		System.out.println("trajectory:");
+		System.out.println( nref.calcTrajectory() );
 	}
 
-	private static NodeSpecification makeNodeSpec() {
+	private static NodeSpecification nodeSpec() {
 		String id = "node";
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 		double maxSpeed = 1.0;

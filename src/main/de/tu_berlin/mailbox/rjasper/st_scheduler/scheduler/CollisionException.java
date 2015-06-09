@@ -1,5 +1,10 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
+/**
+ * Indicates a collision between multiple objects.
+ *
+ * @author Rico Jasper
+ */
 public class CollisionException extends Exception {
 
 	private static final long serialVersionUID = 2727252132184723119L;

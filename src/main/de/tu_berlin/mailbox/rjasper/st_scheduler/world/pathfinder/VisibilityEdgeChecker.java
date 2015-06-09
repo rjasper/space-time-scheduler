@@ -14,6 +14,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterable;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
+/**
+ * Checks if two points are visible to each other.
+ *
+ * @author Rico Jasper
+ */
 public class VisibilityEdgeChecker {
 
 	private final Geometry forbiddenMap;
@@ -31,8 +36,8 @@ public class VisibilityEdgeChecker {
 	 * @return {@code true} if no forbidden region blocks the view
 	 */
 	public boolean check(Point from, Point to) {
-		if (from.equalsTopo(to) && !from.within(forbiddenMap))
-			return true;
+		if (from.equalsTopo(to))
+			return !within(from);
 
 		LineString line = lineString(from, to);
 
@@ -55,6 +60,11 @@ public class VisibilityEdgeChecker {
 					return !isTrue(matrix.get(INTERIOR, INTERIOR));
 				}
 			}::give);
+	}
+
+	private boolean within(Point point) {
+		return new GeometryIterable(forbiddenMap, true, false, false).stream()
+			.anyMatch(g -> point.within(g));
 	}
 
 }

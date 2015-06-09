@@ -16,6 +16,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Adds vertices and edges to a graph to provide multiple minium time finish
+ * vertices.
+ *
+ * @author Rico Jasper
+ */
 public class MinimumTimeVertexConnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;

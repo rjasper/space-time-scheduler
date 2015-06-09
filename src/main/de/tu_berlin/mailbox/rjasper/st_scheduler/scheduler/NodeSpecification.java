@@ -11,11 +11,11 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
  * Specifies the representation of a physical node unit in the real world.
  * This class abstracts the physical abilities of the real node, such as its
  * shape and maximum velocity.</p>
- * 
+ *
  * @author Rico Jasper
  */
 public final class NodeSpecification {
-	
+
 	/**
 	 * The node's ID.
 	 */
@@ -52,9 +52,9 @@ public final class NodeSpecification {
 	 * @param maxSpeed
 	 *            the maximum velocity
 	 * @param initialLocation
-	 *            the initial location where the node begins to 'exist'
+	 *            the location where the node begins to 'exist'
 	 * @param initialTime
-	 *            this initial time when the node begins to 'exist'
+	 *            the time when the node begins to 'exist'
 	 * @throws NullPointerException
 	 *             if any object argument is null
 	 * @throws IllegalArgumentException

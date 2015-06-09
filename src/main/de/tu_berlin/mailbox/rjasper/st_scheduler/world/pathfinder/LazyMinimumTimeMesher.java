@@ -18,6 +18,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Builds a navigation graph from forbidden regions including a calculated
+ * minimum time finish vertex.
+ *
+ * @author Rico Jasper
+ */
 public class LazyMinimumTimeMesher {
 
 	private ImmutablePoint startVertex = null;

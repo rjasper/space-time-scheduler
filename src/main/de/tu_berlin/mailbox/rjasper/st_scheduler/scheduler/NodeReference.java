@@ -179,7 +179,7 @@ public class NodeReference  {
 	 * @throws IllegalArgumentException
 	 *             if the interval is invalid.
 	 */
-	public Collection<SpaceTimeSlot> NodeSlots(LocalDateTime from, LocalDateTime to) {
+	public Collection<SpaceTimeSlot> idleSlots(LocalDateTime from, LocalDateTime to) {
 		return node.idleSlots(from, to);
 	}
 

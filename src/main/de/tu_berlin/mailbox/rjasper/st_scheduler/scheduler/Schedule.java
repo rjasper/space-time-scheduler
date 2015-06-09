@@ -21,148 +21,154 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.SimpleIntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
+/**
+ * Represents the scheduler's schedule consisting of the trajectories and jobs
+ * of each node.
+ *
+ * @author Rico Jasper
+ */
 public class Schedule {
-	
+
 	private final Map<String, Node> nodes = new HashMap<>();
-	
+
 	private final Map<UUID, Job> jobs = new HashMap<>();
 
 	private final Set<ScheduleAlternative> alternatives = new HashSet<>();
-	
+
 	private final Set<UUID> jobIdLock = new HashSet<>();
-	
+
 	public boolean hasAlternative(ScheduleAlternative alternative) {
 		return alternatives.contains(alternative);
 	}
-	
+
 	public Collection<Node> getNodes() {
 		return unmodifiableCollection(nodes.values());
 	}
-	
+
 	public Node getNode(String nodeId) {
 		Objects.requireNonNull(nodeId, "nodeId");
-		
+
 		Node node = nodes.get(nodeId);
-		
+
 		if (node == null)
 			throw new IllegalArgumentException("unknown node id");
-		
+
 		return node;
 	}
 
 	public void addNode(Node node) {
 		Objects.requireNonNull(node, "node");
-		
+
 		Node previous = nodes.putIfAbsent(node.getId(), node);
-		
+
 		if (previous != null)
 			throw new IllegalArgumentException("node id already assigned");
 	}
-	
+
 	public void removeNode(String nodeId) {
 		Objects.requireNonNull(nodeId, "nodeId");
-		
+
 		Node node = nodes.get(nodeId);
-		
+
 		if (node == null)
 			throw new IllegalArgumentException("unknown node id");
 		if (!node.isIdle())
 			throw new IllegalStateException("node still has scheduled jobs");
-		
+
 		nodes.remove(nodeId);
 	}
-	
+
 	public Job getJob(UUID jobId) {
 		Job job = jobs.get(jobId);
-		
+
 		if (job == null)
 			throw new IllegalArgumentException("unknown job id");
-		
+
 		return job;
 	}
-	
+
 	public void removeJob(UUID jobId) {
 		Job job = getJob(jobId);
 		Node node = job.getNodeReference().getActual();
-		
+
 		if (node.hasJobLockedForRemoval(job))
 			throw new IllegalStateException("job is locked for removal");
-		
+
 		node.removeJob(job);
 		jobs.remove(jobId);
 	}
-	
+
 	public Collection<ScheduleAlternative> getAlternatives() {
 		return unmodifiableCollection(alternatives);
 	}
-	
+
 	public void addAlternative(ScheduleAlternative alternative) {
 		Objects.requireNonNull(alternative, "alternative");
-		
+
 		if (!alternative.isSealed())
 			new IllegalArgumentException("alternative not sealed");
-		
+
 		checkCompatibility(alternative);
-		
+
 		alternatives.add(alternative);
 		applyLocks(alternative);
 	}
-	
+
 	public void integrate(ScheduleAlternative alternative) {
 		Objects.requireNonNull(alternative, "alternative");
-		
+
 		boolean status = alternatives.remove(alternative);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 
 		releaseLocks(alternative);
 		applyChanges(alternative);
 	}
-	
+
 	public void integrate(ScheduleAlternative alternative, Node node) {
 		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(node, "node");
-		
+
 		boolean status = alternatives.contains(alternative);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
-		
+
 		NodeUpdate update = alternative.popUpdate(node);
-		
+
 		if (alternative.isEmpty())
 			alternatives.remove(alternative);
-		
+
 		releaseLocks(update);
 		applyChanges(update);
 	}
-	
+
 	public void eliminate(ScheduleAlternative alternative) {
 		Objects.requireNonNull(alternative, "alternative");
-		
+
 		boolean status = alternatives.remove(alternative);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
 
 		releaseLocks(alternative);
 	}
-	
+
 	public void eliminate(ScheduleAlternative alternative, Node node) {
 		Objects.requireNonNull(alternative, "alternative");
 		Objects.requireNonNull(node, "node");
-		
+
 		boolean status = alternatives.contains(alternative);
-		
+
 		if (!status)
 			throw new IllegalArgumentException("unknown alternative");
-		
+
 		NodeUpdate update = alternative.popUpdate(node);
-		
+
 		if (alternative.isEmpty())
 			alternatives.remove(alternative);
-		
+
 		releaseLocks(update);
 	}
 
@@ -174,10 +180,10 @@ public class Schedule {
 			IntervalSet<LocalDateTime> removalsIntervals = u.getJobRemovalIntervals();
 			IntervalSet<LocalDateTime> trajIntervals = u.getTrajectoryIntervals();
 			IntervalSet<LocalDateTime> trajLockIntervals = u.getTrajectoryLock();
-			
+
 			Collection<Job> jobs = u.getJobs();
 			Collection<Job> removals = u.getJobRemovals();
-			
+
 			try {
 				u.checkSelfConsistency();
 			} catch (IllegalStateException e) {
@@ -210,25 +216,25 @@ public class Schedule {
 				throw new IllegalArgumentException("job removal lock violation");
 		}
 	}
-	
+
 	private boolean verifyJobId(Job job, Collection<Job> removals) {
 		UUID jobId = job.getId();
-		
+
 		// if there is a scheduled job with the given id
 		if (jobs.containsKey(jobId)) {
 			boolean toBeRemoved = removals.stream()
 				.map(Job::getId)
 				.anyMatch(id -> id.equals(jobId));
-			
+
 			// refuse if job is not be rescheduled
 			if (!toBeRemoved)
 				return false;
 		}
-		
+
 		// refuse if another alternative already uses the job id
 		if (jobIdLock.contains(jobId))
 			return false;
-		
+
 		return true;
 	}
 
@@ -237,65 +243,65 @@ public class Schedule {
 		Point location = job.getLocation();
 		LocalDateTime jobStart = job.getStartTime();
 		LocalDateTime jobFinish = job.getFinishTime();
-		
+
 		IntervalSet<LocalDateTime> originalSections = new SimpleIntervalSet<LocalDateTime>()
 			.add(jobStart, jobFinish)
 			.remove(trajectoryUpdates);
-		
+
 		return originalSections.isEmpty() ||
 			// check if relevant original trajectory sections are stationary
 			originalSections.stream()
 			.allMatch(i -> {
 				LocalDateTime start = i.getFromInclusive();
 				LocalDateTime finish = i.getToExclusive();
-			
+
 				return
 					node.isStationary(start, finish) &&
 					node.interpolateLocation(start).equals(location);
 			});
 	}
-	
+
 	private boolean verifyTrajectoryContinuity(Node node, Collection<Trajectory> trajectories) {
 		if (trajectories.isEmpty())
 			return true;
-		
+
 		Iterator<Trajectory> it = trajectories.iterator();
-		
+
 		Trajectory first = it.next();
 		Trajectory last = first;
-		
+
 		if (!verifyNodeLocation(node, first.getStartLocation(), first.getStartTime()))
 			return false;
-		
+
 		while (it.hasNext()) {
 			Trajectory curr = it.next();
 
 			LocalDateTime finishTime = last.getFinishTime();
 			LocalDateTime startTime = curr.getStartTime();
-			
+
 			if (!startTime.equals(finishTime) && (
 				!verifyNodeLocation(node, last.getFinishLocation(), finishTime) ||
 				!verifyNodeLocation(node, curr.getStartLocation(), startTime)))
 			{
 				return false;
 			}
-			
+
 			last = curr;
 		}
-		
+
 		if (!verifyNodeLocation(node, last.getFinishLocation(), last.getFinishTime()))
 			return false;
-		
+
 		return true;
 	}
-	
+
 	private boolean verifyNodeLocation(Node node, ImmutablePoint location, LocalDateTime time) {
 		if (time.equals(Scheduler.END_OF_TIME))
 			return true;
-		
+
 		return node.interpolateLocation(time).equals(location);
 	}
-	
+
 	private void applyChanges(ScheduleAlternative alternative) {
 		for (NodeUpdate u : alternative.getUpdates())
 			applyChanges(u);
@@ -303,7 +309,7 @@ public class Schedule {
 
 	private void applyChanges(NodeUpdate update) {
 		Node node = update.getNode();
-		
+
 		for (Job j : update.getJobRemovals()) {
 			node.removeJob(j);
 			jobs.remove(j.getId());
@@ -320,43 +326,43 @@ public class Schedule {
 		for (NodeUpdate u : alternative.getUpdates())
 			applyLocks(u);
 	}
-	
+
 	private void applyLocks(NodeUpdate update) {
 		Node node = update.getNode();
-		
+
 		node.addTrajectoryLock( update.getTrajectoryLock() );
-		
+
 		for (Job j : update.getJobRemovals())
 			node.addJobRemovalLock(j);
-		
+
 		update.getJobs().stream()
 			.map(Job::getId)
 			.forEach(jobIdLock::add);
 	}
-	
+
 	private void releaseLocks(ScheduleAlternative alternative) {
 		for (NodeUpdate u : alternative.getUpdates())
 			releaseLocks(u);
 	}
-	
+
 	private void releaseLocks(NodeUpdate update) {
 		Node node = update.getNode();
-		
+
 		node.removeTrajectoryLock( update.getTrajectoryLock() );
 
 		for (Job j : update.getJobRemovals())
 			node.removeJobRemovalLock(j);
-		
+
 		update.getJobs().stream()
 			.map(Job::getId)
 			.forEach(jobIdLock::remove);
 	}
-	
+
 	public void cleanUp(LocalDateTime presentTime) {
 		for (Node n : nodes.values()) {
 			NavigableMap<LocalDateTime, Job> nJobs = n.getNavigableJobs();
 			Job lowerJob = value( nJobs.lowerEntry(presentTime) );
-			
+
 			if (lowerJob != null) {
 				// determine lowest key not to be removed
 				LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
@@ -367,7 +373,7 @@ public class Schedule {
 						.map(Job::getId)
 						.forEach(jobs::remove);;
 			}
-			
+
 			n.cleanUp(presentTime);
 		}
 	}

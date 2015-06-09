@@ -14,32 +14,32 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.PointPathInterpolato
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.Seeker;
 
 /**
- * Implements an spatial path.
- * 
+ * Implements the spatial path.
+ *
  * @author Rico Jasper
  */
 public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPath.Segment> {
-	
+
 	/**
 	 * An empty {@code SpatialPath}.
 	 */
 	private static final SpatialPath EMPTY = new SpatialPath(ImmutableList.of());
-	
+
 	/**
 	 * @return an empty {@code SpatialPath}.
 	 */
 	public static SpatialPath empty() {
 		return EMPTY;
 	}
-	
+
 	/**
 	 * Stores the arc values.
 	 */
 	private final double[] arcs;
-	
+
 	/**
 	 * Constructs a spatial path of the given vertices.
-	 * 
+	 *
 	 * @param vertices
 	 * @throws NullPointerException
 	 *             if {@code vertices} are {@code null}.
@@ -48,34 +48,34 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	 */
 	public SpatialPath(ImmutableList<ImmutablePoint> vertices) {
 		super(vertices);
-		
+
 		this.arcs = calcArcs(vertices);
 	}
-	
+
 	/**
 	 * Calculates the arc values of the vertices from the given points.
-	 * 
+	 *
 	 * @param points
 	 * @return the arc values.
 	 */
 	private static double[] calcArcs(List<? extends Point> points) {
 		if (points.isEmpty())
 			return new double[0];
-		
+
 		// if not empty there are at least two points
-		
+
 		int n = points.size();
 		double[] arcs = new double[n];
 		arcs[0] = 0;
 		Point p1 = points.get(0);
-		
+
 		for (int i = 1; i < n; ++i) {
 			Point p2 = points.get(i);
-			
+
 			arcs[i] = arcs[i-1] + DistanceOp.distance(p1, p2);
 			p1 = p2;
 		}
-		
+
 		return arcs;
 	}
 
@@ -87,7 +87,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	protected SpatialPath create(ImmutableList<ImmutablePoint> vertices) {
 		return new SpatialPath(vertices);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see world.Path#getEmpty()
@@ -96,21 +96,21 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	protected SpatialPath getEmpty() {
 		return empty();
 	}
-	
+
 	/**
 	 * The vertex of a {@code SpatialPath}. Stores additional information about
 	 * the vertex in context to the path.
 	 */
 	public static class Vertex extends PointPath.Vertex {
-		
+
 		/**
 		 * The arc value.
 		 */
 		private final double arc;
-		
+
 		/**
 		 * Constructs a new {@code Vertex}.
-		 * 
+		 *
 		 * @param index
 		 * @param point
 		 * @param arc
@@ -118,7 +118,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		 */
 		public Vertex(SpatialPath path, int index, ImmutablePoint point, double arc) {
 			super(path, index, point);
-			
+
 			this.arc = arc;
 		}
 
@@ -128,18 +128,18 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		public double getArc() {
 			return arc;
 		}
-		
+
 	}
-	
+
 	/**
 	 * The segment of a {@code SpatialPath}. Stores additional information about
 	 * the segment in context to the path.
 	 */
 	public class Segment extends PointPath.Segment<Vertex> {
-		
+
 		/**
 		 * Constructs a new {@code Segment} connecting the given vertices.
-		 * 
+		 *
 		 * @param start
 		 *            start vertex
 		 * @param finish
@@ -148,14 +148,14 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 		public Segment(Vertex start, Vertex finish) {
 			super(start, finish);
 		}
-		
+
 		/**
 		 * @return the length of this segment.
 		 */
 		public double length() {
 			return getFinishVertex().getArc() - getStartVertex().getArc();
 		}
-		
+
 	}
 
 	/*
@@ -185,7 +185,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 
 	/**
 	 * Interpolates the location of the given arc.
-	 * 
+	 *
 	 * @param arc
 	 * @return the location.
 	 * @throws IllegalArgumentException
@@ -197,20 +197,20 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 			throw new IllegalArgumentException("invalid arc");
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
-		
+
 		// short cut for first or last point
 		if (arc == 0.0)
 			return getFirstPoint();
 		if (arc == length())
 			return getLastPoint();
-		
+
 		Seeker<Double, Vertex> seeker = new BinarySearchSeeker<>(
 			this::getVertex,
 			Vertex::getArc,
 			size());
 		Interpolator<Double, ImmutablePoint> interpolator =
 			new PointPathInterpolator<>(seeker);
-		
+
 		return interpolator.interpolate(arc).get();
 	}
 
@@ -222,7 +222,7 @@ public class SpatialPath extends AbstractPointPath<SpatialPath.Vertex, SpatialPa
 	public SpatialPath concat(Path<? extends Vertex, ? extends Segment> other) {
 		if (!(other instanceof SpatialPath))
 			throw new IllegalArgumentException("incompatible path");
-		
+
 		return (SpatialPath) super.concat(other);
 	}
 

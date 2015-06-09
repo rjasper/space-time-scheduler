@@ -1,8 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.util.Throwables.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.StaticCollisionDetector.*;
+import static de.tu_berlin.mailbox.rjasper.util.Throwables.*;
 import static java.util.UUID.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
@@ -109,6 +109,20 @@ public class Scheduler {
 	}
 
 	/**
+	 * Returns the reference to the node with the given ID.
+	 *
+	 * @param nodeId
+	 * @return the reference.
+	 * @throws NullPointerException
+	 *             if {@code nodeId} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if node ID is unassigned.
+	 */
+	public NodeReference getNodeReference(String nodeId) {
+		return schedule.getNode(nodeId).getReference();
+	}
+
+	/**
 	 * Adds a new {@link Node} to the scheduler. The given specification
 	 * is used to create the node.
 	 *
@@ -171,20 +185,6 @@ public class Scheduler {
 			return false;
 
 		return true;
-	}
-
-	/**
-	 * Returns the reference to the node with the given ID.
-	 *
-	 * @param nodeId
-	 * @return the reference.
-	 * @throws NullPointerException
-	 *             if {@code nodeId} is {@code null}
-	 * @throws IllegalArgumentException
-	 *             if node ID is unassigned.
-	 */
-	public NodeReference getNodeReference(String nodeId) {
-		return schedule.getNode(nodeId).getReference();
 	}
 
 	/**
@@ -686,7 +686,7 @@ public class Scheduler {
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code transactionId} is unknown or if there is no node
-	 *             updated for the node given by {@code nodeId}.
+	 *             update for the node given by {@code nodeId}.
 	 */
 	public void commit(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
@@ -737,7 +737,7 @@ public class Scheduler {
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
 	 *             if {@code transactionId} is unknown or if there is no node
-	 *             updated for the node given by {@code nodeId}.
+	 *             update for the node given by {@code nodeId}.
 	 */
 	public void abort(UUID transactionId, String nodeId) {
 		Objects.requireNonNull(transactionId, "transactionId");
@@ -779,7 +779,7 @@ public class Scheduler {
 
 		Collection<TrajectoryUpdate> trajectories = updates.stream()
 			.flatMap(u -> {
-				NodeReference w = u.getNode().getReference();
+				NodeReference n = u.getNode().getReference();
 
 				// circumvents nested lambda expression
 				// t -> new TrajectoryUpdate(t, w)
@@ -787,7 +787,7 @@ public class Scheduler {
 					.map(new Function<Trajectory, TrajectoryUpdate>() {
 						@Override
 						public TrajectoryUpdate apply(Trajectory t) {
-							return new TrajectoryUpdate(t, w);
+							return new TrajectoryUpdate(t, n);
 						}
 					});
 			})
