@@ -180,9 +180,6 @@ public class ForbiddenRegionBuilderTest {
 		Geometry expected = immutablePolygon(
 			5, 6, 2.5, 8, 2.5, 4, 5., 2, 7.5, 3.5, 7.5, 7.5, 5, 6);
 
-		System.out.println(region.getRegion());
-		System.out.println(expected);
-
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
