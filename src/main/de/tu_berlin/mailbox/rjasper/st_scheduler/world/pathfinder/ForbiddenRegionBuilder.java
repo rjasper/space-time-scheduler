@@ -488,8 +488,12 @@ public class ForbiddenRegionBuilder {
 		Point xy0 = spatialPathSegment.getStartPoint();
 		Point vt1 = obstacleTrajectorySegment.getStartLocation();
 		Point vt2 = obstacleTrajectorySegment.getFinishLocation();
+		double dt = obstacleTrajectorySegment.durationInSeconds();
 		// note that the start is vt2 and finish vt1
-		Matrix pointTraceUnitRowMatrix = makeUnitVector(vt2, vt1).toRowMatrix();
+		Vector vt = makeVector(vt2, vt1);
+		// M = dt*vt / vt^2 = v / v^2
+		Matrix M = vt.multiply(dt).divide(
+				vt.toRowMatrix().multiply( vt.toColumnMatrix()).get(0, 0) ).toRowMatrix();
 
 		// origin
 		double x0 = xy0.getX();
@@ -506,9 +510,8 @@ public class ForbiddenRegionBuilder {
 			// s = s0
 			c.x = s0;
 
-			// FIXME formular is wrong; should be t = t0 + vt/vt^2 * (xy - xy0)
-			// t = t0 + vt*(xy - xy0)
-			c.y = t0 + pointTraceUnitRowMatrix.multiply(xyT).get(0);
+			// t = t0 + dt*vt / vt^2 * (xy - xy0) = t0 + v/v^2 * (xy - xy0)
+			c.y = t0 + M.multiply(xyT).get(0);
 		});
 
 		return transformed;
