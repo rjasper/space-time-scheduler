@@ -18,6 +18,11 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.SimpleIntervalSe
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.TrajectoryContainer;
 
+/**
+ * A NodeUpdate stores schedule update information of a node.
+ *
+ * @author Rico Jasper
+ */
 public class NodeUpdate implements Cloneable {
 
 	private final Node node;
@@ -95,7 +100,7 @@ public class NodeUpdate implements Cloneable {
 		// TODO only lock different sections
 		// also release locks when trajectory sections follow original trajectory
 		// but don't remove job locks
-		
+
 		trajectoryLock.add(startTime, finishTime);
 		trajectoryContainer.update(trajectory);
 	}

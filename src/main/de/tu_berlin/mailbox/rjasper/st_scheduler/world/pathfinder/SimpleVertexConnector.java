@@ -13,6 +13,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Adds Edges between any pairs of vertices visible to each other.
+ *
+ * @author Rico Jasper
+ */
 public class SimpleVertexConnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;

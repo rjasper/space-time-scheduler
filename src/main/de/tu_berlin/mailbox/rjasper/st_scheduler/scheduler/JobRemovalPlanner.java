@@ -24,6 +24,12 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspective;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.AbstractSpatialPathfinder;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.LazyFixTimePathfinder;
 
+/**
+ * The JobRemovalPlanner removes a job from the schedule of a node and updates
+ * the node's trajectory accordingly.
+ *
+ * @author Rico Jasper
+ */
 public class JobRemovalPlanner {
 
 	private World world = null;

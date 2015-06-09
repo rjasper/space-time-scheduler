@@ -3,6 +3,7 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.GeometryMatchers.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
 import static java.lang.Math.*;
 import static java.util.Collections.*;
@@ -40,11 +41,8 @@ public class ForbiddenRegionBuilderTest {
 		return builder.getResultForbiddenRegions();
 	}
 
-	// FIXME reproduce bug #2208
-	// FIXME reproduce bug #2277
-
 	@Test
-	public void testStationaryCase() {
+	public void testStationaryCase1() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
 			immutablePoint(2, 3), immutablePoint(2, 3)));
 		DynamicObstacle obstacle = new DynamicObstacle(
@@ -63,6 +61,28 @@ public class ForbiddenRegionBuilderTest {
 			region, contains( lineString(0, 1, 0, 3) ));
 		assertThat("forbidden region did contain more than essential area",
 			region, not(contains( lineString(0, 1-ulp(1), 0, 3+ulp(3)) )));
+	}
+
+	@Test
+	public void testStationaryCase2() {
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+			immutablePoint(1.5, 2), immutablePoint(1.5, 2)));
+		DynamicObstacle obstacle = new DynamicObstacle(
+			immutablePolygon(1.75, -0.25, 0.25, 1.75, -1.75, 0.25, -0.25, -1.75, 1.75, -0.25),
+			trajectory(
+				0, 3,
+				4, 0,
+				0, 10));
+
+		Collection<ForbiddenRegion> regions =
+			buildRegions(path, singleton(obstacle));
+
+		Geometry region = regions.iterator().next().getRegion();
+
+		assertThat("forbidden region did not contain essential area",
+			region, contains( lineString(0, 2.5, 0, 7.5) ));
+		assertThat("forbidden region did contain more than essential area",
+			region, not(contains( lineString(0, 2.5-ulp(2.5), 0, 7.5+ulp(7.5)) )));
 	}
 
 	@Test
@@ -136,13 +156,12 @@ public class ForbiddenRegionBuilderTest {
 
 	@Test
 	public void testPathSplit() {
-		SpatialPath path = new SpatialPath(ImmutableList.of(
-			immutablePoint(2., 4.), immutablePoint(6., 8.), immutablePoint(10., 4.)));
+		SpatialPath path = spatialPath(0, 0, 3, 4, 7, 1);
 		Trajectory trajectory = trajectory(
-			 6, 6,
-			12, 2,
-			 0, 5);
-		ImmutablePolygon shape = immutablePolygon(-2., -2., 2., -2., 2., 2., -2., 2., -2., -2.);
+			3, 3,
+			8, -2,
+			0, 10);
+		ImmutablePolygon shape = immutableBox(-1.5, -2, 2, 2);
 		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
 
 		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
@@ -158,15 +177,8 @@ public class ForbiddenRegionBuilderTest {
 
 		ForbiddenRegion region = regions.iterator().next();
 
-		double sqrt2 = Math.sqrt(2.);
 		Geometry expected = immutablePolygon(
-			2.*sqrt2, 2.,
-			2.*sqrt2, 4.,
-			4.*sqrt2, 3.,
-			6.*sqrt2, 4.,
-			6.*sqrt2, 2.,
-			4.*sqrt2, 1.,
-			2.*sqrt2, 2.);
+			5, 6, 2.5, 8, 2.5, 4, 5., 2, 7.5, 3.5, 7.5, 7.5, 5, 6);
 
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}

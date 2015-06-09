@@ -19,6 +19,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Builds a navigation graph from forbidden regions.
+ *
+ * @author Rico Jasper
+ */
 public class LazyFixTimeMesher {
 
 	private ImmutablePoint startVertex = null;
@@ -163,7 +168,7 @@ public class LazyFixTimeMesher {
 
 	private void meshLazy() {
 		LazyVertexConnector connector = new LazyVertexConnector();
-	
+
 		connector.setGraph(graph);
 		connector.setMinArc(startVertex.getX());
 		connector.setMaxArc(finishVertex.getX());
@@ -173,7 +178,7 @@ public class LazyFixTimeMesher {
 		connector.setLazyVelocity(lazyVelocity);
 		connector.setForbiddenMap(forbiddenMap);
 		connector.setWeightCalculator(weightCalculator);
-	
+
 		connector.connect();
 	}
 

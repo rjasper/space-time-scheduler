@@ -14,6 +14,12 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSet;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
+/**
+ * Represents an alternative of the schedule. Only stores differences between
+ * the original and the alternative schedule.
+ *
+ * @author Rico Jasper
+ */
 public class ScheduleAlternative {
 
 	private final ScheduleAlternative parent;

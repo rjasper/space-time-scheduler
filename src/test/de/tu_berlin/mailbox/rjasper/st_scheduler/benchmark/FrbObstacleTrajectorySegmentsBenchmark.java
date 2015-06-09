@@ -66,8 +66,10 @@ public class FrbObstacleTrajectorySegmentsBenchmark implements Benchmarkable {
 		ImmutableList.Builder<ImmutablePoint> pathBuilder = ImmutableList.builder();
 		ImmutableList.Builder<LocalDateTime> timeBuilder = ImmutableList.builder();
 
-		ImmutablePoint top = immutablePoint(2, 2);
-		ImmutablePoint bot = immutablePoint(2, -2);
+		ImmutablePoint top = immutablePoint(2, 0.5);
+		ImmutablePoint bot = immutablePoint(2, -0.5);
+//		ImmutablePoint top = immutablePoint(2, 2);
+//		ImmutablePoint bot = immutablePoint(2, -2);
 
 		pathBuilder.add(top);
 		timeBuilder.add(atSecond(0));

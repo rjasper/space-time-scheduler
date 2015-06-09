@@ -2,6 +2,11 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Checks if two points are within valid bounds.
+ *
+ * @author Rico Jasper
+ */
 public class BoundsEdgeChecker {
 
 	private final double minArc;

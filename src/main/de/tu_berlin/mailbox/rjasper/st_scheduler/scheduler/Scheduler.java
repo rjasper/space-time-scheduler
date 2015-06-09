@@ -1,8 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.util.Throwables.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
 import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.StaticCollisionDetector.*;
+import static de.tu_berlin.mailbox.rjasper.util.Throwables.*;
 import static java.util.UUID.*;
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;

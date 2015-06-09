@@ -7,6 +7,11 @@ import java.util.function.BiFunction;
 
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Checks if a location is not being blocked within a certain amount of time.
+ *
+ * @author Rico Jasper
+ */
 public class BufferTimeEdgeChecker {
 
 	private final double bufferDuration;

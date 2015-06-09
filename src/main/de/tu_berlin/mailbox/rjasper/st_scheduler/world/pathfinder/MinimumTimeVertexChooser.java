@@ -14,6 +14,11 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Selects the minimum time vertex among multiple finish vertex candidates.
+ *
+ * @author Rico Jasper
+ */
 public class MinimumTimeVertexChooser {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph = null;

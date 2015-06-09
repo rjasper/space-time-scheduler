@@ -13,7 +13,6 @@ import java.util.stream.StreamSupport;
 // TODO document
 public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>> {
 
-
 	/**
 	 * A {@code Vertex} represent a corner point of a path. Each vertex,
 	 * excluding the first and the last one, have exactly one predecessor vertex
@@ -22,15 +21,15 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * segments define the path.
 	 */
 	public static class Vertex {
-		
+
 		private final Path<?, ?> path;
-		
+
 		protected final int index;
 
 		public Vertex(Path<?, ?> path, int index) {
 			this.path = Objects.requireNonNull(path, "path");
 			this.index = index;
-			
+
 			if (index < 0 || index >= path.size())
 				throw new IndexOutOfBoundsException();
 		}
@@ -55,7 +54,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 		public boolean isLast() {
 			return index == path.size()-1;
 		}
-		
+
 	}
 
 	/**
@@ -65,9 +64,9 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	 * least one segment. All vertices and segments define the path.
 	 */
 	public static class Segment<V extends Vertex> {
-		
+
 		protected final V startVertex;
-		
+
 		protected final V finishVertex;
 
 		public Segment(V startVertex, V finishVertex) {
@@ -118,7 +117,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 		public String toString() {
 			return String.format("(%s, %s)", getStartVertex(), getFinishVertex());
 		}
-		
+
 	}
 
 	/**
@@ -141,7 +140,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public default V getFirstVertex() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
-		
+
 		return getVertex(0);
 	}
 
@@ -153,13 +152,13 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public default V getLastVertex() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
-		
+
 		return getVertex(size()-1);
 	}
-	
+
 	/**
 	 * Returns the vertex at position {@code index}.
-	 * 
+	 *
 	 * @param index
 	 * @return the vertex.
 	 * @throws IllegalArgumentException
@@ -175,7 +174,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public default S getFirstSegment() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
-		
+
 		return getSegment(0);
 	}
 
@@ -187,31 +186,31 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public default S getLastSegment() {
 		if (isEmpty())
 			throw new NoSuchElementException("path is empty");
-		
+
 		return getSegment(size()-2);
 	}
 
 	/**
 	 * Returns the segment at position {@code index}.
-	 * 
+	 *
 	 * @param index
 	 * @return the segment.
 	 * @throws IllegalArgumentException
 	 *             if the {@code index} is invalid.
 	 */
 	public abstract S getSegment(int index);
-	
+
 	/**
 	 * Concatenates this path with the given one.
-	 * 
+	 *
 	 * @param other
 	 * @return the concatenated path.
 	 */
 	public abstract Path<V, S> concat(Path<? extends V, ? extends S> other);
-	
+
 	/**
 	 * Returns a sub path from the given start sub-index to the finish sub-index.
-	 * 
+	 *
 	 * @param fromSubIndex
 	 * @param toSubIndex
 	 * @return the sub path.
@@ -238,7 +237,7 @@ public interface Path<V extends Path.Vertex, S extends Path.Segment<? extends V>
 	public default Stream<V> vertexStream() {
 		return StreamSupport.stream(vertexSpliterator(), false);
 	}
-	
+
 	/**
 	 * @return a {@code SegmentIterator}.
 	 */

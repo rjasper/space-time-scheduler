@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
@@ -603,22 +604,23 @@ public class Node {
 			.orElse(0.0);
 	}
 
-	// FIXME don't remove jobs scheduled for removal
 	public void cleanUp(LocalDateTime presentTime) {
 		// remove past trajectories
 		trajectoryContainer.deleteBefore(presentTime);
 
 		// remove past jobs
 
-		Job lowerJob = value( jobs.lowerEntry(presentTime) );
+		Iterator<Job> it = jobs.values().iterator();
 
-		// determine lowest key not to be removed
-		if (lowerJob != null) {
-			LocalDateTime lowestKey = lowerJob.getFinishTime().isAfter(presentTime)
-				? lowerJob.getStartTime()
-				: presentTime;
+		while (it.hasNext()) {
+			Job j = it.next();
 
-			jobs.headMap(lowestKey).clear();
+			// until job lies in the future
+			if (j.getFinishTime().compareTo(presentTime) > 0)
+				break;
+
+			if (!hasJobLockedForRemoval(j))
+				it.remove();
 		}
 	}
 

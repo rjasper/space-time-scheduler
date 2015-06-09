@@ -68,7 +68,27 @@ public class NodeTest {
 		assertThat(slots, equalTo(expected));
 	}
 
-	// FIXME reproduce bug #2206
+	@Test
+	public void testCleanUpJobRemoval() {
+		Node node = node("node", 0, 0);
+		NodeReference ref = node.getReference();
+
+		Job j = new Job(uuid("j"), ref, immutablePoint(0, 0), atSecond(0), secondsToDuration(1));
+
+		node.addJob(j);
+
+		node.addJobRemovalLock(j);
+		node.cleanUp(atSecond(2)); // job added for removal should not be cleaned up
+
+		assertThat("job added for removal was cleaned up",
+			node.hasJob(j), is(true));
+
+		node.removeJobRemovalLock(j);
+		node.removeJob(j);
+
+		assertThat("job was not removed",
+			node.hasJob(j), is(false));
+	}
 
 	@Test
 	public void testCleanUp1() {

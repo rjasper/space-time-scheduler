@@ -15,6 +15,11 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.LocationItera
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.WorldPerspectiveCache;
 
+/**
+ * Specialized scheduler to schedule a set of periodic jobs.
+ *
+ * @author Rico Jasper
+ */
 public class PeriodicJobScheduler {
 
 	private World world = null;

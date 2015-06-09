@@ -14,9 +14,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterable;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
-// TODO test
-// FIXME reproduce bug #2209
-
+/**
+ * Checks if two points are visible to each other.
+ *
+ * @author Rico Jasper
+ */
 public class VisibilityEdgeChecker {
 
 	private final Geometry forbiddenMap;
@@ -34,10 +36,8 @@ public class VisibilityEdgeChecker {
 	 * @return {@code true} if no forbidden region blocks the view
 	 */
 	public boolean check(Point from, Point to) {
-		// FIXME cannot test within using a geometry collection
-		if (from.equalsTopo(to) && !from.within(forbiddenMap))
-//		if (from.equalsTopo(to) && !within(from))
-			return true;
+		if (from.equalsTopo(to))
+			return !within(from);
 
 		LineString line = lineString(from, to);
 
