@@ -604,7 +604,6 @@ public class Node {
 			.orElse(0.0);
 	}
 
-	// FIXME don't remove jobs scheduled for removal
 	public void cleanUp(LocalDateTime presentTime) {
 		// remove past trajectories
 		trajectoryContainer.deleteBefore(presentTime);

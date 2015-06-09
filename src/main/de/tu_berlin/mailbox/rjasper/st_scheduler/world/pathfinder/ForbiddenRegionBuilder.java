@@ -24,7 +24,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.LineStringExtracter;
@@ -805,66 +804,18 @@ public class ForbiddenRegionBuilder {
 		Matrix transformationMatrix,
 		Polygon obstacleShape)
 	{
-		Polygon mask = makeParallelogramMask(spatialPathSegment, obstacleTrajectorySegment);
 		Polygon movedObstacleShape =
 			translateGeometry(obstacleShape, obstacleTrajectorySegment.getStartLocation());
-		Geometry maskedMovedObstacleShape = movedObstacleShape.intersection(mask);
-		Geometry region = transformRegularObstacle(
+		Geometry transformed = transformRegularObstacle(
 			spatialPathSegment,
 			obstacleTrajectorySegment,
-			maskedMovedObstacleShape,
+			movedObstacleShape,
 			transformationMatrix);
 
+		Polygon mask = makeArcRectangularMask(spatialPathSegment, obstacleTrajectorySegment);
+		Geometry region = transformed.intersection(mask);
+
 		return region;
-	}
-
-	/**
-	 * <p>
-	 * Calculates the mask for the obstacle shape in the regular case. The
-	 * result is a parallelogram spanned by the spatial path segment and
-	 * trajectory segment.
-	 * </p>
-	 *
-	 * <p>
-	 * Also includes a buffer if the segment is the first or last one.
-	 * </p>
-	 *
-	 * @param spatialPathSegment
-	 * @param obstacleTrajectorySegment
-	 * @return
-	 */
-	private static Polygon makeParallelogramMask(
-		SpatialPath.Segment spatialPathSegment,
-		Trajectory.Segment obstacleTrajectorySegment)
-	{
-		Point s1p = spatialPathSegment.getStartPoint();
-		Point s2p = spatialPathSegment.getFinishPoint();
-
-		Vector s1v = makeVector(s1p);
-		Vector s2v = makeVector(s2p);
-		Vector vtv = makeVector(
-			obstacleTrajectorySegment.getStartLocation(),
-			obstacleTrajectorySegment.getFinishLocation());
-
-		boolean first = spatialPathSegment.isFirst();
-		boolean last = spatialPathSegment.isLast();
-
-		// calculate point vectors
-		Vector v1 = first ? leftBuffer (s1v) : s1v;
-		Vector v2 = last  ? rightBuffer(s2v) : s2v;
-		Vector v3 = v2.subtract(vtv);
-		Vector v4 = v1.subtract(vtv);
-
-		// make points
-		Point p1 = makePoint(v1);
-		Point p2 = makePoint(v2);
-		Point p3 = makePoint(v3);
-		Point p4 = makePoint(v4);
-
-		// make polygon
-		LinearRing shell = linearRing(p1, p2, p3, p4, p1);
-
-		return polygon(shell);
 	}
 
 	/**
@@ -873,17 +824,17 @@ public class ForbiddenRegionBuilder {
 	 *
 	 * @param spatialPathSegment
 	 * @param obstacleTrajectorySegment
-	 * @param maskedMovedObstacleShape
+	 * @param movedObstacleShape
 	 * @param transformationMatrix
 	 * @return the subregion
 	 */
 	private Geometry transformRegularObstacle(
 		SpatialPath.Segment spatialPathSegment,
 		Trajectory.Segment obstacleTrajectorySegment,
-		Geometry maskedMovedObstacleShape,
+		Geometry movedObstacleShape,
 		Matrix transformationMatrix)
 	{
-		Geometry region = (Geometry) maskedMovedObstacleShape.clone();
+		Geometry region = (Geometry) movedObstacleShape.clone();
 		Vector spatialOffset = makeVector( spatialPathSegment.getStartPoint() );
 		Vector arcTimeOffset = new BasicVector(new double[] {
 			spatialPathSegment.getStartVertex().getArc(),
@@ -1044,8 +995,6 @@ public class ForbiddenRegionBuilder {
 		return clone;
 	}
 
-	// FIXME buffers too small (see bug #2277)
-
 	/**
 	 * Calculates the left buffered value of the given arc.
 	 *
@@ -1057,18 +1006,6 @@ public class ForbiddenRegionBuilder {
 	}
 
 	/**
-	 * Calculates the left buffered vector of the given one.
-	 *
-	 * @param v the vector
-	 * @return the buffered left vector.
-	 */
-	private static Vector leftBuffer(Vector v) {
-		double s = v.get(0), t = v.get(1);
-
-		return new BasicVector(new double[] {leftBuffer(s), t});
-	}
-
-	/**
 	 * Calculates the right buffered value of the given arc.
 	 *
 	 * @param s the arc value
@@ -1076,18 +1013,6 @@ public class ForbiddenRegionBuilder {
 	 */
 	private static double rightBuffer(double s) {
 		return s + ulp(s);
-	}
-
-	/**
-	 * Calculates the right buffered vector of the given one.
-	 *
-	 * @param v the vector
-	 * @return the buffered right vector.
-	 */
-	private static Vector rightBuffer(Vector v) {
-		double s = v.get(0), t = v.get(1);
-
-		return new BasicVector(new double[] {rightBuffer(s), t});
 	}
 
 	/**
