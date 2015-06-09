@@ -1,8 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static org.junit.Assert.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
