@@ -14,6 +14,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterable;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySplitter;
 
+/**
+ * Checks if two points are visible to each other.
+ *
+ * @author Rico Jasper
+ */
 public class VisibilityEdgeChecker {
 
 	private final Geometry forbiddenMap;

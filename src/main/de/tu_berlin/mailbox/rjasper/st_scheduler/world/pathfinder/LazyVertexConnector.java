@@ -20,6 +20,11 @@ import com.vividsolutions.jts.geom.Point;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometryIterator;
 
+/**
+ * Adds vertices and edges to a graph to provide stationary path segments.
+ *
+ * @author Rico Jasper
+ */
 public class LazyVertexConnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph;

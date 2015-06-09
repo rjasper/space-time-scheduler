@@ -15,6 +15,11 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 
+/**
+ * Removes any vertices which don't lead to the finish vertex.
+ *
+ * @author Rico Jasper
+ */
 public class SimpleVertexDisconnector {
 
 	private DefaultDirectedWeightedGraph<ImmutablePoint, DefaultWeightedEdge> graph = null;
