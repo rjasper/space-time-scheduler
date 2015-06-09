@@ -19,10 +19,10 @@ public class Benchmark {
 //		benchmarks.add(SpatialPathfinderBenchmark.class);
 		benchmarks.add(SingularJobSchedulerNodeNumberSuccessBenchmark.class);
 		benchmarks.add(SingularJobSchedulerNodeNumberErrorBenchmark.class);
-		benchmarks.add(SingularJobSchedulerSlotNumber1SuccessBenchmark.class);
-		benchmarks.add(SingularJobSchedulerSlotNumber1ErrorBenchmark.class);
-		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
-		benchmarks.add(SingularJobSchedulerSlotNumber2ErrorBenchmark.class);
+//		benchmarks.add(SingularJobSchedulerSlotNumber1SuccessBenchmark.class);
+//		benchmarks.add(SingularJobSchedulerSlotNumber1ErrorBenchmark.class);
+//		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
+//		benchmarks.add(SingularJobSchedulerSlotNumber2ErrorBenchmark.class);
 		benchmarks.add(PeriodicJobSchedulerSameLocationBenchmark.class);
 		benchmarks.add(PeriodicJobSchedulerIndependentLocationBenchmark.class);
 		benchmarks.add(DependentJobSchedulerBenchmark.class);

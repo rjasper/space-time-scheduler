@@ -140,8 +140,7 @@ public class Scheduler {
 
 		Node node = new Node(spec);
 
-		// FIXME uncomment
-//		checkNodePlacement(node);
+		checkNodePlacement(node);
 
 		schedule.addNode(node);
 
@@ -814,11 +813,6 @@ public class Scheduler {
 	 */
 	public void cleanUp() {
 		schedule.cleanUp(presentTime);
-	}
-
-	// FIXME remove
-	public Node __debug__getNode(String nodeId) {
-		return schedule.getNode(nodeId);
 	}
 
 }
