@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.tu-berlin.kbs</groupId>
 	<artifactId>space-time-scheduler</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.1-benchmark</version>
 	<build>
 		<sourceDirectory>src/main</sourceDirectory>
 		<testSourceDirectory>src/test</testSourceDirectory>
@@ -33,7 +33,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>de.tu_berlin.mailbox.rjasper.st_scheduler.example.Example</mainClass>
+							<mainClass>de.tu_berlin.mailbox.rjasper.st_scheduler.benchmark.Benchmark</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
