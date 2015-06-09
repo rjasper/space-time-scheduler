@@ -58,48 +58,48 @@ public final class BasicExample {
 		System.out.println("schedule update:");
 		System.out.println(result);
 		System.out.println();
-		System.out.println("node's trajectory");
+		System.out.println("trajectory:");
 		System.out.println(nodeRef.calcTrajectory());
 	}
 
 	private static StaticObstacle staticObstacle() {
 		ImmutablePolygon shape = immutableBox(1.0, 5.0, 3.0, 7.0);
-	
+
 		return new StaticObstacle(shape);
 	}
 
 	private static DynamicObstacle dynamicObstacle() {
 		ImmutablePolygon shape = immutableBox(-1.0, -1.0, 1.0, 1.0);
-	
+
 		SpatialPath spatialPath = new SpatialPath(ImmutableList.of(
 			immutablePoint(7.0, 9.0),
 			immutablePoint(7.0, 6.0)));
-	
+
 		ImmutableList<LocalDateTime> times = ImmutableList.of(
 			LocalDateTime.of(2015, 1, 1, 0, 0,  0),  // 1/1/2015 12:00 AM
 			LocalDateTime.of(2015, 1, 1, 0, 0, 30)); // 1/1/2015 12:30 AM
-	
+
 		Trajectory trajectory =
 			new SimpleTrajectory(spatialPath, times);
-	
+
 		return new DynamicObstacle(shape, trajectory);
 	}
 
 	private static World world() {
 		StaticObstacle staticObstacle = staticObstacle();
 		DynamicObstacle dynamicObstacle = dynamicObstacle();
-	
+
 		return new World(ImmutableList.of(staticObstacle), ImmutableList.of(dynamicObstacle));
 	}
 
 	private static NodeSpecification nodeSpec() {
 		ImmutablePolygon nodeShape = immutableBox(-0.5, -0.5, +0.5, +0.5);
 		double maxSpeed = 1.0; // m/s
-	
+
 		ImmutablePoint initialLocation = immutablePoint(2.5, 2.5);
-	
+
 		LocalDateTime initialTime = LocalDateTime.of(2015, 1, 1, 0, 1, 0); // 1/1/2015 12:01 AM
-	
+
 		return new NodeSpecification("node-id", nodeShape, maxSpeed, initialLocation, initialTime);
 	}
 
