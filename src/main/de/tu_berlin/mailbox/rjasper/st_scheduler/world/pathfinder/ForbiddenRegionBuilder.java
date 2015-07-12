@@ -756,6 +756,8 @@ public class ForbiddenRegionBuilder {
 		for (int i = 0; i < n; ++i) {
 			Geometry g = obstaclePathIntersection.getGeometryN(i);
 
+			// FIXME must store empty region instead of null if g is not a lineString
+
 			// g might be a point
 			if (!(g instanceof LineString))
 				continue;

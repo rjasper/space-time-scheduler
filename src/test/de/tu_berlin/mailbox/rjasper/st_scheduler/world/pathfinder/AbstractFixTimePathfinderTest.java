@@ -18,8 +18,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
-import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 
 public abstract class AbstractFixTimePathfinderTest {
 
@@ -75,7 +75,7 @@ public abstract class AbstractFixTimePathfinderTest {
 
 		assertTrue(validPath);
 
-		SimpleTrajectory trajectory = pf.getResultTrajectory().composed();
+		Trajectory trajectory = pf.getResultTrajectory();
 
 		assertThat("trajectory is empty",
 			trajectory.isEmpty(), is(false));
