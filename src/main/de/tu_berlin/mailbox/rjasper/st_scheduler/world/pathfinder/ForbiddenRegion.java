@@ -5,8 +5,6 @@ import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometrie
 import java.util.Objects;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
@@ -16,16 +14,16 @@ import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
  * represents an area of arc-time pairs on a curve. The arc results in a
  * position of a trajectory which is unavailable at certain times due to dynamic
  * obstacles. Such arc-time pairs belong therefore to a forbidden region.
- * 
+ *
  * @author Rico Jasper
  */
-public class ForbiddenRegion { 
-	
+public class ForbiddenRegion {
+
 	/**
 	 * The geometry representing the forbidden region.
 	 */
 	private final Geometry region;
-	
+
 	/**
 	 * The dynamic obstacle responsible for this forbidden region.
 	 */
@@ -33,7 +31,7 @@ public class ForbiddenRegion {
 
 	/**
 	 * Constructs a new forbidden region.
-	 * 
+	 *
 	 * @param region
 	 *            representing the area of the forbidden region.
 	 * @param dynamicObstacle
@@ -41,16 +39,16 @@ public class ForbiddenRegion {
 	 * @throws NullPointerException
 	 *             if any argument is {@code null}.
 	 * @throws IllegalArgumentException
-	 *             if region is empty, invalid, non-simple, not 2D or neither
-	 *             a polygon nor a multi polygon.
+	 *             if region is empty, invalid, non-simple.
 	 */
 	public ForbiddenRegion(Geometry region, DynamicObstacle dynamicObstacle) {
 		Objects.requireNonNull(dynamicObstacle, "dynamicObstacle");
 		GeometriesRequire.requireValidSimple2DGeometry(region, "region");
-		
-		if (!(region instanceof Polygon || region instanceof MultiPolygon))
-			throw new IllegalArgumentException("illegal region");
-		
+
+		// allow region of any dimension
+//		if (!(region instanceof Polygon || region instanceof MultiPolygon))
+//			throw new IllegalArgumentException("illegal region");
+
 		this.region = immutable(region);
 		this.dynamicObstacle = dynamicObstacle;
 	}

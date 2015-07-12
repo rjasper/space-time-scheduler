@@ -84,7 +84,7 @@ public abstract class AbstractMinimumTimePathfinderTest {
 
 		assertTrue(status);
 
-		Trajectory trajectory = pf.getResultTrajectory().composed();
+		Trajectory trajectory = pf.getResultTrajectory();
 
 		assertThat("trajectory is empty",
 			trajectory.isEmpty(), is(false));

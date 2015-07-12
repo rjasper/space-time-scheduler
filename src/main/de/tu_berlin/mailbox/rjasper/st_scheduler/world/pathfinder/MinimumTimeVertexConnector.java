@@ -143,6 +143,7 @@ public class MinimumTimeVertexConnector {
 
 		// connect finish vertices
 		for (ImmutablePoint v : vertices) {
+			// TODO don't add candidates which are idendical to their origin
 			ImmutablePoint candidate = calcCandidate(v);
 			graph.addVertex(candidate);
 
