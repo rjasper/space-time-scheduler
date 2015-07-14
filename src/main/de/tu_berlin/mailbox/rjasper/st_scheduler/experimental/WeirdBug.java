@@ -49,12 +49,12 @@ public final class WeirdBug {
 		}
 	}
 
-	public void addJob(double x, double y, LocalDateTime time) {
+	public void addJob(double x, double y, LocalDateTime earliest, LocalDateTime latest) {
 		UUID jobId = UUID.randomUUID();
-		ImmutablePoint location = immutablePoint(10, 10);
+		ImmutablePoint location = immutablePoint(x, y);
 
 		ScheduleResult res = scheduler.schedule(
-			JobSpecification.createSS(jobId, location, time, time, ofSeconds(1)));
+			JobSpecification.createSF(jobId, location, earliest, latest, ofSeconds(1)));
 
 		if (res.isError())
 			System.err.println("errorenous result");
@@ -76,10 +76,10 @@ public final class WeirdBug {
 	public static void main(String[] args) {
 		WeirdBug ctx = new WeirdBug();
 
-		ctx.addNode(0, 0, atSecond(0));
-		ctx.addNode(10, 0, atSecond(0));
+		ctx.addNode(10, 2, atSecond(0));
+		ctx.addNode(5, 2, atSecond(0));
 
-		ctx.addJob(10, 10, atSecond(20));
+		ctx.addJob(5, 15, atSecond(30), atSecond(40));
 
 		for (NodeReference ref : ctx.getNodeRefs()) {
 			System.out.println(ref.getId());
