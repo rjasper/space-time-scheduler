@@ -7,6 +7,7 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -751,7 +752,7 @@ public class ForbiddenRegionBuilder {
 		double duration = obstacleTrajectorySegment.durationInSeconds();
 		double displacement = arcUnitRowMatrix.multiply(vt).get(0);
 
-		Polygon[] subregions = new Polygon[n];
+		List<Polygon> subregions = new ArrayList<>(n);
 		// for each line string
 		for (int i = 0; i < n; ++i) {
 			Geometry g = obstaclePathIntersection.getGeometryN(i);
@@ -781,10 +782,10 @@ public class ForbiddenRegionBuilder {
 			// first and last coordinate have to be equal
 			regionCoords[regionCoords.length-1] = (Coordinate) regionCoords[0].clone();
 
-			subregions[i] = polygon(regionCoords);
+			subregions.add(polygon(regionCoords));
 		}
 
-		return multiPolygon(subregions);
+		return multiPolygon(subregions.toArray(new Polygon[subregions.size()]));
 	}
 
 	/**

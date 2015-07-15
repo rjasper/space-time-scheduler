@@ -20,7 +20,9 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.ArcTimePath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DecomposedTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.DynamicObstacle;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SimpleTrajectory;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.world.Trajectory;
 import de.tu_berlin.mailbox.rjasper.time.TimeConv;
 
 /**
@@ -78,7 +80,7 @@ public abstract class AbstractVelocityPathfinder {
 	/**
 	 * The calculated trajectory.
 	 */
-	private DecomposedTrajectory resultTrajectory = null;
+	private Trajectory resultTrajectory = null;
 
 	/**
 	 * The directly evaded dynamic obstacles.
@@ -245,7 +247,7 @@ public abstract class AbstractVelocityPathfinder {
 	/**
 	 * @return the calculated trajectory.
 	 */
-	public DecomposedTrajectory getResultTrajectory() {
+	public Trajectory getResultTrajectory() {
 		return resultTrajectory;
 	}
 
@@ -254,7 +256,7 @@ public abstract class AbstractVelocityPathfinder {
 	 *
 	 * @param resultTrajectory
 	 */
-	private void setResultTrajectory(DecomposedTrajectory resultTrajectory) {
+	private void setResultTrajectory(Trajectory resultTrajectory) {
 		this.resultTrajectory = resultTrajectory;
 	}
 
@@ -326,7 +328,7 @@ public abstract class AbstractVelocityPathfinder {
 				calculateEvadedObstacles(forbiddenRegions, arcTimePath));
 		} else {
 			setResultTrajectory(
-				DecomposedTrajectory.empty());
+				SimpleTrajectory.empty());
 			setResultEvadedObstacles(
 				emptyList());
 		}
@@ -395,11 +397,11 @@ public abstract class AbstractVelocityPathfinder {
 	 * @param arcTimePath the velocity profile.
 	 * @return the trajectory.
 	 */
-	private DecomposedTrajectory buildTrajectory(ArcTimePath arcTimePath) {
+	private Trajectory buildTrajectory(ArcTimePath arcTimePath) {
 		LocalDateTime baseTime = getBaseTime();
 		SpatialPath spatialPath = getSpatialPath();
 
-		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath);
+		return new DecomposedTrajectory(baseTime, spatialPath, arcTimePath).composed();
 	}
 
 	/**

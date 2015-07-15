@@ -120,6 +120,29 @@ public class ForbiddenRegionBuilderTest {
 	}
 
 	@Test
+	public void testParallelCasePointIntersection() {
+		SpatialPath path = new SpatialPath(ImmutableList.of(
+			immutablePoint(5., 0.), immutablePoint(10., 0.)));
+		Trajectory trajectory = trajectory(
+			0, 4,
+			0, 0,
+			0, 1);
+		ImmutablePolygon shape = immutableBox(-1, -1, 1, 1);
+		DynamicObstacle obstacle = new DynamicObstacle(shape, trajectory);
+
+		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
+		builder.setBaseTime(TimeFactory.BASE_TIME);
+		builder.setSpatialPath(path);
+		builder.setDynamicObstacles(Collections.singleton(obstacle));
+
+		builder.calculate();
+
+		Collection<ForbiddenRegion> regions = builder.getResultForbiddenRegions();
+
+		assertThat(regions.isEmpty(), is(true));
+	}
+
+	@Test
 	public void testRegularCase() {
 		SpatialPath path = new SpatialPath(ImmutableList.of(
 			immutablePoint(2., 2.), immutablePoint(8., 8.)));

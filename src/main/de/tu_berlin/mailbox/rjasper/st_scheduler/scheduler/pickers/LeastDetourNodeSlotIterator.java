@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.vividsolutions.jts.geom.Point;
 
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.SpaceTimeSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers.NodeSlotIterator.NodeSlot;
 
@@ -49,8 +50,13 @@ public class LeastDetourNodeSlotIterator implements Iterator<NodeSlot> {
 		Point p2 = location;
 		Point p3 = stSlot.getFinishLocation();
 
+		// TODO bug not reproduced and tested
+
 		// detour
-		return (distance(p1, p2) + distance(p2, p3)) - distance(p1, p3);
+		if (stSlot.getFinishTime().compareTo(Scheduler.END_OF_TIME) == 0)
+			return distance(p1, p2);
+		else
+			return (distance(p1, p2) + distance(p2, p3)) - distance(p1, p3);
 	}
 
 	@Override
