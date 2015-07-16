@@ -78,6 +78,10 @@ public class World {
 
 		Geometry map = immutableMultiPolygon(shapes);
 
+		// multipolygon might be self-intersecting
+		if (!map.isValid())
+			map = map.union();
+
 		return map;
 	}
 
