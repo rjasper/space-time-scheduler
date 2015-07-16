@@ -3,6 +3,7 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 import static de.tu_berlin.mailbox.rjasper.collect.Immutables.*;
 import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
 
 import java.util.Collection;
 
@@ -80,7 +81,7 @@ public class World {
 
 		// multipolygon might be self-intersecting
 		if (!map.isValid())
-			map = map.union();
+			map = immutable( map.union() );
 
 		return map;
 	}
