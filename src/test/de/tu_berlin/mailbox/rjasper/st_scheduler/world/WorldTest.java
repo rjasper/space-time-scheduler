@@ -44,9 +44,34 @@ public class WorldTest {
 			immutableBox(10, 0, 20, 10));
 
 		World world = new World(ImmutableList.of(o1, o2), ImmutableList.of());
-
 		World buffered = world.buffer(1.0);
+		Geometry bufferedMap = buffered.getMap();
 
+		assertThat("map is invalid",
+			buffered.getMap().isValid(), is(true));
+		assertThat("map is no multipolygon",
+			bufferedMap instanceof MultiPolygon, is(true));
+	}
+
+	@Test
+	public void testComplexWorld() {
+		StaticObstacle o1 = new StaticObstacle(
+			immutablePolygon(0, 0, 24, 0, 24, 0.1, 0, 0.1, 0, 0));
+		StaticObstacle o2 = new StaticObstacle(
+			immutablePolygon(4.0, 7.0, 9.0, 7.0, 9.0, 6.0, 5.0, 6.0, 5.0, 0.0, 4.0, 0.0, 4.0, 7.0));
+		StaticObstacle o3 = new StaticObstacle(
+			immutablePolygon(4.0, 9.0, 9.0, 9.0, 9.0, 10.0, 5.0, 10.0, 5.0, 15.0, 4.0, 15.0, 4.0, 9.0));
+		StaticObstacle o4 = new StaticObstacle(
+			immutablePolygon(6.0, 1.0, 15.0, 1.0, 15.0, 2.0, 6.0, 2.0, 6.0, 1.0));
+		StaticObstacle o5 = new StaticObstacle(
+			immutablePolygon(11.0, 3.0, 14.0, 3.0, 14.0, 13.0, 7.0, 13.0, 7.0, 12.0, 11.0, 12.0, 11.0, 3.0));
+		StaticObstacle o6 = new StaticObstacle(
+			immutablePolygon(16.0, 7.0, 17.0, 7.0, 17.0, 0.0, 16.0, 0.0, 16.0, 7.0));
+		StaticObstacle o7 = new StaticObstacle(
+			immutablePolygon(16.0, 9.0, 17.0, 9.0, 17.0, 15.0, 16.0, 15.0, 16.0, 9.0));
+
+		World world = new World(ImmutableList.of(o1, o2, o3, o4, o5, o6, o7), ImmutableList.of());
+		World buffered = world.buffer(0.5*Math.sqrt(2.0));
 		Geometry bufferedMap = buffered.getMap();
 
 		assertThat("map is invalid",

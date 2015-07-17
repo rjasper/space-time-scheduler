@@ -13,13 +13,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * Extends the {@code GeometryCollection} to be immutable. Any Attempts to alter
  * the geometry trigger an {@link UnsupportedOperationException}.
  * </p>
- * 
+ *
  * <p>
  * Note that the {@code ImmutableGeometryCollection} is not the super type of
  * {@link ImmutableMultiPoint}, {@link ImmutableMultiLineString}, or
  * {@link ImmutableMultiPolygon}.
  * </p>
- * 
+ *
  * @author Rico Jasper
  */
 public class ImmutableGeometryCollection extends GeometryCollection implements ImmutableGeometry {
@@ -29,7 +29,7 @@ public class ImmutableGeometryCollection extends GeometryCollection implements I
 	/**
 	 * Constructs a new {@code ImmutableGeometryCollection} from the given
 	 * geometry collection.
-	 * 
+	 *
 	 * @param geometryCollection
 	 */
 	public ImmutableGeometryCollection(GeometryCollection geometryCollection) {
@@ -39,18 +39,18 @@ public class ImmutableGeometryCollection extends GeometryCollection implements I
 	/**
 	 * Constructs a new {@code ImmutableGeometryCollection} from the given
 	 * geometries.
-	 * 
+	 *
 	 * @param geometries
 	 * @param factory
 	 */
 	public ImmutableGeometryCollection(Geometry[] geometries, GeometryFactory factory) {
 		super(immutable(geometries), factory);
 	}
-	
+
 	/**
 	 * Constructs a new {@code ImmutableGeometryCollection} from the given
 	 * geometries. Does not make a copy of the given array.
-	 * 
+	 *
 	 * @param geometries
 	 * @param factory
 	 * @param shared
@@ -63,20 +63,20 @@ public class ImmutableGeometryCollection extends GeometryCollection implements I
 
 	/**
 	 * Retrieves the geometries from the given geometry collection.
-	 * 
+	 *
 	 * @param geometryCollection
 	 * @return the geometries.
 	 */
 	private static Geometry[] retrieveGeometries(GeometryCollection geometryCollection) {
 		if (geometryCollection instanceof ImmutableGeometryCollection)
 			return ((ImmutableGeometryCollection) geometryCollection).geometries;
-		
+
 		int n = geometryCollection.getNumGeometries();
-		
+
 		Geometry[] geometries = new Geometry[n];
 		for (int i = 0; i < n; ++i)
 			geometries[i] = geometryCollection.getGeometryN(i);
-		
+
 		return geometries;
 	}
 
@@ -114,10 +114,19 @@ public class ImmutableGeometryCollection extends GeometryCollection implements I
 	@Override
 	public Geometry norm() {
 		GeometryCollection mutable = getMutable();
-		
+
 		mutable.normalize();
-		
+
 		return mutable;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.vividsolutions.jts.geom.Geometry#union()
+	 */
+	@Override
+	public Geometry union() {
+		return getMutable().union();
 	}
 
 	/*

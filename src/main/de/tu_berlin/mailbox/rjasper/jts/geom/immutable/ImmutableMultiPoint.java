@@ -4,6 +4,7 @@ import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometrie
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
@@ -13,12 +14,12 @@ import com.vividsolutions.jts.geom.Point;
  * Extends the {@code MultiPoint} to be immutable. Any Attempts to alter
  * the geometry trigger an {@link UnsupportedOperationException}.
  * </p>
- * 
+ *
  * <p>
  * Note that the {@link ImmutableGeometryCollection} is not the super type of
  * {@code ImmutableMultiPoint}.
  * </p>
- * 
+ *
  * @author Rico Jasper
  */
 public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry {
@@ -28,7 +29,7 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 	/**
 	 * Constructs a new {@code ImmutableMultiPoint} from the given
 	 * multi point.
-	 * 
+	 *
 	 * @param multiPoint
 	 */
 	public ImmutableMultiPoint(MultiPoint multiPoint) {
@@ -37,7 +38,7 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 
 	/**
 	 * Constructs a new {@code ImmutableMultiPoint} from the given points.
-	 * 
+	 *
 	 * @param points
 	 * @param factory
 	 */
@@ -48,7 +49,7 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 	/**
 	 * Constructs a new {@code ImmutableMultiPoint} from the given points. Does
 	 * not make a copy of the given array.
-	 * 
+	 *
 	 * @param points
 	 * @param factory
 	 * @param shared
@@ -61,20 +62,20 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 
 	/**
 	 * Retrieves the points from the given multi point.
-	 * 
+	 *
 	 * @param multiPoint
 	 * @return the points.
 	 */
 	private static ImmutablePoint[] retrievePoints(MultiPoint multiPoint) {
 		if (multiPoint instanceof ImmutableMultiPoint)
 			return (ImmutablePoint[]) ((ImmutableMultiPoint) multiPoint).geometries;
-		
+
 		int n = multiPoint.getNumGeometries();
-		
+
 		ImmutablePoint[] points = new ImmutablePoint[n];
 		for (int i = 0; i < n; ++i)
 			points[i] = immutable((Point) multiPoint.getGeometryN(i));
-		
+
 		return points;
 	}
 
@@ -85,7 +86,7 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 	@Override
 	public MultiPoint getMutable() {
 		Point[] points = (Point[]) geometries;
-		
+
 		return new MultiPoint(mutable(points), factory);
 	}
 
@@ -114,10 +115,19 @@ public class ImmutableMultiPoint extends MultiPoint implements ImmutableGeometry
 	@Override
 	public MultiPoint norm() {
 		MultiPoint mutable = getMutable();
-		
+
 		mutable.normalize();
-		
+
 		return mutable;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.vividsolutions.jts.geom.Geometry#union()
+	 */
+	@Override
+	public Geometry union() {
+		return getMutable().union();
 	}
 
 	/*

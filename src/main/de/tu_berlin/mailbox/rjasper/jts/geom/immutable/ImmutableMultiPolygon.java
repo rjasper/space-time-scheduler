@@ -4,6 +4,7 @@ import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometrie
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
@@ -13,22 +14,22 @@ import com.vividsolutions.jts.geom.Polygon;
  * Extends the {@code MultiPolygon} to be immutable. Any Attempts to alter
  * the geometry trigger an {@link UnsupportedOperationException}.
  * </p>
- * 
+ *
  * <p>
  * Note that the {@link ImmutableGeometryCollection} is not the super type of
  * {@code ImmutableMultiPolygon}.
  * </p>
- * 
+ *
  * @author Rico Jasper
  */
 public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeometry {
 
 	private static final long serialVersionUID = 2982709814063389648L;
-	
+
 	/**
 	 * Constructs a new {@code ImmutableMultiPolygon} from the given
 	 * multi polygon.
-	 * 
+	 *
 	 * @param multiPolygon
 	 */
 	public ImmutableMultiPolygon(MultiPolygon multiPolygon) {
@@ -38,7 +39,7 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 	/**
 	 * Constructs a new {@code ImmutableMultiLineString} from the given
 	 * polygons.
-	 * 
+	 *
 	 * @param polygons
 	 * @param factory
 	 */
@@ -49,7 +50,7 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 	/**
 	 * Constructs a new {@code ImmutableMultiPolygon} from the given
 	 * polygons. Does not make a copy of the given array.
-	 * 
+	 *
 	 * @param polygons
 	 * @param factory
 	 * @param shared
@@ -62,20 +63,20 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 
 	/**
 	 * Retrieves the polygons from the given multi polygon.
-	 * 
+	 *
 	 * @param multiPolygon
 	 * @return the polygons.
 	 */
 	private static ImmutablePolygon[] retrievePolygons(MultiPolygon multiPolygon) {
 		if (multiPolygon instanceof ImmutableMultiPolygon)
 			return (ImmutablePolygon[]) ((ImmutableMultiPolygon) multiPolygon).geometries;
-		
+
 		int n = multiPolygon.getNumGeometries();
-		
+
 		ImmutablePolygon[] polygons = new ImmutablePolygon[n];
 		for (int i = 0; i < n; ++i)
 			polygons[i] = immutable((Polygon) multiPolygon.getGeometryN(i));
-		
+
 		return polygons;
 	}
 
@@ -86,7 +87,7 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 	@Override
 	public MultiPolygon getMutable() {
 		Polygon[] polygon = (Polygon[]) geometries;
-		
+
 		return new MultiPolygon(mutable(polygon), factory);
 	}
 
@@ -115,10 +116,19 @@ public class ImmutableMultiPolygon extends MultiPolygon implements ImmutableGeom
 	@Override
 	public MultiPolygon norm() {
 		MultiPolygon mutable = getMutable();
-		
+
 		mutable.normalize();
-		
+
 		return mutable;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.vividsolutions.jts.geom.Geometry#union()
+	 */
+	@Override
+	public Geometry union() {
+		return getMutable().union();
 	}
 
 	/*
