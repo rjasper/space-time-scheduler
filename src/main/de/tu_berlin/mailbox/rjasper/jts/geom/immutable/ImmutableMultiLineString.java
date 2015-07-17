@@ -4,6 +4,7 @@ import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometrie
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -13,12 +14,12 @@ import com.vividsolutions.jts.geom.MultiLineString;
  * Extends the {@code MultiLineString} to be immutable. Any Attempts to alter
  * the geometry trigger an {@link UnsupportedOperationException}.
  * </p>
- * 
+ *
  * <p>
  * Note that the {@link ImmutableGeometryCollection} is not the super type of
  * {@code ImmutableMultiLineString}.
  * </p>
- * 
+ *
  * @author Rico Jasper
  */
 public class ImmutableMultiLineString extends MultiLineString implements ImmutableGeometry {
@@ -28,7 +29,7 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	/**
 	 * Constructs a new {@code ImmutableMultiLineString} from the given
 	 * multi line string.
-	 * 
+	 *
 	 * @param multiLineString
 	 */
 	public ImmutableMultiLineString(MultiLineString multiLineString) {
@@ -38,7 +39,7 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	/**
 	 * Constructs a new {@code ImmutableMultiLineString} from the given
 	 * line strings.
-	 * 
+	 *
 	 * @param lineStrings
 	 * @param factory
 	 */
@@ -49,7 +50,7 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	/**
 	 * Constructs a new {@code ImmutableMultiLineString} from the given
 	 * line strings. Does not make a copy of the given array.
-	 * 
+	 *
 	 * @param lineStrings
 	 * @param factory
 	 * @param shared
@@ -62,20 +63,20 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 
 	/**
 	 * Retrieves the line strings from the given multi line string.
-	 * 
+	 *
 	 * @param multiLineString
 	 * @return the line strings.
 	 */
 	private static ImmutableLineString[] retrieveLineStrings(MultiLineString multiLineString) {
 		if (multiLineString instanceof ImmutableMultiLineString)
 			return (ImmutableLineString[]) ((ImmutableMultiLineString) multiLineString).geometries;
-		
+
 		int n = multiLineString.getNumGeometries();
-		
+
 		ImmutableLineString[] lineStrings = new ImmutableLineString[n];
 		for (int i = 0; i < n; ++i)
 			lineStrings[i] = immutable((LineString) multiLineString.getGeometryN(i));
-		
+
 		return lineStrings;
 	}
 
@@ -86,7 +87,7 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	@Override
 	public MultiLineString getMutable() {
 		LineString[] lineStrings = (LineString[]) geometries;
-		
+
 		return new MultiLineString(mutable(lineStrings), factory);
 	}
 
@@ -98,7 +99,7 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	public void geometryChanged() {
 		throw new UnsupportedOperationException("MultiLineString immutable");
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.vividsolutions.jts.geom.GeometryCollection#normalize()
@@ -115,10 +116,19 @@ public class ImmutableMultiLineString extends MultiLineString implements Immutab
 	@Override
 	public MultiLineString norm() {
 		MultiLineString mutable = getMutable();
-		
+
 		mutable.normalize();
-		
+
 		return mutable;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.vividsolutions.jts.geom.Geometry#union()
+	 */
+	@Override
+	public Geometry union() {
+		return getMutable().union();
 	}
 
 	/*
