@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
 
 public class WorldTest {
 
@@ -45,7 +47,12 @@ public class WorldTest {
 
 		World buffered = world.buffer(1.0);
 
-		assertThat(buffered.getMap().isValid(), is(true));
+		Geometry bufferedMap = buffered.getMap();
+
+		assertThat("map is invalid",
+			buffered.getMap().isValid(), is(true));
+		assertThat("map is no multipolygon",
+			bufferedMap instanceof MultiPolygon, is(true));
 	}
 
 }

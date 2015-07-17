@@ -5,11 +5,13 @@ import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.util.GeometryExtracter;
 
 import de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
@@ -79,8 +81,14 @@ public class World {
 		Geometry map = immutableMultiPolygon(shapes);
 
 		// multipolygon might be self-intersecting
-		if (!map.isValid())
-			map = map.union();
+		if (!map.isValid()) {
+			Geometry union = map.union(); // produces GeometryCollection
+
+			@SuppressWarnings("unchecked")
+			List<Polygon> polygons = (List<Polygon>) GeometryExtracter.extract(union, Polygon.class);
+
+			map = immutableMultiPolygon(polygons.toArray(new Polygon[polygons.size()]));
+		}
 
 		return map;
 	}
