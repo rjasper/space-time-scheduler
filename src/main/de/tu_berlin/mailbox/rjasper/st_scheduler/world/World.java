@@ -14,6 +14,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.GeometryExtracter;
 
 import de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire;
+import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 
 /**
@@ -74,9 +75,9 @@ public class World {
 	 * @return the map.
 	 */
 	private static Geometry makeMap(Collection<StaticObstacle> staticObstacles) {
-		Polygon[] shapes = staticObstacles.stream()
+		ImmutablePolygon[] shapes = staticObstacles.stream()
 			.map(StaticObstacle::getShape)
-			.toArray(n -> new Polygon[n]);
+			.toArray(n -> new ImmutablePolygon[n]);
 
 		Geometry map = immutableMultiPolygon(shapes);
 
