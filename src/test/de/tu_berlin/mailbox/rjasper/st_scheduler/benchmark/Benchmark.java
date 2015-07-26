@@ -23,7 +23,7 @@ public class Benchmark {
 //		benchmarks.add(SingularJobSchedulerSlotNumber1ErrorBenchmark.class);
 //		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
 //		benchmarks.add(SingularJobSchedulerSlotNumber2ErrorBenchmark.class);
-//		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
+		benchmarks.add(SingularJobSchedulerSlotNumber2SuccessBenchmark.class);
 		benchmarks.add(SingularJobSchedulerSlotNumber3ErrorBenchmark.class);
 //		benchmarks.add(PeriodicJobSchedulerSameLocationBenchmark.class);
 //		benchmarks.add(PeriodicJobSchedulerIndependentLocationBenchmark.class);
