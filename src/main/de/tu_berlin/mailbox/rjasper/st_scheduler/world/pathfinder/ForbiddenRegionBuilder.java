@@ -996,6 +996,10 @@ public class ForbiddenRegionBuilder {
 		return clone;
 	}
 
+	// the minimum buffer lowers the chances that a buffered
+	// line string becomes to small for JTS to handle
+	private static final double MIN_BUFFER = 1e-9;
+
 	/**
 	 * Calculates the left buffered value of the given arc.
 	 *
@@ -1003,7 +1007,7 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered left side.
 	 */
 	private static double leftBuffer(double s) {
-		return s - ulp(s);
+		return s - max(ulp(s), MIN_BUFFER);
 	}
 
 	/**
@@ -1013,7 +1017,7 @@ public class ForbiddenRegionBuilder {
 	 * @return the buffered right side.
 	 */
 	private static double rightBuffer(double s) {
-		return s + ulp(s);
+		return s + max(ulp(s), MIN_BUFFER);
 	}
 
 	/**
