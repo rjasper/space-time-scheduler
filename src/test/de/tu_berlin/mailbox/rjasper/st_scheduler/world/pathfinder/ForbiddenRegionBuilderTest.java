@@ -248,4 +248,30 @@ public class ForbiddenRegionBuilderTest {
 		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-10 ));
 	}
 
+	@Test
+	public void testSmallRegion() {
+		SpatialPath path = spatialPath(0, 0, 0, 0);
+		Trajectory traj = trajectory(0, 0, 1, -1, 0, 0.25);
+		ImmutablePolygon shape = immutableBox(-1, -1, 1, 1);
+		DynamicObstacle obstacle = new DynamicObstacle(shape, traj);
+
+		ForbiddenRegionBuilder builder = new ForbiddenRegionBuilder();
+		builder.setBaseTime(TimeFactory.BASE_TIME);
+		builder.setSpatialPath(path);
+		builder.setDynamicObstacles(Collections.singleton(obstacle));
+
+		builder.calculate();
+		Collection<ForbiddenRegion> regions = builder.getResultForbiddenRegions();
+
+		assertEquals(1, regions.size());
+
+		ForbiddenRegion region = regions.iterator().next();
+
+		Geometry expected = box(0, 0, 0, 0.25);
+
+		assertTrue(expected.norm().equalsExact( mutable(region.getRegion()), 1e-6 ));
+		assertThat("calculated region differs from expected region",
+			expected.norm().equalsExact( mutable(region.getRegion()), 1e-6 ), is(true));
+	}
+
 }

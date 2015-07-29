@@ -104,9 +104,16 @@ public class TopologyBug {
 
 		ctx.addNode(2, 2, atSecond(0));
 		ctx.addNode(2, 6, atSecond(0));
-		ctx.addNode(2, 10, atSecond(0));
+//		ctx.addNode(2, 10, atSecond(0));
 
-		ctx.addJob(immutableBox(12, 3, 14, 5), atSecond(2), atSecond(60));
+//		1) 2 60 21 7
+//		2) 2 60 10 8
+//		3) 2 60 10 11
+
+//		ctx.addJob(immutableBox(12, 3, 14, 5), atSecond(2), atSecond(60));
+		ctx.addJob(immutableBox(20, 6, 22, 8), atSecond(2), atSecond(60));
+		ctx.addJob(immutableBox(9, 7, 11, 9), atSecond(2), atSecond(60));
+		ctx.addJob(immutableBox(9, 10, 11, 12), atSecond(2), atSecond(60));
 
 		for (NodeReference ref : ctx.getNodeRefs()) {
 			System.out.println(ref.getId());
