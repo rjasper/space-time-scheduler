@@ -41,7 +41,7 @@ public class SchedulerTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private static NodeFactory wFact = new NodeFactory();
+	private static NodeFactory nFact = new NodeFactory();
 
 	private static final ImmutablePolygon NODE_SHAPE = immutableBox(
 		-0.5, -0.5, 0.5, 0.5);
@@ -105,7 +105,7 @@ public class SchedulerTest {
 		StaticObstacle obstacle = new StaticObstacle(immutableBox(10, 10, 20, 20));
 		World world = new World(ImmutableList.of(obstacle), ImmutableList.of());
 		NodeSpecification ns =
-			wFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			nFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 
 		Scheduler sc = new Scheduler(world);
 		sc.addNode(ns);
@@ -125,7 +125,7 @@ public class SchedulerTest {
 	@Test
 	public void testAllBusy() throws CollisionException {
 		NodeSpecification ns =
-			wFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
+			nFact.createNodeSpecification("n", immutableBox(-1, -1, 1, 1), 1.0, 0, 0, 0);
 
 		Scheduler sc = new Scheduler(new World());
 		sc.addNode(ns);
@@ -184,9 +184,9 @@ public class SchedulerTest {
 		ImmutablePolygon shape = immutableBox(-0.5, -0.5, 0.5, 0.5);
 
 		NodeSpecification ns1 =
-			wFact.createNodeSpecification("w1", shape, 1.0, 11, 31, 0);
+			nFact.createNodeSpecification("w1", shape, 1.0, 11, 31, 0);
 		NodeSpecification ns2 =
-			wFact.createNodeSpecification("w2", shape, 1.0, 25, 11, 0);
+			nFact.createNodeSpecification("w2", shape, 1.0, 25, 11, 0);
 
 		// top right
 		JobSpecification s1 = new JobSpecification(

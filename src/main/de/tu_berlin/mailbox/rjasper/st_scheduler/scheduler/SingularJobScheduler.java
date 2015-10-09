@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -140,10 +139,8 @@ public class SingularJobScheduler {
 				SpaceTimeSlot s = ns.getSlot();
 				WorldPerspective perspective = perspectiveCache.getPerspectiveFor(n);
 
-				NavigableMap<LocalDateTime, Job> wJobs = n.getNavigableJobs();
 				// true if there is one job after s.finish
-				boolean fixedEnd = !wJobs.isEmpty() &&
-					!wJobs.lastKey().isBefore( s.getFinishTime() );
+				boolean fixedEnd = s.getFinishTime().isBefore(Scheduler.END_OF_TIME);
 
 				tp.setFixedEnd(fixedEnd);
 				tp.setWorldPerspective(perspective);

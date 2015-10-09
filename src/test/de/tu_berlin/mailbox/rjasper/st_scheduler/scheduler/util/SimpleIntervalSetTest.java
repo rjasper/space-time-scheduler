@@ -1017,6 +1017,132 @@ public class SimpleIntervalSetTest {
 		
 		assertThat(set.maxValue(), is(atSecond(1)));
 	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testFloorValue1() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		set.floorValue(-1);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testFloorValue2() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		set.floorValue(0);
+	}
+
+	@Test
+	public void testFloorValue3() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.floorValue(1), is(1));
+	}
+
+	@Test
+	public void testFloorValue4() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.floorValue(2), is(2));
+	}
+
+	@Test
+	public void testFloorValue5() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.floorValue(3), is(2));
+	}
+	
+	@Test
+	public void testFloorValue6() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.floorValue(6), is(6));
+	}
+	
+	@Test
+	public void testFloorValue7() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.floorValue(7), is(6));
+	}
+	
+	@Test
+	public void testCeilingValue1() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.ceilingValue(-1), is(0));
+	}
+
+	@Test
+	public void testCeilingValue2() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.ceilingValue(0), is(0));
+	}
+
+	@Test
+	public void testCeilingValue3() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.ceilingValue(1), is(1));
+	}
+
+	@Test
+	public void testCeilingValue4() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.ceilingValue(2), is(4));
+	}
+
+	@Test
+	public void testCeilingValue5() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		assertThat(set.ceilingValue(3), is(4));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testCeilingValue6() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+		
+		set.ceilingValue(6);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testCeilingValue7() {
+		SimpleIntervalSet<Integer> set = new SimpleIntervalSet<>();
+		set.add(0, 2);
+		set.add(4, 6);
+
+		set.ceilingValue(7);
+	}
 
 	@Test
 	public void testContainsLeftTight() {

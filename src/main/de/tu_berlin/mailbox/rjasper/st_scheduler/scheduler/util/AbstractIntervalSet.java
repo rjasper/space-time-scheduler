@@ -47,7 +47,7 @@ implements IntervalSet<T>
 		
 		Interval<T> floorInterval = floorInterval(obj);
 		
-		if (floorInterval.getToExclusive().compareTo(obj) > 0)
+		if (floorInterval != null && floorInterval.getToExclusive().compareTo(obj) > 0)
 			return obj;
 		
 		Interval<T> higherInterval = higherInterval(obj);

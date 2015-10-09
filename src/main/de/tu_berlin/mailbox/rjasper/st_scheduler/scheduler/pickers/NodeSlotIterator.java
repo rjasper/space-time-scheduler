@@ -9,7 +9,6 @@ import static java.util.Collections.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
-import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -18,6 +17,7 @@ import com.vividsolutions.jts.geom.Point;
 import de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometriesRequire;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Node;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.ScheduleAlternative;
+import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.Scheduler;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.SpaceTimeSlot;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.NodeSlotBuilder;
 
@@ -299,20 +299,14 @@ public class NodeSlotIterator implements Iterator<NodeSlotIterator.NodeSlot> {
 			} else {
 				SpaceTimeSlot candidate = slotIterator.next();
 
-				if (!slotIterator.hasNext()) {
-					// check if there are no more jobs afterwards (indicates final slot)
-
-					NavigableMap<LocalDateTime, ?> jobs = nextNode.getNavigableJobs();
-
-					// if no more job after candidate
-					if (jobs.isEmpty() || jobs.lastKey() .compareTo( candidate.getStartTime() ) < 0) {
-						// overwrite candidate using the task location as final location
-						candidate = new SpaceTimeSlot(
-							candidate.getStartLocation(),
-							immutable(location),
-							candidate.getStartTime(),
-							candidate.getFinishTime());
-					}
+				// if no more job after candidate
+				if (candidate.getFinishTime().equals(Scheduler.END_OF_TIME)) {
+					// overwrite candidate using the task location as final location
+					candidate = new SpaceTimeSlot(
+						candidate.getStartLocation(),
+						immutable(location),
+						candidate.getStartTime(),
+						candidate.getFinishTime());
 				}
 
 				// break if the current idle slot is accepted
