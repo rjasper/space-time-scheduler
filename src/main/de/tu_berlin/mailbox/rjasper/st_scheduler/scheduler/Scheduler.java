@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -781,15 +780,8 @@ public class Scheduler {
 			.flatMap(u -> {
 				NodeReference n = u.getNode().getReference();
 
-				// circumvents nested lambda expression
-				// t -> new TrajectoryUpdate(t, w)
 				return u.getTrajectories().stream()
-					.map(new Function<Trajectory, TrajectoryUpdate>() {
-						@Override
-						public TrajectoryUpdate apply(Trajectory t) {
-							return new TrajectoryUpdate(t, n);
-						}
-					});
+					.map(t -> new TrajectoryUpdate(t, n));
 			})
 			.collect(toList());
 

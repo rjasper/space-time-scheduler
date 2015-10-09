@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
 
 import de.tu_berlin.mailbox.rjasper.collect.CollectionsRequire;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
@@ -378,9 +377,8 @@ public abstract class AbstractVelocityPathfinder {
 	{
 		// create lookup table to map points to an obstacle
 		Map<ImmutablePoint, DynamicObstacle> lookup = forbiddenRegions.stream()
-			// TODO remove cast as soon as ECJ is able to infer type (Stream<SimpleEntry<Point, DynamicObstacle>>)
 			// for each coordinate of each region
-			.flatMap(r -> (Stream<SimpleEntry<ImmutablePoint, DynamicObstacle>>) Arrays.stream(r.getRegion().getCoordinates())
+			.flatMap(r -> Arrays.stream(r.getRegion().getCoordinates())
 			.map(c -> immutablePoint(c.x, c.y))                      // map to a point
 			.map(p -> new SimpleEntry<>(p, r.getDynamicObstacle()))) // map to an entry
 			.collect(toMap(Entry::getKey, Entry::getValue, (u, v) -> u)); // collect map with no-overwrite merge
