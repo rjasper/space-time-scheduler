@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 
-import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -104,9 +103,9 @@ public class LazyFixTimePathfinder extends AbstractFixTimePathfinder {
 			return new ArcTimePath(ImmutableList.of(startVertex, finishVertex));
 
 		List<DefaultWeightedEdge> edges =
-			DijkstraShortestPath.findPathBetween(mesh, startVertex, finishVertex);
+			ModifiedDijkstraAlgorithm.findPathBetween(mesh, startVertex, finishVertex);
 
-		if (edges == null)
+		if (edges.isEmpty())
 			return ArcTimePath.empty();
 
 		Iterable<ImmutablePoint> targets = () -> edges.stream()
