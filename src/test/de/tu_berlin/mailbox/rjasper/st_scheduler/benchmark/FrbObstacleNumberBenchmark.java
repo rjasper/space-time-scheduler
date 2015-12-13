@@ -1,9 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.benchmark;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.spatialPath;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.trajectory;
+import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.BASE_TIME;
 
 import java.time.Duration;
 import java.util.ArrayList;

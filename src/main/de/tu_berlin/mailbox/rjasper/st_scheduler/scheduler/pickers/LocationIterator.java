@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.geometryCollection;
 
 import java.util.Comparator;
 import java.util.Iterator;

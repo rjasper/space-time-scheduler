@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.collect.Maps.*;
-import static java.util.Collections.*;
+import static de.tu_berlin.mailbox.rjasper.collect.Maps.value;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

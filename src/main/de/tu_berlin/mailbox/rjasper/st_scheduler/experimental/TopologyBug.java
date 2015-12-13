@@ -1,8 +1,10 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.experimental;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutable;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDurationSafe;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

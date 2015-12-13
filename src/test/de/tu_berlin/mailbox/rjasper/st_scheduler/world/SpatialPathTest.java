@@ -1,9 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.spatialPath;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.util.NoSuchElementException;
 

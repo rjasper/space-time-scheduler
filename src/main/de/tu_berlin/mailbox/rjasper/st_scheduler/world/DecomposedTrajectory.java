@@ -1,9 +1,11 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
-import static java.lang.Math.*;
+import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.toImmutableList;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableLineString;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.durationToSeconds;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.lang.ref.SoftReference;
 import java.time.Duration;

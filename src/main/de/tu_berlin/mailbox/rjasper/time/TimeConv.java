@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.time;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
 
 import java.time.DateTimeException;
 import java.time.Duration;

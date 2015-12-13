@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import com.google.common.collect.ImmutableList;
 

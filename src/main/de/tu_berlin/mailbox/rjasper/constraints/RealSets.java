@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.constraints;
 
-import static java.lang.Math.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public final class RealSets {
 	

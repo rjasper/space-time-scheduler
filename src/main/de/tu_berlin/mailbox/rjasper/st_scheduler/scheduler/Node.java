@@ -1,14 +1,20 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.collect.Maps.*;
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.ArcTimePathMotionIntervalCalculation.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryLengthDurationCalculation.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryMotionIntervalCalculation.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.collect.Maps.value;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.min;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.unmodifiableIntervalSet;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.ArcTimePathMotionIntervalCalculation.calcMotionIntervals;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryLengthDurationCalculation.calcLengthDuration;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.TrajectoryMotionIntervalCalculation.calcMotionIntervals;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.durationToSeconds;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDuration;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.timeToSeconds;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableNavigableMap;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.stream.Collectors.toList;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

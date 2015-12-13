@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.matchers;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.Objects;

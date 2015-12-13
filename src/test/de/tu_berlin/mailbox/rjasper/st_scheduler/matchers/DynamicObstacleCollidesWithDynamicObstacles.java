@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.matchers;
 
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.collides;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.Objects;

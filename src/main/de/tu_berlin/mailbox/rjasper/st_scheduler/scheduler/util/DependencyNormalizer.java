@@ -1,8 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.min;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;

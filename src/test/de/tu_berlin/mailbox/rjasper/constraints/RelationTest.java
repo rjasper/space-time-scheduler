@@ -1,7 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.constraints;
 
-import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.intervalVariable;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.matchers;
 
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

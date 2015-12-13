@@ -1,6 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
-import static java.util.Spliterator.*;
+import static java.util.Spliterator.DISTINCT;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.SORTED;
 
 import java.util.Iterator;
 import java.util.Map.Entry;

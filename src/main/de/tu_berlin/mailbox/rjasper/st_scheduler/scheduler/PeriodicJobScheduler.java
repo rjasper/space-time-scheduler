@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

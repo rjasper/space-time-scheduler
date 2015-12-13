@@ -1,7 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.util;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.durationToSeconds;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDuration;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

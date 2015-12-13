@@ -1,14 +1,23 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.GeometryMatchers.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
-import static java.lang.Math.*;
-import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.mutable;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.box;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.lineString;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.polygon;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.GeometryMatchers.contains;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.spatialPath;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.trajectory;
+import static java.lang.Math.ulp;
+import static java.util.Collections.singleton;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Collections;

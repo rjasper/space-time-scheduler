@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.fixtures;
 
-import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.toImmutableList;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
 
 import java.util.Arrays;
 

@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.collect;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
 import java.util.LinkedList;

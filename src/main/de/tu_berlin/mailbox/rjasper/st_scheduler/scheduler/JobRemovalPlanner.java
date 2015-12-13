@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.*;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.DynamicCollisionDetector.collides;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

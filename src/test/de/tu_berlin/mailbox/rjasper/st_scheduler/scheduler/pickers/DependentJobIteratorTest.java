@@ -1,11 +1,12 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
-import static de.tu_berlin.mailbox.rjasper.util.UUIDFactory.*;
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToTime;
+import static de.tu_berlin.mailbox.rjasper.util.UUIDFactory.uuid;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.junit.Assert.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

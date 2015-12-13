@@ -1,6 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.benchmark;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.circle;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.multiPolygon;
 
 import java.time.Duration;
 import java.util.function.BiFunction;

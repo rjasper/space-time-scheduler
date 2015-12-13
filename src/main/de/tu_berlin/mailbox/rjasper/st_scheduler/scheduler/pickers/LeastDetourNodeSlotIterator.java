@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
-import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
+import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
 
 import java.util.Comparator;
 import java.util.Iterator;

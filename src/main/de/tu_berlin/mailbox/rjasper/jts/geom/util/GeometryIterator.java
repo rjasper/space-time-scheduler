@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.jts.geom.util;
 
-import static java.util.Collections.*;
+import static java.util.Collections.singleton;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

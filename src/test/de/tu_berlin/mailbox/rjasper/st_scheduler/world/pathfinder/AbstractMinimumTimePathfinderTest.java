@@ -1,14 +1,19 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;
-import static java.util.Collections.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.trajectoryCollidesWith;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PathFactory.spatialPath;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.TrajectoryFactory.trajectory;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDurationSafe;
+import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.atSecond;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

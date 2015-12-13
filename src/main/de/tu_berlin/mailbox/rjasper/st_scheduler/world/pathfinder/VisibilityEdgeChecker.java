@@ -1,9 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
-import static com.vividsolutions.jts.geom.Location.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static java.util.Objects.*;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
+import static com.vividsolutions.jts.geom.Location.INTERIOR;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.lineString;
+import static java.util.Objects.requireNonNull;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.IntersectionMatrix;

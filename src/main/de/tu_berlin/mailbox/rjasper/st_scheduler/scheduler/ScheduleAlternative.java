@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableCollection;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

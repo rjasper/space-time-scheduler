@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.AsDynamicObstacles.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutable;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.util.AsDynamicObstacles.asDynamicObstacles;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

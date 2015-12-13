@@ -1,7 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.util;
 
-import static com.vividsolutions.jts.geom.IntersectionMatrix.*;
-import static com.vividsolutions.jts.geom.Location.*;
+import static com.vividsolutions.jts.geom.IntersectionMatrix.isTrue;
+import static com.vividsolutions.jts.geom.Location.BOUNDARY;
+import static com.vividsolutions.jts.geom.Location.INTERIOR;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

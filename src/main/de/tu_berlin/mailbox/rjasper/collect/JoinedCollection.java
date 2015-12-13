@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.collect;
 
-import static java.util.Objects.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.AbstractCollection;
 import java.util.Collection;

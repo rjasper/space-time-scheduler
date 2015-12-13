@@ -2,11 +2,13 @@ package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
 import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.JobMatchers.satisfies;
 import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDuration;
 import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToTime;
 import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.atSecond;
 import static de.tu_berlin.mailbox.rjasper.util.UUIDFactory.uuid;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,9 +21,6 @@ import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePolygon;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.RadiusBasedWorldPerspectiveCache;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.World;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder.StraightEdgePathfinder;
-
-import static org.hamcrest.CoreMatchers.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.JobMatchers.*;
 
 public class SingularJobSchedulerTest {
 

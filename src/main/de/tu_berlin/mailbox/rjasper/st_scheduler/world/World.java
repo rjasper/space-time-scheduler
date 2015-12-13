@@ -1,8 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static de.tu_berlin.mailbox.rjasper.collect.Immutables.*;
-import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.collect.Immutables.immutable;
+import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.toImmutableList;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableMultiPolygon;
 
 import java.util.Collection;
 import java.util.List;

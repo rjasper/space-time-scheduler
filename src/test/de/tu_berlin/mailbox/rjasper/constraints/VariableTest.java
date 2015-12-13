@@ -1,9 +1,15 @@
 package de.tu_berlin.mailbox.rjasper.constraints;
 
-import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.*;
-import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.*;
-import static de.tu_berlin.mailbox.rjasper.constraints.VariableFixtures.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.emptyRealSet;
+import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.fullRealSet;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.customVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.emptyVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.intervalVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.realVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.relativeVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFactory.singletonVariable;
+import static de.tu_berlin.mailbox.rjasper.constraints.VariableFixtures.mutualDependentVariables;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

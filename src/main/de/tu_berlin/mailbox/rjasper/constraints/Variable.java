@@ -1,9 +1,10 @@
 package de.tu_berlin.mailbox.rjasper.constraints;
 
-import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.*;
-import static fj.data.List.*;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.emptyRealSet;
+import static de.tu_berlin.mailbox.rjasper.constraints.RealSets.fullRealSet;
+import static fj.data.List.list;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Arrays;
 import java.util.Collection;

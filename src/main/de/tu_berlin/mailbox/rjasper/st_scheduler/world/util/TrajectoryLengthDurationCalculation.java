@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.util;
 
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDuration;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.timeToSeconds;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

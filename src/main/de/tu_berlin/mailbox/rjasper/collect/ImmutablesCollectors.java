@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.collect;
 
-import static java.util.stream.Collector.Characteristics.*;
+import static java.util.stream.Collector.Characteristics.UNORDERED;
 
 import java.util.stream.Collector;
 

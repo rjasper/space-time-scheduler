@@ -1,6 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.jts.geom.immutable;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.alwaysTrue;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.guard;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutableNonNull;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.mutable;
 
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.CoordinateSequence;

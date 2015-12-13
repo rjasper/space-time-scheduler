@@ -1,7 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.example;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static java.util.UUID.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static java.util.UUID.randomUUID;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -1,7 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.factories;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePolygon;
+import static de.tu_berlin.mailbox.rjasper.time.TimeFactory.atSecond;
 
 import java.time.LocalDateTime;
 

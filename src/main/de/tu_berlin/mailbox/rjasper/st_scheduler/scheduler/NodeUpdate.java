@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
-import static java.util.Collections.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.unmodifiableIntervalSet;
+import static java.util.Collections.unmodifiableSet;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static java.lang.Double.*;
+import static java.lang.Double.max;
+import static java.lang.Double.min;
 
 import java.util.NoSuchElementException;
 

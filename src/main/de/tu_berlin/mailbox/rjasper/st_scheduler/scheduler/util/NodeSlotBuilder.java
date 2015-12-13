@@ -1,9 +1,10 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util;
 
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.*;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.min;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.IntervalSets.emptyIntervalSet;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDateTime;
 import java.util.Iterator;

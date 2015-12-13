@@ -1,6 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.jts.geom.util;
 
-import static java.util.Spliterator.*;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
 
 import java.util.Iterator;
 import java.util.Spliterator;

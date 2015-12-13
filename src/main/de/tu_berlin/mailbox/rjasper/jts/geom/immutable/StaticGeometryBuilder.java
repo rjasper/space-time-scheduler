@@ -1,7 +1,7 @@
 package de.tu_berlin.mailbox.rjasper.jts.geom.immutable;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySequencer.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutableNoCopy;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.util.GeometrySequencer.sequence;
 
 import java.util.Collection;
 

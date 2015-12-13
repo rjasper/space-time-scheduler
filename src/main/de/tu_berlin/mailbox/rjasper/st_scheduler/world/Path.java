@@ -1,6 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static java.util.Spliterator.*;
+import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.SIZED;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

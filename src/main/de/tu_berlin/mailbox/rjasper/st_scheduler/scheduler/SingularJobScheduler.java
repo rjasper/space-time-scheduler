@@ -1,8 +1,8 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -1,8 +1,9 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler;
 
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.DependencyNormalizer.*;
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.util.DependencyNormalizer.normalizeDependentJobSpecifications;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

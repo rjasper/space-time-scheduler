@@ -1,6 +1,6 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.matchers;
 
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.*;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.CollisionMatchers.obstaclesCollideWith;
 
 import org.hamcrest.Description;
 import org.hamcrest.Factory;

@@ -1,10 +1,10 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.scheduler.pickers;
 
-import static com.vividsolutions.jts.operation.distance.DistanceOp.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.*;
-import static de.tu_berlin.mailbox.rjasper.lang.Comparables.*;
-import static de.tu_berlin.mailbox.rjasper.time.TimeConv.*;
-import static java.util.Collections.*;
+import static com.vividsolutions.jts.operation.distance.DistanceOp.distance;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutableGeometries.immutable;
+import static de.tu_berlin.mailbox.rjasper.lang.Comparables.max;
+import static de.tu_berlin.mailbox.rjasper.time.TimeConv.secondsToDuration;
+import static java.util.Collections.emptyIterator;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

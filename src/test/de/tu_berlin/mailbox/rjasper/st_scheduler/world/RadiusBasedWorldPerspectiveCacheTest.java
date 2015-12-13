@@ -1,10 +1,14 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world;
 
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.GeometryMatchers.*;
-import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PerspectiveCacheFactory.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutableBox;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.matchers.GeometryMatchers.topologicallyEqualTo;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PerspectiveCacheFactory.emptyPerspectiveCache;
+import static de.tu_berlin.mailbox.rjasper.st_scheduler.world.factories.PerspectiveCacheFactory.perspectiveCache;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 import java.util.function.Supplier;

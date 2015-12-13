@@ -1,20 +1,12 @@
 package de.tu_berlin.mailbox.rjasper.st_scheduler.world.pathfinder;
 
-import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.*;
-import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.*;
+import static de.tu_berlin.mailbox.rjasper.collect.ImmutablesCollectors.toImmutableList;
+import static de.tu_berlin.mailbox.rjasper.jts.geom.immutable.StaticGeometryBuilder.immutablePoint;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
-
-import straightedge.geom.KPoint;
-import straightedge.geom.PolygonConverter;
-import straightedge.geom.path.NodeConnector;
-import straightedge.geom.path.PathBlockingObstacle;
-import straightedge.geom.path.PathBlockingObstacleImpl;
-import straightedge.geom.path.PathData;
-import straightedge.geom.path.PathFinder;
 
 import com.google.common.collect.ImmutableList;
 import com.vividsolutions.jts.geom.LineString;
@@ -23,6 +15,13 @@ import com.vividsolutions.jts.geom.Point;
 import de.tu_berlin.mailbox.rjasper.jts.geom.immutable.ImmutablePoint;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.SpatialPath;
 import de.tu_berlin.mailbox.rjasper.st_scheduler.world.StaticObstacle;
+import straightedge.geom.KPoint;
+import straightedge.geom.PolygonConverter;
+import straightedge.geom.path.NodeConnector;
+import straightedge.geom.path.PathBlockingObstacle;
+import straightedge.geom.path.PathBlockingObstacleImpl;
+import straightedge.geom.path.PathData;
+import straightedge.geom.path.PathFinder;
 
 /**
  * The {@code StraightEdgePathfinder} is a {@link AbstractSpatialPathfinder} which
